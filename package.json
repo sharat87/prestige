@@ -20,7 +20,6 @@
 		"babel-preset-env": "^1.7.0",
 		"codejar": "^3.0.0",
 		"codemirror": "^5.55.0",
-		"gh-pages": "^3.0.0",
 		"less": "^3.11.3",
 		"mithril": "^2.0.4",
 		"msgpack-lite": "^0.1.26",

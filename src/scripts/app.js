@@ -367,7 +367,7 @@ function MainView() {
 }
 
 function Workspace() {
-	const client = new HttpSession("http://localhost:3041/");
+	const client = new HttpSession("http://prestige-proxy.herokuapp.com/");
 
 	return { view };
 
