@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Prestige</title>
+
+<link rel="icon" type="image/png" href="assets/favicon.ico">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png">
+
+<body>
+
+<!--
+<% if (isDev) { %>
+<p style="position: fixed; top: 0; left: 40%; background-color: maroon; color: white; padding: 6px; z-index: 99">DEV</p>
+<% } %>
+-->
+
+<noscript style="font-size:2em">This is a webapp written in Javascript and as such, requires Javascript to function.
+	Please enable Javascript in your browser or get a better browser like Firefox or Chromium. Thank you for checking
+	us out.</noscript>
+<div id="app"></div>
+
+<!-- Mithril CDN -->
+<script src="https://unpkg.com/mithril@2.0.4/mithril.min.js"></script>
+
+<!-- CodeMirror CDN: https://cdnjs.com/libraries/codemirror -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/addon/selection/active-line.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/theme/elegant.min.css">
+
+<!-- CodeJar CDN: https://www.jsdelivr.com/package/npm/codejar -->
+<script type="module">
+import { CodeJar } from "https://cdn.jsdelivr.net/npm/codejar@3.0.0/codejar.min.js";
+window.CodeJar = CodeJar;
+</script>
+
+<!-- Prism CDN: https://cdnjs.com/libraries/prism -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/prism.min.js" data-manual></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/components/prism-json.min.js"></script>
+
+<!-- Mustache CDN: https://unpkg.com/browse/mustache@4.0.1/ -->
+<script src="https://unpkg.com/mustache@4.0.1/mustache.min.js"></script>
+
+<link rel="stylesheet" href="styles.less">
+<script src="scripts/app.js"></script>

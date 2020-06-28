@@ -1,0 +1,32 @@
+{
+	"name": "prestige-rest-client",
+	"version": "1.0.0",
+	"description": "An HTTP client, by Shrikant.",
+	"author": "Shrikant Sharat Kandula <shrikantsharat.k@gmail.com>",
+	"license": "ISC",
+	"bugs": {
+		"url": "https://github.com/sharat87/prestige/issues"
+	},
+	"homepage": "https://github.com/sharat87/prestige",
+	"browserslist": [
+		"last 2 Chrome versions",
+		"last 2 Firefox versions",
+		"last 2 Edge versions",
+		"last 2 Safari versions"
+	],
+	"devDependencies": {
+		"@babel/core": "^7.10.3",
+		"babel-plugin-transform-runtime": "^6.23.0",
+		"babel-preset-env": "^1.7.0",
+		"codejar": "^3.0.0",
+		"codemirror": "^5.55.0",
+		"gh-pages": "^3.0.0",
+		"less": "^3.11.3",
+		"mithril": "^2.0.4",
+		"msgpack-lite": "^0.1.26",
+		"mustache": "^4.0.1",
+		"parcel-bundler": "^1.12.4",
+		"prismjs": "^1.20.0",
+		"typescript": "^3.9.5"
+	}
+}
