@@ -34,11 +34,8 @@ class HttpSession {
 
 	checkProxy() {
 		fetch(this.proxy)
-			.then(response => response.arrayBuffer())
-			.then(buffer => {
-				console.log(buffer);
-				const response = msgpack.decode(Buffer.from(buffer));
-				console.log(response);
+			.then(response => response.json())
+			.then(response => {
 				if (!response.ok || response.prestigeProxyVersion !== 1) {
 					this.proxy = null;
 				}
