@@ -7,3 +7,6 @@
 
 /dist
 /.cache
+
+/.env.local
+/.env.*.local
