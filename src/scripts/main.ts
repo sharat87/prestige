@@ -53,9 +53,14 @@ class HttpSession {
 			return;
 		}
 
-		fetch(this.proxy, { headers: { Accept: "application/json" } })
-			.then(response => response.json())
-			.then(response => {
+		m.request({
+			method: "GET",
+			url: this.proxy,
+			headers: {
+				Accept: "application/json",
+			},
+		})
+			.then((response: { ok: boolean, prestigeProxyVersion: number }) => {
 				if (!response.ok || response.prestigeProxyVersion !== 1) {
 					this.proxy = null;
 				}
@@ -685,7 +690,7 @@ function CodeBlock() {
 		const { content, language } = vnode.attrs;
 		let i = 0;
 		return m("pre", [
-			m(".line-numbers", content.split("\n").map(line => m("div", ++i))),
+			m(".line-numbers", content.split("\n").map(() => m("div", ++i))),
 			m("code", highlight(content, language, false)),
 		]);
 	}
