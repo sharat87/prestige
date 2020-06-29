@@ -1,0 +1,23 @@
+{
+	"compilerOptions": {
+		"target": "ES6",
+		"esModuleInterop": true,
+		"strictNullChecks": true,
+		"allowJs": true,
+		"lib": [
+			"DOM",
+			"DOM.Iterable",
+			"ES6",
+			"ES2015.Core",
+			"ES2015.Collection",
+			"ES2018.Promise"
+		],
+		"types": [
+			"node"
+		],
+		"sourceMap": true
+	},
+	"include": [
+		"src/scripts/*"
+	]
+}

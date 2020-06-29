@@ -258,8 +258,22 @@ main {
 		margin: .5em 0 1em;
 		width: 100%;
 		background-color: rgba(0, 0, 0, .04);
-		padding: 6px 6px 1em 6px; /* Some extra room for the macOS scrollbar at the bottom */
+		//padding: 6px 6px 1em 6px; /* Some extra room for the macOS scrollbar at the bottom */
 		tab-size: 4;
+		display: flex;
+		flex-direction: row;
+
+		.line-numbers {
+			text-align: right;
+			border-right: 1px solid rgba(0, 0, 0, .4);
+			padding: 3px;
+			opacity: .6;
+		}
+
+		> code {
+			flex-grow: 1;
+			padding: 3px 3px 1em 3px;
+		}
 	}
 
 	.CodeMirror {

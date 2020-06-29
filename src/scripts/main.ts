@@ -1,22 +1,37 @@
-// import m from "mithril";
-// import Mustache from "mustache";
-// import Prism from "prismjs";
-// import "prismjs/components/prism-json";
-// import CodeMirror from "codemirror";
-// import "codemirror/lib/codemirror.css";
-// import "codemirror/addon/selection/active-line";
-// import "codemirror/theme/elegant.css";
+import m from "mithril";
+import Mustache from "mustache";
+import Prism from "prismjs";
+import "prismjs/components/prism-json";
+import CodeMirror from "codemirror";
+import "codemirror/lib/codemirror.css";
+import "codemirror/addon/selection/active-line";
+import "codemirror/theme/elegant.css";
 // import { CodeJar } from "codejar";
-
 import msgpack from "msgpack-lite";
 
-window.addEventListener("load", () => m.mount(document.getElementById("app"), MainView));
+// Expected environment variables.
+declare var process: { env: { PRESTIGE_PROXY_URL: string } };
+
+window.addEventListener("load", () => {
+	const root = document.createElement("div");
+	root.setAttribute("id", "app");
+	document.body.insertAdjacentElement("afterbegin", root);
+	m.mount(root, MainView);
+	document.getElementById("loadingBox")?.remove();
+});
 
 Mustache.escape = function (text) {
 	return text;
 };
 
 class HttpSession {
+	cookies: any[];
+	_isLoading: boolean;
+	proxy: null | string;
+	result: any;
+	handlers: Map<string, any>;
+	data: any;
+
 	constructor(proxy) {
 		// These are persistent throughout a session.
 		this.cookies = [];
@@ -33,7 +48,12 @@ class HttpSession {
 	}
 
 	checkProxy() {
-		fetch(this.proxy)
+		if (this.proxy == null) {
+			console.log("No proxy set.");
+			return;
+		}
+
+		fetch(this.proxy, { headers: { Accept: "application/json" } })
 			.then(response => response.json())
 			.then(response => {
 				if (!response.ok || response.prestigeProxyVersion !== 1) {
@@ -54,7 +74,7 @@ class HttpSession {
 	}
 
 	set isLoading(value) {
-		this._isLoading = !!value;
+		this._isLoading = value;
 		m.redraw();
 	}
 
@@ -72,7 +92,7 @@ class HttpSession {
 
 		const startTime = Date.now();
 		this.isLoading = true;
-		let request = null;
+		let request: any = null;
 
 		this.handlers.clear();
 		this.data = {};
@@ -85,7 +105,7 @@ class HttpSession {
 				return this._execute(request);
 			})
 			.then(res => {
-				console.log("Got runTop response for ", request);
+				console.log("Got runTop response for ", request, res);
 				this.isLoading = false;
 				this.result = res;
 				updateCookies(this.cookies, this.result.cookies);
@@ -109,7 +129,7 @@ class HttpSession {
 			lines = lines.split("\n");
 		}
 
-		let request = null;
+		let request: any = null;
 
 		return this
 			._extractRequest(lines, cursorLine, this)
@@ -131,7 +151,7 @@ class HttpSession {
 
 	async _extractRequest(lines, cursorLine, context) {
 		let isInScript = false;
-		const scriptLines = [];
+		const scriptLines: string[] = [];
 
 		for (let lNum = 0; lNum < cursorLine; ++lNum) {
 			const line = lines[lNum];
@@ -142,6 +162,11 @@ class HttpSession {
 				isInScript = false;
 				const fn = new Function(scriptLines.join("\n"));
 				scriptLines.splice(0, scriptLines.length);
+				// The following may be used in the script, so ensure they exist, and are marked as used for the sanity
+				// of IDE and TypeScript.
+				if (!context.run || !context.on || !context.off) {
+					console.error("Not all of the required context interface functions are available.")
+				}
 				const returnValue = fn.call(context);
 				if (isPromise(returnValue)) {
 					await returnValue;
@@ -158,18 +183,18 @@ class HttpSession {
 			return null;
 		}
 
-		const bodyLines = []
+		const bodyLines: string[] = []
 		const details = {
 			method: "GET",
-			url: null,
-			body: null,
+			url: "",
+			body: "",
 			headers: new Headers(),
 		};
 
 		let isInBody = false;
-		const headerLines = [];
+		const headerLines: string[] = [];
 		for (let lNum = cursorLine; lNum < lines.length; ++lNum) {
-			const lineText = lines[lNum];
+			const lineText: string = lines[lNum];
 			if (lineText.startsWith("###")) {
 				break;
 			}
@@ -239,7 +264,7 @@ class HttpSession {
 			throw new Error("URL cannot be empty!");
 		}
 
-		const options = {
+		const options: RequestInit = {
 			cache: "no-store",
 			credentials: "same-origin",
 		};
@@ -258,7 +283,7 @@ class HttpSession {
 				response: {
 					status: response.status,
 					statusText: response.statusText,
-					headers: Array.from(response.headers.entries()),
+					headers: response.headers,
 					body: msgpack.decode(Buffer.from(await response.arrayBuffer())),
 					history: null,
 					cookies: null,
@@ -304,7 +329,7 @@ class HttpSession {
 
 	emit(name, detail) {
 		const event = new CustomEvent(name, { detail });
-		const promises = [];
+		const promises: Promise<any>[] = [];
 
 		if (this.handlers.has(name)) {
 			for (const fn of this.handlers.get(name)) {
@@ -463,8 +488,9 @@ function EditorPane(initialVnode) {
 
 function CodeMirrorEditor() {
 	let content = "";
-	let onUpdate = null;
+	let onUpdate: null | Function = null;
 
+	// noinspection JSUnusedGlobalSymbols
 	return { view, oncreate };
 
 	function oncreate(vnode) {
@@ -497,6 +523,7 @@ function CodeMirrorEditor() {
 	}
 }
 
+/*
 function CodeJarEditor() {
 	const state = {
 		content: "",
@@ -522,6 +549,7 @@ function CodeJarEditor() {
 		editor.innerHTML = highlight(state.content, "clike", true);
 	}
 }
+ */
 
 function ResultPane() {
 	return { view };
@@ -557,7 +585,7 @@ function ResultPane() {
 							Object.entries(result.request).map(([name, value]) => {
 								return name !== "method" && name !== "url" && m("tr", [
 									m("th", name.replace(/\b\w/g, stringUpperCase)),
-									m("td", typeof value === "string" ? value : JSON.stringify(value, 2, 2)),
+									m("td", typeof value === "string" ? value : JSON.stringify(value, null, 2)),
 								])
 							}),
 						]),
@@ -583,7 +611,7 @@ function ResultPane() {
 				history.length > 0 && m(
 					"p.redirection-message",
 					`Request redirected ${history.length === 1 ? "once" : history.length + "times"}.` +
-						" Scroll down for more details."
+					" Scroll down for more details."
 				),
 				m("p", { style: { padding: "0 6px" } }, m.trust("Request finished in <b>" + result.timeTaken + "ms</b>.")),
 				renderResponse(response),
@@ -607,7 +635,7 @@ function ResultPane() {
 			return null;
 		}
 
-		const rows = [];
+		const rows: any[] = [];
 
 		for (const [name, value] of headers) {
 			rows.push(m("tr", [
@@ -622,6 +650,8 @@ function ResultPane() {
 	function renderResponse(response) {
 		const responseContentType = getContentTypeFromHeaders(response && response.headers);
 		const requestContentType = getContentTypeFromHeaders(response && response.request.headers);
+
+		console.log("response.body", response.body);
 
 		return response && m("div.response", [
 			m(
@@ -653,7 +683,11 @@ function CodeBlock() {
 
 	function view(vnode) {
 		const { content, language } = vnode.attrs;
-		return m("pre", highlight(content, language));
+		let i = 0;
+		return m("pre", [
+			m(".line-numbers", content.split("\n").map(line => m("div", ++i))),
+			m("code", highlight(content, language, false)),
+		]);
 	}
 }
 
@@ -757,7 +791,7 @@ function prettify(content, language) {
 
 function prettifyJson(json) {
 	try {
-		return JSON.stringify(JSON.parse(json), 2, 2);
+		return JSON.stringify(JSON.parse(json), null, 2);
 	} catch (error) {
 		// TODO: The fact that this JSON is invalid should be communicated to the user.
 		console.error("Error parsing/prettifying JSON.");

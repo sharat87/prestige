@@ -1,0 +1,10 @@
+[build]
+  publish = "dist/"
+  command = "npm run build"
+  environment = { NODE_VERSION = "12" }
+
+# Following is required for SPAs that handle routing client-side.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

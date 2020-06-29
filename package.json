@@ -14,8 +14,18 @@
 		"last 2 Edge versions",
 		"last 2 Safari versions"
 	],
+	"scripts": {
+		"start": "parcel serve --port 3040 --no-autoinstall --global Prestige src/index.pug",
+		"build": "parcel build --no-autoinstall --no-source-maps src/index.html",
+		"prestart": "rm -rf .cache dist"
+	},
 	"devDependencies": {
 		"@babel/core": "^7.10.3",
+		"@types/codemirror": "0.0.96",
+		"@types/mithril": "^2.0.3",
+		"@types/msgpack-lite": "^0.1.7",
+		"@types/mustache": "^4.0.1",
+		"@types/prismjs": "^1.16.1",
 		"babel-plugin-transform-runtime": "^6.23.0",
 		"babel-preset-env": "^1.7.0",
 		"codejar": "^3.0.0",
