@@ -1,0 +1,15 @@
+doctype html
+html(lang="en")
+	head
+		meta(charset="UTF-8")
+		title Help, Prestige, help!
+
+		link(rel="icon" type="image/png" href="assets/favicon.ico")
+		link(rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png")
+		link(rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png")
+
+		style
+			| body { font-family: sans-serif; margin: 0 auto; max-width: 720px; padding: 6px; }
+
+	body
+		include:markdown-it help.md

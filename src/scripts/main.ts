@@ -6,7 +6,6 @@ import CodeMirror from "codemirror";
 import "codemirror/lib/codemirror.css";
 import "codemirror/addon/selection/active-line";
 import "codemirror/theme/elegant.css";
-// import { CodeJar } from "codejar";
 import msgpack from "msgpack-lite";
 
 // Expected environment variables.
@@ -23,6 +22,33 @@ window.addEventListener("load", () => {
 Mustache.escape = function (text) {
 	return text;
 };
+
+CodeMirror.defineMode("prestige", (config, parserConfig) => {
+	return { startState, token };
+
+	function startState() {
+		return {
+			inJavascript: false,
+		};
+	}
+
+	function token(stream, state) {
+		if (stream.sol() && stream.match("###")) {
+			stream.eatSpace();
+			state.inJavascript = stream.match("javascript");
+			stream.skipToEnd();
+			return "variable-2";
+		}
+
+		stream.skipToEnd();
+
+		if (state.inJavascript) {
+			return "string";
+		}
+
+		return null;
+	}
+});
 
 class HttpSession {
 	cookies: any[];
@@ -84,13 +110,11 @@ class HttpSession {
 	}
 
 	runTop(lines, cursorLine) {
-		console.log("runTop", lines, cursorLine);
 		if (this.isLoading) {
 			alert("There's a request currently pending. Please wait for it to finish.");
 			return Promise.reject();
 		}
 
-		cursorLine = cursorLine || 0;
 		if (typeof lines === "string") {
 			lines = lines.split("\n");
 		}
@@ -110,7 +134,6 @@ class HttpSession {
 				return this._execute(request);
 			})
 			.then(res => {
-				console.log("Got runTop response for ", request, res);
 				this.isLoading = false;
 				this.result = res;
 				updateCookies(this.cookies, this.result.cookies);
@@ -157,14 +180,16 @@ class HttpSession {
 	async _extractRequest(lines, cursorLine, context) {
 		let isInScript = false;
 		const scriptLines: string[] = [];
+		let startLine: number = 0;
 
 		for (let lNum = 0; lNum < cursorLine; ++lNum) {
 			const line = lines[lNum];
-			if (line === "<scrip" + "t data-static>") {
+			if (line === "### javascript") {
 				isInScript = true;
 
-			} else if (line === "</scrip" + "t>") {
+			} else if (line === "###") {
 				isInScript = false;
+				startLine = lNum + 1;
 				const fn = new Function(scriptLines.join("\n"));
 				scriptLines.splice(0, scriptLines.length);
 				// The following may be used in the script, so ensure they exist, and are marked as used for the sanity
@@ -198,7 +223,12 @@ class HttpSession {
 
 		let isInBody = false;
 		const headerLines: string[] = [];
-		for (let lNum = cursorLine; lNum < lines.length; ++lNum) {
+
+		while (lines[startLine] === "") {
+			++startLine;
+		}
+
+		for (let lNum = startLine; lNum < lines.length; ++lNum) {
 			const lineText: string = lines[lNum];
 			if (lineText.startsWith("###")) {
 				break;
@@ -452,12 +482,6 @@ function EditorPane(initialVnode) {
 					onUpdate: onEditorChanges,
 					onExecute: onExecuteCb,
 				}),
-				// m(CodeJarEditor, {
-				// 	content: localStorage.getItem("content1") ||
-				// 		"GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n",
-				// 	onUpdate: onEditorChanges,
-				// 	onExecute: vnode.attrs.onExecute,
-				// }),
 				m(Toolbar, {
 					right: [
 						m(
@@ -528,34 +552,6 @@ function CodeMirrorEditor() {
 	}
 }
 
-/*
-function CodeJarEditor() {
-	const state = {
-		content: "",
-		editor: null,
-		view,
-		oncreate,
-	};
-
-	return state;
-
-	function oncreate(vnode) {
-		vnode.state.content = vnode.attrs.content || "";
-		vnode.dom.textContent = vnode.state.content;
-		vnode.state.editor = new CodeJar(vnode.dom, renderCode);
-	}
-
-	function view() {
-		return m("pre.body.codejar.line-numbers.language-clike");
-	}
-
-	function renderCode(editor) {
-		state.content = editor.textContent;
-		editor.innerHTML = highlight(state.content, "clike", true);
-	}
-}
- */
-
 function ResultPane() {
 	return { view };
 
@@ -597,7 +593,7 @@ function ResultPane() {
 					],
 					m(PageEnd),
 				]),
-				m("div.toolbar", "Result Actions"),
+				m("div.toolbar"),
 			]);
 		}
 
@@ -667,16 +663,12 @@ function ResultPane() {
 			m("pre.url", response.request.method + " " + response.url),
 			m("h2", "Response"),
 			m("h3", "Body"),
-			response.body
-				? m(CodeBlock, { content: response.body, language: responseContentType ? responseContentType.split("/")[1] : null })
-				: m("p", m("em", "No content")),
+			m(CodeBlock, { content: response.body, language: responseContentType ? responseContentType.split("/")[1] : null }),
 			m("h3", "Headers"),
 			(renderHeaders(response.headers)) || m("p", "Nothing here."),
 			m("h2", "Request"),
 			m("h3", "Body"),
-			response.request.body
-				? m(CodeBlock, { content: response.request.body, language: requestContentType ? requestContentType.split("/")[1] : null })
-				: m("p", m("em", "No content")),
+			m(CodeBlock, { content: response.request.body, language: requestContentType ? requestContentType.split("/")[1] : null }),
 			m("h3", "Headers"),
 			(renderHeaders(response.request.headers)) || m("p", "Nothing here."),
 		]);
@@ -687,11 +679,26 @@ function CodeBlock() {
 	return { view };
 
 	function view(vnode) {
-		const { content, language } = vnode.attrs;
+		let { content, language } = vnode.attrs;
+
+		if (content == null || content === "") {
+			return m("p", m("em", "Nothing"));
+		}
+
+		if (typeof content !== "string") {
+			content = JSON.stringify(content);
+		}
+
 		let i = 0;
+		const prettyContent = prettify(content, language);
+
 		return m("pre", [
-			m(".line-numbers", content.split("\n").map(() => m("div", ++i))),
-			m("code", highlight(content, language, false)),
+			m(".line-numbers", prettyContent.split(/\r?\n/).map(() => m("div", ++i))),
+			m(
+				"code", language && Prism.languages[language]
+					? m.trust(Prism.highlight(prettyContent, Prism.languages[language], language))
+					: prettyContent
+			),
 		]);
 	}
 }
@@ -747,7 +754,7 @@ function CookiesModal() {
 			m("div.popup.right", [
 				m("header", m("h2", "Cookies")),
 				m("section", [
-					m("pre", JSON.stringify(vnode.attrs.cookies, null, 2)),
+					m("pre", "this.cookies = " + JSON.stringify(vnode.attrs.cookies, null, 2)),
 					m(PageEnd),
 				]),
 				m("footer", [

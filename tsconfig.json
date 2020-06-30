@@ -13,7 +13,7 @@
 			"ES2018.Promise"
 		],
 		"types": [
-			"node"
+			"jest"
 		],
 		"sourceMap": true
 	},
