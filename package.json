@@ -16,7 +16,7 @@
 	],
 	"scripts": {
 		"start": "parcel serve --port 3040 --no-autoinstall --global Prestige src/index.pug",
-		"build": "parcel build --no-autoinstall --no-source-maps src/index.html",
+		"build": "parcel build --no-autoinstall --no-source-maps src/index.pug",
 		"prestart": "rm -rf .cache dist"
 	},
 	"devDependencies": {
