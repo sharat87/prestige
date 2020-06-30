@@ -34,11 +34,16 @@ CodeMirror.defineMode("prestige", (config, parserConfig) => {
 	}
 
 	function token(stream, state) {
-		if (stream.sol() && stream.match("###")) {
+		if (stream.match("###")) {
 			stream.eatSpace();
 			state.inJavascript = stream.match("javascript");
 			stream.skipToEnd();
 			return "variable-2";
+		}
+
+		if (stream.eat("#")) {
+			stream.skipToEnd();
+			return "comment";
 		}
 
 		stream.skipToEnd();

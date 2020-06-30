@@ -128,6 +128,7 @@ export default class HttpSession {
 		let isInScript = false;
 		const scriptLines: string[] = [];
 		let startLine: number = 0;
+		let pageContentStarted = false;
 
 		for (let lNum = 0; lNum < cursorLine; ++lNum) {
 			const line = lines[lNum];
@@ -137,6 +138,7 @@ export default class HttpSession {
 			} else if (line === "###") {
 				isInScript = false;
 				startLine = lNum + 1;
+				pageContentStarted = false;
 				const fn = new Function(scriptLines.join("\n"));
 				scriptLines.splice(0, scriptLines.length);
 				// The following may be used in the script, so ensure they exist, and are marked as used for the sanity
@@ -151,6 +153,12 @@ export default class HttpSession {
 
 			} else if (isInScript) {
 				scriptLines.push(line);
+
+			} else if (!pageContentStarted && (line.startsWith("#") || line === "")) {
+				startLine = lNum + 1;
+
+			} else if (!pageContentStarted) {
+				pageContentStarted = true;
 
 			}
 		}
