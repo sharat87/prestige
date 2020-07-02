@@ -2,12 +2,9 @@ import m from "mithril";
 import Mustache from "mustache";
 import Prism from "prismjs";
 import "prismjs/components/prism-json";
-import CodeMirror from "codemirror";
-import "codemirror/lib/codemirror.css";
-import "codemirror/addon/selection/active-line";
-import "codemirror/theme/elegant.css";
-
 import HttpSession from "./HttpSession";
+import CodeEditor from "./CodeEditor";
+import OptionsModal from "./Options";
 
 // Expected environment variables.
 declare var process: { env: { PRESTIGE_PROXY_URL: string } };
@@ -23,38 +20,6 @@ window.addEventListener("load", () => {
 Mustache.escape = function (text) {
 	return text;
 };
-
-CodeMirror.defineMode("prestige", (config, parserConfig) => {
-	return { startState, token };
-
-	function startState() {
-		return {
-			inJavascript: false,
-		};
-	}
-
-	function token(stream, state) {
-		if (stream.match("###")) {
-			stream.eatSpace();
-			state.inJavascript = stream.match("javascript");
-			stream.skipToEnd();
-			return "variable-2";
-		}
-
-		if (stream.eat("#")) {
-			stream.skipToEnd();
-			return "comment";
-		}
-
-		stream.skipToEnd();
-
-		if (state.inJavascript) {
-			return "string";
-		}
-
-		return null;
-	}
-});
 
 function MainView() {
 	let isOptionsVisible = false;
@@ -126,7 +91,7 @@ function Toolbar() {
 	return { view };
 
 	function view(vnode) {
-		return m("div.toolbar", [
+		return m(".toolbar", [
 			m(".bar", [
 				m("div.left", vnode.attrs.left),
 				m("div.right", vnode.attrs.right),
@@ -143,21 +108,11 @@ function EditorPane(initialVnode) {
 
 	return { view };
 
-	function onEditorChanges(value) {
-		localStorage.setItem("content1", value);
-	}
-
 	function view(vnode) {
 		onExecute = vnode.attrs.onExecute;
 		return m(
 			"div.editor-pane",
 			[
-				m(CodeMirrorEditor, {
-					content: localStorage.getItem("content1") ||
-						"GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n",
-					onUpdate: onEditorChanges,
-					onExecute: onExecuteCb,
-				}),
 				m(Toolbar, {
 					right: [
 						m(
@@ -173,8 +128,18 @@ function EditorPane(initialVnode) {
 						isCookiesPopupVisible && m(CookiesModal, { onClose: toggleCookiesPopup, cookies: vnode.attrs.cookies }),
 					],
 				}),
+				m(CodeEditor, {
+					content: localStorage.getItem("content1") ||
+						"GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n",
+					onUpdate: onEditorChanges,
+					onExecute: onExecuteCb,
+				}),
 			]
 		);
+	}
+
+	function onEditorChanges(value) {
+		localStorage.setItem("content1", value);
 	}
 
 	function onExecuteCb(codeMirror) {
@@ -188,43 +153,6 @@ function EditorPane(initialVnode) {
 	function toggleCookiesPopup() {
 		isCookiesPopupVisible = !isCookiesPopupVisible;
 		m.redraw();
-	}
-}
-
-function CodeMirrorEditor() {
-	let content = "";
-	let onUpdate: null | Function = null;
-
-	// noinspection JSUnusedGlobalSymbols
-	return { view, oncreate };
-
-	function oncreate(vnode) {
-		content = vnode.attrs.content || "";
-		const editor = CodeMirror(vnode.dom, {
-			theme: "elegant",
-			mode: "prestige",
-			lineNumbers: true,
-			autofocus: true,
-			styleActiveLine: true,
-			value: content,
-		});
-		editor.setOption("extraKeys", {
-			"Ctrl-Enter": vnode.attrs.onExecute,
-			"Cmd-Enter": vnode.attrs.onExecute,
-		});
-		editor.on("changes", onChanges);
-		onUpdate = vnode.attrs.onUpdate;
-	}
-
-	function onChanges(codeMirror) {
-		content = codeMirror.getValue();
-		if (onUpdate) {
-			onUpdate(content);
-		}
-	}
-
-	function view() {
-		return m(".body");
 	}
 }
 
@@ -243,10 +171,11 @@ function ResultPane() {
 		}
 
 		if (!result.ok) {
-			return m("div.result-pane.error", [
-				m("div.body", [
+			return m(".result-pane.error", [
+				m(".toolbar"),
+				m(".body", [
 					m("h2", "Error executing request"),
-					m("p", result.error.message),
+					m("p.message", result.error.message),
 					result.error.stack && m("pre", result.error.stack),
 					result.request && [
 						m("h2", "Request details"),
@@ -259,8 +188,12 @@ function ResultPane() {
 								m("th", "URL"),
 								m("td", result.request.url || m("em", "Empty.")),
 							]),
+							m("tr", [
+								m("th", "Body"),
+								m("td", m("pre", result.request.body) || m("em", "Empty.")),
+							]),
 							Object.entries(result.request).map(([name, value]) => {
-								return name !== "method" && name !== "url" && m("tr", [
+								return name !== "method" && name !== "url" && name !== "body" && m("tr", [
 									m("th", name.replace(/\b\w/g, stringUpperCase)),
 									m("td", typeof value === "string" ? value : JSON.stringify(value, null, 2)),
 								])
@@ -269,11 +202,10 @@ function ResultPane() {
 					],
 					m(PageEnd),
 				]),
-				m("div.toolbar"),
 			]);
 		}
 
-		const { response, history } = result;
+		const { response, history, cookieChanges } = result;
 
 		if (vnode.state.responseMirror) {
 			vnode.state.responseMirror.setValue(response.body);
@@ -283,18 +215,7 @@ function ResultPane() {
 			vnode.state.requestMirror.setValue(response.request.body || "");
 		}
 
-		return m("div.result-pane", [
-			m("div.body", [
-				history.length > 0 && m(
-					"p.redirection-message",
-					`Request redirected ${history.length === 1 ? "once" : history.length + "times"}.` +
-					" Scroll down for more details."
-				),
-				m("p", { style: { padding: "0 6px" } }, m.trust("Request finished in <b>" + result.timeTaken + "ms</b>.")),
-				renderResponse(response),
-				history ? history.map(renderResponse).reverse() : null,
-				m(PageEnd),
-			]),
+		return m(".result-pane", [
 			m(Toolbar, {
 				left: [
 					m(
@@ -304,6 +225,32 @@ function ResultPane() {
 					),
 				],
 			}),
+			m(".body", [
+				m("ul.messages", [
+					history.length > 0 && m("li",
+						`Redirected ${history.length === 1 ? "once" : history.length + "times"}.` +
+							" Scroll down for more details."),
+					m("li", [
+						"Finished in ",
+						m("b", result.timeTaken),
+						"ms.",
+					]),
+					cookieChanges.any && m("li",
+						[
+							"Cookies: ",
+							m.trust([
+								cookieChanges.added ? (cookieChanges.added + " new") : null,
+								cookieChanges.modified ? (cookieChanges.modified + " modified") : null,
+								cookieChanges.removed ? (cookieChanges.removed + " removed") : null,
+							].filter(v => v != null).join(", ")),
+							".",
+						]
+					)
+				]),
+				renderResponse(response),
+				history ? history.map(renderResponse).reverse() : null,
+				m(PageEnd),
+			]),
 		]);
 	}
 
@@ -312,7 +259,7 @@ function ResultPane() {
 			return null;
 		}
 
-		const rows: any[] = [];
+		const rows: m.Vnode[] = [];
 
 		for (const [name, value] of headers) {
 			rows.push(m("tr", [
@@ -321,7 +268,7 @@ function ResultPane() {
 			]));
 		}
 
-		return rows.length > 0 ? m("div.table-box", m("table", m("tbody", rows))) : null;
+		return m(Table, rows);
 	}
 
 	function renderResponse(response) {
@@ -387,40 +334,6 @@ function PageEnd() {
 	}
 }
 
-function OptionsModal() {
-	return { view };
-
-	function view(vnode) {
-		return [
-			// m("div.mask"),
-			m("div.modal", [
-				m("header", m("h2", "Options")),
-				m("section.form", [
-					m("span", "Dark Mode"),
-					m("div", [
-						m("label", { title: "Sync to system's dark mode setting" }, [
-							m("input", { type: "radio", name: "darkMode", value: "auto" }),
-							m("span", "Auto"),
-						]),
-						m("label", [
-							m("input", { type: "radio", name: "darkMode", value: "light" }),
-							m("span", "Light"),
-						]),
-						m("label", [
-							m("input", { type: "radio", name: "darkMode", value: "dark" }),
-							m("span", "Dark"),
-						]),
-					]),
-				]),
-				m("footer", [
-					m("button.primary", { type: "button", onclick: vnode.attrs.doSave }, "Save"),
-					m("button", { type: "button", onclick: vnode.attrs.doClose }, "Cancel"),
-				]),
-			]),
-		];
-	}
-}
-
 function CookiesModal() {
 	return { view };
 
@@ -446,7 +359,9 @@ function Table() {
 	return { view };
 
 	function view(vnode) {
-		return m(".table-box", m("table", m("tbody", vnode.children)));
+		return vnode.children && vnode.children.length > 0
+			? m(".table-box", m("table", m("tbody", vnode.children)))
+			: null;
 	}
 }
 

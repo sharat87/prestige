@@ -2,12 +2,41 @@ import m from "mithril";
 import Mustache from "mustache";
 import msgpack from "msgpack-lite";
 
+interface Cookie {
+	domain: string,
+	path: string,
+	name: string,
+	value: string,
+	expires: string,
+}
+
+interface SuccessResult {
+	ok: true,
+	response: any,
+	cookies: Cookie[],
+	cookieChanges: {
+		added: number,
+		modified: number,
+		removed: number,
+		any: boolean,
+	},
+	request: any,
+	timeTaken?: number,
+}
+
+interface FailureResult {
+	ok: false,
+	error: any,
+	request: any,
+	timeTaken?: number,
+}
+
 export default class HttpSession {
-	cookies: any[];
+	cookies: Cookie[];
 	_isLoading: boolean;
 	proxy: null | string;
-	result: any;
-	handlers: Map<string, any>;
+	result: SuccessResult | FailureResult | null;
+	handlers: Map<string, Set<Function>>;
 	data: any;
 
 	constructor(proxy) {
@@ -83,8 +112,11 @@ export default class HttpSession {
 			.then(res => {
 				this.isLoading = false;
 				this.result = res;
-				updateCookies(this.cookies, this.result.cookies);
-				this.result.ok = true;
+				if (this.result != null) {
+					this.result.ok = true;
+					(this.result as SuccessResult).cookieChanges =
+						updateCookies(this.cookies, (this.result as SuccessResult).cookies);
+				}
 			})
 			.catch(error => {
 				this.isLoading = false;
@@ -92,7 +124,9 @@ export default class HttpSession {
 				return Promise.reject(error);
 			})
 			.finally(() => {
-				this.result.timeTaken = Date.now() - startTime;
+				if (this.result != null) {
+					this.result.timeTaken = Date.now() - startTime;
+				}
 				m.redraw();
 			});
 	}
@@ -115,8 +149,10 @@ export default class HttpSession {
 			.then(res => {
 				console.log("Got run response for", request);
 				this.result = res;
-				updateCookies(this.cookies, this.result.cookies);
-				this.result.ok = true;
+				if (this.result != null) {
+					this.result.ok = true;
+					updateCookies(this.cookies, (this.result as SuccessResult).cookies);
+				}
 			})
 			.catch(error => {
 				this.result = { ok: false, error, request };
@@ -135,7 +171,7 @@ export default class HttpSession {
 			if (line === "### javascript") {
 				isInScript = true;
 
-			} else if (line === "###") {
+			} else if (line.startsWith("###")) {
 				isInScript = false;
 				startLine = lNum + 1;
 				pageContentStarted = false;
@@ -178,6 +214,8 @@ export default class HttpSession {
 
 		let isInBody = false;
 		const headerLines: string[] = [];
+		let headersStarted = false;
+		const queryParams: string[] = [];
 
 		while (lines[startLine] === "") {
 			++startLine;
@@ -189,10 +227,7 @@ export default class HttpSession {
 				break;
 			}
 
-			if (lNum === cursorLine) {
-				headerLines.push(lineText);
-
-			} else if (isInBody) {
+			if (isInBody) {
 				bodyLines.push(lineText);
 
 			} else if (lineText === "") {
@@ -210,9 +245,18 @@ export default class HttpSession {
 				}
 
 			} else if (!lineText.startsWith("#")) {
-				headerLines.push(lineText);
+				if (!headersStarted && lineText.match(/^\s/)) {
+					queryParams.push(lineText.replace(/^\s+/, ""));
+				} else {
+					headersStarted = true;
+					headerLines.push(lineText);
+				}
 
 			}
+		}
+
+		if (queryParams.length > 0) {
+			// TODO: Set query params.
 		}
 
 		if (bodyLines.length > 0) {
@@ -292,37 +336,36 @@ export default class HttpSession {
 			});
 
 			const buffer = Buffer.from(await (await fetch(this.proxy, options)).arrayBuffer());
-			console.log(JSON.stringify(buffer));
 			const data = msgpack.decode(buffer);
+
 			if (data.ok) {
 				console.log("response data", data);
+				return data;
+
 			} else {
 				console.error("response data", data);
+				return Promise.reject(new Error(data.error.message));
+
 			}
-			return data;
 
 		}
 	}
 
 	on(name, fn) {
-		if (!this.handlers.has(name)) {
-			this.handlers.set(name, new Set());
-		}
-		this.handlers.get(name).add(fn);
+		(this.handlers.get(name) || this.handlers.set(name, new Set()).get(name))?.add(fn);
 	}
 
 	off(name, fn) {
-		if (this.handlers.has(name)){
-			this.handlers.get(name).delete(fn);
-		}
+		this.handlers.get(name)?.delete(fn);
 	}
 
 	emit(name, detail) {
 		const event = new CustomEvent(name, { detail });
 		const promises: Promise<any>[] = [];
 
-		if (this.handlers.has(name)) {
-			for (const fn of this.handlers.get(name)) {
+		const functions = this.handlers.get(name);
+		if (functions != null) {
+			for (const fn of functions) {
 				const value = fn(event);
 				if (isPromise(value)) {
 					promises.push(value);
@@ -335,19 +378,40 @@ export default class HttpSession {
 	}
 }
 
-function updateCookies(cookies, newCookies) {
+function updateCookies(cookies: Cookie[], newCookies: Cookie[]) {
+	const counts = {
+		added: 0,
+		modified: 0,
+		removed: 0,
+		any: false,
+	};
+
+	console.log("cookies two", cookies, newCookies);
+
 	for (const newOne of newCookies) {
 		let isFound = false;
 		for (const oldOne of cookies) {
+			console.log("cookies", oldOne, newOne);
 			if (oldOne.domain === newOne.domain && oldOne.path === newOne.path && oldOne.name === newOne.name) {
-				oldOne.value = newOne.value;
+				if (oldOne.value !== newOne.value || oldOne.expires !== newOne.expires) {
+					oldOne.value = newOne.value;
+					oldOne.expires = newOne.expires;
+					++counts.modified;
+				}
 				isFound = true;
 			}
 		}
 		if (!isFound) {
 			cookies.push(newOne);
+			++counts.added;
 		}
 	}
+
+	if (counts.added > 0 || counts.modified > 0 || counts.removed > 0) {
+		counts.any = true;
+	}
+
+	return counts;
 }
 
 function isPromise(object) {

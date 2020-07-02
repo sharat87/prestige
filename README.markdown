@@ -26,3 +26,11 @@ weren't listed here, but still were just as helpful):
 More: <https://github.com/marmelab/awesome-rest>.
 
 TODO: Also support using <https://cors-anywhere.herokuapp.com/> as a proxy?
+
+## Rough Roadmap
+
+- Tests (at least for syntax parsing).
+- A desktop app with <https://github.com/webview/webview> or something similar.
+- Ability to start client and server with a single `docker-compose` command.
+- Javascript syntax highlighting.
+- Create a rough SVG Logo.
