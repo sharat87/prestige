@@ -33,7 +33,7 @@ interface FailureResult {
 }
 
 export default class HttpSession {
-	cookies: CookieJar;
+	cookieJar: CookieJar;
 	_isLoading: boolean;
 	proxy: null | string;
 	result: SuccessResult | FailureResult | null;
@@ -42,7 +42,7 @@ export default class HttpSession {
 
 	constructor(proxy) {
 		// These are persistent throughout a session.
-		this.cookies = new CookieJar();
+		this.cookieJar = new CookieJar();
 		this._isLoading = false;
 		this.proxy = proxy;
 
@@ -116,7 +116,7 @@ export default class HttpSession {
 				if (this.result != null) {
 					this.result.ok = true;
 					(this.result as SuccessResult).cookieChanges =
-						this.cookies.update((this.result as SuccessResult).cookies);
+						this.cookieJar.update((this.result as SuccessResult).cookies);
 				}
 			})
 			.catch(error => {
@@ -152,7 +152,7 @@ export default class HttpSession {
 				this.result = res;
 				if (this.result != null) {
 					this.result.ok = true;
-					this.cookies.update((this.result as SuccessResult).cookies);
+					this.cookieJar.update((this.result as SuccessResult).cookies);
 				}
 			})
 			.catch(error => {
@@ -332,13 +332,12 @@ export default class HttpSession {
 				url,
 				method,
 				headers: Array.from(headers.entries()),
-				cookies: this.cookies,
+				cookies: this.cookieJar.plain(),
 				body,
 			});
 
 			const buffer = Buffer.from(await (await fetch(this.proxy, options)).arrayBuffer());
 			const data = msgpack.decode(buffer);
-			console.log("decoded body data from response", data);
 
 			if (data.ok) {
 				console.log("response data", data);

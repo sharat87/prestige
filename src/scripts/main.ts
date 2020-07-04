@@ -74,7 +74,7 @@ function Workspace() {
 
 	function view() {
 		return m("div.er-pair", [
-			m(EditorPane, { onExecute, cookies: client.cookies }),
+			m(EditorPane, { onExecute, cookies: client.cookieJar }),
 			m(ResultPane, { client }),
 		]);
 	}
