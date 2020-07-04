@@ -120,7 +120,7 @@ function EditorPane(initialVnode) {
 							{ onclick: toggleCookiesPopup, isActive: isCookiesPopupVisible },
 							[
 								"Cookies",
-								vnode.attrs.cookies && vnode.attrs.cookies.length > 0 && ` (${vnode.attrs.cookies.length})`,
+								vnode.attrs.cookies.length > 0 && ` (${vnode.attrs.cookies.length})`,
 							],
 						),
 					],

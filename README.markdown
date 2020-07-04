@@ -17,6 +17,16 @@ weren't listed here, but still were just as helpful):
 1. [Mustache](https://mustache.github.io/) --- powers the templating.
 1. [MsgPack](https://msgpack.org/index.html) --- powers the protocol for communication with the proxy server.
 
+## Developing
+
+For development, use the following command to start a development server on port 3040:
+
+    npm start
+
+Once this is running, the app can be accessed at <http://localhost:3040/index.html> and the help document can be
+accessed at <http://localhost:3040/help.html>. Note that just <http://localhost:3040> doesn't currently work, we have to
+explicitly specify the `index.html` file.
+
 ## Inspirations
 
 - HTTP Client for Sublime Text: <https://requester.org/>.

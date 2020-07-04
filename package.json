@@ -15,9 +15,9 @@
 		"last 2 Safari versions"
 	],
 	"scripts": {
-		"start": "parcel serve --port 3040 --no-autoinstall --global Prestige src/index.pug src/help.pug",
-		"build": "parcel build --no-autoinstall --no-source-maps src/index.pug",
-		"prestart": "rm -rf .cache dist",
+		"start": "parcel serve --port 3040 --no-autoinstall src/index.pug src/help.pug",
+		"build": "rm -rf .cache dist; parcel build --no-autoinstall --no-source-maps src/index.pug",
+		"prestart": "rm -rf .cache",
 		"test": "jest"
 	},
 	"jest": {
@@ -27,7 +27,7 @@
 		}
 	},
 	"devDependencies": {
-		"@babel/core": "^7.10.3",
+		"@babel/core": "^7.10.4",
 		"@types/codemirror": "0.0.96",
 		"@types/jest": "^26.0.3",
 		"@types/mithril": "^2.0.3",
@@ -49,6 +49,6 @@
 		"prismjs": "^1.20.0",
 		"pug": "^3.0.0",
 		"ts-jest": "^26.1.1",
-		"typescript": "^3.9.5"
+		"typescript": "^3.9.6"
 	}
 }

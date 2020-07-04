@@ -1,6 +1,7 @@
 import m from "mithril";
 import Mustache from "mustache";
 import msgpack from "msgpack-lite";
+import CookieJar from "./CookieJar";
 
 interface Cookie {
 	domain: string,
@@ -32,7 +33,7 @@ interface FailureResult {
 }
 
 export default class HttpSession {
-	cookies: Cookie[];
+	cookies: CookieJar;
 	_isLoading: boolean;
 	proxy: null | string;
 	result: SuccessResult | FailureResult | null;
@@ -41,7 +42,7 @@ export default class HttpSession {
 
 	constructor(proxy) {
 		// These are persistent throughout a session.
-		this.cookies = [];
+		this.cookies = new CookieJar();
 		this._isLoading = false;
 		this.proxy = proxy;
 
@@ -115,7 +116,7 @@ export default class HttpSession {
 				if (this.result != null) {
 					this.result.ok = true;
 					(this.result as SuccessResult).cookieChanges =
-						updateCookies(this.cookies, (this.result as SuccessResult).cookies);
+						this.cookies.update((this.result as SuccessResult).cookies);
 				}
 			})
 			.catch(error => {
@@ -151,7 +152,7 @@ export default class HttpSession {
 				this.result = res;
 				if (this.result != null) {
 					this.result.ok = true;
-					updateCookies(this.cookies, (this.result as SuccessResult).cookies);
+					this.cookies.update((this.result as SuccessResult).cookies);
 				}
 			})
 			.catch(error => {
@@ -337,6 +338,7 @@ export default class HttpSession {
 
 			const buffer = Buffer.from(await (await fetch(this.proxy, options)).arrayBuffer());
 			const data = msgpack.decode(buffer);
+			console.log("decoded body data from response", data);
 
 			if (data.ok) {
 				console.log("response data", data);
@@ -376,42 +378,6 @@ export default class HttpSession {
 		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises))
 			.finally(m.redraw);
 	}
-}
-
-function updateCookies(cookies: Cookie[], newCookies: Cookie[]) {
-	const counts = {
-		added: 0,
-		modified: 0,
-		removed: 0,
-		any: false,
-	};
-
-	console.log("cookies two", cookies, newCookies);
-
-	for (const newOne of newCookies) {
-		let isFound = false;
-		for (const oldOne of cookies) {
-			console.log("cookies", oldOne, newOne);
-			if (oldOne.domain === newOne.domain && oldOne.path === newOne.path && oldOne.name === newOne.name) {
-				if (oldOne.value !== newOne.value || oldOne.expires !== newOne.expires) {
-					oldOne.value = newOne.value;
-					oldOne.expires = newOne.expires;
-					++counts.modified;
-				}
-				isFound = true;
-			}
-		}
-		if (!isFound) {
-			cookies.push(newOne);
-			++counts.added;
-		}
-	}
-
-	if (counts.added > 0 || counts.modified > 0 || counts.removed > 0) {
-		counts.any = true;
-	}
-
-	return counts;
 }
 
 function isPromise(object) {
