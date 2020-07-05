@@ -1,6 +1,7 @@
 # Prestige
 
-An HTTP client, by Shrikant.
+An HTTP client, by Shrikant. Available at [prestigemad.com](https://prestigemad.com)
+([Why that domain?][#about-the-domain]).
 
 This is a *simple*, *text-based*, *in-browser*, HTTP client app that I wanted for myself and wished someone would build
 it one day. Well, had to do it myself in the end.
@@ -44,3 +45,18 @@ TODO: Also support using <https://cors-anywhere.herokuapp.com/> as a proxy?
 - Ability to start client and server with a single `docker-compose` command.
 - Javascript syntax highlighting.
 - Create a rough SVG Logo.
+
+## Why the domain?
+
+Well, because finding a decent and reasonable domain name today is precisely mad. Arriving at this domain went something
+like this:
+
+> SO: Whatcha doin?
+> Me: Going mad looking for a domain name for my project.
+> SO: Okay.
+> Me: I'm just going to pick a mad domain instead.
+> SO: Sure.
+> Me: I'll just stick mad into the domain name!
+> SO: What's for dinner?
+
+And so we have [prestigemad.com](https://prestigemad.com).
