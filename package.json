@@ -15,9 +15,11 @@
 		"last 2 Safari versions"
 	],
 	"scripts": {
-		"start": "parcel serve --port 3040 --no-autoinstall src/index.pug src/help.pug",
 		"build": "rm -rf .cache dist; parcel build --no-autoinstall --no-source-maps src/index.pug",
+		"start": "parcel serve --port 3040 --no-autoinstall src/index.pug src/help.pug",
 		"prestart": "rm -rf .cache",
+		"lint": "tslint src/scripts/*.ts src/tests/*.ts",
+		"lint_fix": "tslint --fix src/scripts/*.ts src/tests/*.ts",
 		"test": "jest"
 	},
 	"jest": {
@@ -49,6 +51,7 @@
 		"prismjs": "^1.20.0",
 		"pug": "^3.0.0",
 		"ts-jest": "^26.1.1",
+		"tslint": "^6.1.2",
 		"typescript": "^3.9.6"
 	}
 }

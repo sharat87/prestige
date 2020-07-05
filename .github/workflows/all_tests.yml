@@ -26,5 +26,8 @@ jobs:
       - name: Install packages
         run: npm ci
 
+      - name: Lint TypeScript
+        run: npm lint
+
       - name: Run all tests
         run: npm test

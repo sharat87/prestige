@@ -6,7 +6,7 @@ import "codemirror/lib/codemirror.css";
 
 export default function CodeEditor() {
 	let content = "";
-	let onUpdate: null | Function = null;
+	let onUpdate: null | ((string) => void) = null;
 	let codeMirror: CodeMirror.Editor | null = null;
 
 	return {view, oncreate};
@@ -31,19 +31,19 @@ export default function CodeEditor() {
 		onUpdate = vnode.attrs.onUpdate;
 	}
 
-	function onChanges(codeMirror) {
-		content = codeMirror.getValue();
-		updateGutter(codeMirror);
-		updateLineBackgrounds(codeMirror);
+	function onChanges(codeMirror1) {
+		content = codeMirror1.getValue();
+		updateGutter(codeMirror1);
+		updateLineBackgrounds(codeMirror1);
 
 		if (onUpdate) {
 			onUpdate(content);
 		}
 	}
 
-	function updateGutter(codeMirror) {
-		const lines = codeMirror.getValue().split("\n");
-		const doc = codeMirror.getDoc();
+	function updateGutter(codeMirror1) {
+		const lines = codeMirror1.getValue().split("\n");
+		const doc = codeMirror1.getDoc();
 		doc.clearGutter("prestige");
 
 		for (const [i, line] of lines.entries()) {
@@ -61,9 +61,9 @@ export default function CodeEditor() {
 		}
 	}
 
-	function updateLineBackgrounds(codeMirror) {
-		const lines = codeMirror.getValue().split("\n");
-		const doc = codeMirror.getDoc();
+	function updateLineBackgrounds(codeMirror1) {
+		const lines = codeMirror1.getValue().split("\n");
+		const doc = codeMirror1.getDoc();
 
 		let inJs = false;
 		for (const [i, line] of lines.entries()) {
@@ -76,10 +76,10 @@ export default function CodeEditor() {
 			}
 
 			if (inJs) {
-				codeMirror.addLineClass(i, "background", "line-javascript");
+				codeMirror1.addLineClass(i, "background", "line-javascript");
 
 			} else {
-				codeMirror.removeLineClass(i, "background", "line-javascript");
+				codeMirror1.removeLineClass(i, "background", "line-javascript");
 
 			}
 		}
@@ -117,7 +117,9 @@ CodeMirror.defineMode("prestige", (config) => {
 		return {
 			context: state.context,
 			bodyJustStarted: state.bodyJustStarted,
+			// @ts-ignore
 			jsState: state.jsState === null ? null : CodeMirror.copyState(jsMode, state.jsState),
+			// @ts-ignore
 			jsonState: state.jsonState === null ? null : CodeMirror.copyState(jsMode, state.jsonState),
 		}
 	}
@@ -153,6 +155,7 @@ CodeMirror.defineMode("prestige", (config) => {
 			if (state.jsState === null) {
 				console.log("incorrect state", stream.current());
 			}
+			// @ts-ignore
 			return jsMode?.token(stream, state.jsState);
 		}
 
@@ -169,6 +172,7 @@ CodeMirror.defineMode("prestige", (config) => {
 				}
 			}
 			if (state.jsonState) {
+				// @ts-ignore
 				return jsonMode.token(stream, state.jsonState);
 			} else {
 				stream.skipToEnd();

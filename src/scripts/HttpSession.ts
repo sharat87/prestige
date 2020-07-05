@@ -38,7 +38,7 @@ export default class HttpSession {
 	_isLoading: boolean;
 	proxy: null | string;
 	result: SuccessResult | FailureResult | null;
-	handlers: Map<string, Set<Function>>;
+	handlers: Map<string, Set<(CustomEvent) => any>>;
 	data: any;
 
 	constructor(proxy) {
@@ -132,16 +132,16 @@ export default class HttpSession {
 			});
 	}
 
-	run(lines, cursorLine) {
-		console.log("run", lines, cursorLine);
-		cursorLine = cursorLine || 0;
+	run(lines, runLineNum) {
+		console.log("run", lines, runLineNum);
+		runLineNum = runLineNum || 0;
 		if (typeof lines === "string") {
 			lines = lines.split("\n");
 		}
 
 		let request: any = null;
 
-		return extractRequest(lines, cursorLine, this)
+		return extractRequest(lines, runLineNum, this)
 			.then(req => {
 				request = req;
 				return this._execute(request);

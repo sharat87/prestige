@@ -3,9 +3,9 @@ import { isPromise } from "./utils";
 
 interface Context {
 	data: object;
-	run: Function;
-	on: Function;
-	off: Function;
+	run: ((lines: string[], runLineNum: number) => Promise<void>);
+	on: ((string, callback: ((CustomEvent) => void)) => void);
+	off: ((string, callback: ((CustomEvent) => void)) => void);
 }
 
 export async function extractRequest(lines: string[], runLineNum: number, context: Context) {

@@ -302,7 +302,8 @@ function CodeBlock() {
 	return { view };
 
 	function view(vnode) {
-		let { content, language } = vnode.attrs;
+		let { content } = vnode.attrs;
+		const { language } = vnode.attrs;
 
 		if (content == null || content === "") {
 			return m("p", m("em", "Nothing"));
