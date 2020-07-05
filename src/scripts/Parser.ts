@@ -1,13 +1,20 @@
 import Mustache from "mustache";
 import { isPromise } from "./utils";
 
-export async function extractRequest(lines, cursorLine, context) {
+interface Context {
+	data: object;
+	run: Function;
+	on: Function;
+	off: Function;
+}
+
+export async function extractRequest(lines: string[], runLineNum: number, context: Context) {
     let isInScript = false;
     const scriptLines: string[] = [];
     let startLine: number = 0;
     let pageContentStarted = false;
 
-    for (let lNum = 0; lNum < cursorLine; ++lNum) {
+    for (let lNum = 0; lNum < runLineNum; ++lNum) {
         const line = lines[lNum];
         if (line === "### javascript") {
             isInScript = true;
@@ -73,17 +80,6 @@ export async function extractRequest(lines, cursorLine, context) {
 
         } else if (lineText === "") {
             isInBody = true;
-            const renderedLines = Mustache.render(headerLines.join("\n"), context.data).split("\n");
-            const [method, ...urlParts] = renderedLines[0].split(/\s+/);
-            details.method = method.toUpperCase();
-            details.url = urlParts.join(" ");
-            for (const rLine of renderedLines.slice(1)) {
-                const [name, ...valueParts] = rLine.split(/:\s*/);
-                if (name === "") {
-                    throw new Error("Header name cannot be blank.");
-                }
-                details.headers.append(name, valueParts.join(" "));
-            }
 
         } else if (!lineText.startsWith("#")) {
             if (!headersStarted && lineText.match(/^\s/)) {
@@ -95,6 +91,18 @@ export async function extractRequest(lines, cursorLine, context) {
 
         }
     }
+
+	const renderedLines = Mustache.render(headerLines.join("\n"), context.data).split("\n");
+	const [method, ...urlParts] = renderedLines[0].split(/\s+/);
+	details.method = method.toUpperCase();
+	details.url = urlParts.join(" ");
+	for (const rLine of renderedLines.slice(1)) {
+		const [name, ...valueParts] = rLine.split(/:\s*/);
+		if (name === "") {
+			throw new Error("Header name cannot be blank.");
+		}
+		details.headers.append(name, valueParts.join(" "));
+	}
 
     if (queryParams.length > 0) {
         // TODO: Set query params.
