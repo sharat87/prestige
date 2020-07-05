@@ -14,7 +14,7 @@ interface Cookie {
 interface SuccessResult {
 	ok: true,
 	response: any,
-	cookies: Cookie[],
+	cookies: Map<string, Cookie[]>,
 	cookieChanges: {
 		added: number,
 		modified: number,
@@ -332,7 +332,7 @@ export default class HttpSession {
 				url,
 				method,
 				headers: Array.from(headers.entries()),
-				cookies: this.cookieJar.plain(),
+				cookies: this.cookieJar,
 				body,
 			});
 

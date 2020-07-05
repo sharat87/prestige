@@ -1,52 +1,34 @@
-interface FullCookie {
-	domain: string,
-	path: string,
-	name: string,
-	value: string,
-	expires: string,
-}
-
 interface Morsel {
-	path: string,
-	name: string,
 	value: string,
 	expires: string,
 }
 
 export default class CookieJar {
-	cookies: Map<string, Morsel[]>;
-	length: number;
+	store: object;
+	size: number;
 
 	constructor() {
-		this.cookies = new Map();
-		this.length = 0;
+		this.store = {};
+		this.size = 0;
 	}
 
-	recomputeLength() {
+	recomputeSize() {
 		let count = 0;
 
-		for (const cookies of this.cookies.values()) {
-			count += cookies.length;
+		for (const byPath of Object.values(this.store)) {
+			for (const byName of Object.values(byPath)) {
+				count += Object.keys(byName as object).length;
+			}
 		}
 
-		this.length = count;
+		this.size = count;
 	}
 
 	toJSON() {
-		return this.cookies;
+		return this.store;
 	}
 
-	plain() {
-		const plainData = {};
-
-		for (const [domain, cookies] of this.cookies) {
-			plainData[domain] = Array.from(cookies);
-		}
-
-		return plainData;
-	}
-
-	update(newCookies: FullCookie[]) {
+	update(newCookies: object) {
 		const counts = {
 			added: 0,
 			modified: 0,
@@ -54,29 +36,32 @@ export default class CookieJar {
 			any: false,
 		};
 
-		for (const newOne of newCookies) {
-			let isFound = false;
-
-			const domainCookies = this.cookies.get(newOne.domain) || [];
-			if (!this.cookies.has(newOne.domain)) {
-				this.cookies.set(newOne.domain, domainCookies);
+		for (const [domain, byPath] of Object.entries(newCookies)) {
+			let isNew = false;
+			if (!this.store[domain]) {
+				this.store[domain] = {};
+				isNew = true;
 			}
+			const oldByPath = this.store[domain];
 
-			for (const oldOne of domainCookies) {
-				console.log("cookies", oldOne, newOne);
-				if (oldOne.path === newOne.path && oldOne.name === newOne.name) {
-					if (oldOne.value !== newOne.value || oldOne.expires !== newOne.expires) {
-						oldOne.value = newOne.value;
-						oldOne.expires = newOne.expires;
-						++counts.modified;
-					}
-					isFound = true;
+			for (const [path, byName] of Object.entries(byPath)) {
+				if (!oldByPath[path]) {
+					oldByPath[path] = {};
+					isNew = true;
 				}
-			}
+				const oldByName = oldByPath[path];
 
-			if (!isFound) {
-				domainCookies.push(newOne);
-				++counts.added;
+				for (const [name, morsel] of Object.entries(byName as object)) {
+					if (!isNew && oldByName[name]
+							&& (oldByName[name].value !== morsel.value || oldByName[name].expires !== morsel.expires)) {
+						++counts.modified;
+					} else {
+						++counts.added;
+					}
+					oldByName[name] = morsel;
+
+				}
+
 			}
 		}
 
@@ -84,7 +69,19 @@ export default class CookieJar {
 			counts.any = true;
 		}
 
-		this.recomputeLength();
+		this.recomputeSize();
 		return counts;
+	}
+
+	get(domain, path, name): Morsel | null {
+		try {
+			return this.store[domain][path][name];
+		} catch (error) {
+			if (error instanceof TypeError) {
+				return null;
+			} else {
+				throw error;
+			}
+		}
 	}
 }
