@@ -27,7 +27,7 @@ jobs:
         run: npm ci
 
       - name: Lint TypeScript
-        run: npm lint
+        run: npm run lint
 
       - name: Run all tests
         run: npm test
