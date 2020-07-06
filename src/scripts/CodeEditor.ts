@@ -94,6 +94,7 @@ export default function CodeEditor() {
 	}
 
 	function view() {
+		codeMirror?.refresh();
 		return m(".body");
 	}
 }
