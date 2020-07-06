@@ -36,6 +36,8 @@ explicitly specify the `index.html` file.
 
 More: <https://github.com/marmelab/awesome-rest>.
 
+Selectable sessions support like <https://httpie.org/>?
+
 TODO: Also support using <https://cors-anywhere.herokuapp.com/> as a proxy?
 
 ## Rough Roadmap

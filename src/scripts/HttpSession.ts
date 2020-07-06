@@ -230,6 +230,14 @@ export default class HttpSession {
 		}
 	}
 
+	authHeader(username, password) {
+		return "Authorization: Basic " + btoa(username + ":" + password);
+	}
+
+	graphql(query: string) {
+		return JSON.stringify({ query });
+	}
+
 	on(name, fn) {
 		(this.handlers.get(name) || this.handlers.set(name, new Set()).get(name))?.add(fn);
 	}
