@@ -310,7 +310,7 @@ main {
 	}
 }
 
-.CodeMirror {
+div.CodeMirror {
 	background: transparent;
 	color: inherit;
 	font-family: var(--code-font-family);
@@ -330,6 +330,16 @@ main {
 			transform: translateY(calc(-50% - 1px));
 			display: inline-block;
 		}
+	}
+
+	span.CodeMirror-matchingbracket {
+		background-color: #CFD;
+		color: #070;
+	}
+
+	span.CodeMirror-nonmatchingbracket {
+		background-color: red;
+		color: white;
 	}
 }
 

@@ -1,6 +1,7 @@
 import m from "mithril";
 import CodeMirror from "codemirror";
 import "codemirror/addon/selection/active-line";
+import "codemirror/addon/edit/matchbrackets";
 import "codemirror/mode/javascript/javascript";
 import "codemirror/lib/codemirror.css";
 
@@ -16,6 +17,7 @@ export default function CodeEditor() {
 		codeMirror = CodeMirror(vnode.dom, {
 			mode: "prestige",
 			lineNumbers: true,
+			matchBrackets: {},
 			autofocus: true,
 			styleActiveLine: true,
 			gutters: ["prestige"],
@@ -127,7 +129,7 @@ CodeMirror.defineMode("prestige", (config) => {
 
 	function token(stream, state) {
 		const { bodyJustStarted } = state;
-		state.bodyJustStarted = false;
+		state.bodyJustStarted = false;/**/
 
 		if (stream.match("###")) {
 			if (state.jsState !== null) {
@@ -140,7 +142,7 @@ CodeMirror.defineMode("prestige", (config) => {
 			stream.eatSpace();
 			state.context = stream.match("javascript") ? "javascript" : null;
 			if (state.context === "javascript") {
-				state.jsState = CodeMirror.startState(jsMode);
+				state.jsState = CodeMirror.startState(jsMode);/**/
 			}
 
 			stream.skipToEnd();
