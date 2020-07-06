@@ -101,7 +101,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 		if (name === "") {
 			throw new Error("Header name cannot be blank.");
 		}
-		details.headers.append(name, valueParts.join(" "));
+		details.headers.append(name, valueParts.join(":"));
 	}
 
     if (queryParams.length > 0) {
