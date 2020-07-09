@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"description": "An HTTP client, by Shrikant.",
 	"author": "Shrikant Sharat Kandula <shrikantsharat.k@gmail.com>",
-	"license": "ISC",
+	"license": "Apache-2.0",
 	"bugs": {
 		"url": "https://github.com/sharat87/prestige/issues"
 	},
