@@ -4,12 +4,6 @@
 	"description": "An HTTP client, by Shrikant.",
 	"author": "Shrikant Sharat Kandula <shrikantsharat.k@gmail.com>",
 	"license": "Apache-2.0",
-	"licenses": [
-		{
-			"type": "Apache-2.0",
-			"url": "http://www.apache.org/licenses/LICENSE-2.0"
-		}
-	],
 	"bugs": {
 		"url": "https://github.com/sharat87/prestige/issues"
 	},
