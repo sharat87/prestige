@@ -1,10 +1,9 @@
 import m from "mithril";
-import Mustache from "mustache";
-import Prism from "prismjs";
-import "prismjs/components/prism-json";
 import HttpSession from "./HttpSession";
-import CodeEditor from "./CodeEditor";
+import { Editor, CodeBlock } from "./code-components";
 import OptionsModal from "./Options";
+import { loadInstance, saveInstance } from "./storage";
+import Beacon from "./Beacon";
 
 // Expected environment variables.
 declare var process: { env: { PRESTIGE_PROXY_URL: string } };
@@ -17,13 +16,24 @@ window.addEventListener("load", () => {
 	document.getElementById("loadingBox")?.remove();
 });
 
-Mustache.escape = function (text) {
-	return text;
-};
-
 function MainView() {
-	let isOptionsVisible = false;
-	let isCookiesVisible = false;
+	const client = new HttpSession(process.env.PRESTIGE_PROXY_URL);
+
+	const workspaceBeacon = new Beacon();
+
+	const instance = loadInstance("master") || { text: "GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n", cookieJar: {}};
+	if (instance.cookieJar) {
+		client.cookieJar.update(instance.cookieJar);
+		m.redraw();
+	}
+
+	enum VisiblePopup {
+		None,
+		Options,
+		Cookies,
+	}
+
+	let visiblePopup: VisiblePopup = VisiblePopup.None;
 
 	return { view };
 
@@ -36,14 +46,35 @@ function MainView() {
 						m("span", { style: { "margin-left": "1em" } }, m("em", "Just an HTTP client by Shrikant.")),
 					]),
 					m("div", [
-						// m("a", { href: "#", onclick: onCookiesToggle, class: isCookiesVisible ? "active" : "" }, "Cookies"),
+						m(
+							LinkButton,
+							"Doc: master ▼"
+						),
+						m(
+							LinkButton,
+							{ onclick: onCookiesToggle, isActive: visiblePopup === VisiblePopup.Cookies },
+							`Cookies (${client.cookieJar.size}) ▼`
+						),
+						m(
+							LinkButton,
+							{ onclick: onOptionsToggle, isActive: visiblePopup === VisiblePopup.Options },
+							"Options ▼"
+						),
+						m(LinkButton, { href: "help.html" }, "Help"),
 						m(LinkButton, { href: "https://github.com/sharat87/prestige" }, "GitHub"),
-						m(LinkButton, { onclick: onOptionsToggle, isActive: isOptionsVisible }, "Options"),
 					]),
 				]),
-				m(Workspace),
-				isOptionsVisible && m(OptionsModal, { doSave: onOptionsSave, doClose: onOptionsToggle }),
-				isCookiesVisible && m(CookiesModal, { doClose: onCookiesToggle }),
+				m(".er-pair", [
+					m(EditorPane, {
+						onExecute,
+						content: instance?.text,
+						onChanges: doSave,
+						workspaceBeacon,
+					}),
+					m(ResultPane, { client, workspaceBeacon }),
+				]),
+				visiblePopup === VisiblePopup.Options && m(OptionsModal, { doSave: onOptionsSave, doClose: onOptionsToggle }),
+				visiblePopup === VisiblePopup.Cookies && m(CookiesModal, { cookies: client.cookieJar, onClose: onCookiesToggle, onClear: onClearCookies }),
 			]),
 		];
 	}
@@ -52,12 +83,16 @@ function MainView() {
 		if (event) {
 			event.preventDefault();
 		}
-		isCookiesVisible = !isCookiesVisible;
+		visiblePopup = visiblePopup === VisiblePopup.Cookies ? VisiblePopup.None : VisiblePopup.Cookies;
 		m.redraw();
 	}
 
+	function onClearCookies() {
+		client.cookieJar.clear();
+	}
+
 	function onOptionsToggle() {
-		isOptionsVisible = !isOptionsVisible;
+		visiblePopup = visiblePopup === VisiblePopup.Options ? VisiblePopup.None : VisiblePopup.Options;
 		m.redraw();
 	}
 
@@ -65,81 +100,54 @@ function MainView() {
 		console.warn("WIP Save & apply options");
 		m.redraw();
 	}
-}
 
-function Workspace() {
-	const client = new HttpSession(process.env.PRESTIGE_PROXY_URL);
-
-	return { view };
-
-	function view() {
-		return m("div.er-pair", [
-			m(EditorPane, { onExecute, cookies: client.cookieJar }),
-			m(ResultPane, { client }),
-		]);
-	}
-
-	function onExecute(codeMirror) {
-		const lines = codeMirror.getValue().split("\n");
-		const cursorLine = codeMirror.getCursor().line;
+	function onExecute(lines, cursorLine) {
 		client.runTop(lines, cursorLine)
-			.finally(m.redraw);
+			.finally(() => {
+				instance.cookieJar = client.cookieJar;
+				doSave();
+				m.redraw();
+			});
+	}
+
+	function doSave(content?: string) {
+		if (content) {
+			instance.text = content;
+		}
+		saveInstance("master", instance);
 	}
 }
 
-function Toolbar() {
-	return { view };
-
-	function view(vnode) {
-		return m(".toolbar", [
-			m(".bar", [
-				m("div.left", vnode.attrs.left),
-				m("div.right", vnode.attrs.right),
-			]),
-			// TODO: Can we use `vnode.children` instead of `vnode.attrs.peripherals`?
-			m(".peripherals", vnode.attrs.peripherals),
-		]);
-	}
+const Toolbar = {
+	view: vnode => m(".toolbar", (vnode.attrs.left || vnode.attrs.right) && [
+		m(".bar", [
+			m("div.left", vnode.attrs.left),
+			m("div.right", vnode.attrs.right),
+		]),
+		// TODO: Can we use `vnode.children` instead of `vnode.attrs.peripherals`?
+		m(".peripherals", vnode.attrs.peripherals),
+	])
 }
 
 function EditorPane(initialVnode) {
+	// TODO: Merge this with the Editor component.
 	let { onExecute } = initialVnode.attrs;
 	let isCookiesPopupVisible = false;
+	const flashQueue: any[] = [];
+	let prevExecuteBookmark: null | CodeMirror.TextMarker = null;
 
 	return { view };
 
 	function view(vnode) {
 		onExecute = vnode.attrs.onExecute;
-		return m(
-			"div.editor-pane",
-			[
-				m(Toolbar, {
-					right: [
-						m(
-							LinkButton,
-							{ onclick: toggleCookiesPopup, isActive: isCookiesPopupVisible },
-							[
-								"Cookies",
-								vnode.attrs.cookies.length > 0 && ` (${vnode.attrs.cookies.length})`,
-							],
-						),
-					],
-					peripherals: [
-						isCookiesPopupVisible && m(CookiesModal, { onClose: toggleCookiesPopup, cookies: vnode.attrs.cookies }),
-					],
-				}),
-				m(CodeEditor, {
-					content: localStorage.getItem("content1") ||
-						"GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n",
-					onUpdate: onEditorChanges,
-					onExecute: onExecuteCb,
-				}),
-			]
-		);
-	}
-
-	function onEditorChanges(value) {
-		localStorage.setItem("content1", value);
+		return m(".editor-pane", m(Editor, {
+			flashQueue: flashQueue,
+			content: vnode.attrs.content,
+			onUpdate: vnode.attrs.onChanges,
+			onExecute: onExecuteCb,
+			workspaceBeacon: vnode.attrs.workspaceBeacon,
+			onRunAgain,
+		}));
 	}
 
 	function onExecuteCb(codeMirror) {
@@ -147,7 +155,34 @@ function EditorPane(initialVnode) {
 			alert("Running a selection is not supported yet.");
 		}
 
-		onExecute(codeMirror);
+		const lines = codeMirror.getValue().split("\n");
+		const cursorLine = codeMirror.getCursor().line;
+
+		prevExecuteBookmark?.clear();
+		prevExecuteBookmark = codeMirror.getDoc().setBookmark(codeMirror.getCursor());
+
+		let startLine = cursorLine;
+		while (startLine >= 0 && !lines[startLine].startsWith("###")) {
+			--startLine;
+		}
+
+		let endLine = cursorLine;
+		while (endLine <= lines.length && !lines[endLine].startsWith("###")) {
+			++endLine;
+		}
+
+		// TODO: Compute the page borders to apply flash correctly.
+		flashQueue.push({ start: startLine, end: endLine + 1 });
+
+		onExecute(lines, cursorLine);
+	}
+
+	function onRunAgain(codeMirror: CodeMirror.Editor) {
+		if (prevExecuteBookmark == null) {
+			return;
+		}
+		codeMirror.setCursor(prevExecuteBookmark.find() as any);
+		onExecuteCb(codeMirror);
 	}
 
 	function toggleCookiesPopup() {
@@ -163,7 +198,7 @@ function ResultPane() {
 		const { result, isLoading } = vnode.attrs.client;
 
 		if (isLoading) {
-			return m("div.result-pane.loading", m("p", m.trust("Loading&hellip;")));
+			return m(".result-pane.loading", m("p", m.trust("Loading&hellip;")));
 		}
 
 		if (result == null) {
@@ -172,7 +207,7 @@ function ResultPane() {
 
 		if (!result.ok) {
 			return m(".result-pane.error", [
-				m(".toolbar"),
+				m(Toolbar),
 				m(".body", [
 					m("h2", "Error executing request"),
 					m("p.message", result.error.message),
@@ -220,8 +255,12 @@ function ResultPane() {
 				left: [
 					m(
 						LinkButton,
-						{ onclick: () => alert("click WIP") },
-						"Result related tools: WIP"
+						{
+							onclick() {
+								vnode.attrs.workspaceBeacon?.do("run-again");
+							},
+						},
+						"Run Again"
 					),
 				],
 			}),
@@ -232,8 +271,8 @@ function ResultPane() {
 							" Scroll down for more details."),
 					m("li", [
 						"Finished in ",
-						m("b", result.timeTaken),
-						"ms.",
+						m("b", m(IntervalDisplay, { ms: result.timeTaken })),
+						".",
 					]),
 					cookieChanges.any && m("li",
 						[
@@ -275,8 +314,6 @@ function ResultPane() {
 		const responseContentType = getContentTypeFromHeaders(response && response.headers);
 		const requestContentType = getContentTypeFromHeaders(response && response.request.headers);
 
-		console.log("response.body", response.body);
-
 		return response && m("div.response", [
 			m(
 				"h2",
@@ -286,128 +323,89 @@ function ResultPane() {
 			m("pre.url", response.request.method + " " + response.url),
 			m("h2", "Response"),
 			m("h3", "Body"),
-			m(CodeBlock, { content: response.body, language: responseContentType ? responseContentType.split("/")[1] : null }),
+			m(CodeBlock, { text: response.body, spec: responseContentType }),
 			m("h3", "Headers"),
 			(renderHeaders(response.headers)) || m("p", "Nothing here."),
 			m("h2", "Request"),
 			m("h3", "Body"),
-			m(CodeBlock, { content: response.request.body, language: requestContentType ? requestContentType.split("/")[1] : null }),
+			m(CodeBlock, { text: response.request.body, spec: requestContentType }),
 			m("h3", "Headers"),
 			(renderHeaders(response.request.headers)) || m("p", "Nothing here."),
 		]);
 	}
 }
 
-function CodeBlock() {
-	return { view };
+const IntervalDisplay = {
+	view(vnode) {
+		const { ms } = vnode.attrs;
 
-	function view(vnode) {
-		let { content } = vnode.attrs;
-		const { language } = vnode.attrs;
+		if (ms < 1000) {
+			return [ms, "ms"];
 
-		if (content == null || content === "") {
-			return m("p", m("em", "Nothing"));
+		} else {
+			return [Math.round(ms / 100) / 10, "s"];
+
 		}
-
-		if (typeof content !== "string") {
-			content = JSON.stringify(content);
-		}
-
-		let i = 0;
-		const prettyContent = prettify(content, language);
-
-		return m("pre", [
-			m(".line-numbers", prettyContent.split(/\r?\n/).map(() => m("div", ++i))),
-			m(
-				"code", language && Prism.languages[language]
-					? m.trust(Prism.highlight(prettyContent, Prism.languages[language], language))
-					: prettyContent
-			),
-		]);
 	}
 }
 
-function PageEnd() {
-	return { view };
-
-	function view() {
-		return m("p", { style: { margin: "2em 0 3em", "text-align": "center", "font-size": "2em" } }, "❦");
-	}
+const PageEnd = {
+	view: () => m(
+		"p",
+		{ style: { margin: "2em 0 3em", textAlign: "center", fontSize: "2em" } },
+		"❦"
+	)
 }
 
-function CookiesModal() {
-	return { view };
-
-	function view(vnode) {
-		return [
-			// m("div.mask"),
-			m("div.popup.right", [
-				m("header", m("h2", "Cookies")),
-				m("section", [
-					m("pre", "this.cookies = " + JSON.stringify(vnode.attrs.cookies, null, 2)),
-					m(PageEnd),
-				]),
-				m("footer", [
-					// m("button.primary", { type: "button", onclick: vnode.attrs.doSave }, "Save"),
-					m("button", { type: "button", onclick: vnode.attrs.onClose }, "Close"),
-				]),
+const CookiesModal = {
+	view: vnode => m(".modal", [
+		m("header", m("h2", "Cookies")),
+		m("section", [
+			m("pre", "this.cookies = " + JSON.stringify(vnode.attrs.cookies, null, 2)),
+			m(PageEnd),
+		]),
+		m("footer", [
+			m("div", [
+				vnode.attrs.cookies?.size > 0 && m(
+					"button",
+					{ type: "button", onclick: vnode.attrs.onClear },
+					"Clear all cookies"
+				),
 			]),
-		];
-	}
+			m("div", [
+				// m("button.primary", { type: "button", onclick: vnode.attrs.doSave }, "Save"),
+				m("button", { type: "button", onclick: vnode.attrs.onClose }, "Close"),
+			]),
+		]),
+	])
 }
 
-function Table() {
-	return { view };
-
-	function view(vnode) {
-		return vnode.children && vnode.children.length > 0
-			? m(".table-box", m("table", m("tbody", vnode.children)))
-			: null;
-	}
+const Table = {
+	view: vnode => vnode.children && vnode.children.length > 0 &&
+		m(".table-box", m("table", m("tbody", vnode.children)))
 }
 
-function LinkButton() {
-	return { view };
-
-	function view(vnode) {
-		return m(
-			"a",
-			{
-				class: "button" + (vnode.attrs.isActive ? " active" : ""),
-				href: vnode.attrs.href || "#",
-				target: "_blank",  // TODO: Set this to _blank *only* for external links.
-				onclick(event) {
-					if (event.target.getAttribute("href") === "#" || event.target.getAttribute("href") === "") {
-						event.preventDefault();
-					}
-					if (vnode.attrs.onclick) {
-						vnode.attrs.onclick(event);
-					}
-				},
+const LinkButton = {
+	view: vnode => m(
+		"a",
+		{
+			class: "button" + (vnode.attrs.isActive ? " active" : ""),
+			href: vnode.attrs.href || "#",
+			target: "_blank",  // TODO: Set this to _blank *only* for external links.
+			onclick(event) {
+				if (event.target.getAttribute("href") === "#" || event.target.getAttribute("href") === "") {
+					event.preventDefault();
+				}
+				if (vnode.attrs.onclick) {
+					vnode.attrs.onclick(event);
+				}
 			},
-			vnode.children
-		);
-	}
+		},
+		vnode.children
+	)
 }
 
-function prettify(content, language) {
-	if (language === "json") {
-		return prettifyJson(content);
-	}
-	return content;
-}
-
-function prettifyJson(json) {
-	try {
-		return JSON.stringify(JSON.parse(json), null, 2);
-	} catch (error) {
-		// TODO: The fact that this JSON is invalid should be communicated to the user.
-		console.error("Error parsing/prettifying JSON.");
-		return json;
-	}
-}
-
-function getContentTypeFromHeaders(headers) {
+function getContentTypeFromHeaders(headers: Headers | Map<string, string> | string[][]) {
 	if (headers == null) {
 		return null;
 	}

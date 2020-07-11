@@ -8,6 +8,10 @@ export default class CookieJar {
 	size: number;
 
 	constructor() {
+		this.clear();
+	}
+
+	clear() {
 		this.store = {};
 		this.size = 0;
 	}

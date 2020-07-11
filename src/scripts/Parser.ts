@@ -1,5 +1,6 @@
-import Mustache from "mustache";
-import { isPromise } from "./utils";
+import {isPromise} from "./utils";
+import {buildQueryString} from "mithril";
+import interpolate from "./interpolate";
 
 interface Context {
 	data: object;
@@ -92,7 +93,8 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
         }
     }
 
-	const renderedLines = Mustache.render(headerLines.join("\n"), context.data).split("\n");
+	// const renderedLines = Mustache.render(headerLines.join("\n"), context.data).split("\n");
+	const renderedLines = interpolate(headerLines.join("\n"), context).split("\n");
 	const [method, ...urlParts] = renderedLines[0].split(/\s+/);
 	details.method = method.toUpperCase();
 	details.url = urlParts.join(" ");
@@ -105,7 +107,12 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 	}
 
     if (queryParams.length > 0) {
-        // TODO: Set query params.
+    	const paramsObject = {};
+        for (const param of queryParams) {
+			const parts = param.split("=");
+        	paramsObject[parts[0]] = parts.length > 1 ? parts.slice(1).join("=") : "";
+		}
+        details.url += (details.url.includes("?") ? "&" : "?") + buildQueryString(paramsObject);
     }
 
     if (bodyLines.length > 0) {
@@ -128,4 +135,74 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
     }
 
     return details;
+}
+
+export enum BlockType {
+	PAGE,
+	PREAMBLE,
+	PREAMBLE_ENDED,
+	BODY,
+}
+
+export interface Block {
+	start: number;
+	end: number;
+	type: BlockType;
+}
+
+export function computeStructure(input: string[] | string): Block[] {
+	const lines: string[] = typeof input === "string" ? input.split("\n") : input;
+
+	const structure: Block[] = [];
+
+	let type: BlockType = BlockType.PAGE;
+	let pageStart: number = 0;
+	let typeStart: number | null = null;
+	let lastNonBlank: number = -1;
+
+	for (const [index, line] of lines.entries()) {
+		const hasText = line.trim() !== "";
+
+		if (line.startsWith("###")) {
+			if (typeStart != null) {
+				structure.push({ start: typeStart, end: lastNonBlank, type });
+				typeStart = null;
+			}
+			type = BlockType.PAGE;
+			if (lastNonBlank >= 0) {
+				structure.push({ start: pageStart, end: lastNonBlank, type });
+			}
+			pageStart = index;
+
+		} else if (line.startsWith("#") && type !== BlockType.BODY) {
+			// This is a comment line. Just ignore.
+
+		} else if (!hasText) {
+			if (type === BlockType.PREAMBLE) {
+				structure.push({ start: typeStart as number, end: lastNonBlank, type });
+				typeStart = null;
+				type = BlockType.PREAMBLE_ENDED;
+			}
+
+		} else if (hasText) {
+			if (type === BlockType.PAGE) {
+				type = BlockType.PREAMBLE;  // Preamble is the URL+Headers part of an HTTP request.
+				typeStart = index;
+			} else if (type === BlockType.PREAMBLE_ENDED) {
+				type = BlockType.BODY;
+				typeStart = index;
+			}
+
+		}
+
+		if (hasText) {
+			lastNonBlank = index;
+		}
+	}
+
+	if (typeStart != null) {
+		structure.push({ start: typeStart, end: lastNonBlank, type });
+	}
+
+	return structure;
 }

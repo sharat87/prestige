@@ -2,15 +2,30 @@ import m from "mithril";
 import CodeMirror from "codemirror";
 import "codemirror/addon/selection/active-line";
 import "codemirror/addon/edit/matchbrackets";
+import "codemirror/addon/edit/closebrackets";
 import "codemirror/mode/javascript/javascript";
+import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
+import {BlockType, computeStructure} from "./Parser";
 
-export default function CodeEditor() {
+export function Editor(initialVnode) {
 	let content = "";
 	let onUpdate: null | ((string) => void) = null;
-	let codeMirror: CodeMirror.Editor | null = null;
+	let codeMirror: null | CodeMirror.Editor = null;
+	let onExecute = initialVnode.attrs.onExecute;
+	initialVnode.attrs.workspaceBeacon?.on("run-again", onRunAgain);
 
-	return {view, oncreate};
+	return { view, oncreate, onremove };
+
+	function onremove(vnode) {
+		vnode.attrs.workspaceBeacon?.off("run-again", onRunAgain);
+	}
+
+	function onRunAgain() {
+		if (codeMirror != null) {
+			initialVnode.attrs.onRunAgain(codeMirror);
+		}
+	}
 
 	function oncreate(vnode) {
 		content = vnode.attrs.content || "";
@@ -19,18 +34,29 @@ export default function CodeEditor() {
 			lineNumbers: true,
 			matchBrackets: {},
 			autofocus: true,
+			autoCloseBrackets: true,
 			styleActiveLine: true,
 			gutters: ["prestige"],
 			value: content,
 		});
+
 		codeMirror.setOption("extraKeys", {
-			"Ctrl-Enter": vnode.attrs.onExecute,
-			"Cmd-Enter": vnode.attrs.onExecute,
+			"Ctrl-Enter": onExecute,
+			"Cmd-Enter": onExecute,
 		});
+
 		codeMirror.on("changes", onChanges);
+
 		updateGutter(codeMirror);
 		updateLineBackgrounds(codeMirror);
+
 		onUpdate = vnode.attrs.onUpdate;
+
+		document.addEventListener("keydown", event => {
+			if (event.key === "Escape") {
+				codeMirror?.focus();
+			}
+		});
 	}
 
 	function onChanges(codeMirror1) {
@@ -44,28 +70,53 @@ export default function CodeEditor() {
 	}
 
 	function updateGutter(codeMirror1) {
-		const lines = codeMirror1.getValue().split("\n");
 		const doc = codeMirror1.getDoc();
 		doc.clearGutter("prestige");
 
-		for (const [i, line] of lines.entries()) {
-			if (line.startsWith("###")) {
+		const lines: string[] = codeMirror1.getValue().split("\n");
+		const structure = computeStructure(lines);
+
+		for (const {start, end, type} of structure) {
+			if (type === BlockType.PAGE && lines[start].startsWith("###")) {
 				const el = document.createElement("span");
 				el.innerText = "+";
 				el.style.color = "green";
 				el.style.fontWeight = "bold";
 				el.style.cursor = "pointer";
 				el.title = "Insert new request here.";
-				el.dataset.lineNum = i;
+				el.dataset.lineNum = start.toString();
 				el.addEventListener("click", onNewClicked);
-				doc.setGutterMarker(i, "prestige", el);
+				doc.setGutterMarker(start, "prestige", el);
+
+			} else if (type === BlockType.BODY && lines[start].startsWith("{")) {
+				const content = lines.slice(start, end + 1).join("\n");
+				try {
+					const pretty = JSON.stringify(JSON.parse(content), null, 2);
+					if (content !== pretty) {
+						const el = document.createElement("span");
+						el.innerText = "P";
+						el.style.backgroundColor = "#09F";
+						el.style.color = "white";
+						el.style.cursor = "pointer";
+						el.title = "Prettify JSON body.";
+						el.dataset.start = start.toString();
+						el.dataset.end = end.toString();
+						el.dataset.pretty = pretty;
+						el.addEventListener("click", onPrettifyClicked);
+						doc.setGutterMarker(start, "prestige", el);
+					}
+
+				} catch (e) {
+					console.error("Error adding prettify button on line " + start, e);
+
+				}
+
 			}
 		}
 	}
 
 	function updateLineBackgrounds(codeMirror1) {
 		const lines = codeMirror1.getValue().split("\n");
-		const doc = codeMirror1.getDoc();
 
 		let inJs = false;
 		for (const [i, line] of lines.entries()) {
@@ -95,9 +146,77 @@ export default function CodeEditor() {
 		);
 	}
 
-	function view() {
+	function onPrettifyClicked(event) {
+		codeMirror?.replaceRange(
+			event.target.dataset.pretty + "\n",
+			{ line: parseInt(event.target.dataset.start, 10), ch: 0 },
+			{ line: 1 + parseInt(event.target.dataset.end, 10), ch: 0 }
+		)
+	}
+
+	function onFlash(event: CustomEvent | { detail: { start: number, end: number } }) {
+		if (codeMirror == null) {
+			return;
+		}
+
+		let doc = codeMirror.getDoc() as any;
+		const { start, end } = event.detail;
+
+		for (let i = start; i < end; ++i) {
+			doc.addLineClass(i, "line", "flash");
+		}
+
+		clearFlash(doc, start, end);
+	}
+
+	function clearFlash(doc, start, end) {
+		setTimeout(() => {
+			for (let i = start; i < end; ++i) {
+				console.log("flash", i)
+				doc.removeLineClass(i, "line", "flash");
+			}
+		}, 0);
+	}
+
+	function view(vnode) {
+		let flashQueue = vnode.attrs.flashQueue;
+		if (codeMirror && flashQueue) {
+			while (flashQueue.length > 0) {
+				onFlash({ detail: flashQueue.shift() })
+			}
+		}
+
 		codeMirror?.refresh();
 		return m(".body");
+	}
+}
+
+export function CodeBlock(initialVnode) {
+	console.log("New CodeBlock component", initialVnode.attrs);
+	let codeMirror: null | CodeMirror.Editor = null;
+	return { view, oncreate };
+
+	function oncreate(vnode) {
+		let text = vnode.attrs.text;
+
+		if (text == null || text === "") {
+			return m("p", m("em", "Nothing"));
+		}
+
+		if (typeof text !== "string") {
+			text = JSON.stringify(text);
+		}
+
+		codeMirror = CodeMirror(vnode.dom, {
+			mode: vnode.attrs.spec,
+			readOnly: true,
+			lineNumbers: true,
+			value: prettify(text, vnode.attrs.spec),
+		});
+	}
+
+	function view() {
+		return m(".code-block");
 	}
 }
 
@@ -194,3 +313,21 @@ CodeMirror.defineMode("prestige", (config) => {
 		}
 	}
 });
+
+function prettify(text, spec) {
+	const language = spec.split("/", 2)[1];
+	if (language === "json") {
+		return prettifyJson(text);
+	}
+	return text;
+}
+
+function prettifyJson(json) {
+	try {
+		return JSON.stringify(JSON.parse(json), null, 2);
+	} catch (error) {
+		// TODO: The fact that this JSON is invalid should be communicated to the user.
+		console.error("Error parsing/prettifying JSON.");
+		return json;
+	}
+}

@@ -3,7 +3,13 @@
 	"version": "1.0.0",
 	"description": "An HTTP client, by Shrikant.",
 	"author": "Shrikant Sharat Kandula <shrikantsharat.k@gmail.com>",
-	"license": "ISC",
+	"license": "Apache-2.0",
+	"licenses": [
+		{
+			"type": "Apache-2.0",
+			"url": "http://www.apache.org/licenses/LICENSE-2.0"
+		}
+	],
 	"bugs": {
 		"url": "https://github.com/sharat87/prestige/issues"
 	},
@@ -15,7 +21,8 @@
 		"last 2 Safari versions"
 	],
 	"scripts": {
-		"build": "rm -rf .cache dist; parcel build --no-autoinstall --no-source-maps src/index.pug",
+		"build": "parcel build --no-cache --no-autoinstall --no-source-maps --detailed-report 20 src/index.pug src/help.pug",
+		"prebuild": "rm -rf .cache dist",
 		"start": "parcel serve --port 3040 --no-autoinstall src/index.pug src/help.pug",
 		"prestart": "rm -rf .cache",
 		"lint": "tslint src/scripts/*.ts src/tests/*.ts",
@@ -34,8 +41,7 @@
 		"@types/jest": "^26.0.3",
 		"@types/mithril": "^2.0.3",
 		"@types/msgpack-lite": "^0.1.7",
-		"@types/mustache": "^4.0.1",
-		"@types/prismjs": "^1.16.1",
+		"babel-plugin-transform-remove-console": "^6.9.4",
 		"babel-plugin-transform-runtime": "^6.23.0",
 		"babel-preset-env": "^1.7.0",
 		"codemirror": "^5.55.0",
@@ -46,9 +52,7 @@
 		"less": "^3.11.3",
 		"mithril": "^2.0.4",
 		"msgpack-lite": "^0.1.26",
-		"mustache": "^4.0.1",
 		"parcel-bundler": "^1.12.4",
-		"prismjs": "^1.20.0",
 		"pug": "^3.0.0",
 		"ts-jest": "^26.1.1",
 		"tslint": "^6.1.2",
