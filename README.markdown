@@ -1,7 +1,7 @@
 # Prestige <sup>&alpha;</sup>
 
-An HTTP client, by Shrikant. Available at [prestigemad.com](https://prestigemad.com)
-([Why that domain?](#why-the-domain)).
+**Just an HTTP client, by Shrikant. Available at [prestigemad.com](https://prestigemad.com)
+([Why that domain?](#why-the-domain)).**
 
 This is a *simple*, *text-based*, *in-browser*, HTTP client app that I wanted for myself and wished someone would build
 it one day. Well, had to do it myself in the end.

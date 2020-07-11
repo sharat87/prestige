@@ -1,8 +1,8 @@
 import m from "mithril";
-import msgpack from "msgpack-lite";
+// import msgpack from "msgpack-lite";
 import CookieJar from "./CookieJar";
-import { extractRequest } from "./Parser";
-import { isPromise } from "./utils";
+import {extractRequest} from "./Parser";
+import {isPromise} from "./utils";
 
 interface Cookie {
 	domain: string,
@@ -197,15 +197,19 @@ export default class HttpSession {
 					status: response.status,
 					statusText: response.statusText,
 					headers: response.headers,
-					body: msgpack.decode(Buffer.from(await response.arrayBuffer())),
-					history: null,
-					cookies: null,
+					// body: msgpack.decode(Buffer.from(await response.arrayBuffer())),
+					body: await response.json(),
+					history: [],
+					cookies: [],
 				},
 			};
 
 		} else  {
 			options.method = "POST";
-			options.headers = new Headers({"Content-Type": "application/json"});
+			options.headers = new Headers({
+				"Content-Type": "application/json",
+				"Accept": "application/json",
+			});
 			options.body = JSON.stringify({
 				url,
 				method,
@@ -214,8 +218,8 @@ export default class HttpSession {
 				body,
 			});
 
-			const buffer = Buffer.from(await (await fetch(this.proxy, options)).arrayBuffer());
-			const data = msgpack.decode(buffer);
+			// const data = msgpack.decode(Buffer.from(await (await fetch(this.proxy, options)).arrayBuffer()));
+			const data = await (await fetch(this.proxy, options)).json();
 
 			if (data.ok) {
 				console.log("response data", data);
