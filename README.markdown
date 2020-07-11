@@ -1,4 +1,4 @@
-# Prestige *<sup>&alpha; alpha</sup>*
+# Prestige <sup>&alpha;</sup>
 
 An HTTP client, by Shrikant. Available at [prestigemad.com](https://prestigemad.com)
 ([Why that domain?](#why-the-domain)).
@@ -22,8 +22,6 @@ weren't listed here, but still were just as helpful):
 1. [Parcel](https://parceljs.org/) --- powers the building and bundling of application assets for deployment.
 1. [TypeScript](https://www.typescriptlang.org/) --- powers the script compilation pipeline behind Parcel.
 1. [CodeMirror](https://codemirror.net/) --- powers the code editor.
-1. [Prism](https://prismjs.com/) --- powers the syntax highlighting in the results pane.
-1. [Mustache](https://mustache.github.io/) --- powers the templating.
 1. [MsgPack](https://msgpack.org/index.html) --- powers the protocol for communication with the proxy server.
 
 A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
@@ -32,7 +30,9 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 For development, use the following command to start a development server on port 3040:
 
-    npm start
+    yarn start
+
+PS: If you don't have yarn installed, please do a `npm install -g yarn` first.
 
 Once this is running, the app can be accessed at <http://localhost:3040/index.html> and the help document can be
 accessed at <http://localhost:3040/help.html>. Note that just <http://localhost:3040> doesn't currently work, we have to
@@ -55,7 +55,7 @@ TODO: Also support using <https://cors-anywhere.herokuapp.com/> as a proxy?
 - Tests (at least for syntax parsing).
 - A desktop app with <https://github.com/webview/webview> or something similar.
 - Ability to start client and server with a single `docker-compose` command.
-- Javascript syntax highlighting.
+- Response handler scripts.
 - Create a rough SVG Logo.
 
 ## Why the domain?

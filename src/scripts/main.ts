@@ -141,7 +141,7 @@ function EditorPane(initialVnode) {
 	function view(vnode) {
 		onExecute = vnode.attrs.onExecute;
 		return m(".editor-pane", m(Editor, {
-			flashQueue: flashQueue,
+			flashQueue,
 			content: vnode.attrs.content,
 			onUpdate: vnode.attrs.onChanges,
 			onExecute: onExecuteCb,

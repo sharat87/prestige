@@ -24,10 +24,10 @@ jobs:
           check-latest: true
 
       - name: Install packages
-        run: npm ci
+        run: yarn install --frozen-lockfile
 
       - name: Lint TypeScript
-        run: npm run lint
+        run: yarn lint
 
       - name: Run all tests
-        run: npm test
+        run: yarn test

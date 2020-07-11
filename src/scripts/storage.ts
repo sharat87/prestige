@@ -6,7 +6,7 @@ interface Instance {
 const INSTANCE_KEY_PREFIX = "instance:";
 
 export function loadInstance(name: string): Instance | null {
-	let raw = localStorage.getItem(INSTANCE_KEY_PREFIX + name);
+	const raw = localStorage.getItem(INSTANCE_KEY_PREFIX + name);
 
 	if (raw == null) {
 		return null;

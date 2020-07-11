@@ -38,7 +38,7 @@ export default function OptionsModal() {
 	return { view };
 
 	function view(vnode) {
-		let displayMode = get(Option.DisplayMode);
+		const displayMode = get(Option.DisplayMode);
 		return [
 			m(".modal", [
 				m("header", m("h2", "Options (WIP, currently does nothing)")),

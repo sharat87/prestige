@@ -12,7 +12,7 @@ export function Editor(initialVnode) {
 	let content = "";
 	let onUpdate: null | ((string) => void) = null;
 	let codeMirror: null | CodeMirror.Editor = null;
-	let onExecute = initialVnode.attrs.onExecute;
+	const onExecute = initialVnode.attrs.onExecute;
 	initialVnode.attrs.workspaceBeacon?.on("run-again", onRunAgain);
 
 	return { view, oncreate, onremove };
@@ -89,10 +89,10 @@ export function Editor(initialVnode) {
 				doc.setGutterMarker(start, "prestige", el);
 
 			} else if (type === BlockType.BODY && lines[start].startsWith("{")) {
-				const content = lines.slice(start, end + 1).join("\n");
+				const pageContent = lines.slice(start, end + 1).join("\n");
 				try {
-					const pretty = JSON.stringify(JSON.parse(content), null, 2);
-					if (content !== pretty) {
+					const pretty = JSON.stringify(JSON.parse(pageContent), null, 2);
+					if (pageContent !== pretty) {
 						const el = document.createElement("span");
 						el.innerText = "P";
 						el.style.backgroundColor = "#09F";
@@ -159,7 +159,7 @@ export function Editor(initialVnode) {
 			return;
 		}
 
-		let doc = codeMirror.getDoc() as any;
+		const doc = codeMirror.getDoc() as any;
 		const { start, end } = event.detail;
 
 		for (let i = start; i < end; ++i) {
@@ -179,7 +179,7 @@ export function Editor(initialVnode) {
 	}
 
 	function view(vnode) {
-		let flashQueue = vnode.attrs.flashQueue;
+		const flashQueue = vnode.attrs.flashQueue;
 		if (codeMirror && flashQueue) {
 			while (flashQueue.length > 0) {
 				onFlash({ detail: flashQueue.shift() })
