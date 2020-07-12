@@ -18,11 +18,10 @@ test coverage.
 Prestige exists thanks to the work of the following open source projects (not exhaustive, thanks to all those who
 weren't listed here, but still were just as helpful):
 
-1. [Mithril](https://mithril.js.org/) --- powers the code structure and provides a scaffolding for the interactivity.
-1. [Parcel](https://parceljs.org/) --- powers the building and bundling of application assets for deployment.
-1. [TypeScript](https://www.typescriptlang.org/) --- powers the script compilation pipeline behind Parcel.
-1. [CodeMirror](https://codemirror.net/) --- powers the code editor.
-1. [MsgPack](https://msgpack.org/index.html) --- powers the protocol for communication with the proxy server.
+1. [Mithril](https://mithril.js.org/) &mdash; powers the code structure and provides a scaffolding for the interactivity.
+1. [Parcel](https://parceljs.org/) &mdash; powers the building and bundling of application assets for deployment.
+1. [TypeScript](https://www.typescriptlang.org/) &mdash; powers the script compilation and static checking within Parcel.
+1. [CodeMirror](https://codemirror.net/) &mdash; powers the code editor and syntax-highlighted code blocks.
 
 A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
 
@@ -50,6 +49,13 @@ Selectable sessions support like <https://httpie.org/>?
 
 TODO: Also support using <https://cors-anywhere.herokuapp.com/> as a proxy?
 
+## Some public APIs play with
+
+1. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
+1. [httpbin.org](http://httpbin.org) &mdash; Great for meta-testing and JSON/form-data related experiments.
+1. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
+1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL.
+
 ## Rough Roadmap
 
 - Tests (at least for syntax parsing).
@@ -72,3 +78,7 @@ like this:
 > **SO**: What's for dinner?
 
 And so we have [prestigemad.com](https://prestigemad.com).
+
+## License
+
+[Apache-2.0](https://github.com/sharat87/prestige/blob/master/LICENSE).
