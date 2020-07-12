@@ -172,7 +172,6 @@ export function Editor(initialVnode) {
 	function clearFlash(doc, start, end) {
 		setTimeout(() => {
 			for (let i = start; i < end; ++i) {
-				console.log("flash", i)
 				doc.removeLineClass(i, "line", "flash");
 			}
 		}, 0);

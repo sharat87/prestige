@@ -221,12 +221,15 @@ export default class HttpSession {
 			// const data = msgpack.decode(Buffer.from(await (await fetch(this.proxy, options)).arrayBuffer()));
 			const data = await (await fetch(this.proxy, options)).json();
 
-			if (data.ok) {
-				console.log("response data", data);
+			if (typeof data.ok === "undefined") {
+				console.error("Unexpected protocol response from proxy", data);
+
+			} else if (data.ok) {
+				console.log("response ok data", data);
 				return data;
 
 			} else {
-				console.error("response data", data);
+				console.error("response non-ok data", data);
 				return Promise.reject(new Error(data.error.message));
 
 			}
