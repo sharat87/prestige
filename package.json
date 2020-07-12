@@ -41,7 +41,7 @@
 		"codemirror": "^5.55.0",
 		"identity-obj-proxy": "^3.0.0",
 		"jest": "^26.1.0",
-		"jsdom": "^16.2.2",
+		"jsdom": "^16.3.0",
 		"jstransformer-markdown-it": "^2.1.0",
 		"less": "^3.11.3",
 		"mithril": "^2.0.4",
