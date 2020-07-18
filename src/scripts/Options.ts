@@ -43,10 +43,6 @@ export default function OptionsModal() {
 			m(".modal", [
 				m("header", m("h2", "Options (WIP, currently does nothing)")),
 				m("section.form", [
-					m("span", "Proxy"),
-					m("div", [
-						m("input", { type: "text", value: get(Option.Proxy) }),
-					]),
 					m("span", "Dark Mode"),
 					m("div", [
 						m("label", { title: "Sync to system's dark mode setting" }, [
@@ -60,6 +56,21 @@ export default function OptionsModal() {
 						m("label", [
 							m("input", { type: "radio", name: "displayMode", value: "dark", checked: displayMode === "dark" }),
 							m("span", "Dark"),
+						]),
+					]),
+					m("span", "Toolbar Style"),
+					m("div", [
+						m("label", [
+							m("input", { type: "radio", name: "toolbarStyle", value: "icons" }),
+							m("span", "Icons"),
+						]),
+						m("label", [
+							m("input", { type: "radio", name: "toolbarStyle", value: "text", checked: true }),
+							m("span", "Text"),
+						]),
+						m("label", [
+							m("input", { type: "radio", name: "toolbarStyle", value: "both" }),
+							m("span", "Icons & Text"),
 						]),
 					]),
 				]),

@@ -6,11 +6,11 @@ html, body {
 	height: 100%;
 	--header-height: 30px;
 	--layout-border: 1px solid var(--seam-color);
-	--code-font-family: "Source Code Pro";
+	--code-font-family: "DM Mono";
 }
 
 body {
-	font: 14px Lato, sans-serif;
+	font: 14px "Open Sans", sans-serif;
 	margin: 0;
 	tab-size: 4;
 	background-color: var(--bg);
@@ -44,7 +44,6 @@ button {
 	border: 2px solid #BBB;
 	border-radius: 3px;
 	padding: 3px 12px;
-	margin: 9px;
 	cursor: pointer;
 
 	&.primary {
@@ -105,7 +104,7 @@ table {
 main {
 	height: 100%;
 
-	header {
+	> header {
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -316,7 +315,7 @@ main {
 		.CodeMirror-lines {
 			cursor: default;
 
-			span {
+			span:not(.CodeMirror-foldmarker) {
 				cursor: text;
 			}
 		}
@@ -370,8 +369,12 @@ main {
 		border-left-color: var(--fg);
 	}
 
+	.CodeMirror-dialog {
+		background-color: var(--bg);
+	}
+
 	.cm-header, .cm-strong {
-		font-weight: 600;
+		font-weight: 500;
 	}
 
 	.cm-tab {
@@ -443,10 +446,10 @@ main {
 
 	> header {
 		border-bottom: 1px solid var(--seam-color);
-	}
 
-	> header h2 {
-		margin: 9px 3px;
+		h2 {
+			margin: 0;
+		}
 	}
 
 	> section {

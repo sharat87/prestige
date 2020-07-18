@@ -6,7 +6,7 @@ html(lang="en")
 
 		link(
 			rel="stylesheet"
-			href="https://fonts.googleapis.com/css2?family=Lato:ital,wght@0,400;0,600;1,400&family=Source+Code+Pro:ital,wght@0,400;0,600;1,400&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;1,400&family=DM+Mono:ital,wght@0,400;0,500;1,400;1,500&display=swap"
 		)
 
 		link(rel="icon" type="image/png" href="assets/favicon.ico")
@@ -24,22 +24,8 @@ html(lang="en")
 			| Please enable Javascript in your browser or get a better browser like Firefox or Chromium.
 			| Thank you for checking us out.
 
-		//- TODO: For CDNs, figure out a way to not include them in the Parcel bundle.
-		//- Mithril CDN
-		//script(src="https://unpkg.com/mithril@2.0.4/mithril.min.js")
-
-		//- CodeMirror CDN: https://cdnjs.com/libraries/codemirror
-		//script(src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/codemirror.min.js")
-		//script(src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/addon/selection/active-line.min.js")
-		//link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.54.0/codemirror.min.css")
-		//link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.55.0/theme/elegant.min.css")
-
-		//- Prism CDN: https://cdnjs.com/libraries/prism
-		//script(src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/prism.min.js" data-manual="")
-		//script(src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.20.0/components/prism-json.min.js")
-
-		//- Mustache CDN: https://unpkg.com/browse/mustache@4.0.1/
-		//script(src="https://unpkg.com/mustache@4.0.1/mustache.min.js")
-
 		link(rel="stylesheet" href="styles.less")
 		script(src="scripts/main.ts")
+
+		script
+			include analytics.js

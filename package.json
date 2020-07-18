@@ -18,7 +18,7 @@
 		"build": "parcel build --no-cache --no-autoinstall --no-source-maps --detailed-report 20 src/index.pug src/help.pug",
 		"prebuild": "rm -rf .cache dist",
 		"start": "parcel serve --port 3040 --no-autoinstall src/index.pug src/help.pug",
-		"prestart": "rm -rf .cache",
+		"prestart": "rm -rf .cache dist",
 		"lint": "tslint src/scripts/*.ts src/tests/*.ts",
 		"lint_fix": "tslint --fix src/scripts/*.ts src/tests/*.ts",
 		"test": "jest"

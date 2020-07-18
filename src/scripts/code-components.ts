@@ -3,6 +3,15 @@ import CodeMirror from "codemirror";
 import "codemirror/addon/selection/active-line";
 import "codemirror/addon/edit/matchbrackets";
 import "codemirror/addon/edit/closebrackets";
+import "codemirror/addon/dialog/dialog";
+import "codemirror/addon/dialog/dialog.css";
+import "codemirror/addon/search/searchcursor";
+import "codemirror/addon/search/search";
+import "codemirror/addon/fold/foldcode";
+import "codemirror/addon/fold/brace-fold";
+import "codemirror/addon/fold/foldgutter";
+import "codemirror/addon/fold/foldgutter.css";
+import "codemirror/addon/comment/comment";
 import "codemirror/mode/javascript/javascript";
 import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
@@ -38,11 +47,12 @@ export function Editor(initialVnode) {
 			styleActiveLine: true,
 			gutters: ["prestige"],
 			value: content,
-		});
-
-		codeMirror.setOption("extraKeys", {
-			"Ctrl-Enter": onExecute,
-			"Cmd-Enter": onExecute,
+			extraKeys: {
+				"Ctrl-Enter": onExecute,
+				"Cmd-Enter": onExecute,
+				"Cmd-F": "findPersistent",
+				"Cmd-/": "toggleComment",
+			},
 		});
 
 		codeMirror.on("changes", onChanges);
@@ -210,6 +220,8 @@ export function CodeBlock(initialVnode) {
 			mode: vnode.attrs.spec,
 			readOnly: true,
 			lineNumbers: true,
+			foldGutter: true,
+			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
 			value: prettify(text, vnode.attrs.spec),
 		});
 	}
@@ -219,33 +231,45 @@ export function CodeBlock(initialVnode) {
 	}
 }
 
-CodeMirror.defineMode("prestige", (config) => {
+interface PrestigeState {
+	context: null | string;
+	bodyJustStarted: boolean;
+	jsState: any;
+	bodyState: any;
+}
+
+CodeMirror.defineMode("prestige", (config, modeOptions): CodeMirror.Mode<PrestigeState> => {
 	const jsMode = CodeMirror.getMode(config, "javascript");
 	const jsonMode = CodeMirror.getMode(config, { name: "javascript", json: true });
 
-	return { startState, copyState, token, blankLine };
+	return {
+		name: "prestige",
+		lineComment: "#",
+		token,
+		startState,
+		blankLine,
+		copyState,
+	};
 
-	function startState() {
+	function startState(): PrestigeState {
 		return {
 			context: null,
 			bodyJustStarted: false,
 			jsState: null,
-			jsonState: null,
+			bodyState: null,
 		};
 	}
 
-	function copyState(state) {
+	function copyState(state: PrestigeState) {
 		return {
 			context: state.context,
 			bodyJustStarted: state.bodyJustStarted,
-			// @ts-ignore
 			jsState: state.jsState === null ? null : CodeMirror.copyState(jsMode, state.jsState),
-			// @ts-ignore
-			jsonState: state.jsonState === null ? null : CodeMirror.copyState(jsMode, state.jsonState),
+			bodyState: state.bodyState === null ? null : CodeMirror.copyState(jsMode, state.bodyState),
 		}
 	}
 
-	function token(stream, state) {
+	function token(stream, state): string | null {
 		const { bodyJustStarted } = state;
 		state.bodyJustStarted = false;/**/
 
@@ -253,8 +277,8 @@ CodeMirror.defineMode("prestige", (config) => {
 			if (state.jsState !== null) {
 				state.jsState = null;
 			}
-			if (state.jsonState !== null) {
-				state.jsonState = null;
+			if (state.bodyState !== null) {
+				state.bodyState = null;
 			}
 
 			stream.eatSpace();
@@ -276,8 +300,7 @@ CodeMirror.defineMode("prestige", (config) => {
 			if (state.jsState === null) {
 				console.log("incorrect state", stream.current());
 			}
-			// @ts-ignore
-			return jsMode?.token(stream, state.jsState);
+			return jsMode.token(stream, state.jsState);
 		}
 
 		if (state.context === null) {
@@ -289,12 +312,14 @@ CodeMirror.defineMode("prestige", (config) => {
 		if (state.context === "request-body") {
 			if (bodyJustStarted) {
 				if (stream.peek() === "{") {
-					state.jsonState = CodeMirror.startState(jsonMode);
+					state.bodyState = CodeMirror.startState(jsonMode);
+				} else if (stream.peek() === "=") {
+					state.bodyState = CodeMirror.startState(jsMode);
+					stream.eat("=");
 				}
 			}
-			if (state.jsonState) {
-				// @ts-ignore
-				return jsonMode.token(stream, state.jsonState);
+			if (state.bodyState) {
+				return jsonMode.token(stream, state.bodyState);
 			} else {
 				stream.skipToEnd();
 				return "string";

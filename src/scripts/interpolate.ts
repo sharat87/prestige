@@ -1,6 +1,4 @@
 export default function interpolate(content: string, context): string {
-	// TODO: Escape any backticks inside `content` before rending it as a template string.
-
 	const keys: string[] = [];
 	const values: any[] = [];
 
