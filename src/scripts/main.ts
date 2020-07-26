@@ -1,10 +1,11 @@
 import m from "mithril";
 import HttpSession from "./HttpSession";
-import { Editor, CodeBlock } from "./code-components";
+import {CodeBlock, Editor} from "./code-components";
 import OptionsModal from "./Options";
-import { loadInstance, saveInstance } from "./storage";
+import {loadInstance, saveInstance} from "./storage";
 import Beacon from "./Beacon";
 import Workspace from "./Workspace";
+import {NothingMessage} from "./NothingMessage";
 
 // Expected environment variables.
 declare var process: { env: { PRESTIGE_PROXY_URL: string } };
@@ -259,7 +260,7 @@ function ResultPane() {
 			]);
 		}
 
-		const { response, history, cookieChanges } = result;
+		const { response, proxy, history, cookieChanges } = result;
 
 		if (vnode.state.responseMirror) {
 			vnode.state.responseMirror.setValue(response.body);
@@ -303,7 +304,10 @@ function ResultPane() {
 							].filter(v => v != null).join(", ")),
 							".",
 						]
-					)
+					),
+					m("li", proxy != null
+						? ["Run with proxy at ", m("a", { href: proxy, target: "_blank" }, proxy), "."]
+						: "Direct CORS request, no proxy used. Only limited information available."),
 				]),
 				renderResponse(response),
 				history ? history.map(renderResponse).reverse() : null,
@@ -317,6 +321,10 @@ function ResultPane() {
 			return null;
 		}
 
+		if (headers instanceof Headers) {
+			headers = headers.entries();
+		}
+
 		const rows: m.Vnode[] = [];
 
 		for (const [name, value] of headers) {
@@ -326,7 +334,7 @@ function ResultPane() {
 			]));
 		}
 
-		return m(Table, rows);
+		return rows.length > 0 ? m(Table, rows) : null;
 	}
 
 	function renderResponse(response) {
@@ -344,12 +352,12 @@ function ResultPane() {
 			m("h3", "Body"),
 			m(CodeBlock, { text: response.body, spec: responseContentType }),
 			m("h3", "Headers"),
-			(renderHeaders(response.headers)) || m("p", "Nothing here."),
+			renderHeaders(response.headers) || m(NothingMessage),
 			m("h2", "Request"),
 			m("h3", "Body"),
 			m(CodeBlock, { text: response.request.body, spec: requestContentType }),
 			m("h3", "Headers"),
-			(renderHeaders(response.request.headers)) || m("p", "Nothing here."),
+			renderHeaders(response.request.headers) || m(NothingMessage),
 		]);
 	}
 }

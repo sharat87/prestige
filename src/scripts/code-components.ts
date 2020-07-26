@@ -17,6 +17,7 @@ import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
 import {BlockType, computeStructure} from "./Parser";
 import Workspace from "./Workspace";
+import {NothingMessage} from "./NothingMessage";
 
 export function Editor(initialVnode) {
 	let workspace: Workspace = initialVnode.attrs.workspace;
@@ -200,26 +201,28 @@ export function CodeBlock(initialVnode) {
 	return { view, oncreate };
 
 	function oncreate(vnode) {
-		codeMirror = CodeMirror(vnode.dom, {
-			mode: vnode.attrs.spec,
-			readOnly: true,
-			lineNumbers: true,
-			foldGutter: true,
-			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-			value: asString(vnode.attrs.text, vnode.attrs.spec),
-		});
+		if (vnode.dom.classList.contains("code-block")) {
+			codeMirror = CodeMirror(vnode.dom, {
+				mode: vnode.attrs.spec,
+				readOnly: true,
+				lineNumbers: true,
+				foldGutter: true,
+				gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
+				value: asString(vnode.attrs.text, vnode.attrs.spec),
+			});
+		}
 	}
 
 	function view(vnode) {
+		console.log("Code block with text:", vnode.attrs.text)
 		const haveText = asString(vnode.attrs.text, vnode.attrs.spec) !== "";
 		if (codeMirror != null) {
 			codeMirror.setValue(asString(vnode.attrs.text, vnode.attrs.spec));
 		}
 
-		return [
-			m(".code-block", { style: { display: haveText ? "" : "none" } }),
-			!haveText && m("p", m("em", "Nothing")),
-		];
+		return haveText
+			? m(".code-block", { style: { display: haveText ? "" : "none" } })
+			: m(NothingMessage);
 	}
 
 	function asString(text: null | string | object, spec: string): string {

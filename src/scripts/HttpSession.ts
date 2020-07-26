@@ -46,6 +46,7 @@ export default class HttpSession {
 		this.cookieJar = new CookieJar();
 		this._isLoading = false;
 		this.proxy = proxy;
+		console.log("this.proxy", this.proxy);
 
 		// These should reset for each execute action.
 		this.result = null;
@@ -112,6 +113,7 @@ export default class HttpSession {
 			})
 			.then(res => {
 				this.isLoading = false;
+				console.log("Execute Result", res);
 				this.result = res;
 				if (this.result != null) {
 					this.result.ok = true;
@@ -189,20 +191,27 @@ export default class HttpSession {
 		if (proxy == null || proxy === "") {
 			options.method = method;
 			options.headers = headers;
-			options.body = typeof body === "string" ? body : null;
 
+			if (typeof body === "string" && body !== "") {
+				options.body = body;
+			}
+
+			console.log("Fetch", url, options);
 			const response = await fetch(url, options);
 			console.log("response", response);
 			return {
 				ok: true,
+				proxy: null,
 				response: {
 					status: response.status,
 					statusText: response.statusText,
+					url,
 					headers: response.headers,
 					// body: msgpack.decode(Buffer.from(await response.arrayBuffer())),
-					body: await response.json(),
+					body: await response.text(),
 					request: {
 						url,
+						body: null,
 						...options,
 					},
 				},
@@ -225,10 +234,12 @@ export default class HttpSession {
 			});
 
 			// const data = msgpack.decode(Buffer.from(await (await fetch(this.proxy, options)).arrayBuffer()));
-			const data = await (await fetch(this.proxy, options)).json();
+			const data = await (await fetch(proxy, options)).json();
+			data.proxy = proxy;
 
 			if (typeof data.ok === "undefined") {
 				console.error("Unexpected protocol response from proxy", data);
+				return data;
 
 			} else if (data.ok) {
 				console.log("response ok data", data);
@@ -244,11 +255,7 @@ export default class HttpSession {
 	}
 
 	getProxyUrl({ method, url, headers, body }) {
-		if (url.includes("://localhost")) {
-			return null; //this.proxy; // TODO: Cookies don't work right when running without a proxy.
-		} else {
-			return this.proxy;
-		}
+		return url.includes("://localhost") ? null : this.proxy;
 	}
 
 	authHeader(username, password) {
