@@ -6,11 +6,11 @@ html, body {
 	height: 100%;
 	--header-height: 30px;
 	--layout-border: 1px solid var(--seam-color);
-	--code-font-family: "DM Mono";
+	--code-font-family: "DM Mono", monospace;
 }
 
 body {
-	font: 14px "Open Sans", sans-serif;
+	font: 14px "Source Sans Pro", sans-serif;
 	margin: 0;
 	tab-size: 4;
 	background-color: var(--bg);
@@ -342,7 +342,8 @@ main {
 }
 
 .editor-pane div.CodeMirror {
-	background: rgba(0, 0, 0, .03);
+	background: rgba(0, 0, 0, .02);
+	opacity: .8;
 	color: inherit;
 	font-family: var(--code-font-family);
 	z-index: 0;
@@ -363,6 +364,7 @@ main {
 
 	&.CodeMirror-focused {
 		background: transparent;
+		opacity: 1;
 	}
 
 	.CodeMirror-cursor {
@@ -486,7 +488,7 @@ body:not([data-t]), body[data-t="default"] {
 	--gutter-bg: #F7F7F7;
 	--gutter-border: #EEE;
 	--activeline-bg: #006FFF12;
-	--js-bg: #FFFCF3;
+	--js-bg: rgba(255, 198, 26, 0.05);
 	--green-fg: #080;
 	--green-bg: tint($--green-fg, 95%);
 	--red-fg: #F40;

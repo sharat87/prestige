@@ -16,10 +16,10 @@ import "codemirror/mode/javascript/javascript";
 import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
 import {BlockType, computeStructure} from "./Parser";
+import Workspace from "./Workspace";
 
 export function Editor(initialVnode) {
-	let content = "";
-	let onUpdate: null | ((string) => void) = null;
+	let workspace: Workspace = initialVnode.attrs.workspace;
 	let codeMirror: null | CodeMirror.Editor = null;
 	const onExecute = initialVnode.attrs.onExecute;
 	initialVnode.attrs.workspaceBeacon?.on("run-again", onRunAgain);
@@ -37,7 +37,6 @@ export function Editor(initialVnode) {
 	}
 
 	function oncreate(vnode) {
-		content = vnode.attrs.content || "";
 		codeMirror = CodeMirror(vnode.dom, {
 			mode: "prestige",
 			lineNumbers: true,
@@ -46,7 +45,7 @@ export function Editor(initialVnode) {
 			autoCloseBrackets: true,
 			styleActiveLine: true,
 			gutters: ["prestige"],
-			value: content,
+			value: workspace.getContent(),
 			extraKeys: {
 				"Ctrl-Enter": onExecute,
 				"Cmd-Enter": onExecute,
@@ -60,7 +59,7 @@ export function Editor(initialVnode) {
 		updateGutter(codeMirror);
 		updateLineBackgrounds(codeMirror);
 
-		onUpdate = vnode.attrs.onUpdate;
+		workspace = vnode.attrs.workspace;
 
 		document.addEventListener("keydown", event => {
 			if (event.key === "Escape") {
@@ -70,13 +69,9 @@ export function Editor(initialVnode) {
 	}
 
 	function onChanges(codeMirror1) {
-		content = codeMirror1.getValue();
+		workspace.setContent(codeMirror1.getValue());
 		updateGutter(codeMirror1);
 		updateLineBackgrounds(codeMirror1);
-
-		if (onUpdate) {
-			onUpdate(content);
-		}
 	}
 
 	function updateGutter(codeMirror1) {
@@ -201,33 +196,38 @@ export function Editor(initialVnode) {
 }
 
 export function CodeBlock(initialVnode) {
-	console.log("New CodeBlock component", initialVnode.attrs);
 	let codeMirror: null | CodeMirror.Editor = null;
 	return { view, oncreate };
 
 	function oncreate(vnode) {
-		let text = vnode.attrs.text;
-
-		if (text == null || text === "") {
-			return m("p", m("em", "Nothing"));
-		}
-
-		if (typeof text !== "string") {
-			text = JSON.stringify(text);
-		}
-
 		codeMirror = CodeMirror(vnode.dom, {
 			mode: vnode.attrs.spec,
 			readOnly: true,
 			lineNumbers: true,
 			foldGutter: true,
 			gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-			value: prettify(text, vnode.attrs.spec),
+			value: asString(vnode.attrs.text, vnode.attrs.spec),
 		});
 	}
 
-	function view() {
-		return m(".code-block");
+	function view(vnode) {
+		const haveText = asString(vnode.attrs.text, vnode.attrs.spec) !== "";
+		if (codeMirror != null) {
+			codeMirror.setValue(asString(vnode.attrs.text, vnode.attrs.spec));
+		}
+
+		return [
+			m(".code-block", { style: { display: haveText ? "" : "none" } }),
+			!haveText && m("p", m("em", "Nothing")),
+		];
+	}
+
+	function asString(text: null | string | object, spec: string): string {
+		if (text != null && typeof text !== "string") {
+			text = JSON.stringify(text);
+		}
+
+		return text == null ? "" : prettify(text, spec);
 	}
 }
 
@@ -338,11 +338,13 @@ CodeMirror.defineMode("prestige", (config, modeOptions): CodeMirror.Mode<Prestig
 	}
 });
 
-function prettify(text, spec) {
-	const language = spec.split("/", 2)[1];
+function prettify(text: string, spec: null | string) {
+	const language = spec == null ? null : spec.split("/", 2)[1];
+
 	if (language === "json") {
 		return prettifyJson(text);
 	}
+
 	return text;
 }
 

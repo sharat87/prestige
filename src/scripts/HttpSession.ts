@@ -115,8 +115,10 @@ export default class HttpSession {
 				this.result = res;
 				if (this.result != null) {
 					this.result.ok = true;
-					(this.result as SuccessResult).cookieChanges =
-						this.cookieJar.update((this.result as SuccessResult).cookies);
+					if ((this.result as SuccessResult).cookies) {
+						(this.result as SuccessResult).cookieChanges =
+							this.cookieJar.update((this.result as SuccessResult).cookies);
+					}
 				}
 			})
 			.catch(error => {
@@ -182,15 +184,15 @@ export default class HttpSession {
 			credentials: "same-origin",
 		};
 
-		if (this.proxy == null) {
+		const proxy = this.getProxyUrl({ method, url, headers, body });
+
+		if (proxy == null || proxy === "") {
 			options.method = method;
 			options.headers = headers;
-
-			if (typeof body === "string" && body.length > 0) {
-				options.body = body;
-			}
+			options.body = typeof body === "string" ? body : null;
 
 			const response = await fetch(url, options);
+			console.log("response", response);
 			return {
 				ok: true,
 				response: {
@@ -199,9 +201,13 @@ export default class HttpSession {
 					headers: response.headers,
 					// body: msgpack.decode(Buffer.from(await response.arrayBuffer())),
 					body: await response.json(),
-					history: [],
-					cookies: [],
+					request: {
+						url,
+						...options,
+					},
 				},
+				history: [],
+				cookies: [],
 			};
 
 		} else  {
@@ -234,6 +240,14 @@ export default class HttpSession {
 
 			}
 
+		}
+	}
+
+	getProxyUrl({ method, url, headers, body }) {
+		if (url.includes("://localhost")) {
+			return null; //this.proxy; // TODO: Cookies don't work right when running without a proxy.
+		} else {
+			return this.proxy;
 		}
 	}
 

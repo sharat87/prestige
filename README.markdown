@@ -3,6 +3,8 @@
 **Just an HTTP client, by Shrikant. Available at [prestigemad.com](https://prestigemad.com)
 ([Why that domain?](#why-the-domain)).**
 
+> Under the abstractions, it's all just stardust interacting with text.
+
 This is a *simple*, *text-based*, *in-browser*, HTTP client app that I wanted for myself and wished someone would build
 it one day. Well, had to do it myself in the end.
 

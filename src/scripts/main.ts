@@ -4,6 +4,7 @@ import { Editor, CodeBlock } from "./code-components";
 import OptionsModal from "./Options";
 import { loadInstance, saveInstance } from "./storage";
 import Beacon from "./Beacon";
+import Workspace from "./Workspace";
 
 // Expected environment variables.
 declare var process: { env: { PRESTIGE_PROXY_URL: string } };
@@ -18,14 +19,7 @@ window.addEventListener("load", () => {
 
 function MainView() {
 	const client = new HttpSession(process.env.PRESTIGE_PROXY_URL);
-
-	const workspaceBeacon = new Beacon();
-
-	const instance = loadInstance("master") || { text: "GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n", cookieJar: {}};
-	if (instance.cookieJar) {
-		client.cookieJar.update(instance.cookieJar);
-		m.redraw();
-	}
+	const workspace = new Workspace();
 
 	enum VisiblePopup {
 		None,
@@ -64,15 +58,10 @@ function MainView() {
 						m(LinkButton, { href: "https://github.com/sharat87/prestige" }, "GitHub"),
 					]),
 				]),
-				m(".er-pair", [
-					m(EditorPane, {
-						onExecute,
-						content: instance?.text,
-						onChanges: doSave,
-						workspaceBeacon,
-					}),
-					m(ResultPane, { client, workspaceBeacon }),
-				]),
+				m(WorkspaceView, {
+					client,
+					workspace,
+				}),
 				visiblePopup === VisiblePopup.Options && m(OptionsModal, { doSave: onOptionsSave, doClose: onOptionsToggle }),
 				visiblePopup === VisiblePopup.Cookies && m(CookiesModal, { cookies: client.cookieJar, onClose: onCookiesToggle, onClear: onClearCookies }),
 			]),
@@ -100,6 +89,39 @@ function MainView() {
 		console.warn("WIP Save & apply options");
 		m.redraw();
 	}
+}
+
+function WorkspaceView(initialVnode) {
+	let { client, workspace } = initialVnode.attrs;
+
+	const instance = loadInstance("master") || {
+		text: "GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n",
+		cookieJar: {},
+	};
+
+	if (instance.cookieJar) {
+		client.cookieJar.update(instance.cookieJar);
+		m.redraw();
+	}
+
+	workspace.setContent(instance.text);
+	workspace.onContentChanged(doSave);
+
+	const workspaceBeacon = new Beacon();
+
+	return { view };
+
+	function view(vnode) {
+		workspace = vnode.attrs.workspace;
+		return m(".er-pair", [
+			m(EditorPane, {
+				onExecute,
+				workspaceBeacon,
+				workspace,
+			}),
+			m(ResultPane, { client, workspaceBeacon }),
+		]);
+	}
 
 	function onExecute(lines, cursorLine) {
 		client.runTop(lines, cursorLine)
@@ -110,10 +132,8 @@ function MainView() {
 			});
 	}
 
-	function doSave(content?: string) {
-		if (content) {
-			instance.text = content;
-		}
+	function doSave() {
+		instance.text = workspace.getContent();
 		saveInstance("master", instance);
 	}
 }
@@ -142,11 +162,10 @@ function EditorPane(initialVnode) {
 		onExecute = vnode.attrs.onExecute;
 		return m(".editor-pane", m(Editor, {
 			flashQueue,
-			content: vnode.attrs.content,
-			onUpdate: vnode.attrs.onChanges,
 			onExecute: onExecuteCb,
 			workspaceBeacon: vnode.attrs.workspaceBeacon,
 			onRunAgain,
+			workspace: vnode.attrs.workspace,
 		}));
 	}
 
