@@ -223,11 +223,14 @@ main {
 .result-pane {
 	border-left: var(--layout-border);
 
-	&.loading p {
+	&.loading {
 		text-align: center;
-		font-size: 3em;
-		font-style: italic;
-		margin: 2em 0;
+
+		p:first-child {
+			font-size: 3em;
+			font-style: italic;
+			margin: 2em 0;
+		}
 	}
 
 	&.error {
@@ -425,6 +428,13 @@ main {
 .CodeMirror-selected, ::selection {
 	background: var(--selection-bg) !important;
 	text-shadow: none;
+}
+
+.note {
+	padding: 6px;
+	border-radius: 3px;
+	background-color: #EEF;
+	border: 1px solid shade($background-color, 60%);
 }
 
 .modal {

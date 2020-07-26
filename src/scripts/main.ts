@@ -218,7 +218,11 @@ function ResultPane() {
 		const { result, isLoading } = vnode.attrs.client;
 
 		if (isLoading) {
-			return m(".result-pane.loading", m("p", m.trust("Loading&hellip;")));
+			return m(".result-pane.loading", [
+				m("p", m.trust("Loading&hellip;")),
+				// TODO: Show Cancel button after a few seconds of request not completing.
+				// m("p", m(LinkButton, "Cancel")),
+			]);
 		}
 
 		if (result == null) {
@@ -389,6 +393,9 @@ const CookiesModal = {
 		m("header", m("h2", "Cookies")),
 		m("section", [
 			m("pre", "this.cookies = " + JSON.stringify(vnode.attrs.cookies, null, 2)),
+			m("p.note", { style: { marginTop: "2em" } }, "These cookies will be used for requests executed by proxy" +
+				" only. For requests that are executed without a proxy, please refer to the browser console. This is" +
+				" a browser-level security restriction."),
 			m(PageEnd),
 		]),
 		m("footer", [
@@ -413,23 +420,25 @@ const Table = {
 }
 
 const LinkButton = {
-	view: vnode => m(
-		"a",
-		{
-			class: "button" + (vnode.attrs.isActive ? " active" : ""),
-			href: vnode.attrs.href || "#",
-			target: "_blank",  // TODO: Set this to _blank *only* for external links.
-			onclick(event) {
-				if (event.target.getAttribute("href") === "#" || event.target.getAttribute("href") === "") {
-					event.preventDefault();
-				}
-				if (vnode.attrs.onclick) {
-					vnode.attrs.onclick(event);
-				}
+	view: vnode => {
+		return m(
+			"a",
+			{
+				class: "button" + (vnode.attrs.isActive ? " active" : ""),
+				href: vnode.attrs.href || "#",
+				target: "_blank",  // TODO: Set this to _blank *only* for external links.
+				onclick(event) {
+					if (event.target.getAttribute("href") === "#" || event.target.getAttribute("href") === "") {
+						event.preventDefault();
+					}
+					if (vnode.attrs.onclick) {
+						vnode.attrs.onclick(event);
+					}
+				},
 			},
-		},
-		vnode.children
-	)
+			vnode.children
+		);
+	}
 }
 
 function getContentTypeFromHeaders(headers: Headers | Map<string, string> | string[][]) {
