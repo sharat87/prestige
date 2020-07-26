@@ -187,6 +187,8 @@ export default class HttpSession {
 		};
 
 		const proxy = this.getProxyUrl({ method, url, headers, body });
+		// TODO: Let the timeout be set by the user.
+		const timeout = 5 * 60;  // Seconds.
 
 		if (proxy == null || proxy === "") {
 			options.method = method;
@@ -196,9 +198,8 @@ export default class HttpSession {
 				options.body = body;
 			}
 
-			console.log("Fetch", url, options);
+			// TODO: Use `m.request` instead of `fetch` because it supports timeout <https://mithril.js.org/request.html>.
 			const response = await fetch(url, options);
-			console.log("response", response);
 			return {
 				ok: true,
 				proxy: null,
@@ -229,6 +230,7 @@ export default class HttpSession {
 				url,
 				method,
 				headers: Array.from(headers.entries()),
+				timeout,
 				cookies: this.cookieJar,
 				body,
 			});
