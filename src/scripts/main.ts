@@ -341,9 +341,12 @@ function ResultPane() {
 		return rows.length > 0 ? m(Table, rows) : null;
 	}
 
-	function renderResponse(response) {
+	function renderResponse(response, proxy: null | string = null) {
 		const responseContentType = getContentTypeFromHeaders(response && response.headers);
 		const requestContentType = getContentTypeFromHeaders(response && response.request.headers);
+		const nothingMessageAttrs = {
+			extraMessage: proxy == null ? "This may be because a proxy was not used to run this request." : "",
+		};
 
 		return response && m("div.response", [
 			m(
@@ -356,12 +359,12 @@ function ResultPane() {
 			m("h3", "Body"),
 			m(CodeBlock, { text: response.body, spec: responseContentType }),
 			m("h3", "Headers"),
-			renderHeaders(response.headers) || m(NothingMessage),
+			renderHeaders(response.headers) || m(NothingMessage, nothingMessageAttrs),
 			m("h2", "Request"),
 			m("h3", "Body"),
 			m(CodeBlock, { text: response.request.body, spec: requestContentType }),
 			m("h3", "Headers"),
-			renderHeaders(response.request.headers) || m(NothingMessage),
+			renderHeaders(response.request.headers) || m(NothingMessage, nothingMessageAttrs),
 		]);
 	}
 }
