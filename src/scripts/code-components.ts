@@ -22,7 +22,7 @@ import {NothingMessage} from "./NothingMessage";
 export function Editor(initialVnode) {
 	let workspace: Workspace = initialVnode.attrs.workspace;
 	let codeMirror: null | CodeMirror.Editor = null;
-	const onExecute = initialVnode.attrs.onExecute;
+	const flashQueue: any[] = [];
 	initialVnode.attrs.workspaceBeacon?.on("run-again", onRunAgain);
 
 	return { view, oncreate, onremove };
@@ -33,7 +33,8 @@ export function Editor(initialVnode) {
 
 	function onRunAgain() {
 		if (codeMirror != null) {
-			initialVnode.attrs.onRunAgain(codeMirror);
+			workspace.runAgain(codeMirror);
+			doExecute();
 		}
 	}
 
@@ -48,8 +49,8 @@ export function Editor(initialVnode) {
 			gutters: ["prestige"],
 			value: workspace.getContent(),
 			extraKeys: {
-				"Ctrl-Enter": onExecute,
-				"Cmd-Enter": onExecute,
+				"Ctrl-Enter": doExecute,
+				"Cmd-Enter": doExecute,
 				"Cmd-F": "findPersistent",
 				"Cmd-/": "toggleComment",
 			},
@@ -67,6 +68,33 @@ export function Editor(initialVnode) {
 				codeMirror?.focus();
 			}
 		});
+	}
+
+	function doExecute() {
+		if (codeMirror == null) {
+			return;
+		}
+
+		if (codeMirror.somethingSelected()) {
+			alert("Running a selection is not supported yet.");
+			return;
+		}
+
+		workspace.execute(codeMirror, flashQueue);
+
+		const lines = codeMirror.getValue().split("\n");
+		const cursorLine = codeMirror.getCursor().line;
+
+		if (workspace.session != null) {
+			workspace.session.runTop(lines, cursorLine)
+				.finally(() => {
+					if (workspace.instance != null && workspace.session != null) {
+						workspace.instance.cookieJar = workspace.session.cookieJar;
+					}
+					workspace.saveInstance();
+					m.redraw();
+				});
+		}
 	}
 
 	function onChanges(codeMirror1) {
@@ -183,9 +211,8 @@ export function Editor(initialVnode) {
 		}, 0);
 	}
 
-	function view(vnode) {
-		const flashQueue = vnode.attrs.flashQueue;
-		if (codeMirror && flashQueue) {
+	function view() {
+		if (codeMirror != null) {
 			while (flashQueue.length > 0) {
 				onFlash({ detail: flashQueue.shift() })
 			}
@@ -196,7 +223,7 @@ export function Editor(initialVnode) {
 	}
 }
 
-export function CodeBlock(initialVnode) {
+export function CodeBlock() {
 	let codeMirror: null | CodeMirror.Editor = null;
 	return { view, oncreate };
 
@@ -214,7 +241,6 @@ export function CodeBlock(initialVnode) {
 	}
 
 	function view(vnode) {
-		console.log("Code block with text:", vnode.attrs.text)
 		const haveText = asString(vnode.attrs.text, vnode.attrs.spec) !== "";
 		if (codeMirror != null) {
 			codeMirror.setValue(asString(vnode.attrs.text, vnode.attrs.spec));

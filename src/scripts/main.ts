@@ -1,11 +1,12 @@
 import m from "mithril";
 import HttpSession from "./HttpSession";
-import {CodeBlock, Editor} from "./code-components";
+import { CodeBlock, Editor } from "./code-components";
 import OptionsModal from "./Options";
-import {loadInstance, saveInstance} from "./storage";
 import Beacon from "./Beacon";
 import Workspace from "./Workspace";
-import {NothingMessage} from "./NothingMessage";
+import { NothingMessage } from "./NothingMessage";
+import { LinkButton } from "./LinkButton";
+import { ChevronDown } from "./Icons";
 
 // Expected environment variables.
 declare var process: { env: { PRESTIGE_PROXY_URL: string } };
@@ -21,6 +22,8 @@ window.addEventListener("load", () => {
 function MainView() {
 	const client = new HttpSession(process.env.PRESTIGE_PROXY_URL);
 	const workspace = new Workspace();
+	workspace.session = client;
+	workspace.loadInstance("master");
 
 	enum VisiblePopup {
 		None,
@@ -48,7 +51,10 @@ function MainView() {
 						m(
 							LinkButton,
 							{ onclick: onCookiesToggle, isActive: visiblePopup === VisiblePopup.Cookies },
-							`Cookies (${client.cookieJar.size}) ▼`
+							[
+								`Cookies (${ client.cookieJar.size }) `,
+								m(ChevronDown),
+							]
 						),
 						m(
 							LinkButton,
@@ -63,8 +69,15 @@ function MainView() {
 					client,
 					workspace,
 				}),
-				visiblePopup === VisiblePopup.Options && m(OptionsModal, { doSave: onOptionsSave, doClose: onOptionsToggle }),
-				visiblePopup === VisiblePopup.Cookies && m(CookiesModal, { cookies: client.cookieJar, onClose: onCookiesToggle, onClear: onClearCookies }),
+				visiblePopup === VisiblePopup.Options && m(OptionsModal, {
+					doSave: onOptionsSave,
+					doClose: onOptionsToggle
+				}),
+				visiblePopup === VisiblePopup.Cookies && m(CookiesModal, {
+					cookies: client.cookieJar,
+					onClose: onCookiesToggle,
+					onClear: onClearCookies,
+				}),
 			]),
 		];
 	}
@@ -92,50 +105,22 @@ function MainView() {
 	}
 }
 
-function WorkspaceView(initialVnode) {
-	let { client, workspace } = initialVnode.attrs;
-
-	const instance = loadInstance("master") || {
-		text: "GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n",
-		cookieJar: {},
-	};
-
-	if (instance.cookieJar) {
-		client.cookieJar.update(instance.cookieJar);
-		m.redraw();
-	}
-
-	workspace.setContent(instance.text);
-	workspace.onContentChanged(doSave);
-
+function WorkspaceView() {
+	// TODO: Get rid of the `workspaceBeacon`.
 	const workspaceBeacon = new Beacon();
 
 	return { view };
 
 	function view(vnode) {
-		workspace = vnode.attrs.workspace;
+		const workspace = vnode.attrs.workspace;
 		return m(".er-pair", [
-			m(EditorPane, {
-				onExecute,
+			m(".editor-pane", m(Editor, { workspaceBeacon, workspace })),
+			m(ResultPane, {
+				client: workspace.session,
 				workspaceBeacon,
 				workspace,
 			}),
-			m(ResultPane, { client, workspaceBeacon }),
 		]);
-	}
-
-	function onExecute(lines, cursorLine) {
-		client.runTop(lines, cursorLine)
-			.finally(() => {
-				instance.cookieJar = client.cookieJar;
-				doSave();
-				m.redraw();
-			});
-	}
-
-	function doSave() {
-		instance.text = workspace.getContent();
-		saveInstance("master", instance);
 	}
 }
 
@@ -148,67 +133,6 @@ const Toolbar = {
 		// TODO: Can we use `vnode.children` instead of `vnode.attrs.peripherals`?
 		m(".peripherals", vnode.attrs.peripherals),
 	])
-}
-
-function EditorPane(initialVnode) {
-	// TODO: Merge this with the Editor component.
-	let { onExecute } = initialVnode.attrs;
-	let isCookiesPopupVisible = false;
-	const flashQueue: any[] = [];
-	let prevExecuteBookmark: null | CodeMirror.TextMarker = null;
-
-	return { view };
-
-	function view(vnode) {
-		onExecute = vnode.attrs.onExecute;
-		return m(".editor-pane", m(Editor, {
-			flashQueue,
-			onExecute: onExecuteCb,
-			workspaceBeacon: vnode.attrs.workspaceBeacon,
-			onRunAgain,
-			workspace: vnode.attrs.workspace,
-		}));
-	}
-
-	function onExecuteCb(codeMirror) {
-		if (codeMirror.somethingSelected()) {
-			alert("Running a selection is not supported yet.");
-		}
-
-		const lines = codeMirror.getValue().split("\n");
-		const cursorLine = codeMirror.getCursor().line;
-
-		prevExecuteBookmark?.clear();
-		prevExecuteBookmark = codeMirror.getDoc().setBookmark(codeMirror.getCursor());
-
-		let startLine = cursorLine;
-		while (startLine >= 0 && !lines[startLine].startsWith("###")) {
-			--startLine;
-		}
-
-		let endLine = cursorLine;
-		while (endLine <= lines.length && !lines[endLine].startsWith("###")) {
-			++endLine;
-		}
-
-		// TODO: Compute the page borders to apply flash correctly.
-		flashQueue.push({ start: startLine, end: endLine + 1 });
-
-		onExecute(lines, cursorLine);
-	}
-
-	function onRunAgain(codeMirror: CodeMirror.Editor) {
-		if (prevExecuteBookmark == null) {
-			return;
-		}
-		codeMirror.setCursor(prevExecuteBookmark.find() as any);
-		onExecuteCb(codeMirror);
-	}
-
-	function toggleCookiesPopup() {
-		isCookiesPopupVisible = !isCookiesPopupVisible;
-		m.redraw();
-	}
 }
 
 function ResultPane() {
@@ -234,7 +158,8 @@ function ResultPane() {
 				m(Toolbar),
 				m(".body", [
 					m("h2", "Error executing request"),
-					m("p.message", result.error.message),
+					result.error.title != null && m("h3", result.error.title),
+					m("pre.message", result.error.message),
 					result.error.stack && m("pre", result.error.stack),
 					result.request && [
 						m("h2", "Request details"),
@@ -291,8 +216,8 @@ function ResultPane() {
 			m(".body", [
 				m("ul.messages", [
 					history.length > 0 && m("li",
-						`Redirected ${history.length === 1 ? "once" : history.length + "times"}.` +
-							" Scroll down for more details."),
+						`Redirected ${ history.length === 1 ? "once" : history.length + "times" }.` +
+						" Scroll down for more details."),
 					m("li", [
 						"Finished in ",
 						m("b", m(IntervalDisplay, { ms: result.timeTaken })),
@@ -352,20 +277,73 @@ function ResultPane() {
 			m(
 				"h2",
 				{ class: "status s" + response.status.toString()[0] + "xx" },
-				`${response.status} ${response.statusText}`
+				`${ response.status } ${ response.statusText }`
 			),
 			m("pre.url", response.request.method + " " + response.url),
 			m("h2", "Response"),
-			m("h3", "Body"),
-			m(CodeBlock, { text: response.body, spec: responseContentType }),
+			m(RichDataViewer, { text: response.body, spec: responseContentType }),
 			m("h3", "Headers"),
 			renderHeaders(response.headers) || m(NothingMessage, nothingMessageAttrs),
 			m("h2", "Request"),
-			m("h3", "Body"),
-			m(CodeBlock, { text: response.request.body, spec: requestContentType }),
+			m(RichDataViewer, { text: response.request.body, spec: requestContentType }),
 			m("h3", "Headers"),
 			renderHeaders(response.request.headers) || m(NothingMessage, nothingMessageAttrs),
 		]);
+	}
+}
+
+function RichDataViewer() {
+	enum Tabs {
+		text,
+		svgSafe,
+		svgRaw,
+	}
+
+	let visibleTab = Tabs.text;
+
+	return { view };
+
+	function view(vnode) {
+		let { text, spec } = vnode.attrs;
+
+		if (text == null) {
+			text = "";
+		}
+
+		return [
+			m("h3", [
+				"Body ",
+				spec != null && m("small", ` (${ spec })`),
+			]),
+			text !== "" && m(".tab-bar", [
+				m(LinkButton, {
+					isActive: visibleTab === Tabs.text, onclick() {
+						visibleTab = Tabs.text
+					}
+				}, "Text"),
+				spec === "image/svg+xml" && [
+					m(LinkButton, {
+						isActive: visibleTab === Tabs.svgSafe, onclick() {
+							visibleTab = Tabs.svgSafe
+						}
+					}, "SVG Safe"),
+					m(LinkButton, {
+						isActive: visibleTab === Tabs.svgRaw, onclick() {
+							visibleTab = Tabs.svgRaw
+						}
+					}, "SVG Raw"),
+				],
+			]),
+			m("div",
+				{ style: { padding: 0, display: (text !== "" && visibleTab === Tabs.text) ? "" : "none" } },
+				m(CodeBlock, {
+					text,
+					spec,
+				})
+			),
+			visibleTab === Tabs.svgSafe && m("img", { src: "data:image/svg+xml;base64," + btoa(text) }),
+			visibleTab === Tabs.svgRaw && m.trust(text),
+		];
 	}
 }
 
@@ -420,28 +398,6 @@ const CookiesModal = {
 const Table = {
 	view: vnode => vnode.children && vnode.children.length > 0 &&
 		m(".table-box", m("table", m("tbody", vnode.children)))
-}
-
-const LinkButton = {
-	view: vnode => {
-		return m(
-			"a",
-			{
-				class: "button" + (vnode.attrs.isActive ? " active" : ""),
-				href: vnode.attrs.href || "#",
-				target: "_blank",  // TODO: Set this to _blank *only* for external links.
-				onclick(event) {
-					if (event.target.getAttribute("href") === "#" || event.target.getAttribute("href") === "") {
-						event.preventDefault();
-					}
-					if (vnode.attrs.onclick) {
-						vnode.attrs.onclick(event);
-					}
-				},
-			},
-			vnode.children
-		);
-	}
 }
 
 function getContentTypeFromHeaders(headers: Headers | Map<string, string> | string[][]) {

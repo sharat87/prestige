@@ -1,16 +1,17 @@
 * {
 	box-sizing: border-box;
+	transition: background-color .1s ease-out, color .1s ease-out;
 }
 
 html, body {
 	height: 100%;
 	--header-height: 30px;
 	--layout-border: 1px solid var(--seam-color);
-	--code-font-family: "DM Mono", monospace;
+	--code-font-family: "Fira Mono", monospace;
 }
 
 body {
-	font: 14px "Source Sans Pro", sans-serif;
+	font: 14px "Fira Sans", sans-serif;
 	margin: 0;
 	tab-size: 4;
 	background-color: var(--bg);
@@ -62,21 +63,40 @@ button {
 }
 
 a {
+	display: inline-block;
+	color: #08A;
+}
+
+a.link-button, button.link-button {
+	display: inline-block;
 	color: #08A;
 	text-decoration: underline;
+	padding: 6px 9px;
+	border: none;
+	background: none;
+	border-radius: 0;
 
-	&.button {
-		display: inline-block;
-		padding: 6px 9px;
+	&:hover {
+		background-color: #DEF;
+	}
 
-		&:hover {
-			background-color: #DEF;
-		}
+	&.active {
+		background-color: #08A;
+		color: white;
+		text-decoration: none;
+	}
+}
 
-		&.active {
-			background-color: #08A;
-			color: white;
-			text-decoration: none;
+.tab-bar {
+	border-bottom: 1px solid #08A;
+
+	.link-button {
+		border-radius: 6px 6px 0 0;
+		padding-top: 3px;
+		padding-bottom: $padding-top;
+
+		+ .link-button {
+			margin-left: 6px;
 		}
 	}
 }
@@ -124,6 +144,12 @@ main {
 			font-size: 1.5em;
 		}
 	}
+}
+
+.CodeMirror {
+	color: inherit;
+	font-family: var(--code-font-family);
+	line-height: 1.4em;
 }
 
 .er-pair {
@@ -212,14 +238,6 @@ main {
 	}
 }
 
-.editor-pane > .editor {
-	height: 100%;
-}
-
-.editor-pane .CodeMirror {
-	height: 100%;
-}
-
 .result-pane {
 	border-left: var(--layout-border);
 
@@ -238,7 +256,7 @@ main {
 		color: #622;
 
 		.message {
-			font-size: 1.2em;
+			font-size: 1.1em;
 		}
 
 		th, td {
@@ -255,14 +273,21 @@ main {
 		margin-top: 6px;
 	}
 
-	.response + .response {
-		border-top: 2px dashed #ACF;
-		margin-top: 1em;
-	}
+	.response {
+		+ .response {
+			border-top: 2px dashed #ACF;
+			margin-top: 1em;
+		}
 
-	.response > * {
-		padding-left: 6px;
-		padding-right: 6px;
+		> * {
+			padding-left: 6px;
+			padding-right: 6px;
+		}
+
+		img, svg {
+			max-height: 200px;
+			max-width: 100%;
+		}
 	}
 
 	.status {
@@ -283,28 +308,6 @@ main {
 	.status.s5xx {
 		color: var(--red-fg);
 		background-color: var(--red-bg);
-	}
-
-	pre {
-		overflow-x: auto;
-		margin: .5em 0 1em;
-		width: 100%;
-		background-color: rgba(0, 0, 0, .04);
-		//padding: 6px 6px 1em 6px; /* Some extra room for the macOS scrollbar at the bottom */
-		display: flex;
-		flex-direction: row;
-
-		.line-numbers {
-			text-align: right;
-			border-right: 1px solid rgba(0, 0, 0, .4);
-			padding: 3px;
-			opacity: .6;
-		}
-
-		> code {
-			flex-grow: 1;
-			padding: 3px 3px 1em 3px;
-		}
 	}
 
 	.code-block {
@@ -345,13 +348,10 @@ main {
 }
 
 .editor-pane div.CodeMirror {
+	height: 100%;
 	background: rgba(0, 0, 0, .02);
-	opacity: .8;
-	color: inherit;
-	font-family: var(--code-font-family);
-	z-index: 0;
-	line-height: 1.4em;
 	text-shadow: 1px 1px 2px rgba(0, 0, 0, .06);
+	z-index: 0;
 
 	.CodeMirror-code > div {
 		transition: background-color 400ms ease-out 0ms;
@@ -490,7 +490,7 @@ main {
 	margin: 6px 3px;
 }
 
-body:not([data-t]), body[data-t="default"] {
+body:not([data-t]), body[data-t=default] {
 	--fg: #333;
 	--bg: #FFF;
 	--selection-bg: #ADF;
@@ -503,19 +503,19 @@ body:not([data-t]), body[data-t="default"] {
 	--green-bg: tint($--green-fg, 95%);
 	--red-fg: #F40;
 	--red-bg: tint($--red-fg, 95%);
+}
 
-	&.dark {
-		--fg: #DDD;
-		--bg: #222;
-		--selection-bg: #357;
-		--seam-color: #444;
-		--gutter-bg: #292929;
-		--gutter-border: #333;
-		--js-bg: #322;
-		--activeline-bg: #234;
-		--green-fg: #2B3;
-		--green-bg: shade($--green-fg, 70%);
-		--red-fg: #F33;
-		--red-bg: shade($--red-fg, 70%);
-	}
+body[data-t=dark] {
+	--fg: #DDD;
+	--bg: #222;
+	--selection-bg: #357;
+	--seam-color: #444;
+	--gutter-bg: #292929;
+	--gutter-border: #333;
+	--js-bg: #322;
+	--activeline-bg: #234;
+	--green-fg: #2B3;
+	--green-bg: shade($--green-fg, 70%);
+	--red-fg: #F33;
+	--red-bg: shade($--red-fg, 70%);
 }

@@ -1,4 +1,4 @@
-interface Instance {
+export interface Instance {
 	text: string;
 	cookieJar;
 }

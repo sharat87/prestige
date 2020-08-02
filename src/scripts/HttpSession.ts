@@ -1,5 +1,4 @@
 import m from "mithril";
-// import msgpack from "msgpack-lite";
 import CookieJar from "./CookieJar";
 import {extractRequest} from "./Parser";
 import {isPromise} from "./utils";
@@ -31,6 +30,13 @@ interface FailureResult {
 	error: any,
 	request: any,
 	timeTaken?: number,
+}
+
+interface ExecuteResponse {
+	status: number,
+	statusText: string,
+	headers: string[][],
+	body: string,
 }
 
 export default class HttpSession {
@@ -198,8 +204,52 @@ export default class HttpSession {
 				options.body = body;
 			}
 
-			// TODO: Use `m.request` instead of `fetch` because it supports timeout <https://mithril.js.org/request.html>.
-			const response = await fetch(url, options);
+			const headersObject = {};
+			for (const [name, value] of headers) {
+				headersObject[name] = value;
+			}
+
+			const response = await m.request({
+				url,
+				method,
+				headers: headersObject,
+				body,
+				withCredentials: true,
+				serialize(data: any): any {
+					return data;
+				},
+				config(xhr: XMLHttpRequest, options: m.RequestOptions<ExecuteResponse>): XMLHttpRequest | void {
+					xhr.addEventListener("readystatechange", event => {
+						/* Use xhr.readyState to show progress.
+						0 	UNSENT 	Client has been created. open() not called yet.
+						1 	OPENED 	open() has been called.
+						2 	HEADERS_RECEIVED 	send() has been called, and headers and status are available.
+						3 	LOADING 	Downloading; responseText holds partial data.
+						4 	DONE 	The operation is complete.
+						 */
+					});
+				},
+				extract(xhr: XMLHttpRequest, options: m.RequestOptions<ExecuteResponse>): ExecuteResponse {
+					const lines: string[] = xhr.getAllResponseHeaders().trim().split(/[\r\n]+/);
+					const responseHeaders: string[][] = [];
+
+					for (const headerLine of lines) {
+						const parts = headerLine.split(":");
+						const name = parts.shift();
+						if (name != null) {
+							responseHeaders.push([name, parts.join(":").trim()]);
+						}
+					}
+
+					return {
+						status: xhr.status,
+						statusText: xhr.statusText,
+						headers: responseHeaders,
+						body: xhr.responseText,
+					};
+				},
+			});
+
 			return {
 				ok: true,
 				proxy: null,
@@ -208,8 +258,7 @@ export default class HttpSession {
 					statusText: response.statusText,
 					url,
 					headers: response.headers,
-					// body: msgpack.decode(Buffer.from(await response.arrayBuffer())),
-					body: await response.text(),
+					body: response.body,
 					request: {
 						url,
 						body: null,
@@ -226,17 +275,39 @@ export default class HttpSession {
 				"Content-Type": "application/json",
 				"Accept": "application/json",
 			});
+
+			const requestHeaders = Array.from(headers.entries());
 			options.body = JSON.stringify({
 				url,
 				method,
-				headers: Array.from(headers.entries()),
+				headers: requestHeaders,
 				timeout,
 				cookies: this.cookieJar,
 				body,
 			});
 
-			// const data = msgpack.decode(Buffer.from(await (await fetch(this.proxy, options)).arrayBuffer()));
-			const data = await (await fetch(proxy, options)).json();
+			const response = await fetch(proxy, options);
+
+			const textResponse = await response.text();
+			let data;
+
+			try {
+				data = JSON.parse(textResponse);
+			} catch (error) {
+				if (!(error instanceof SyntaxError)) {
+					throw error;
+				}
+				// The proxy server couldn't return a valid JSON, this is most likely due to a server error on the proxy.
+				data = {
+					ok: false,
+					proxy,
+					error: {
+						title: `Error parsing response from the proxy`,
+						message: textResponse,
+					},
+				};
+			}
+
 			data.proxy = proxy;
 
 			if (typeof data.ok === "undefined") {
@@ -257,7 +328,7 @@ export default class HttpSession {
 	}
 
 	getProxyUrl({ method, url, headers, body }) {
-		return url.includes("://localhost") ? null : this.proxy;
+		return this.proxy;  // url.includes("://localhost") ? null : this.proxy;
 	}
 
 	authHeader(username, password) {
@@ -274,19 +345,15 @@ export default class HttpSession {
 
 	emit(name, detail) {
 		const event = new CustomEvent(name, { detail });
-		const promises: Promise<any>[] = [];
+		const promises: Promise<void>[] = [];
 
-		const functions = this.handlers.get(name);
-		if (functions != null) {
-			for (const fn of functions) {
-				const value = fn(event);
-				if (isPromise(value)) {
-					promises.push(value);
-				}
+		for (const fn of this.handlers.get(name) || []) {
+			const value = fn(event);
+			if (isPromise(value)) {
+				promises.push(value);
 			}
 		}
 
-		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises))
-			.finally(m.redraw);
+		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises)).finally(m.redraw);
 	}
 }
