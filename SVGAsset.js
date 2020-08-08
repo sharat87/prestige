@@ -12,11 +12,9 @@ module.exports = class SVGAsset extends Asset {
 
 	async generate() {
 		this.addDependency("mithril");
-		return [
-			{
-				type: "js",
-				value: `const icon = require("mithril").trust(${JSON.stringify(this.contents)}); module.exports = { view: () => icon };`,
-			},
-		];
+		const value = `
+		const content = ${JSON.stringify(this.contents.trim())}, m = require("mithril");
+		module.exports = { content, component: { view: () => m("span.icon", {role: "image"}, m.trust(content)) } };`;
+		return [{type: this.type, value}];
 	}
 }

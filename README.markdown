@@ -1,6 +1,6 @@
 # Prestige <sup>&alpha;</sup>
 
-**Just an HTTP client, by Shrikant. Available at [prestigemad.com](https://prestigemad.com)
+**Just an HTTP client, by [@sharat87](https://sharats.me). Available at [prestigemad.com](https://prestigemad.com)
 ([Why that domain?](#why-the-domain)).**
 
 > Under the abstractions, it's all just stardust interacting with text.

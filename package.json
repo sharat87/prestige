@@ -27,9 +27,6 @@
 			"\\.(css|less)$": "identity-obj-proxy"
 		}
 	},
-	"alias": {
-		"icons": "tabler-icons/icons"
-	},
 	"devDependencies": {
 		"@babel/core": "^7.10.4",
 		"@types/codemirror": "0.0.96",
@@ -47,7 +44,7 @@
 		"mithril": "^2.0.4",
 		"parcel-bundler": "^1.12.4",
 		"pug": "^3.0.0",
-		"tabler-icons": "^1.11.0",
+		"remixicon": "^2.5.0",
 		"ts-jest": "^26.1.1",
 		"tslint": "^6.1.2",
 		"typescript": "^3.9.6"

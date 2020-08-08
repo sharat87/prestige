@@ -4,6 +4,8 @@ import { Instance, loadInstance, saveInstance } from "./storage";
 import m from "mithril";
 import CodeMirror from "codemirror";
 import { BlockType, computeStructure } from "./Parser";
+import PlusSVG from "remixicon/icons/System/add-circle-line.svg";
+import BracesSVG from "remixicon/icons/Development/braces-line.svg";
 
 // Expected environment variables.
 declare var process: { env: { PRESTIGE_PROXY_URL: string } };
@@ -16,6 +18,7 @@ interface Storage {
 export default class Workspace {
 	codeMirror: null | CodeMirror.Editor;
 	private _content: string;
+	private _lines: null | string[];
 	storage: null | Storage;
 	private prevExecuteBookmark: null | CodeMirror.TextMarker;
 	private readonly contentChanged: EventEmitter<Workspace, string>;
@@ -27,6 +30,7 @@ export default class Workspace {
 	constructor() {
 		this.codeMirror = null;
 		this._content = "";
+		this._lines = null;
 		this.storage = null;
 		this.prevExecuteBookmark = null;
 		this.contentChanged = new EventEmitter("contentChanged");
@@ -86,21 +90,21 @@ export default class Workspace {
 			},
 		});
 
-		this.updateGutter();
-		this.updateLineBackgrounds();
+		this.updateEditorDisplay();
 
 		this.codeMirror.on("changes", () => {
+			this._lines = null;
 			this.saveInstance();
-			this.updateGutter();
-			this.updateLineBackgrounds();
+			this.updateEditorDisplay();
 		});
 	}
 
-	getContent() {
+	getContent(): string {
 		return this.codeMirror ? this.codeMirror.getValue() : this._content;
 	}
 
-	setContent(content) {
+	setContent(content): void {
+		this._lines = null;
 		if (this.codeMirror == null) {
 			this._content = content;
 		} else {
@@ -108,49 +112,34 @@ export default class Workspace {
 		}
 	}
 
-	updateLineBackgrounds() {
-		if (this.codeMirror == null) {
-			return;
+	get lines(): string[] {
+		if (this._lines == null) {
+			this._lines = this.getContent().split("\n");
 		}
 
-		const lines = this.getContent().split("\n");
-
-		let inJs = false;
-		for (const [i, line] of lines.entries()) {
-			if (line.startsWith("### javascript")) {
-				inJs = true;
-
-			} else if (line.startsWith("###")) {
-				inJs = false;
-
-			}
-
-			if (inJs) {
-				this.codeMirror.addLineClass(i, "background", "line-javascript");
-
-			} else {
-				this.codeMirror.removeLineClass(i, "background", "line-javascript");
-
-			}
-		}
+		return this._lines;
 	}
 
-	updateGutter() {
+	/**
+	 * Update gutter, widgets, highlights etc. of the CodeMirror editor. Usually called when the contents of the editor
+	 * change.
+	 */
+	updateEditorDisplay() {
 		if (this.codeMirror == null) {
 			return;
 		}
 
 		this.codeMirror.clearGutter("prestige");
 
-		const lines: string[] = this.getContent().split("\n");
+		const lines: string[] = this.lines;
 		const structure = computeStructure(lines);
 
 		for (const { start, end, type } of structure) {
 			if (type === BlockType.PAGE && lines[start].startsWith("###")) {
 				const el = document.createElement("span");
-				el.innerText = "+";
+				el.classList.add("icon");
+				el.innerHTML = PlusSVG.content;
 				el.style.color = "green";
-				el.style.fontWeight = "bold";
 				el.style.cursor = "pointer";
 				el.title = "Insert new request here.";
 				el.dataset.lineNum = start.toString();
@@ -163,7 +152,8 @@ export default class Workspace {
 					const pretty = JSON.stringify(JSON.parse(pageContent), null, 2);
 					if (pageContent !== pretty) {
 						const el = document.createElement("span");
-						el.innerText = "P";
+						el.classList.add("icon");
+						el.innerHTML = BracesSVG.content;
 						el.style.backgroundColor = "#09F";
 						el.style.color = "white";
 						el.style.cursor = "pointer";
@@ -182,10 +172,30 @@ export default class Workspace {
 
 			}
 		}
+
+		let inJs = false;
+		for (const [i, line] of lines.entries()) {
+			// TODO: Use computed structure instead of tying to parse for javascript blocks.
+			if (line.startsWith("### javascript")) {
+				inJs = true;
+
+			} else if (line.startsWith("###")) {
+				inJs = false;
+
+			}
+
+			if (inJs) {
+				this.codeMirror.addLineClass(i, "background", "line-javascript");
+
+			} else {
+				this.codeMirror.removeLineClass(i, "background", "line-javascript");
+
+			}
+		}
 	}
 
 	onNewClicked(event) {
-		const lineNum = parseInt(event.target.dataset.lineNum, 10);
+		const lineNum = parseInt(event.currentTarget.dataset.lineNum, 10);
 		this.codeMirror?.replaceRange(
 			"###\n\nGET http://httpbin.org/get?name=sherlock\n\n",
 			{ line: lineNum, ch: 0 }
@@ -194,9 +204,9 @@ export default class Workspace {
 
 	onPrettifyClicked(event) {
 		this.codeMirror?.replaceRange(
-			event.target.dataset.pretty + "\n",
-			{ line: parseInt(event.target.dataset.start, 10), ch: 0 },
-			{ line: 1 + parseInt(event.target.dataset.end, 10), ch: 0 }
+			event.currentTarget.dataset.pretty + "\n",
+			{ line: parseInt(event.currentTarget.dataset.start, 10), ch: 0 },
+			{ line: 1 + parseInt(event.currentTarget.dataset.end, 10), ch: 0 }
 		)
 	}
 
@@ -214,7 +224,7 @@ export default class Workspace {
 			return;
 		}
 
-		const lines = this.getContent().split("\n");
+		const lines = this.lines;
 		const cursorLine = this.codeMirror.getCursor().line;
 
 		this.prevExecuteBookmark?.clear();

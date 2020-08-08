@@ -1,6 +1,6 @@
-import Mithril from "mithril";
+import m from "mithril";
 
 declare module "*.svg" {
-	const content: Mithril.Component;
-	export default content;
+	const content: string;
+	const component: m.Component;
 }
