@@ -1,15 +1,10 @@
 import m from "mithril";
-import HttpSession from "./HttpSession";
 import { CodeBlock, Editor } from "./code-components";
 import OptionsModal from "./Options";
-import Beacon from "./Beacon";
 import Workspace from "./Workspace";
 import { NothingMessage } from "./NothingMessage";
 import { LinkButton } from "./LinkButton";
-import { ChevronDown } from "./Icons";
-
-// Expected environment variables.
-declare var process: { env: { PRESTIGE_PROXY_URL: string } };
+import { ChevronDown, ExternalLink } from "./Icons";
 
 window.addEventListener("load", () => {
 	const root = document.createElement("div");
@@ -20,10 +15,14 @@ window.addEventListener("load", () => {
 });
 
 function MainView() {
-	const client = new HttpSession(process.env.PRESTIGE_PROXY_URL);
 	const workspace = new Workspace();
-	workspace.session = client;
 	workspace.loadInstance("master");
+
+	document.addEventListener("keydown", event => {
+		if (event.key === "Escape") {
+			workspace.codeMirror?.focus();
+		}
+	});
 
 	enum VisiblePopup {
 		None,
@@ -41,40 +40,34 @@ function MainView() {
 				m("header", [
 					m("div", [
 						m("h1", "Prestige"),
-						m("span", { style: { "margin-left": "1em" } }, m("em", "Just an HTTP client by Shrikant.")),
+						m("span", { style: { marginLeft: "1em" } }, m("em", "Just an HTTP client by Shrikant.")),
 					]),
 					m("div", [
 						m(
 							LinkButton,
-							"Doc: master ▼"
+							["Doc: master", m(ChevronDown)]
 						),
 						m(
 							LinkButton,
 							{ onclick: onCookiesToggle, isActive: visiblePopup === VisiblePopup.Cookies },
-							[
-								`Cookies (${ client.cookieJar.size }) `,
-								m(ChevronDown),
-							]
+							[`Cookies (${ workspace.cookieJar.size }) `, m(ChevronDown)]
 						),
 						m(
 							LinkButton,
 							{ onclick: onOptionsToggle, isActive: visiblePopup === VisiblePopup.Options },
-							"Options ▼"
+							["Options", m(ChevronDown)]
 						),
-						m(LinkButton, { href: "help.html" }, "Help"),
-						m(LinkButton, { href: "https://github.com/sharat87/prestige" }, "GitHub"),
+						m(LinkButton, { href: "help.html" }, ["Help", m(ExternalLink)]),
+						m(LinkButton, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
 					]),
 				]),
-				m(WorkspaceView, {
-					client,
-					workspace,
-				}),
+				m(WorkspaceView, { workspace }),
 				visiblePopup === VisiblePopup.Options && m(OptionsModal, {
 					doSave: onOptionsSave,
-					doClose: onOptionsToggle
+					doClose: onOptionsToggle,
 				}),
 				visiblePopup === VisiblePopup.Cookies && m(CookiesModal, {
-					cookies: client.cookieJar,
+					cookies: workspace.cookieJar,
 					onClose: onCookiesToggle,
 					onClear: onClearCookies,
 				}),
@@ -82,16 +75,13 @@ function MainView() {
 		];
 	}
 
-	function onCookiesToggle(event) {
-		if (event) {
-			event.preventDefault();
-		}
+	function onCookiesToggle() {
 		visiblePopup = visiblePopup === VisiblePopup.Cookies ? VisiblePopup.None : VisiblePopup.Cookies;
 		m.redraw();
 	}
 
 	function onClearCookies() {
-		client.cookieJar.clear();
+		workspace.cookieJar.clear();
 	}
 
 	function onOptionsToggle() {
@@ -100,26 +90,19 @@ function MainView() {
 	}
 
 	function onOptionsSave() {
-		console.warn("WIP Save & apply options");
+		alert("WIP Save & apply options");
 		m.redraw();
 	}
 }
 
 function WorkspaceView() {
-	// TODO: Get rid of the `workspaceBeacon`.
-	const workspaceBeacon = new Beacon();
-
 	return { view };
 
 	function view(vnode) {
 		const workspace = vnode.attrs.workspace;
 		return m(".er-pair", [
-			m(".editor-pane", m(Editor, { workspaceBeacon, workspace })),
-			m(ResultPane, {
-				client: workspace.session,
-				workspaceBeacon,
-				workspace,
-			}),
+			m(".editor-pane", m(Editor, { workspace })),
+			m(ResultPane, { workspace }),
 		]);
 	}
 }
@@ -133,13 +116,14 @@ const Toolbar = {
 		// TODO: Can we use `vnode.children` instead of `vnode.attrs.peripherals`?
 		m(".peripherals", vnode.attrs.peripherals),
 	])
-}
+};
 
 function ResultPane() {
 	return { view };
 
 	function view(vnode) {
-		const { result, isLoading } = vnode.attrs.client;
+		const workspace = vnode.attrs.workspace;
+		const { result, isLoading } = workspace.session;
 
 		if (isLoading) {
 			return m(".result-pane.loading", [
@@ -201,17 +185,7 @@ function ResultPane() {
 
 		return m(".result-pane", [
 			m(Toolbar, {
-				left: [
-					m(
-						LinkButton,
-						{
-							onclick() {
-								vnode.attrs.workspaceBeacon?.do("run-again");
-							},
-						},
-						"Run Again"
-					),
-				],
+				left: m(LinkButton, { onclick: workspace.runAgain }, "Run Again"),
 			}),
 			m(".body", [
 				m("ul.messages", [
@@ -304,7 +278,8 @@ function RichDataViewer() {
 	return { view };
 
 	function view(vnode) {
-		let { text, spec } = vnode.attrs;
+		let { text } = vnode.attrs;
+		const { spec } = vnode.attrs;
 
 		if (text == null) {
 			text = "";
@@ -359,7 +334,7 @@ const IntervalDisplay = {
 
 		}
 	}
-}
+};
 
 const PageEnd = {
 	view: () => m(
@@ -367,7 +342,7 @@ const PageEnd = {
 		{ style: { margin: "2em 0 3em", textAlign: "center", fontSize: "2em" } },
 		"❦"
 	)
-}
+};
 
 const CookiesModal = {
 	view: vnode => m(".modal", [
@@ -393,12 +368,12 @@ const CookiesModal = {
 			]),
 		]),
 	])
-}
+};
 
 const Table = {
 	view: vnode => vnode.children && vnode.children.length > 0 &&
 		m(".table-box", m("table", m("tbody", vnode.children)))
-}
+};
 
 function getContentTypeFromHeaders(headers: Headers | Map<string, string> | string[][]) {
 	if (headers == null) {

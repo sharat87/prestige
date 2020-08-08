@@ -9,7 +9,4 @@
 /.cache
 /coverage
 
-/.env.local
-/.env.*.local
-
 /yarn-error.log

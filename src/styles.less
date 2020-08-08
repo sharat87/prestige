@@ -69,7 +69,8 @@ a {
 
 a.link-button, button.link-button {
 	display: inline-block;
-	color: #08A;
+	color: var(--fg);
+	--fg: #08A;
 	text-decoration: underline;
 	padding: 6px 9px;
 	border: none;
@@ -82,9 +83,16 @@ a.link-button, button.link-button {
 
 	&.active {
 		background-color: #08A;
-		color: white;
+		--fg: white;
 		text-decoration: none;
 	}
+}
+
+.icon svg, .icon {
+	vertical-align: middle;
+	width: 2ch;
+	height: 2ch;
+	margin-left: 3px;
 }
 
 .tab-bar {
@@ -354,7 +362,7 @@ main {
 	z-index: 0;
 
 	.CodeMirror-code > div {
-		transition: background-color 400ms ease-out 0ms;
+		transition: background-color 300ms ease-out 0ms;
 	}
 
 	.flash {

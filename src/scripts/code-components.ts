@@ -15,210 +15,22 @@ import "codemirror/addon/comment/comment";
 import "codemirror/mode/javascript/javascript";
 import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
-import {BlockType, computeStructure} from "./Parser";
-import Workspace from "./Workspace";
-import {NothingMessage} from "./NothingMessage";
+import { NothingMessage } from "./NothingMessage";
 
-export function Editor(initialVnode) {
-	let workspace: Workspace = initialVnode.attrs.workspace;
-	let codeMirror: null | CodeMirror.Editor = null;
-	const flashQueue: any[] = [];
-	initialVnode.attrs.workspaceBeacon?.on("run-again", onRunAgain);
-
-	return { view, oncreate, onremove };
-
-	function onremove(vnode) {
-		vnode.attrs.workspaceBeacon?.off("run-again", onRunAgain);
-	}
-
-	function onRunAgain() {
-		if (codeMirror != null) {
-			workspace.runAgain(codeMirror);
-			doExecute();
-		}
-	}
+export function Editor() {
+	return { view, oncreate };
 
 	function oncreate(vnode) {
-		codeMirror = CodeMirror(vnode.dom, {
-			mode: "prestige",
-			lineNumbers: true,
-			matchBrackets: {},
-			autofocus: true,
-			autoCloseBrackets: true,
-			styleActiveLine: true,
-			gutters: ["prestige"],
-			value: workspace.getContent(),
-			extraKeys: {
-				"Ctrl-Enter": doExecute,
-				"Cmd-Enter": doExecute,
-				"Cmd-F": "findPersistent",
-				"Cmd-/": "toggleComment",
-			},
-		});
-
-		codeMirror.on("changes", onChanges);
-
-		updateGutter(codeMirror);
-		updateLineBackgrounds(codeMirror);
-
-		workspace = vnode.attrs.workspace;
-
-		document.addEventListener("keydown", event => {
-			if (event.key === "Escape") {
-				codeMirror?.focus();
-			}
-		});
-	}
-
-	function doExecute() {
-		if (codeMirror == null) {
-			return;
-		}
-
-		if (codeMirror.somethingSelected()) {
-			alert("Running a selection is not supported yet.");
-			return;
-		}
-
-		workspace.execute(codeMirror, flashQueue);
-
-		const lines = codeMirror.getValue().split("\n");
-		const cursorLine = codeMirror.getCursor().line;
-
-		if (workspace.session != null) {
-			workspace.session.runTop(lines, cursorLine)
-				.finally(() => {
-					if (workspace.instance != null && workspace.session != null) {
-						workspace.instance.cookieJar = workspace.session.cookieJar;
-					}
-					workspace.saveInstance();
-					m.redraw();
-				});
-		}
-	}
-
-	function onChanges(codeMirror1) {
-		workspace.setContent(codeMirror1.getValue());
-		updateGutter(codeMirror1);
-		updateLineBackgrounds(codeMirror1);
-	}
-
-	function updateGutter(codeMirror1) {
-		const doc = codeMirror1.getDoc();
-		doc.clearGutter("prestige");
-
-		const lines: string[] = codeMirror1.getValue().split("\n");
-		const structure = computeStructure(lines);
-
-		for (const {start, end, type} of structure) {
-			if (type === BlockType.PAGE && lines[start].startsWith("###")) {
-				const el = document.createElement("span");
-				el.innerText = "+";
-				el.style.color = "green";
-				el.style.fontWeight = "bold";
-				el.style.cursor = "pointer";
-				el.title = "Insert new request here.";
-				el.dataset.lineNum = start.toString();
-				el.addEventListener("click", onNewClicked);
-				doc.setGutterMarker(start, "prestige", el);
-
-			} else if (type === BlockType.BODY && lines[start].startsWith("{")) {
-				const pageContent = lines.slice(start, end + 1).join("\n");
-				try {
-					const pretty = JSON.stringify(JSON.parse(pageContent), null, 2);
-					if (pageContent !== pretty) {
-						const el = document.createElement("span");
-						el.innerText = "P";
-						el.style.backgroundColor = "#09F";
-						el.style.color = "white";
-						el.style.cursor = "pointer";
-						el.title = "Prettify JSON body.";
-						el.dataset.start = start.toString();
-						el.dataset.end = end.toString();
-						el.dataset.pretty = pretty;
-						el.addEventListener("click", onPrettifyClicked);
-						doc.setGutterMarker(start, "prestige", el);
-					}
-
-				} catch (e) {
-					console.error("Error adding prettify button on line " + start, e);
-
-				}
-
-			}
-		}
-	}
-
-	function updateLineBackgrounds(codeMirror1) {
-		const lines = codeMirror1.getValue().split("\n");
-
-		let inJs = false;
-		for (const [i, line] of lines.entries()) {
-			if (line.startsWith("### javascript")) {
-				inJs = true;
-
-			} else if (line.startsWith("###")) {
-				inJs = false;
-
-			}
-
-			if (inJs) {
-				codeMirror1.addLineClass(i, "background", "line-javascript");
-
-			} else {
-				codeMirror1.removeLineClass(i, "background", "line-javascript");
-
-			}
-		}
-	}
-
-	function onNewClicked(event) {
-		const lineNum = parseInt(event.target.dataset.lineNum, 10);
-		codeMirror?.replaceRange(
-			"###\n\nGET http://httpbin.org/get?name=sherlock\n\n",
-			{ line: lineNum, ch: 0 }
-		);
-	}
-
-	function onPrettifyClicked(event) {
-		codeMirror?.replaceRange(
-			event.target.dataset.pretty + "\n",
-			{ line: parseInt(event.target.dataset.start, 10), ch: 0 },
-			{ line: 1 + parseInt(event.target.dataset.end, 10), ch: 0 }
-		)
-	}
-
-	function onFlash(event: CustomEvent | { detail: { start: number, end: number } }) {
-		if (codeMirror == null) {
-			return;
-		}
-
-		const doc = codeMirror.getDoc() as any;
-		const { start, end } = event.detail;
-
-		for (let i = start; i < end; ++i) {
-			doc.addLineClass(i, "line", "flash");
-		}
-
-		clearFlash(doc, start, end);
-	}
-
-	function clearFlash(doc, start, end) {
-		setTimeout(() => {
-			for (let i = start; i < end; ++i) {
-				doc.removeLineClass(i, "line", "flash");
-			}
-		}, 0);
+		this.workspace = vnode.attrs.workspace;
+		this.workspace.initCodeMirror(vnode.dom);
 	}
 
 	function view() {
-		if (codeMirror != null) {
-			while (flashQueue.length > 0) {
-				onFlash({ detail: flashQueue.shift() })
-			}
+		if (this.workspace != null) {
+			this.workspace.doFlashes();
+			this.workspace.codeMirror?.refresh();
 		}
 
-		codeMirror?.refresh();
 		return m(".body");
 	}
 }
@@ -267,7 +79,7 @@ interface PrestigeState {
 	bodyState: any;
 }
 
-CodeMirror.defineMode("prestige", (config, modeOptions): CodeMirror.Mode<PrestigeState> => {
+CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<PrestigeState> => {
 	const jsMode = CodeMirror.getMode(config, "javascript");
 	const jsonMode = CodeMirror.getMode(config, { name: "javascript", json: true });
 
@@ -293,8 +105,8 @@ CodeMirror.defineMode("prestige", (config, modeOptions): CodeMirror.Mode<Prestig
 		return {
 			context: state.context,
 			bodyJustStarted: state.bodyJustStarted,
-			jsState: state.jsState === null ? null : CodeMirror.copyState(jsMode, state.jsState),
-			bodyState: state.bodyState === null ? null : CodeMirror.copyState(jsMode, state.bodyState),
+			jsState: state.jsState === null ? null : (CodeMirror as any).copyState(jsMode, state.jsState),
+			bodyState: state.bodyState === null ? null : (CodeMirror as any).copyState(jsMode, state.bodyState),
 		}
 	}
 
@@ -329,7 +141,7 @@ CodeMirror.defineMode("prestige", (config, modeOptions): CodeMirror.Mode<Prestig
 			if (state.jsState === null) {
 				console.log("incorrect state", stream.current());
 			}
-			return jsMode.token(stream, state.jsState);
+			return jsMode.token ? jsMode.token(stream, state.jsState) : "error";
 		}
 
 		if (state.context === null) {
@@ -348,7 +160,7 @@ CodeMirror.defineMode("prestige", (config, modeOptions): CodeMirror.Mode<Prestig
 				}
 			}
 			if (state.bodyState) {
-				return jsonMode.token(stream, state.bodyState);
+				return jsonMode.token ? jsonMode.token(stream, state.bodyState) : "error";
 			} else {
 				stream.skipToEnd();
 				return "string";

@@ -15,10 +15,8 @@
 		"last 2 Safari versions"
 	],
 	"scripts": {
-		"build": "parcel build --no-cache --no-autoinstall --no-source-maps --detailed-report 20 src/index.pug src/help.pug",
-		"prebuild": "rm -rf .cache dist",
-		"start": "parcel serve --port 3040 --no-autoinstall src/index.pug src/help.pug",
-		"prestart": "rm -rf .cache dist",
+		"build": "node manage.js build",
+		"start": "node manage.js serve",
 		"lint": "tslint src/scripts/*.ts src/tests/*.ts",
 		"lint_fix": "tslint --fix src/scripts/*.ts src/tests/*.ts",
 		"test": "jest"
@@ -28,6 +26,9 @@
 		"moduleNameMapper": {
 			"\\.(css|less)$": "identity-obj-proxy"
 		}
+	},
+	"alias": {
+		"icons": "tabler-icons/icons"
 	},
 	"devDependencies": {
 		"@babel/core": "^7.10.4",
@@ -46,6 +47,7 @@
 		"mithril": "^2.0.4",
 		"parcel-bundler": "^1.12.4",
 		"pug": "^3.0.0",
+		"tabler-icons": "^1.11.0",
 		"ts-jest": "^26.1.1",
 		"tslint": "^6.1.2",
 		"typescript": "^3.9.6"

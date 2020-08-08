@@ -1,7 +1,7 @@
 import m from "mithril";
 import CookieJar from "./CookieJar";
-import {extractRequest} from "./Parser";
-import {isPromise} from "./utils";
+import { extractRequest } from "./Parser";
+import { isPromise } from "./utils";
 
 interface Cookie {
 	domain: string,
@@ -111,6 +111,7 @@ export default class HttpSession {
 		this.handlers.clear();
 		this.data = {};
 
+		// TODO: Use a separate context type and object, instead of `this`.
 		return extractRequest(lines, cursorLine, this)
 			.then(async (req) => {
 				request = req;
@@ -218,7 +219,7 @@ export default class HttpSession {
 				serialize(data: any): any {
 					return data;
 				},
-				config(xhr: XMLHttpRequest, options: m.RequestOptions<ExecuteResponse>): XMLHttpRequest | void {
+				config(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): XMLHttpRequest | void {
 					xhr.addEventListener("readystatechange", event => {
 						/* Use xhr.readyState to show progress.
 						0 	UNSENT 	Client has been created. open() not called yet.
@@ -229,7 +230,7 @@ export default class HttpSession {
 						 */
 					});
 				},
-				extract(xhr: XMLHttpRequest, options: m.RequestOptions<ExecuteResponse>): ExecuteResponse {
+				extract(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): ExecuteResponse {
 					const lines: string[] = xhr.getAllResponseHeaders().trim().split(/[\r\n]+/);
 					const responseHeaders: string[][] = [];
 
@@ -269,7 +270,7 @@ export default class HttpSession {
 				cookies: [],
 			};
 
-		} else  {
+		} else {
 			options.method = "POST";
 			options.headers = new Headers({
 				"Content-Type": "application/json",
@@ -327,7 +328,7 @@ export default class HttpSession {
 		}
 	}
 
-	getProxyUrl({ method, url, headers, body }) {
+	getProxyUrl({ /*method, url, headers, body*/ }) {
 		return this.proxy;  // url.includes("://localhost") ? null : this.proxy;
 	}
 

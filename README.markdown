@@ -49,7 +49,7 @@ More: <https://github.com/marmelab/awesome-rest>.
 
 Selectable sessions support like <https://httpie.org/>?
 
-TODO: Also support using <https://cors-anywhere.herokuapp.com/> as a proxy?
+Also support proxies from <https://nordicapis.com/10-free-to-use-cors-proxies/> to execute CORS requests?
 
 ## Some public APIs play with
 

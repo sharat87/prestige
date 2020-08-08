@@ -1,6 +1,6 @@
 export class EventEmitter<TargetType, DetailType> {
     private readonly type: string;
-    private readonly fns: Set<Function>;
+    private readonly fns: Set<(CustomEvent) => void>;
 
     constructor(type) {
         this.type = type;

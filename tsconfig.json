@@ -19,6 +19,7 @@
 		"sourceMap": true
 	},
 	"include": [
-		"src/scripts/*"
+		"src/scripts/*",
+		"src/custom.d.ts"
 	]
 }
