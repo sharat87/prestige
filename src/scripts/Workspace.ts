@@ -1,10 +1,8 @@
-import { EventEmitter } from "./EventEmitter";
 import HttpSession from "./HttpSession";
 import { Instance, loadInstance, saveInstance } from "./storage";
 import m from "mithril";
 import CodeMirror from "codemirror";
 import { BlockType, computeStructure } from "./Parser";
-import PlusSVG from "remixicon/icons/System/add-circle-line.svg";
 import BracesSVG from "remixicon/icons/Development/braces-line.svg";
 
 // Expected environment variables.
@@ -12,6 +10,7 @@ declare var process: { env: { PRESTIGE_PROXY_URL: string } };
 
 interface Storage {
 	save(name: string, data: object): void;
+
 	load(name: string): object;
 }
 
@@ -21,11 +20,11 @@ export default class Workspace {
 	private _lines: null | string[];
 	storage: null | Storage;
 	private prevExecuteBookmark: null | CodeMirror.TextMarker;
-	private readonly contentChanged: EventEmitter<Workspace, string>;
 	private session: HttpSession;
 	instance: null | Instance;
 	instanceName: null | string;
 	private flashQueue: any[];
+	private widgetMarks: CodeMirror.TextMarker[];
 
 	constructor() {
 		this.codeMirror = null;
@@ -33,9 +32,9 @@ export default class Workspace {
 		this._lines = null;
 		this.storage = null;
 		this.prevExecuteBookmark = null;
-		this.contentChanged = new EventEmitter("contentChanged");
 		this.session = new HttpSession(process.env.PRESTIGE_PROXY_URL);
 		this.flashQueue = [];
+		this.widgetMarks = [];
 
 		this.runAgain = this.runAgain.bind(this);
 		this.doExecute = this.doExecute.bind(this);
@@ -134,17 +133,26 @@ export default class Workspace {
 		const lines: string[] = this.lines;
 		const structure = computeStructure(lines);
 
+		for (const mark of this.widgetMarks.splice(0, this.widgetMarks.length)) {
+			mark.clear();
+		}
+
 		for (const { start, end, type } of structure) {
 			if (type === BlockType.PAGE && lines[start].startsWith("###")) {
 				const el = document.createElement("span");
-				el.classList.add("icon");
-				el.innerHTML = PlusSVG.content;
-				el.style.color = "green";
+				el.classList.add("icon", "add-widget");
+				el.innerHTML = "+new";
 				el.style.cursor = "pointer";
+				el.style.marginLeft = "1.5ch";
+				el.style.color = "green";
+				el.style.textDecoration = "underline";
 				el.title = "Insert new request here.";
 				el.dataset.lineNum = start.toString();
 				el.addEventListener("click", this.onNewClicked);
-				this.codeMirror.setGutterMarker(start, "prestige", el);
+				this.widgetMarks.push(this.codeMirror.setBookmark(
+					{ line: start, ch: lines[start].length },
+					{ widget: el, insertLeft: true }
+				));
 
 			} else if (type === BlockType.BODY && lines[start].startsWith("{")) {
 				const pageContent = lines.slice(start, end + 1).join("\n");
@@ -200,6 +208,8 @@ export default class Workspace {
 			"###\n\nGET http://httpbin.org/get?name=sherlock\n\n",
 			{ line: lineNum, ch: 0 }
 		);
+		this.codeMirror?.setCursor(lineNum + 2, 0);
+		this.codeMirror?.focus();
 	}
 
 	onPrettifyClicked(event) {

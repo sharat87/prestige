@@ -16,10 +16,7 @@ export class EventEmitter<TargetType, DetailType> {
     }
 
     emit({target, detail}: { target: TargetType, detail: DetailType }) {
-        const event = new CustomEvent(this.type, {
-            target,
-            detail,
-        });
+        const event = new CustomEvent(this.type, { detail });
         for (const fn of this.fns) {
             fn(event);
         }

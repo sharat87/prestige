@@ -3,6 +3,7 @@
 		"target": "ES6",
 		"esModuleInterop": true,
 		"strictNullChecks": true,
+		"skipLibCheck": true,
 		"allowJs": true,
 		"lib": [
 			"DOM",

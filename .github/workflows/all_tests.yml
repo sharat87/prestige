@@ -27,8 +27,8 @@ jobs:
       - name: Install packages
         run: yarn install --frozen-lockfile
 
-      - name: Lint TypeScript
-        run: yarn lint
+      - name: TypeScript static checks
+        run: yarn check
 
       - name: Run all tests
         run: yarn test

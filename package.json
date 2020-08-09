@@ -17,8 +17,8 @@
 	"scripts": {
 		"build": "node manage.js build",
 		"start": "node manage.js serve",
-		"lint": "tslint src/scripts/*.ts src/tests/*.ts",
-		"lint_fix": "tslint --fix src/scripts/*.ts src/tests/*.ts",
+		"check": "tsc --noEmit --project . && tslint --project .",
+		"lint_fix": "tslint --fix --project .",
 		"test": "jest"
 	},
 	"jest": {
