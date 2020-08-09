@@ -15,7 +15,7 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      - name: Setup Node.js environment
+      - name: Setup Node
         # setup-node versions: <https://github.com/actions/setup-node/releases>.
         uses: actions/setup-node@v2.1.0
         with:
@@ -24,11 +24,11 @@ jobs:
           # Set this option if you want the action to check for the latest available version that satisfies the version spec
           check-latest: true
 
-      - name: Install packages
+      - name: Install Dependencies
         run: yarn install --frozen-lockfile
 
-      - name: TypeScript static checks
+      - name: Lint
         run: yarn run lint
 
-      - name: Run all tests
+      - name: Test
         run: yarn test
