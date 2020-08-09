@@ -28,7 +28,7 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: TypeScript static checks
-        run: yarn check
+        run: yarn run check
 
       - name: Run all tests
         run: yarn test

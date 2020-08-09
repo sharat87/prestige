@@ -137,8 +137,14 @@ export default class Workspace {
 			mark.clear();
 		}
 
+		for (const i of lines.keys()) {
+			this.codeMirror.removeLineClass(i, "background", "line-javascript");
+		}
+
 		for (const { start, end, type } of structure) {
-			if (type === BlockType.PAGE && lines[start].startsWith("###")) {
+			const startLine = lines[start];
+
+			if (type === BlockType.PAGE && startLine.startsWith("###")) {
 				const el = document.createElement("span");
 				el.classList.add("icon", "add-widget");
 				el.innerHTML = "+new";
@@ -150,11 +156,17 @@ export default class Workspace {
 				el.dataset.lineNum = start.toString();
 				el.addEventListener("click", this.onNewClicked);
 				this.widgetMarks.push(this.codeMirror.setBookmark(
-					{ line: start, ch: lines[start].length },
+					{ line: start, ch: startLine.length },
 					{ widget: el, insertLeft: true }
 				));
 
-			} else if (type === BlockType.BODY && lines[start].startsWith("{")) {
+				if (startLine.startsWith("### javascript")) {
+					for (let i = start; i <= end + 1; ++i) {
+						this.codeMirror.addLineClass(i, "background", "line-javascript");
+					}
+				}
+
+			} else if (type === BlockType.BODY && startLine.startsWith("{")) {
 				const pageContent = lines.slice(start, end + 1).join("\n");
 				try {
 					const pretty = JSON.stringify(JSON.parse(pageContent), null, 2);
@@ -177,26 +189,6 @@ export default class Workspace {
 					console.error("Error adding prettify button on line " + start, e);
 
 				}
-
-			}
-		}
-
-		let inJs = false;
-		for (const [i, line] of lines.entries()) {
-			// TODO: Use computed structure instead of tying to parse for javascript blocks.
-			if (line.startsWith("### javascript")) {
-				inJs = true;
-
-			} else if (line.startsWith("###")) {
-				inJs = false;
-
-			}
-
-			if (inJs) {
-				this.codeMirror.addLineClass(i, "background", "line-javascript");
-
-			} else {
-				this.codeMirror.removeLineClass(i, "background", "line-javascript");
 
 			}
 		}
@@ -246,7 +238,7 @@ export default class Workspace {
 		}
 
 		let endLine = cursorLine;
-		while (endLine <= lines.length && !lines[endLine].startsWith("###")) {
+		while (endLine < lines.length && !lines[endLine].startsWith("###")) {
 			++endLine;
 		}
 

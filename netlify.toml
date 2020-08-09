@@ -1,6 +1,6 @@
 [build]
   publish = "dist/"
-  command = "yarn build"
+  command = "yarn run build"
   environment = { NODE_VERSION = "12", PRESTIGE_PROXY_URL = "https://proxy.prestigemad.com/" }
 
 # Following is required for SPAs that handle routing client-side.
