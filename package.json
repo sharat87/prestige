@@ -123,7 +123,7 @@
 	},
 	"devDependencies": {
 		"@babel/core": "^7.10.4",
-		"@types/codemirror": "0.0.96",
+		"@types/codemirror": "0.0.97",
 		"@types/jest": "^26.0.3",
 		"@types/mithril": "^2.0.3",
 		"@typescript-eslint/eslint-plugin": "^3.8.0",
