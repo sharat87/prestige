@@ -1,4 +1,4 @@
-import m from "mithril";
+import m, { VnodeDOM } from "mithril";
 import CodeMirror from "codemirror";
 import "codemirror/addon/selection/active-line";
 import "codemirror/addon/edit/matchbrackets";
@@ -16,31 +16,36 @@ import "codemirror/mode/javascript/javascript";
 import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
 import { NothingMessage } from "./NothingMessage";
+import Workspace from "./Workspace";
 
-export function Editor() {
+export function Editor(): m.Component<{ workspace: Workspace }> {
 	return { view, oncreate };
 
-	function oncreate(vnode) {
-		this.workspace = vnode.attrs.workspace;
-		this.workspace.initCodeMirror(vnode.dom);
-	}
-
-	function view() {
-		if (this.workspace != null) {
-			this.workspace.doFlashes();
-			this.workspace.codeMirror?.refresh();
+	function oncreate(vnode: VnodeDOM<{ workspace: Workspace }>): void {
+		if (!(vnode.dom instanceof HTMLElement)) {
+			throw new Error("CodeMirror for Editor cannot be initialized unless `vnode.dom` is an HTMLElement.");
 		}
 
+		vnode.attrs.workspace.initCodeMirror(vnode.dom);
+	}
+
+	function view(vnode: VnodeDOM<{ workspace: Workspace }>) {
+		vnode.attrs.workspace.doFlashes();
+		vnode.attrs.workspace.codeMirror?.refresh();
 		return m(".body");
 	}
 }
 
-export function CodeBlock() {
+export function CodeBlock(): m.Component<{ spec, text }> {
 	let codeMirror: null | CodeMirror.Editor = null;
 	return { view, oncreate };
 
-	function oncreate(vnode) {
+	function oncreate(vnode: m.VnodeDOM<{ spec, text }>) {
 		if (vnode.dom.classList.contains("code-block")) {
+			if (!(vnode.dom instanceof HTMLElement)) {
+				throw new Error("CodeMirror for CodeBlock cannot be initialized unless `vnode.dom` is an HTMLElement.");
+			}
+
 			codeMirror = CodeMirror(vnode.dom, {
 				mode: vnode.attrs.spec,
 				readOnly: true,
@@ -63,7 +68,7 @@ export function CodeBlock() {
 			: m(NothingMessage);
 	}
 
-	function asString(text: null | string | object, spec: string): string {
+	function asString(text: any, spec: string): string {
 		if (text != null && typeof text !== "string") {
 			text = JSON.stringify(text);
 		}
@@ -107,12 +112,12 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 			bodyJustStarted: state.bodyJustStarted,
 			jsState: state.jsState === null ? null : (CodeMirror as any).copyState(jsMode, state.jsState),
 			bodyState: state.bodyState === null ? null : (CodeMirror as any).copyState(jsMode, state.bodyState),
-		}
+		};
 	}
 
 	function token(stream, state): string | null {
 		const { bodyJustStarted } = state;
-		state.bodyJustStarted = false;/**/
+		state.bodyJustStarted = false;
 
 		if (stream.match("###")) {
 			if (state.jsState !== null) {

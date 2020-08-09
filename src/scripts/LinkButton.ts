@@ -1,8 +1,8 @@
-import m from "mithril";
+import m, { VnodeDOM } from "mithril";
 
-export const LinkButton = { view };
+export const LinkButton: m.Component<{ href?: string, isActive?: boolean, onclick? }> = { view };
 
-function view(vnode) {
+function view(vnode: VnodeDOM<{ href?: string, isActive?: boolean, onclick? }>): m.Vnode {
 	const href = vnode.attrs.href;
 
 	const isButton = href == null || href === "#" || href === "";
@@ -20,6 +20,6 @@ function view(vnode) {
 			onclick: vnode.attrs.onclick,
 			...attrs,
 		},
-		vnode.children
+		vnode.children,
 	);
 }

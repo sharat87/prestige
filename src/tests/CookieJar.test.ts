@@ -11,8 +11,8 @@ test("add single domain cookies", () => {
 	const counts = jar.update({
 		host1: {
 			"/": {
-				name11: {value: "value11", expires: ""},
-				name12: {value: "value12", expires: ""},
+				name11: { value: "value11", expires: "" },
+				name12: { value: "value12", expires: "" },
 			},
 		},
 	});
@@ -27,14 +27,14 @@ test("add two domain cookies", () => {
 	const counts = jar.update({
 		host1: {
 			"/": {
-				name11: {value: "value11", expires: ""},
-				name12: {value: "value12", expires: ""},
+				name11: { value: "value11", expires: "" },
+				name12: { value: "value12", expires: "" },
 			},
 		},
 		host2: {
 			"/": {
-				name21: {value: "value21", expires: ""},
-				name22: {value: "value22", expires: ""},
+				name21: { value: "value21", expires: "" },
+				name22: { value: "value22", expires: "" },
 			},
 		},
 	});
@@ -49,9 +49,9 @@ test("add one domain, update one domain cookies, using objects API", () => {
 	let counts = jar.update({
 		host1: {
 			"/": {
-				name11: {value: "value11", expires: ""},
-				name12: {value: "value12", expires: ""},
-				name13: {value: "value13", expires: ""},
+				name11: { value: "value11", expires: "" },
+				name12: { value: "value12", expires: "" },
+				name13: { value: "value13", expires: "" },
 			},
 		},
 	});
@@ -61,9 +61,9 @@ test("add one domain, update one domain cookies, using objects API", () => {
 	counts = jar.update({
 		host1: {
 			"/": {
-				name11: {value: "value11_new", expires: ""},
-				name12: {value: "value12", expires: "expires_new"},
-				name14: {value: "value14", expires: ""},
+				name11: { value: "value11_new", expires: "" },
+				name12: { value: "value12", expires: "expires_new" },
+				name14: { value: "value14", expires: "" },
 			},
 		},
 	});

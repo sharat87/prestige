@@ -1,5 +1,5 @@
-import {BlockType, computeStructure} from "../scripts/Parser";
-import {makeMockContext} from "./utils";
+import { BlockType, computeStructure } from "../scripts/Parser";
+import { makeMockContext } from "./utils";
 
 test("single line input with one request", async () => {
 	const context = makeMockContext();
@@ -49,7 +49,7 @@ test("post request with one line body", async () => {
 	const structure = computeStructure([
 		"POST http://httpbin.org",
 		"",
-		"body goes here"
+		"body goes here",
 	]);
 
 	expect(structure).toBeDefined();

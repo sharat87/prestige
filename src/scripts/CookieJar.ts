@@ -4,7 +4,7 @@ interface Morsel {
 }
 
 export default class CookieJar {
-	store: object;
+	store: any;
 	size: number;
 
 	constructor() {
@@ -20,19 +20,19 @@ export default class CookieJar {
 		let count = 0;
 
 		for (const byPath of Object.values(this.store)) {
-			for (const byName of Object.values(byPath)) {
-				count += Object.keys(byName as object).length;
+			for (const byName of Object.values(byPath as any)) {
+				count += Object.keys(byName as any).length;
 			}
 		}
 
 		this.size = count;
 	}
 
-	toJSON() {
+	toJSON(): any {
 		return this.store;
 	}
 
-	update(newCookies: object) {
+	update(newCookies: any): { added: number, modified: number, removed: number, any: boolean } {
 		const counts = {
 			added: 0,
 			modified: 0,
@@ -48,16 +48,17 @@ export default class CookieJar {
 			}
 			const oldByPath = this.store[domain];
 
-			for (const [path, byName] of Object.entries(byPath)) {
+			for (const [path, byName] of Object.entries(byPath as any)) {
 				if (!oldByPath[path]) {
 					oldByPath[path] = {};
 					isNew = true;
 				}
 				const oldByName = oldByPath[path];
 
-				for (const [name, morsel] of Object.entries(byName as object)) {
+				for (const [name, morsel] of Object.entries(byName as any)) {
 					if (!isNew && oldByName[name]
-							&& (oldByName[name].value !== morsel.value || oldByName[name].expires !== morsel.expires)) {
+						&& (oldByName[name].value !== (morsel as any).value
+							|| oldByName[name].expires !== (morsel as any).expires)) {
 						++counts.modified;
 					} else {
 						++counts.added;
@@ -77,7 +78,7 @@ export default class CookieJar {
 		return counts;
 	}
 
-	get(domain, path, name): Morsel | null {
+	get(domain: string, path: string, name: string): Morsel | null {
 		try {
 			return this.store[domain][path][name];
 		} catch (error) {

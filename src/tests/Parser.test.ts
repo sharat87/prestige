@@ -1,5 +1,5 @@
-import {extractRequest} from "../scripts/Parser";
-import {makeMockContext} from "./utils";
+import { extractRequest } from "../scripts/Parser";
+import { makeMockContext } from "./utils";
 
 test("single line input with one request", async () => {
 	const context = makeMockContext();
@@ -46,7 +46,7 @@ test("post request with one line body", async () => {
 	const request = await extractRequest([
 		"POST http://httpbin.org",
 		"",
-		"body goes here"
+		"body goes here",
 	], 0, context);
 
 	expect(request).toBeDefined();

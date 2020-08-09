@@ -1,4 +1,4 @@
-export default function interpolate(content: string, context): string {
+export default function interpolate(content: string, context: { data }): string {
 	const keys: string[] = [];
 	const values: any[] = [];
 

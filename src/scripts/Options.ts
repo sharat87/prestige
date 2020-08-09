@@ -14,7 +14,7 @@ const watches: Map<Option, ((option: Option, value: string) => void)[]> = new Ma
 
 export const get = data.get.bind(data);
 
-export function watch(option: Option, fn) {
+export function watch(option: Option, fn: (option: Option, value: string) => void): void {
 	const fns = watches.get(option) || [];
 	if (!watches.has(option)) {
 		watches.set(option, fns);
@@ -22,7 +22,7 @@ export function watch(option: Option, fn) {
 	fns.push(fn);
 }
 
-function set(option: Option, value: string) {
+function set(option: Option, value: string): void {
 	if (value === data.get(option)) {
 		return;
 	}
@@ -34,10 +34,10 @@ function set(option: Option, value: string) {
 	}
 }
 
-export default function OptionsModal() {
+export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 	return { view };
 
-	function view(vnode) {
+	function view(vnode: m.VnodeDOM<{ doClose: () => void}>) {
 		const displayMode = get(Option.DisplayMode);
 		return [
 			m(".modal", [
@@ -46,15 +46,30 @@ export default function OptionsModal() {
 					m("span", "Dark Mode"),
 					m("div", [
 						m("label", { title: "Sync to system's dark mode setting" }, [
-							m("input", { type: "radio", name: "displayMode", value: "system", checked: displayMode === "system" }),
+							m("input", {
+								type: "radio",
+								name: "displayMode",
+								value: "system",
+								checked: displayMode === "system",
+							}),
 							m("span", "System"),
 						]),
 						m("label", [
-							m("input", { type: "radio", name: "displayMode", value: "light", checked: displayMode === "light" }),
+							m("input", {
+								type: "radio",
+								name: "displayMode",
+								value: "light",
+								checked: displayMode === "light",
+							}),
 							m("span", "Light"),
 						]),
 						m("label", [
-							m("input", { type: "radio", name: "displayMode", value: "dark", checked: displayMode === "dark" }),
+							m("input", {
+								type: "radio",
+								name: "displayMode",
+								value: "dark",
+								checked: displayMode === "dark",
+							}),
 							m("span", "Dark"),
 						]),
 					]),
@@ -82,7 +97,7 @@ export default function OptionsModal() {
 		];
 	}
 
-	function doSave(event) {
+	function doSave(/* Event */): void {
 		// TODO: Implement setting, saving (and loading) options.
 		console.warn("Saving options is WIP.");
 	}

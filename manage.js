@@ -2,6 +2,9 @@
  * A Parcel based project build script.
  */
 
+/* global require, process */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const Bundler = require("parcel-bundler");
 const fs = require("fs");
 

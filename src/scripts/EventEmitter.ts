@@ -1,24 +1,26 @@
-export class EventEmitter<TargetType, DetailType> {
-    private readonly type: string;
-    private readonly fns: Set<(CustomEvent) => void>;
+type Callback = (CustomEvent) => void;
 
-    constructor(type) {
-        this.type = type;
-        this.fns = new Set();
-    }
+export class EventEmitter<DetailType> {
+	private readonly type: string;
+	private readonly fns: Set<Callback>;
 
-    on(fn) {
-        this.fns.add(fn);
-    }
+	constructor(type: string) {
+		this.type = type;
+		this.fns = new Set();
+	}
 
-    off(fn) {
-        this.fns.delete(fn);
-    }
+	on(fn: Callback): void {
+		this.fns.add(fn);
+	}
 
-    emit({target, detail}: { target: TargetType, detail: DetailType }) {
-        const event = new CustomEvent(this.type, { detail });
-        for (const fn of this.fns) {
-            fn(event);
-        }
-    }
+	off(fn: Callback): void {
+		this.fns.delete(fn);
+	}
+
+	emit({ detail }: { detail: DetailType }): void {
+		const event = new CustomEvent(this.type, { detail });
+		for (const fn of this.fns) {
+			fn(event);
+		}
+	}
 }

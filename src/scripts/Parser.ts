@@ -3,16 +3,27 @@ import { buildQueryString } from "mithril";
 import interpolate from "./interpolate";
 
 interface Context {
-	data: object;
+	data: any;
 	run: ((lines: string[], runLineNum: number) => Promise<void>);
 	on: ((string, callback: ((CustomEvent) => void)) => void);
 	off: ((string, callback: ((CustomEvent) => void)) => void);
 }
 
-export async function extractRequest(lines: string[], runLineNum: number, context: Context) {
+export interface RequestDetails {
+	method: string;
+	url: string;
+	headers: any;
+	body: string;
+}
+
+export async function extractRequest(lines: string[], runLineNum: number, context: Context)
+	: Promise<null | RequestDetails> {
+
+	const structure = computeStructure(lines);
+
 	let isInScript = false;
 	const scriptLines: string[] = [];
-	let startLine: number = 0;
+	let startLine = 0;
 	let pageContentStarted = false;
 
 	for (let lNum = 0; lNum < runLineNum; ++lNum) {
@@ -27,9 +38,9 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 			const fn = new Function(scriptLines.join("\n"));
 			scriptLines.splice(0, scriptLines.length);
 			// The following may be used in the script, so ensure they exist, and are marked as used for the sanity
-			// of IDE and TypeScript.
+			// Of IDE and TypeScript.
 			if (!context.run || !context.on || !context.off) {
-				console.error("Not all of the required context interface functions are available.")
+				console.error("Not all of the required context interface functions are available.");
 			}
 			const returnValue = fn.call(context);
 			if (isPromise(returnValue)) {
@@ -53,7 +64,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 		return null;
 	}
 
-	const bodyLines: string[] = []
+	const bodyLines: string[] = [];
 	const details = {
 		method: "GET",
 		url: "",
@@ -93,7 +104,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 		}
 	}
 
-	// const renderedLines = Mustache.render(headerLines.join("\n"), context.data).split("\n");
+	// Const renderedLines = Mustache.render(headerLines.join("\n"), context.data).split("\n");
 	const renderedLines = interpolate(headerLines.join("\n"), context).split("\n");
 	const [method, ...urlParts] = renderedLines[0].split(/\s+/);
 	details.method = method.toUpperCase();
@@ -156,9 +167,9 @@ export function computeStructure(input: string[] | string): Block[] {
 	const structure: Block[] = [];
 
 	let type: BlockType = BlockType.PAGE;
-	let pageStart: number = 0;
+	let pageStart = 0;
 	let typeStart: number | null = null;
-	let lastNonBlank: number = -1;
+	let lastNonBlank = -1;
 
 	for (const [index, line] of lines.entries()) {
 		const hasText = line.trim() !== "";

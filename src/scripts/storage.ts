@@ -16,11 +16,11 @@ export function loadInstance(name: string): Instance | null {
 	return { text, cookieJar };
 }
 
-export function saveInstance(name: string, instance: Instance) {
+export function saveInstance(name: string, instance: Instance): void {
 	localStorage.setItem(INSTANCE_KEY_PREFIX + name, JSON.stringify([instance.text, instance.cookieJar]));
 }
 
-export function delInstance(name: string) {
+export function delInstance(name: string): void {
 	localStorage.removeItem(INSTANCE_KEY_PREFIX + name);
 }
 

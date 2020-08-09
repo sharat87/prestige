@@ -1,6 +1,6 @@
 import m from "mithril";
 import CookieJar from "./CookieJar";
-import { extractRequest } from "./Parser";
+import { extractRequest, RequestDetails } from "./Parser";
 import { isPromise } from "./utils";
 
 interface Cookie {
@@ -47,12 +47,11 @@ export default class HttpSession {
 	handlers: Map<string, Set<(CustomEvent) => any>>;
 	data: any;
 
-	constructor(proxy) {
+	constructor(proxy: null | string = null) {
 		// These are persistent throughout a session.
 		this.cookieJar = new CookieJar();
 		this._isLoading = false;
 		this.proxy = proxy;
-		console.log("this.proxy", this.proxy);
 
 		// These should reset for each execute action.
 		this.result = null;
@@ -63,7 +62,7 @@ export default class HttpSession {
 		this.checkProxy();
 	}
 
-	checkProxy() {
+	checkProxy(): void {
 		if (this.proxy == null) {
 			console.log("No proxy set.");
 			return;
@@ -85,23 +84,19 @@ export default class HttpSession {
 			});
 	}
 
-	get isLoading() {
+	get isLoading(): boolean {
 		return this._isLoading;
 	}
 
-	set isLoading(value) {
+	set isLoading(value: boolean) {
 		this._isLoading = value;
 		m.redraw();
 	}
 
-	runTop(lines, cursorLine) {
+	runTop(lines: string[], cursorLine: number): Promise<void> {
 		if (this.isLoading) {
 			alert("There's a request currently pending. Please wait for it to finish.");
 			return Promise.reject();
-		}
-
-		if (typeof lines === "string") {
-			lines = lines.split("\n");
 		}
 
 		const startTime = Date.now();
@@ -143,11 +138,13 @@ export default class HttpSession {
 			});
 	}
 
-	run(lines, runLineNum) {
-		console.log("run", lines, runLineNum);
-		runLineNum = runLineNum || 0;
+	run(lines: string | string[], runLineNum: string | number = 0): Promise<void> {
 		if (typeof lines === "string") {
 			lines = lines.split("\n");
+		}
+
+		if (typeof runLineNum === "string") {
+			runLineNum = parseInt(runLineNum, 10);
 		}
 
 		let request: any = null;
@@ -222,11 +219,11 @@ export default class HttpSession {
 				config(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): XMLHttpRequest | void {
 					xhr.addEventListener("readystatechange", event => {
 						/* Use xhr.readyState to show progress.
-						0 	UNSENT 	Client has been created. open() not called yet.
-						1 	OPENED 	open() has been called.
-						2 	HEADERS_RECEIVED 	send() has been called, and headers and status are available.
-						3 	LOADING 	Downloading; responseText holds partial data.
-						4 	DONE 	The operation is complete.
+						0 UNSENT Client has been created. open() not called yet.
+						1 OPENED open() has been called.
+						2 HEADERS_RECEIVED send() has been called, and headers and status are available.
+						3 LOADING Downloading; responseText holds partial data.
+						4 DONE The operation is complete.
 						 */
 					});
 				},
@@ -298,12 +295,12 @@ export default class HttpSession {
 				if (!(error instanceof SyntaxError)) {
 					throw error;
 				}
-				// The proxy server couldn't return a valid JSON, this is most likely due to a server error on the proxy.
+				// The proxy server didn't return a valid JSON, this is most likely due to a server error on the proxy.
 				data = {
 					ok: false,
 					proxy,
 					error: {
-						title: `Error parsing response from the proxy`,
+						title: "Error parsing response from the proxy",
 						message: textResponse,
 					},
 				};
@@ -328,23 +325,27 @@ export default class HttpSession {
 		}
 	}
 
-	getProxyUrl({ /*method, url, headers, body*/ }) {
-		return this.proxy;  // url.includes("://localhost") ? null : this.proxy;
+	getProxyUrl({ url }: RequestDetails): null | string {
+		return this.proxy && this.proxy.includes("://localhost")
+			? this.proxy
+			: url.includes("://localhost")
+				? null
+				: this.proxy;
 	}
 
-	authHeader(username, password) {
+	authHeader(username: string, password: string): string {
 		return "Authorization: Basic " + btoa(username + ":" + password);
 	}
 
-	on(name, fn) {
+	on(name: string, fn: (CustomEvent) => any) {
 		(this.handlers.get(name) || this.handlers.set(name, new Set()).get(name))?.add(fn);
 	}
 
-	off(name, fn) {
+	off(name: string, fn: (CustomEvent) => any) {
 		this.handlers.get(name)?.delete(fn);
 	}
 
-	emit(name, detail) {
+	emit(name: string, detail: any) {
 		const event = new CustomEvent(name, { detail });
 		const promises: Promise<void>[] = [];
 

@@ -1,4 +1,4 @@
-import m from "mithril";
+import m, { VnodeDOM } from "mithril";
 import { CodeBlock, Editor } from "./code-components";
 import OptionsModal from "./Options";
 import Workspace from "./Workspace";
@@ -45,17 +45,17 @@ function MainView() {
 					m("div", [
 						m(
 							LinkButton,
-							["Doc: master", m(ChevronDown)]
+							["Doc: master", m(ChevronDown)],
 						),
 						m(
 							LinkButton,
 							{ onclick: onCookiesToggle, isActive: visiblePopup === VisiblePopup.Cookies },
-							[`Cookies (${ workspace.cookieJar.size }) `, m(ChevronDown)]
+							[`Cookies (${ workspace.cookieJar.size }) `, m(ChevronDown)],
 						),
 						m(
 							LinkButton,
 							{ onclick: onOptionsToggle, isActive: visiblePopup === VisiblePopup.Options },
-							["Options", m(ChevronDown)]
+							["Options", m(ChevronDown)],
 						),
 						m(LinkButton, { href: "help.html" }, ["Help", m(ExternalLink)]),
 						m(LinkButton, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
@@ -63,7 +63,6 @@ function MainView() {
 				]),
 				m(WorkspaceView, { workspace }),
 				visiblePopup === VisiblePopup.Options && m(OptionsModal, {
-					doSave: onOptionsSave,
 					doClose: onOptionsToggle,
 				}),
 				visiblePopup === VisiblePopup.Cookies && m(CookiesModal, {
@@ -88,11 +87,6 @@ function MainView() {
 		visiblePopup = visiblePopup === VisiblePopup.Options ? VisiblePopup.None : VisiblePopup.Options;
 		m.redraw();
 	}
-
-	function onOptionsSave() {
-		alert("WIP Save & apply options");
-		m.redraw();
-	}
 }
 
 function WorkspaceView() {
@@ -115,7 +109,7 @@ const Toolbar = {
 		]),
 		// TODO: Can we use `vnode.children` instead of `vnode.attrs.peripherals`?
 		m(".peripherals", vnode.attrs.peripherals),
-	])
+	]),
 };
 
 function ResultPane() {
@@ -129,7 +123,7 @@ function ResultPane() {
 			return m(".result-pane.loading", [
 				m("p", m.trust("Loading&hellip;")),
 				// TODO: Show Cancel button after a few seconds of request not completing.
-				// m("p", m(LinkButton, "Cancel")),
+				// M("p", m(LinkButton, "Cancel")),
 			]);
 		}
 
@@ -164,7 +158,7 @@ function ResultPane() {
 								return name !== "method" && name !== "url" && name !== "body" && m("tr", [
 									m("th", name.replace(/\b\w/g, stringUpperCase)),
 									m("td", typeof value === "string" ? value : JSON.stringify(value, null, 2)),
-								])
+								]);
 							}),
 						]),
 					],
@@ -206,7 +200,7 @@ function ResultPane() {
 								cookieChanges.removed ? (cookieChanges.removed + " removed") : null,
 							].filter(v => v != null).join(", ")),
 							".",
-						]
+						],
 					),
 					m("li", proxy != null
 						? ["Run with proxy at ", m("a", { href: proxy, target: "_blank" }, proxy), "."]
@@ -251,7 +245,7 @@ function ResultPane() {
 			m(
 				"h2",
 				{ class: "status s" + response.status.toString()[0] + "xx" },
-				`${ response.status } ${ response.statusText }`
+				`${ response.status } ${ response.statusText }`,
 			),
 			m("pre.url", response.request.method + " " + response.url),
 			m("h2", "Response"),
@@ -266,7 +260,7 @@ function ResultPane() {
 	}
 }
 
-function RichDataViewer() {
+function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 	enum Tabs {
 		text,
 		svgSafe,
@@ -277,7 +271,7 @@ function RichDataViewer() {
 
 	return { view };
 
-	function view(vnode) {
+	function view(vnode: VnodeDOM<{ text: string, spec: null | string }>) {
 		let { text } = vnode.attrs;
 		const { spec } = vnode.attrs;
 
@@ -292,20 +286,23 @@ function RichDataViewer() {
 			]),
 			text !== "" && m(".tab-bar", [
 				m(LinkButton, {
-					isActive: visibleTab === Tabs.text, onclick() {
-						visibleTab = Tabs.text
-					}
+					isActive: visibleTab === Tabs.text,
+					onclick() {
+						visibleTab = Tabs.text;
+					},
 				}, "Text"),
 				spec === "image/svg+xml" && [
 					m(LinkButton, {
-						isActive: visibleTab === Tabs.svgSafe, onclick() {
-							visibleTab = Tabs.svgSafe
-						}
+						isActive: visibleTab === Tabs.svgSafe,
+						onclick() {
+							visibleTab = Tabs.svgSafe;
+						},
 					}, "SVG Safe"),
 					m(LinkButton, {
-						isActive: visibleTab === Tabs.svgRaw, onclick() {
-							visibleTab = Tabs.svgRaw
-						}
+						isActive: visibleTab === Tabs.svgRaw,
+						onclick() {
+							visibleTab = Tabs.svgRaw;
+						},
 					}, "SVG Raw"),
 				],
 			]),
@@ -314,7 +311,7 @@ function RichDataViewer() {
 				m(CodeBlock, {
 					text,
 					spec,
-				})
+				}),
 			),
 			visibleTab === Tabs.svgSafe && m("img", { src: "data:image/svg+xml;base64," + btoa(text) }),
 			visibleTab === Tabs.svgRaw && m.trust(text),
@@ -333,15 +330,15 @@ const IntervalDisplay = {
 			return [Math.round(ms / 100) / 10, "s"];
 
 		}
-	}
+	},
 };
 
 const PageEnd = {
 	view: () => m(
 		"p",
 		{ style: { margin: "2em 0 3em", textAlign: "center", fontSize: "2em" } },
-		"❦"
-	)
+		"❦",
+	),
 };
 
 const CookiesModal = {
@@ -359,20 +356,20 @@ const CookiesModal = {
 				vnode.attrs.cookies?.size > 0 && m(
 					"button",
 					{ type: "button", onclick: vnode.attrs.onClear },
-					"Clear all cookies"
+					"Clear all cookies",
 				),
 			]),
 			m("div", [
-				// m("button.primary", { type: "button", onclick: vnode.attrs.doSave }, "Save"),
+				// M("button.primary", { type: "button", onclick: vnode.attrs.doSave }, "Save"),
 				m("button", { type: "button", onclick: vnode.attrs.onClose }, "Close"),
 			]),
 		]),
-	])
+	]),
 };
 
 const Table = {
 	view: vnode => vnode.children && vnode.children.length > 0 &&
-		m(".table-box", m("table", m("tbody", vnode.children)))
+		m(".table-box", m("table", m("tbody", vnode.children))),
 };
 
 function getContentTypeFromHeaders(headers: Headers | Map<string, string> | string[][]) {

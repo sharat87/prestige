@@ -2,6 +2,9 @@
  * A Parcel Plugin to import SVG files as Mithril components.
  */
 
+/* global require, module */
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const { Asset } = require("parcel-bundler");
 
 module.exports = class SVGAsset extends Asset {
@@ -15,6 +18,6 @@ module.exports = class SVGAsset extends Asset {
 		const value = `
 		const content = ${JSON.stringify(this.contents.trim())}, m = require("mithril");
 		module.exports = { content, component: { view: () => m("span.icon", {role: "image"}, m.trust(content)) } };`;
-		return [{type: this.type, value}];
+		return [{ type: this.type, value }];
 	}
-}
+};

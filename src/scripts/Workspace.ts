@@ -4,15 +4,26 @@ import m from "mithril";
 import CodeMirror from "codemirror";
 import { BlockType, computeStructure } from "./Parser";
 import BracesSVG from "remixicon/icons/Development/braces-line.svg";
+import CookieJar from "./CookieJar";
 
 // Expected environment variables.
-declare var process: { env: { PRESTIGE_PROXY_URL: string } };
+declare const process: { env: { PRESTIGE_PROXY_URL: string } };
 
 interface Storage {
-	save(name: string, data: object): void;
+	save(name: string, data: any): void;
 
-	load(name: string): object;
+	load(name: string): any;
 }
+
+const DEFAULT_EDITOR_CONTENT = `GET http://httpbin.org/get?name=haha
+
+###
+
+POST http://httpbin.org/post
+Content-Type: application/x-www-form-urlencoded
+
+username=sherlock&password=elementary
+`;
 
 export default class Workspace {
 	codeMirror: null | CodeMirror.Editor;
@@ -42,13 +53,14 @@ export default class Workspace {
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this);
 	}
 
-	loadInstance(name) {
+	loadInstance(name: string): void {
 		if (name == null) {
 			throw new TypeError("instance name must be non-null.");
 		}
+
 		this.instanceName = name;
 		this.instance = loadInstance(name) || {
-			text: "GET http://httpbin.org/get?name=haha\n\n###\n\nPOST http://httpbin.org/post\nContent-Type: application/x-www-form-urlencoded\n\nusername=sherlock&password=elementary\n",
+			text: DEFAULT_EDITOR_CONTENT,
 			cookieJar: {},
 		};
 
@@ -60,14 +72,14 @@ export default class Workspace {
 		this.setContent(this.instance.text);
 	}
 
-	saveInstance() {
+	saveInstance(): void {
 		if (this.instance != null && this.instanceName != null) {
 			this.instance.text = this.getContent();
 			saveInstance(this.instanceName, this.instance);
 		}
 	}
 
-	initCodeMirror(element) {
+	initCodeMirror(element: HTMLElement): void {
 		if (this.codeMirror != null) {
 			return;
 		}
@@ -102,7 +114,7 @@ export default class Workspace {
 		return this.codeMirror ? this.codeMirror.getValue() : this._content;
 	}
 
-	setContent(content): void {
+	setContent(content: string): void {
 		this._lines = null;
 		if (this.codeMirror == null) {
 			this._content = content;
@@ -123,7 +135,7 @@ export default class Workspace {
 	 * Update gutter, widgets, highlights etc. of the CodeMirror editor. Usually called when the contents of the editor
 	 * change.
 	 */
-	updateEditorDisplay() {
+	updateEditorDisplay(): void {
 		if (this.codeMirror == null) {
 			return;
 		}
@@ -157,7 +169,7 @@ export default class Workspace {
 				el.addEventListener("click", this.onNewClicked);
 				this.widgetMarks.push(this.codeMirror.setBookmark(
 					{ line: start, ch: startLine.length },
-					{ widget: el, insertLeft: true }
+					{ widget: el, insertLeft: true },
 				));
 
 				if (startLine.startsWith("### javascript")) {
@@ -194,8 +206,8 @@ export default class Workspace {
 		}
 	}
 
-	onNewClicked(event) {
-		const lineNum = parseInt(event.currentTarget.dataset.lineNum, 10);
+	onNewClicked(event: MouseEvent): void {
+		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10);
 		this.codeMirror?.replaceRange(
 			"###\n\nGET http://httpbin.org/get?name=sherlock\n\n",
 			{ line: lineNum, ch: 0 }
@@ -204,19 +216,28 @@ export default class Workspace {
 		this.codeMirror?.focus();
 	}
 
-	onPrettifyClicked(event) {
+	onPrettifyClicked(event: MouseEvent): void {
+		if (!(event.currentTarget instanceof HTMLElement)) {
+			throw new Error("Event without a target.");
+		}
+
+		if (typeof event.currentTarget.dataset.start !== "string"
+			|| typeof event.currentTarget.dataset.end !== "string") {
+			throw new Error("Start/End not available on prettify button.");
+		}
+
 		this.codeMirror?.replaceRange(
 			event.currentTarget.dataset.pretty + "\n",
 			{ line: parseInt(event.currentTarget.dataset.start, 10), ch: 0 },
 			{ line: 1 + parseInt(event.currentTarget.dataset.end, 10), ch: 0 }
-		)
+		);
 	}
 
-	get cookieJar() {
+	get cookieJar(): CookieJar {
 		return this.session.cookieJar;
 	}
 
-	doExecute() {
+	doExecute(): void {
 		if (this.codeMirror == null) {
 			return;
 		}
@@ -254,7 +275,7 @@ export default class Workspace {
 			});
 	}
 
-	runAgain() {
+	runAgain(): void {
 		if (this.codeMirror == null || this.prevExecuteBookmark == null) {
 			return;
 		}
@@ -263,7 +284,7 @@ export default class Workspace {
 		this.doExecute();
 	}
 
-	doFlashes() {
+	doFlashes(): void {
 		if (this.codeMirror == null) {
 			return;
 		}
