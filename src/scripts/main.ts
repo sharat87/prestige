@@ -1,5 +1,5 @@
 import m, { VnodeDOM } from "mithril";
-import { CodeBlock, Editor } from "./code-components";
+import CodeBlock from "./CodeBlock";
 import OptionsModal from "./Options";
 import Workspace from "./Workspace";
 import { NothingMessage } from "./NothingMessage";
@@ -95,7 +95,7 @@ function WorkspaceView() {
 	function view(vnode) {
 		const workspace = vnode.attrs.workspace;
 		return m(".er-pair", [
-			m(".editor-pane", m(Editor, { workspace })),
+			m(EditorPane, { workspace }),
 			m(ResultPane, { workspace }),
 		]);
 	}
@@ -112,7 +112,27 @@ const Toolbar = {
 	]),
 };
 
-function ResultPane() {
+function EditorPane(): m.Component<{ workspace: Workspace }> {
+	return { view, oncreate };
+
+	function oncreate(vnode: VnodeDOM<{ workspace: Workspace }>): void {
+		if (!(vnode.dom.firstElementChild instanceof HTMLElement)) {
+			throw new Error(
+				"CodeMirror for Editor cannot be initialized unless `vnode.dom.firstElementChild` is an HTMLElement.",
+			);
+		}
+
+		vnode.attrs.workspace.initCodeMirror(vnode.dom.firstElementChild);
+	}
+
+	function view(vnode: VnodeDOM<{ workspace: Workspace }>): m.Vnode {
+		vnode.attrs.workspace.doFlashes();
+		vnode.attrs.workspace.codeMirror?.refresh();
+		return m(".editor-pane", m(".body"));
+	}
+}
+
+function ResultPane(): m.Component<{ workspace: Workspace }> {
 	return { view };
 
 	function view(vnode) {

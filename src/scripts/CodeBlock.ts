@@ -1,4 +1,4 @@
-import m, { VnodeDOM } from "mithril";
+import m from "mithril";
 import CodeMirror from "codemirror";
 import "codemirror/addon/selection/active-line";
 import "codemirror/addon/edit/matchbrackets";
@@ -16,27 +16,8 @@ import "codemirror/mode/javascript/javascript";
 import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
 import { NothingMessage } from "./NothingMessage";
-import Workspace from "./Workspace";
 
-export function Editor(): m.Component<{ workspace: Workspace }> {
-	return { view, oncreate };
-
-	function oncreate(vnode: VnodeDOM<{ workspace: Workspace }>): void {
-		if (!(vnode.dom instanceof HTMLElement)) {
-			throw new Error("CodeMirror for Editor cannot be initialized unless `vnode.dom` is an HTMLElement.");
-		}
-
-		vnode.attrs.workspace.initCodeMirror(vnode.dom);
-	}
-
-	function view(vnode: VnodeDOM<{ workspace: Workspace }>) {
-		vnode.attrs.workspace.doFlashes();
-		vnode.attrs.workspace.codeMirror?.refresh();
-		return m(".body");
-	}
-}
-
-export function CodeBlock(): m.Component<{ spec, text }> {
+export default function CodeBlock(): m.Component<{ spec, text }> {
 	let codeMirror: null | CodeMirror.Editor = null;
 	return { view, oncreate };
 
@@ -84,6 +65,7 @@ interface PrestigeState {
 	bodyState: any;
 }
 
+// TODO: Move prestige mode definition to a separate module.
 CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<PrestigeState> => {
 	const jsMode = CodeMirror.getMode(config, "javascript");
 	const jsonMode = CodeMirror.getMode(config, { name: "javascript", json: true });
