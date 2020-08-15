@@ -10,29 +10,45 @@ window.addEventListener("load", () => {
 	const root = document.createElement("div");
 	root.setAttribute("id", "app");
 	document.body.insertAdjacentElement("afterbegin", root);
-	m.mount(root, MainView);
 	document.getElementById("loadingBox")?.remove();
+	m.route(root, "/doc/master", {
+		"/doc/:docName": WorkspaceView,
+	});
 });
 
-function MainView() {
+function WorkspaceView(): m.Component {
 	const workspace = new Workspace();
-	workspace.loadInstance("master");
-
-	document.addEventListener("keydown", event => {
-		if (event.key === "Escape") {
-			workspace.codeMirror?.focus();
-		}
-	});
 
 	enum VisiblePopup {
 		None,
+		DocumentBrowser,
 		Options,
 		Cookies,
 	}
 
-	let visiblePopup: VisiblePopup = VisiblePopup.None;
+	let popup: VisiblePopup = VisiblePopup.None;
 
-	return { view };
+	return {
+		view,
+		oncreate,
+		oninit: loadInstance,
+		onupdate: loadInstance,
+	};
+
+	function loadInstance(vnode) {
+		if (vnode.attrs.docName !== workspace.instanceName) {
+			workspace.loadInstance(vnode.attrs.docName);
+			popup = VisiblePopup.None;
+		}
+	}
+
+	function oncreate() {
+		document.addEventListener("keydown", event => {
+			if (event.key === "Escape") {
+				workspace.codeMirror?.focus();
+			}
+		});
+	}
 
 	function view() {
 		return [
@@ -45,27 +61,42 @@ function MainView() {
 					m("div", [
 						m(
 							LinkButton,
-							["Doc: master", m(ChevronDown)],
+							{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowser },
+							["Doc: ", workspace.instanceName, m(ChevronDown)],
 						),
 						m(
 							LinkButton,
-							{ onclick: onCookiesToggle, isActive: visiblePopup === VisiblePopup.Cookies },
+							{ onclick: onCookiesToggle, isActive: popup === VisiblePopup.Cookies },
 							[`Cookies (${ workspace.cookieJar.size }) `, m(ChevronDown)],
 						),
 						m(
 							LinkButton,
-							{ onclick: onOptionsToggle, isActive: visiblePopup === VisiblePopup.Options },
-							["Options", m(ChevronDown)],
+							{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
+							["Options ", m(ChevronDown)],
 						),
 						m(LinkButton, { href: "help.html" }, ["Help", m(ExternalLink)]),
 						m(LinkButton, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
 					]),
 				]),
-				m(WorkspaceView, { workspace }),
-				visiblePopup === VisiblePopup.Options && m(OptionsModal, {
+				m(".er-pair", [
+					m(EditorPane, { workspace }),
+					m(ResultPane, { workspace }),
+				]),
+				popup === VisiblePopup.DocumentBrowser && m(
+					Modal,
+					{
+						header: m("h2", "Documents"),
+						footer: [
+							m("div"),
+							m("div", m("button", { type: "button", onclick: onDocumentBrowserToggle }, "Close")),
+						],
+					},
+					m(DocumentBrowser)
+				),
+				popup === VisiblePopup.Options && m(OptionsModal, {
 					doClose: onOptionsToggle,
 				}),
-				visiblePopup === VisiblePopup.Cookies && m(CookiesModal, {
+				popup === VisiblePopup.Cookies && m(CookiesModal, {
 					cookies: workspace.cookieJar,
 					onClose: onCookiesToggle,
 					onClear: onClearCookies,
@@ -74,8 +105,12 @@ function MainView() {
 		];
 	}
 
+	function onDocumentBrowserToggle() {
+		popup = popup === VisiblePopup.DocumentBrowser ? VisiblePopup.None : VisiblePopup.DocumentBrowser;
+	}
+
 	function onCookiesToggle() {
-		visiblePopup = visiblePopup === VisiblePopup.Cookies ? VisiblePopup.None : VisiblePopup.Cookies;
+		popup = popup === VisiblePopup.Cookies ? VisiblePopup.None : VisiblePopup.Cookies;
 		m.redraw();
 	}
 
@@ -84,20 +119,8 @@ function MainView() {
 	}
 
 	function onOptionsToggle() {
-		visiblePopup = visiblePopup === VisiblePopup.Options ? VisiblePopup.None : VisiblePopup.Options;
+		popup = popup === VisiblePopup.Options ? VisiblePopup.None : VisiblePopup.Options;
 		m.redraw();
-	}
-}
-
-function WorkspaceView() {
-	return { view };
-
-	function view(vnode) {
-		const workspace = vnode.attrs.workspace;
-		return m(".er-pair", [
-			m(EditorPane, { workspace }),
-			m(ResultPane, { workspace }),
-		]);
 	}
 }
 
@@ -361,31 +384,52 @@ const PageEnd = {
 	),
 };
 
+function DocumentBrowser() {
+	return { view };
+
+	function view() {
+		return "Document listing";
+	}
+}
+
 const CookiesModal = {
-	view: vnode => m(".modal", [
-		m("header", m("h2", "Cookies")),
-		m("section", [
+	view: vnode => m(
+		Modal,
+		{
+			header: m("h2", "Cookies"),
+			footer: [
+				m("div", [
+					vnode.attrs.cookies?.size > 0 && m(
+						"button",
+						{ type: "button", onclick: vnode.attrs.onClear },
+						"Clear all cookies",
+					),
+				]),
+				m("div", [
+					// M("button.primary", { type: "button", onclick: vnode.attrs.doSave }, "Save"),
+					m("button", { type: "button", onclick: vnode.attrs.onClose }, "Close"),
+				]),
+			],
+		},
+		[
 			m("pre", "this.cookies = " + JSON.stringify(vnode.attrs.cookies, null, 2)),
 			m("p.note", { style: { marginTop: "2em" } }, "These cookies will be used for requests executed by proxy" +
 				" only. For requests that are executed without a proxy, please refer to the browser console. This is" +
 				" a browser-level security restriction."),
+		]
+	),
+};
+
+const Modal = {
+	view: vnode => m(".modal", [
+		vnode.attrs.header && m("header", vnode.attrs.header),
+		m("section", [
+			vnode.children,
 			m(PageEnd),
 		]),
-		m("footer", [
-			m("div", [
-				vnode.attrs.cookies?.size > 0 && m(
-					"button",
-					{ type: "button", onclick: vnode.attrs.onClear },
-					"Clear all cookies",
-				),
-			]),
-			m("div", [
-				// M("button.primary", { type: "button", onclick: vnode.attrs.doSave }, "Save"),
-				m("button", { type: "button", onclick: vnode.attrs.onClose }, "Close"),
-			]),
-		]),
+		vnode.attrs.footer && m("footer", vnode.attrs.footer),
 	]),
-};
+}
 
 const Table = {
 	view: vnode => vnode.children && vnode.children.length > 0 &&

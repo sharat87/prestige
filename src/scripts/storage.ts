@@ -1,27 +1,15 @@
 export interface Instance {
 	text: string;
 	cookieJar;
+
+	load(): Promise<void>;
+	save(delta: { text?: string, cookieJar? }): Promise<void>;
 }
 
 const INSTANCE_KEY_PREFIX = "instance:";
 
-export function loadInstance(name: string): Instance | null {
-	const raw = localStorage.getItem(INSTANCE_KEY_PREFIX + name);
-
-	if (raw == null) {
-		return null;
-	}
-
-	const [text, cookieJar] = JSON.parse(raw);
-	return { text, cookieJar };
-}
-
-export function saveInstance(name: string, instance: Instance): void {
-	localStorage.setItem(INSTANCE_KEY_PREFIX + name, JSON.stringify([instance.text, instance.cookieJar]));
-}
-
-export function delInstance(name: string): void {
-	localStorage.removeItem(INSTANCE_KEY_PREFIX + name);
+export function loadInstance(name: string): Instance {
+	return new LocalStorageInstance(name);
 }
 
 export function* listInstanceNames(): Generator<string> {
@@ -30,5 +18,53 @@ export function* listInstanceNames(): Generator<string> {
 		if (key?.startsWith(INSTANCE_KEY_PREFIX)) {
 			yield key.substr(INSTANCE_KEY_PREFIX.length);
 		}
+	}
+}
+
+class LocalStorageInstance implements Instance {
+	name: string;
+	text: string;
+	cookieJar;
+
+	constructor(name) {
+		this.name = name;
+		this.text = "";
+		this.cookieJar = {};
+		this.load()
+			.catch(error => {
+				console.error(`Error loading LocalStorageInstance ${name}.`, error);
+			});
+	}
+
+	load() {
+		const raw = localStorage.getItem(INSTANCE_KEY_PREFIX + this.name);
+		if (raw != null) {
+			const [text, cookieJar] = JSON.parse(raw);
+			this.text = text;
+			this.cookieJar = cookieJar;
+		}
+		return Promise.resolve();
+	}
+
+	save(delta) {
+		let haveChanges = false;
+		if (delta.hasOwnProperty("text")) {
+			this.text = delta.text;
+			haveChanges = true;
+		}
+
+		if (delta.hasOwnProperty("cookieJar")) {
+			this.cookieJar = delta.cookieJar;
+			haveChanges = true;
+		}
+
+		if (haveChanges) {
+			localStorage.setItem(
+				INSTANCE_KEY_PREFIX + this.name,
+				JSON.stringify([this.text, this.cookieJar]),
+			);
+		}
+
+		return Promise.resolve();
 	}
 }

@@ -1,5 +1,5 @@
 import HttpSession from "./HttpSession";
-import { Instance, loadInstance, saveInstance } from "./storage";
+import { Instance, loadInstance } from "./storage";
 import m from "mithril";
 import CodeMirror from "codemirror";
 import { BlockType, computeStructure } from "./Parser";
@@ -32,7 +32,7 @@ export default class Workspace {
 	storage: null | Storage;
 	private prevExecuteBookmark: null | CodeMirror.TextMarker;
 	private session: HttpSession;
-	instance: null | Instance;
+	instance: Instance;
 	instanceName: null | string;
 	private flashQueue: any[];
 	private widgetMarks: CodeMirror.TextMarker[];
@@ -59,10 +59,11 @@ export default class Workspace {
 		}
 
 		this.instanceName = name;
-		this.instance = loadInstance(name) || {
-			text: DEFAULT_EDITOR_CONTENT,
-			cookieJar: {},
-		};
+		this.instance = loadInstance(name);
+
+		if (!this.instance.text) {
+			this.instance.text = DEFAULT_EDITOR_CONTENT;
+		}
 
 		if (this.instance.cookieJar) {
 			this.session.cookieJar.update(this.instance.cookieJar);
@@ -70,13 +71,6 @@ export default class Workspace {
 		}
 
 		this.setContent(this.instance.text);
-	}
-
-	saveInstance(): void {
-		if (this.instance != null && this.instanceName != null) {
-			this.instance.text = this.getContent();
-			saveInstance(this.instanceName, this.instance);
-		}
 	}
 
 	initCodeMirror(element: HTMLElement): void {
@@ -105,7 +99,10 @@ export default class Workspace {
 
 		this.codeMirror.on("changes", () => {
 			this._lines = null;
-			this.saveInstance();
+			this.instance.save({ text: this.getContent() })
+				.catch(error => {
+					console.error("Error saving instance", error);
+				});
 			this.updateEditorDisplay();
 		});
 	}
@@ -267,11 +264,8 @@ export default class Workspace {
 
 		this.session.runTop(lines, cursorLine)
 			.finally(() => {
-				if (this.instance != null) {
-					this.instance.cookieJar = this.session.cookieJar;
-				}
-				this.saveInstance();
 				m.redraw();
+				return this.instance.save({ cookieJar: this.session.cookieJar });
 			});
 	}
 
