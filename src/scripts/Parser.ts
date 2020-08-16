@@ -1,13 +1,7 @@
 import { isPromise } from "./utils";
 import { buildQueryString } from "mithril";
 import interpolate from "./interpolate";
-
-interface Context {
-	data: any;
-	run: ((lines: string[], runLineNum: number) => Promise<void>);
-	on: ((string, callback: ((CustomEvent) => void)) => void);
-	off: ((string, callback: ((CustomEvent) => void)) => void);
-}
+import { Context } from "./Context";
 
 export interface RequestDetails {
 	method: string;

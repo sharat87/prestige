@@ -1,7 +1,7 @@
 import m from "mithril";
 import CookieJar from "./CookieJar";
 import { extractRequest, RequestDetails } from "./Parser";
-import { isPromise } from "./utils";
+import { makeContext } from "./Context";
 
 interface Cookie {
 	domain: string,
@@ -44,8 +44,6 @@ export default class HttpSession {
 	_isLoading: boolean;
 	proxy: null | string;
 	result: SuccessResult | FailureResult | null;
-	handlers: Map<string, Set<(CustomEvent) => any>>;
-	data: any;
 
 	constructor(proxy: null | string = null) {
 		// These are persistent throughout a session.
@@ -55,9 +53,6 @@ export default class HttpSession {
 
 		// These should reset for each execute action.
 		this.result = null;
-		this.handlers = new Map();
-		// This is is used as the Mustache template rendering context.
-		this.data = {};
 
 		this.checkProxy();
 	}
@@ -103,14 +98,12 @@ export default class HttpSession {
 		this.isLoading = true;
 		let request: any = null;
 
-		this.handlers.clear();
-		this.data = {};
-
 		// TODO: Use a separate context type and object, instead of `this`.
-		return extractRequest(lines, cursorLine, this)
+		let context = makeContext(this);
+		return extractRequest(lines, cursorLine, context)
 			.then(async (req) => {
 				request = req;
-				await this.emit("BeforeExecute", { request });
+				await context.emit("BeforeExecute", { request });
 				return this._execute(request);
 			})
 			.then(res => {
@@ -149,7 +142,7 @@ export default class HttpSession {
 
 		let request: any = null;
 
-		return extractRequest(lines, runLineNum, this)
+		return extractRequest(lines, runLineNum, makeContext(this))
 			.then(req => {
 				request = req;
 				return this._execute(request);
@@ -335,27 +328,5 @@ export default class HttpSession {
 
 	authHeader(username: string, password: string): string {
 		return "Authorization: Basic " + btoa(username + ":" + password);
-	}
-
-	on(name: string, fn: (CustomEvent) => any) {
-		(this.handlers.get(name) || this.handlers.set(name, new Set()).get(name))?.add(fn);
-	}
-
-	off(name: string, fn: (CustomEvent) => any) {
-		this.handlers.get(name)?.delete(fn);
-	}
-
-	emit(name: string, detail: any) {
-		const event = new CustomEvent(name, { detail });
-		const promises: Promise<void>[] = [];
-
-		for (const fn of this.handlers.get(name) || []) {
-			const value = fn(event);
-			if (isPromise(value)) {
-				promises.push(value);
-			}
-		}
-
-		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises)).finally(m.redraw);
 	}
 }
