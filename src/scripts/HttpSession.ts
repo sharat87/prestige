@@ -99,7 +99,7 @@ export default class HttpSession {
 		let request: any = null;
 
 		// TODO: Use a separate context type and object, instead of `this`.
-		let context = makeContext(this);
+		const context = makeContext(this);
 		return extractRequest(lines, cursorLine, context)
 			.then(async (req) => {
 				request = req;
