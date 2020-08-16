@@ -1,4 +1,5 @@
 export interface Instance {
+	name: string;
 	text: string;
 	cookieJar;
 
@@ -48,12 +49,12 @@ class LocalStorageInstance implements Instance {
 
 	save(delta) {
 		let haveChanges = false;
-		if (delta.hasOwnProperty("text")) {
+		if (delta.text != null && typeof delta.text === "string") {
 			this.text = delta.text;
 			haveChanges = true;
 		}
 
-		if (delta.hasOwnProperty("cookieJar")) {
+		if (delta.cookieJar != null && typeof delta.cookieJar === "object") {
 			this.cookieJar = delta.cookieJar;
 			haveChanges = true;
 		}

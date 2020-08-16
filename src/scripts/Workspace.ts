@@ -9,12 +9,6 @@ import CookieJar from "./CookieJar";
 // Expected environment variables.
 declare const process: { env: { PRESTIGE_PROXY_URL: string } };
 
-interface Storage {
-	save(name: string, data: any): void;
-
-	load(name: string): any;
-}
-
 const DEFAULT_EDITOR_CONTENT = `GET http://httpbin.org/get?name=haha
 
 ###
@@ -29,11 +23,9 @@ export default class Workspace {
 	codeMirror: null | CodeMirror.Editor;
 	private _content: string;
 	private _lines: null | string[];
-	storage: null | Storage;
 	private prevExecuteBookmark: null | CodeMirror.TextMarker;
 	private session: HttpSession;
 	instance: Instance;
-	instanceName: null | string;
 	private flashQueue: any[];
 	private widgetMarks: CodeMirror.TextMarker[];
 
@@ -41,7 +33,6 @@ export default class Workspace {
 		this.codeMirror = null;
 		this._content = "";
 		this._lines = null;
-		this.storage = null;
 		this.prevExecuteBookmark = null;
 		this.session = new HttpSession(process.env.PRESTIGE_PROXY_URL);
 		this.flashQueue = [];
@@ -58,7 +49,6 @@ export default class Workspace {
 			throw new TypeError("instance name must be non-null.");
 		}
 
-		this.instanceName = name;
 		this.instance = loadInstance(name);
 
 		if (!this.instance.text) {
@@ -78,6 +68,10 @@ export default class Workspace {
 			return;
 		}
 
+		// These two mappings are used for back/forward in macOS. Let the browser handle them.
+		delete (CodeMirror as any).keyMap.macDefault["Cmd-["];
+		delete (CodeMirror as any).keyMap.macDefault["Cmd-]"];
+
 		this.codeMirror = CodeMirror(element, {
 			mode: "prestige",
 			lineNumbers: true,
@@ -92,6 +86,7 @@ export default class Workspace {
 				"Cmd-Enter": this.doExecute,
 				"Cmd-F": "findPersistent",
 				"Cmd-/": "toggleComment",
+				"Shift-Tab": "indentLess",
 			},
 		});
 

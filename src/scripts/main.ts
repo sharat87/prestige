@@ -12,7 +12,7 @@ window.addEventListener("load", () => {
 	document.body.insertAdjacentElement("afterbegin", root);
 	document.getElementById("loadingBox")?.remove();
 	m.route(root, "/doc/master", {
-		"/doc/:docName": WorkspaceView,
+		"/doc/:docName...": WorkspaceView,
 	});
 });
 
@@ -21,6 +21,7 @@ function WorkspaceView(): m.Component {
 
 	enum VisiblePopup {
 		None,
+		// eslint-disable-next-line no-shadow
 		DocumentBrowser,
 		Options,
 		Cookies,
@@ -36,7 +37,7 @@ function WorkspaceView(): m.Component {
 	};
 
 	function loadInstance(vnode) {
-		if (vnode.attrs.docName !== workspace.instanceName) {
+		if (vnode.attrs.docName !== workspace.instance.name) {
 			workspace.loadInstance(vnode.attrs.docName);
 			popup = VisiblePopup.None;
 		}
@@ -62,7 +63,7 @@ function WorkspaceView(): m.Component {
 						m(
 							LinkButton,
 							{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowser },
-							["Doc: ", workspace.instanceName, m(ChevronDown)],
+							["Doc: ", workspace.instance.name, m(ChevronDown)],
 						),
 						m(
 							LinkButton,
@@ -91,7 +92,7 @@ function WorkspaceView(): m.Component {
 							m("div", m("button", { type: "button", onclick: onDocumentBrowserToggle }, "Close")),
 						],
 					},
-					m(DocumentBrowser)
+					m(DocumentBrowser),
 				),
 				popup === VisiblePopup.Options && m(OptionsModal, {
 					doClose: onOptionsToggle,
@@ -416,7 +417,7 @@ const CookiesModal = {
 			m("p.note", { style: { marginTop: "2em" } }, "These cookies will be used for requests executed by proxy" +
 				" only. For requests that are executed without a proxy, please refer to the browser console. This is" +
 				" a browser-level security restriction."),
-		]
+		],
 	),
 };
 
@@ -429,7 +430,7 @@ const Modal = {
 		]),
 		vnode.attrs.footer && m("footer", vnode.attrs.footer),
 	]),
-}
+};
 
 const Table = {
 	view: vnode => vnode.children && vnode.children.length > 0 &&
