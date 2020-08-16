@@ -1,5 +1,5 @@
 import HttpSession from "./HttpSession";
-import { Instance, loadInstance } from "./storage";
+import { Storage, loadStorage } from "./storage";
 import m from "mithril";
 import CodeMirror from "codemirror";
 import { BlockType, computeStructure } from "./Parser";
@@ -25,7 +25,7 @@ export default class Workspace {
 	private _lines: null | string[];
 	private prevExecuteBookmark: null | CodeMirror.TextMarker;
 	private session: HttpSession;
-	instance: Instance;
+	storage: Storage;
 	private flashQueue: any[];
 	private widgetMarks: CodeMirror.TextMarker[];
 
@@ -44,23 +44,23 @@ export default class Workspace {
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this);
 	}
 
-	loadInstance(name: string): void {
+	loadStorage(name: string): void {
 		if (name == null) {
-			throw new TypeError("instance name must be non-null.");
+			throw new TypeError("Storage name must be non-null.");
 		}
 
-		this.instance = loadInstance(name);
+		this.storage = loadStorage(name);
 
-		if (!this.instance.text) {
-			this.instance.text = DEFAULT_EDITOR_CONTENT;
+		if (!this.storage.text) {
+			this.storage.text = DEFAULT_EDITOR_CONTENT;
 		}
 
-		if (this.instance.cookieJar) {
-			this.session.cookieJar.update(this.instance.cookieJar);
+		if (this.storage.cookieJar) {
+			this.session.cookieJar.update(this.storage.cookieJar);
 			m.redraw();
 		}
 
-		this.setContent(this.instance.text);
+		this.setContent(this.storage.text);
 	}
 
 	initCodeMirror(element: HTMLElement): void {
@@ -94,9 +94,9 @@ export default class Workspace {
 
 		this.codeMirror.on("changes", () => {
 			this._lines = null;
-			this.instance.save({ text: this.getContent() })
+			this.storage.save({ text: this.getContent() })
 				.catch(error => {
-					console.error("Error saving instance", error);
+					console.error("Error saving", error);
 				});
 			this.updateEditorDisplay();
 		});
@@ -260,7 +260,7 @@ export default class Workspace {
 		this.session.runTop(lines, cursorLine)
 			.finally(() => {
 				m.redraw();
-				return this.instance.save({ cookieJar: this.session.cookieJar });
+				return this.storage.save({ cookieJar: this.session.cookieJar });
 			});
 	}
 

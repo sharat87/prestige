@@ -1,4 +1,4 @@
-export interface Instance {
+export interface Storage {
 	name: string;
 	text: string;
 	cookieJar;
@@ -9,11 +9,11 @@ export interface Instance {
 
 const INSTANCE_KEY_PREFIX = "instance:";
 
-export function loadInstance(name: string): Instance {
-	return new LocalStorageInstance(name);
+export function loadStorage(name: string): Storage {
+	return new LocalStorageImpl(name);
 }
 
-export function* listInstanceNames(): Generator<string> {
+export function* listStorageNames(): Generator<string> {
 	for (let i = 0; i < localStorage.length; ++i) {
 		const key = localStorage.key(i);
 		if (key?.startsWith(INSTANCE_KEY_PREFIX)) {
@@ -22,7 +22,7 @@ export function* listInstanceNames(): Generator<string> {
 	}
 }
 
-class LocalStorageInstance implements Instance {
+class LocalStorageImpl implements Storage {
 	name: string;
 	text: string;
 	cookieJar;
@@ -33,7 +33,7 @@ class LocalStorageInstance implements Instance {
 		this.cookieJar = {};
 		this.load()
 			.catch(error => {
-				console.error(`Error loading LocalStorageInstance ${name}.`, error);
+				console.error(`Error loading LocalStorageImpl ${name}.`, error);
 			});
 	}
 

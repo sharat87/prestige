@@ -32,13 +32,13 @@ function WorkspaceView(): m.Component {
 	return {
 		view,
 		oncreate,
-		oninit: loadInstance,
-		onupdate: loadInstance,
+		oninit: loadStorage,
+		onupdate: loadStorage,
 	};
 
-	function loadInstance(vnode) {
-		if (vnode.attrs.docName !== workspace.instance.name) {
-			workspace.loadInstance(vnode.attrs.docName);
+	function loadStorage(vnode) {
+		if (workspace.storage == null || vnode.attrs.docName !== workspace.storage.name) {
+			workspace.loadStorage(vnode.attrs.docName);
 			popup = VisiblePopup.None;
 		}
 	}
@@ -63,7 +63,7 @@ function WorkspaceView(): m.Component {
 						m(
 							LinkButton,
 							{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowser },
-							["Doc: ", workspace.instance.name, m(ChevronDown)],
+							["Doc: ", workspace.storage.name, m(ChevronDown)],
 						),
 						m(
 							LinkButton,
