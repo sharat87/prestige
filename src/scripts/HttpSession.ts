@@ -326,7 +326,4 @@ export default class HttpSession {
 				: this.proxy;
 	}
 
-	authHeader(username: string, password: string): string {
-		return "Authorization: Basic " + btoa(username + ":" + password);
-	}
 }

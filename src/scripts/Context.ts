@@ -8,12 +8,13 @@ export interface Context {
 	on: ((string, callback: ((CustomEvent) => void)) => void);
 	off: ((string, callback: ((CustomEvent) => void)) => void);
 	emit: any;
+	authHeader: (username: string, password: string) => string;
 }
 
 export function makeContext(session: HttpSession): Context {
 	const handlers: Map<string, Set<(CustomEvent) => any>> = new Map();
 
-	return { data: {}, on, off, emit, run };
+	return { data: {}, on, off, emit, run, authHeader };
 
 	function off(string, callback: (CustomEvent) => void): void {
 		handlers.get(name)?.delete(callback);
@@ -40,4 +41,9 @@ export function makeContext(session: HttpSession): Context {
 
 		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises)).finally(m.redraw);
 	}
+
+	function authHeader(username: string, password: string): string {
+		return "Authorization: Basic " + btoa(username + ":" + password);
+	}
+
 }
