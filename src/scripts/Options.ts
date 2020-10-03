@@ -1,4 +1,6 @@
 import m from "mithril";
+import { Modal } from "./Modal";
+import Button from "./Button";
 
 enum Option {
 	Proxy,
@@ -39,9 +41,16 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 
 	function view(vnode: m.VnodeDOM<{ doClose: () => void}>) {
 		const displayMode = get(Option.DisplayMode);
-		return [
-			m(".modal", [
-				m("header", m("h2", "Options (WIP, currently does nothing)")),
+		return m(
+			Modal,
+			{
+				title: "Options (WIP, currently does nothing)",
+				footer: [
+					m(Button, { isPrimary: true, onclick: doSave }, "Save"),
+					m(Button, { class: "is-light is-danger", onclick: vnode.attrs.doClose }, "Cancel"),
+				]
+			},
+			[
 				m("section.form", [
 					m("span", "Dark Mode"),
 					m("div", [
@@ -89,12 +98,8 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 						]),
 					]),
 				]),
-				m("footer", [
-					m("button.primary", { type: "button", onclick: doSave }, "Save"),
-					m("button", { type: "button", onclick: vnode.attrs.doClose }, "Cancel"),
-				]),
-			]),
-		];
+			]
+		);
 	}
 
 	function doSave(/* Event */): void {

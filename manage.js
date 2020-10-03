@@ -13,6 +13,21 @@ const job = process.argv[2];
 process.env.NODE_ENV = process.env.NODE_ENV || (job === "build" ? "production" : "development");
 const isProduction = process.env.NODE_ENV === "production";
 
+if (fs.existsSync("private-env.txt")) {
+	const envContents = fs.readFileSync("private-env.txt", { encoding: "utf8" });
+
+	for (const line of envContents.split("\n")) {
+		const strippedLine = line.trim();
+
+		if (strippedLine.length === 0 || strippedLine.startsWith("#")) {
+			continue;
+		}
+
+		const [name, ...value] = strippedLine.split("=");
+		process.env[name.trim()] = value.join("=").trim();
+	}
+}
+
 if (!process.env.PRESTIGE_PROXY_URL) {
 	process.env.PRESTIGE_PROXY_URL = isProduction ? "https://proxy.prestigemad.com/" : "http://localhost:3041/";
 }

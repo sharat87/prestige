@@ -1,9 +1,14 @@
+import firebase from "firebase/app";
+import "firebase/firebase-firestore";
+import AuthService from "./AuthService";
+
 export interface Storage {
 	name: string;
 	text: string;
 	cookieJar;
 
 	load(): Promise<void>;
+
 	save(delta: { text?: string, cookieJar? }): Promise<void>;
 }
 
@@ -22,6 +27,44 @@ export function* listStorageNames(): Generator<string> {
 	}
 }
 
+interface StorageSource {
+	type: string;
+	details: {
+		token?: string;
+	};
+}
+
+export function loadSources(): Promise<Storage[]> {
+	const sources: Storage[] = [];
+
+	const currentUser = AuthService.getCurrentUser();
+	if (currentUser == null) {
+		return Promise.resolve(sources);
+	}
+
+	const db = firebase.firestore();
+
+	return new Promise((resolve, reject) => {
+		db.collection(`s/${currentUser.uid}/s`)
+			.get()
+			.then(snapshot => {
+				snapshot.forEach(doc => {
+					sources.push(createProviderForStorage(doc.data()));
+				});
+				resolve(sources);
+			})
+			.catch(error => {
+				console.error("Error loading sources: ", error);
+				reject(error);
+			});
+	});
+}
+
+function createProviderForStorage(source: StorageSource) {
+	console.log("createProviderForStorage", source);
+	return source;
+}
+
 class LocalStorageImpl implements Storage {
 	name: string;
 	text: string;
@@ -33,7 +76,7 @@ class LocalStorageImpl implements Storage {
 		this.cookieJar = {};
 		this.load()
 			.catch(error => {
-				console.error(`Error loading LocalStorageImpl ${name}.`, error);
+				console.error(`Error loading LocalStorageImpl ${ name }.`, error);
 			});
 	}
 

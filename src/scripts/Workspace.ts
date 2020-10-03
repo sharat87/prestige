@@ -24,7 +24,7 @@ export default class Workspace {
 	private _content: string;
 	private _lines: null | string[];
 	private prevExecuteBookmark: null | CodeMirror.TextMarker;
-	private session: HttpSession;
+	session: HttpSession;
 	storage: Storage;
 	private flashQueue: any[];
 	private widgetMarks: CodeMirror.TextMarker[];
