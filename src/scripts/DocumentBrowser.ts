@@ -1,6 +1,6 @@
 import m from "mithril";
-import { LinkButton } from "./LinkButton";
 import { getAllAvailableProviders } from "./Persistence";
+import Button from "./Button";
 
 export function DocumentBrowser(): m.Component {
     return { view };
@@ -18,9 +18,9 @@ export function DocumentBrowser(): m.Component {
 			}),
 			m("p", [
 				"Connect more endpoints: ",
-				m(LinkButton, "GitHub Repo"),
-				m(LinkButton, "Dropbox"),
-				m(LinkButton, "Google Drive"),
+				m(Button, "GitHub Repo"),
+				m(Button, "Dropbox"),
+				m(Button, "Google Drive"),
 			]),
 		];
     }

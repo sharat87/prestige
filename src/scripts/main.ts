@@ -10,7 +10,6 @@ import { DocumentBrowser } from "./DocumentBrowser";
 import { PageEnd } from "./PageEnd";
 import { Modal } from "./Modal";
 import Button from "./Button";
-import { LinkButton } from "./LinkButton";
 import { ChevronDown, ExternalLink } from "./Icons";
 
 declare const process: { env: any };
@@ -18,7 +17,7 @@ declare const process: { env: any };
 window.addEventListener("load", () => {
 	const root = document.createElement("div");
 	root.setAttribute("id", "app");
-	// root.classList.add("h-screen", "max-h-screen", "overflow-hidden", "grid", "grid-cols-2");
+	root.classList.add("sans-serif");
 	document.body.insertAdjacentElement("afterbegin", root);
 	document.getElementById("loadingBox")?.remove();
 	m.route(root, "/doc/master", {
@@ -78,43 +77,43 @@ function WorkspaceView(): m.Component {
 		const authState = AuthController.getAuthState();
 		return [
 			m("main.h-100", [
-				m("header.flex.items-center.justify-between", [
+				m("header.flex.items-center.justify-between.bb.b--light-silver", [
 					m(".flex.items-center", [
-						m("h1.text-2xl", "Prestige"),
-						m("span", { style: { marginLeft: "1em" } }, m("em", "Just an HTTP client by Shrikant.")),
+						m("h1.f3", "Prestige"),
+						m(".f6.i.ml3", "Just an HTTP client by Shrikant."),
 					]),
 					m(".flex.items-center", [
 						m(
-							LinkButton,
+							NavLink,
 							{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowser },
 							["Doc: ", workspace.storage.name, m(ChevronDown)],
 						),
 						m(
-							LinkButton,
+							NavLink,
 							{ onclick: onCookiesToggle, isActive: popup === VisiblePopup.Cookies },
 							[`Cookies (${ workspace.cookieJar.size }) `, m(ChevronDown)],
 						),
 						m(
-							LinkButton,
+							NavLink,
 							{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
 							["Options ", m(ChevronDown)],
 						),
 						authState === AuthController.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
 						authState === AuthController.AuthState.ANONYMOUS && m(
-							LinkButton,
+							NavLink,
 							{ onclick: onLoginFormToggle, isActive: popup === VisiblePopup.LoginForm },
 							"LogIn/SignUp",
 						),
 						authState === AuthController.AuthState.LOGGED_IN && m(
-							LinkButton,
+							NavLink,
 							{ onclick: AuthController.logout },
 							[
 								AuthController.getCurrentUser()?.displayName || AuthController.getCurrentUser()?.email,
 								": Log out",
 							],
 						),
-						m(LinkButton, { href: "help.html" }, ["Help", m(ExternalLink)]),
-						m(LinkButton, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
+						m(NavLink, { href: "help.html" }, ["Help", m(ExternalLink)]),
+						m(NavLink, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
 					]),
 				]),
 				m(".er-pair.flex.items-stretch.justify-stretch", [
@@ -124,10 +123,10 @@ function WorkspaceView(): m.Component {
 				popup === VisiblePopup.DocumentBrowser && m(
 					Modal,
 					{
-						header: m("h2", "Documents"),
+						title: "Documents",
 						footer: [
 							m("div"),
-							m("div", m("button", { type: "button", onclick: onDocumentBrowserToggle }, "Close")),
+							m("div", m(Button, { style: "primary", type: "button", onclick: onDocumentBrowserToggle }, "Close")),
 						],
 					},
 					m(DocumentBrowser),
@@ -168,6 +167,24 @@ function WorkspaceView(): m.Component {
 	function onOptionsToggle() {
 		popup = popup === VisiblePopup.Options ? VisiblePopup.None : VisiblePopup.Options;
 		m.redraw();
+	}
+}
+
+const NavLink = {
+	view(vnode) {
+		const tag = (vnode.attrs.href ? "a.link" : "button.bn.bg-transparent") +
+			(vnode.attrs.isActive ? ".washed-blue.bg-blue" : ".color-inherit.hover-bg-washed-blue.hover-dark-blue") +
+			".pv1.ph2.pointer";
+
+		return m(
+			tag,
+			{
+				class: vnode.attrs.class || "",
+				...(vnode.attrs.href ? { href: vnode.attrs.href, target: "_blank" } : { type: vnode.attrs.type || "button" }),
+				onclick: vnode.attrs.onclick,
+			},
+			vnode.children,
+		);
 	}
 }
 
@@ -270,8 +287,8 @@ function ResultPane(): m.Component<{ class?: string, workspace: Workspace }> {
 		return m(".result-pane", { class: vnode.attrs.class }, [
 			m(Toolbar, {
 				left: [
-					m(LinkButton, { onclick: workspace.runAgain }, "Run Again"),
-					m(LinkButton, { onclick: () => { alert("Work in progress") } }, "Find in Editor"),
+					m(Button, { onclick: workspace.runAgain }, "Run Again"),
+					m(Button, { onclick: () => { alert("Work in progress") } }, "Find in Editor"),
 				],
 			}),
 			m(".body", [
@@ -448,7 +465,7 @@ const CookiesModal = {
 					{ class: "is-light is-danger", onclick: vnode.attrs.onClear },
 					"Clear all cookies",
 				),
-				m(Button, { onclick: vnode.attrs.onClose }, "Close"),
+				m(Button, { style: "primary", onclick: vnode.attrs.onClose }, "Close"),
 			],
 		},
 		[
@@ -485,7 +502,7 @@ const LoginFormModal = function (initialVnode) {
 					m("label", { for: "loginPassword" }, "Password"),
 					m("input", { id: "loginPassword", type: "password", required: true, minlength: 6 }),
 					m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
-						m(Button, { isPrimary: true, type: "submit" }, "Log in!"),
+						m(Button, { style: "primary", type: "submit" }, "Log in!"),
 					]),
 				]),
 				m("h2", { style: { textAlign: "center", marginTop: "2em" } }, "SignUp"),
@@ -497,7 +514,7 @@ const LoginFormModal = function (initialVnode) {
 					m("label", { for: "signupPasswordRepeat" }, "Password (Repeat)"),
 					m("input", { id: "signupPasswordRepeat", type: "password", required: true, minlength: 6 }),
 					m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
-						m(Button, { isPrimary: true, type: "submit" }, "Sign up!"),
+						m(Button, { style: "primary", type: "submit" }, "Sign up!"),
 					]),
 				]),
 			],

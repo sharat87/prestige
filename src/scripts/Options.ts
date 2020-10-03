@@ -46,9 +46,9 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 			{
 				title: "Options (WIP, currently does nothing)",
 				footer: [
-					m(Button, { isPrimary: true, onclick: doSave }, "Save"),
+					m(Button, { style: "primary", onclick: doSave }, "Save"),
 					m(Button, { class: "is-light is-danger", onclick: vnode.attrs.doClose }, "Cancel"),
-				]
+				],
 			},
 			[
 				m("section.form", [
@@ -98,7 +98,7 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 						]),
 					]),
 				]),
-			]
+			],
 		);
 	}
 

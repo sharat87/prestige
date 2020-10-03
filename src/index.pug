@@ -1,5 +1,5 @@
 doctype html
-html(lang="en")
+html.h-100(lang="en")
 	head
 		meta(charset="UTF-8")
 		title Prestige
@@ -13,20 +13,20 @@ html(lang="en")
 		link(rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32x32.png")
 		link(rel="icon" type="image/png" sizes="16x16" href="assets/favicon-16x16.png")
 
-	body.base16-default-light
+	body.h-100.bg-white.near-black
 		if process.env.NODE_ENV === "development"
 			p(style="position: fixed; top: 0; left: 40%; background-color: maroon; color: white; padding: 6px; z-index: 99") DEV
 
-		p#loadingBox(style="text-align: center; font-size: 2em; opacity: .6") Loading&hellip;
+		p#loadingBox(style="text-align: center; font: 2em sans-serif; opacity: .7") Loading&hellip;
 
 		noscript
 			| This is a webapp written in Javascript and as such, requires Javascript to function.
 			| Please enable Javascript in your browser or get a better browser like Firefox or Chromium.
 			| Thank you for checking us out.
 
-		link(rel="stylesheet" href="new-styles.scss")
+		// Using `..` here makes the resulting sourcemap for this stylesheet useless.
+		link(rel="stylesheet" href="../node_modules/tachyons/css/tachyons.css")
 		link(rel="stylesheet" href="styles.less")
-		link(rel="stylesheet" href="styles-final.css")
 
 		script(src="scripts/main.ts")
 

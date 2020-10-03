@@ -4,22 +4,9 @@
 }
 
 html, body {
-	height: 100%;
 	--header-height: 30px;
 	--layout-border: 1px solid var(--seam-color);
 	--code-font-family: "Fira Mono", monospace;
-}
-
-body {
-	font: 14px "Fira Sans", sans-serif;
-	margin: 0;
-	tab-size: 4;
-	background-color: var(--bg);
-	color: var(--fg);
-}
-
-h1, h2, h3, h4, h5, h6, strong, b {
-	font-weight: 600;
 }
 
 input, button, select {
@@ -36,35 +23,6 @@ input {
 	&:focus {
 		border-color: #09F;
 	}
-}
-
-button {
-	font-size: 1.1em;
-	background-image: linear-gradient(transparent, rgba(0, 0, 0, .08));
-	background-color: var(--gutter-bg);
-	border: 2px solid #BBB;
-	border-radius: 3px;
-	padding: 3px 12px;
-	cursor: pointer;
-
-	&.primary {
-		background-color: #09F;
-		border-color: #09F;
-		color: white;
-	}
-
-	&:hover {
-		background-color: var(--bg);
-	}
-
-	&:active {
-		background-image: none;
-	}
-}
-
-a {
-	display: inline-block;
-	color: #08A;
 }
 
 a.link-button, button.link-button {
@@ -132,7 +90,6 @@ table {
 
 main {
 	> header {
-		border-bottom: var(--layout-border);
 		height: var(--header-height);
 	}
 
@@ -435,8 +392,6 @@ main {
 }
 
 .modal {
-	height: 70vh;
-	width: 40%;
 	top: calc(var(--header-height) - 1px);
 	border-bottom-left-radius: 6px;
 	box-shadow: -6px 6px 18px rgba(0, 0, 0, .4);
