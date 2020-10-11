@@ -4,10 +4,17 @@ import Modal from "./Modal";
 import Button from "./Button";
 import AuthController from "./AuthService";
 
+interface InputAttrs {
+	id: string;
+	type?: "text" | "email" | "password";
+	required?: boolean;
+	minlength?: number;
+}
+
 const Input = {
-    view(vnode: VnodeDOM<{ id: string, type?: "text" | "email" | "password", required?: boolean, minlength?: number }>) {
-        return m("input.pa1.br1.ba.b--silver.bg-transparent", { type: "text", ...vnode.attrs });
-    },
+	view(vnode: VnodeDOM<InputAttrs>) {
+		return m("input.pa1.br1.ba.b--silver.bg-transparent", { type: "text", ...vnode.attrs });
+	},
 };
 
 export default function (initialVnode: VnodeDOM<{ onClose: any }>) {
@@ -89,4 +96,4 @@ export default function (initialVnode: VnodeDOM<{ onClose: any }>) {
 			});
 	}
 
-};
+}

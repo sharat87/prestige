@@ -25,7 +25,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar, onClose: any }>) {
 							{
 								class: "bg-washed-red dark-red hover-bg-dark-red hover-washed-red",
 								// TODO: Cookie jar is not saved after deletion here.
-								onclick: () => vnode.attrs.cookieJar.delete(`${domain}\t${path}\t${name}`)
+								onclick: () => vnode.attrs.cookieJar.delete(`${domain}\t${path}\t${name}`),
 							},
 							"Del",
 						),
@@ -65,7 +65,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar, onClose: any }>) {
 					),
 					m("tbody", rows),
 					/*
-					m("tfoot",
+					M("tfoot",
 						m("tr", [
 							m("td", "+"),
 							m("td", m("input")),
@@ -73,7 +73,11 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar, onClose: any }>) {
 							m("td", m("input")),
 							m("td", m("input")),
 							m("td", m("input")),
-							m("td", m(Button, { class: "bg-washed-green dark-green hover-bg-dark-green hover-washed-green" }, "Add")),
+							m("td", m(
+								Button,
+								{ class: "bg-washed-green dark-green hover-bg-dark-green hover-washed-green" },
+								"Add",
+							)),
 						])
 					),
 					 */

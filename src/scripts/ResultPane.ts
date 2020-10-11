@@ -2,17 +2,27 @@ import m, { VnodeDOM } from "mithril";
 import Workspace from "./Workspace";
 import CodeMirror from "codemirror";
 import { LoadingLabel } from "./LoadingLabel";
-import { Toolbar } from "./Toolbar";
+import Toolbar from "./Toolbar";
 import { Table } from "./Table";
 import PageEnd from "./PageEnd";
 import { NavLink } from "./NavLink";
 import NothingMessage from "./NothingMessage";
 import CodeBlock from "./CodeBlock";
 
-export default function ResultPane(): m.Component<{ class?: string, workspace: Workspace }> {
+interface Attrs {
+	class?: string;
+	workspace: Workspace;
+}
+
+interface State {
+	requestMirror: CodeMirror.Editor;
+	responseMirror: CodeMirror.Editor;
+}
+
+export default function ResultPane(): m.Component<Attrs, State> {
 	return { view };
 
-	function view(vnode: VnodeDOM<{ class?: string, workspace: Workspace }, { requestMirror: CodeMirror.Editor, responseMirror: CodeMirror.Editor }>) {
+	function view(vnode: VnodeDOM<Attrs, State>) {
 		const workspace = vnode.attrs.workspace;
 		const { result, isLoading } = workspace.session;
 
@@ -34,7 +44,10 @@ export default function ResultPane(): m.Component<{ class?: string, workspace: W
 				m(".body", [
 					m("h2.pl2", "Error executing request"),
 					result.error.title != null && m("h3", result.error.title),
-					result.error.message && m("pre.message.overflow-x-auto.overflow-y-hidden.ph2", result.error.message),
+					result.error.message && m(
+						"pre.message.overflow-x-auto.overflow-y-hidden.ph2",
+						result.error.message,
+					),
 					result.error.stack && m("details", [
 						m("summary.pointer", "Stack trace"),
 						m("pre.ph2.ml2", result.error.stack),
@@ -57,7 +70,9 @@ export default function ResultPane(): m.Component<{ class?: string, workspace: W
 							Object.entries(result.request).map(([name, value]) => {
 								return name !== "method" && name !== "url" && name !== "body" && m("tr", [
 									m("th.tl", name.replace(/\b\w/g, s => s.toUpperCase())),
-									m("td", typeof value === "string" ? value : JSON.stringify(value, null, 2)),
+									m("td", typeof value === "string"
+										? value
+										: JSON.stringify(value, null, 2)),
 								]);
 							}),
 						]),
@@ -81,7 +96,9 @@ export default function ResultPane(): m.Component<{ class?: string, workspace: W
 			m(Toolbar, {
 				left: m(".flex", [
 					m(NavLink, { onclick: workspace.runAgain }, "Run Again"),
-					m(NavLink, { onclick: () => { alert("Work in progress") } }, "Find in Editor"),
+					m(NavLink, { onclick: () => {
+						alert("Work in progress");
+					} }, "Find in Editor"),
 				]),
 			}),
 			m(".body", [
@@ -94,7 +111,7 @@ export default function ResultPane(): m.Component<{ class?: string, workspace: W
 						m("b", m(IntervalDisplay, { ms: result.timeTaken })),
 						".",
 					]),
-					cookieChanges.any && m("li",
+					cookieChanges && cookieChanges.any && m("li",
 						[
 							"Cookies: ",
 							m.trust([
@@ -156,7 +173,8 @@ export default function ResultPane(): m.Component<{ class?: string, workspace: W
 				".f2.pa2" + skin,
 				`${ response.status } ${ response.statusText }`,
 			),
-			m("pre.bg-near-white.pa2.pb3.overflow-x-auto.overflow-y-hidden", response.request.method + " " + response.url),
+			m("pre.bg-near-white.pa2.pb3.overflow-x-auto.overflow-y-hidden",
+				response.request.method + " " + response.url),
 			m("a.pl2", { href: response.url, target: "_blank" }, "Open GET request URL in new tab"),
 			m("h2.pl2", "Response"),
 			m(RichDataViewer, { text: response.body, spec: responseContentType }),
@@ -188,7 +206,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 			onclick() {
 				visibleTab = tab;
 			},
-		}, title)
+		}, title);
 	}
 
 	function view(vnode: VnodeDOM<{ text: string, spec: null | string }>) {
@@ -215,7 +233,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 				{ style: { display: (text !== "" && visibleTab === Tabs.text) ? "" : "none" } },
 				m(CodeBlock, {
 					text,
-					spec,
+					spec: spec ?? "",
 				}),
 			),
 			visibleTab === Tabs.iFrame && m("iframe.bn.pa0.w-100", {

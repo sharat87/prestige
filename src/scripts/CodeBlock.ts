@@ -1,4 +1,5 @@
 import m from "mithril";
+import type { VnodeDOM } from "mithril";
 import CodeMirror from "codemirror";
 import "codemirror/addon/selection/active-line";
 import "codemirror/addon/edit/matchbrackets";
@@ -17,11 +18,11 @@ import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
 import NothingMessage from "./NothingMessage";
 
-export default function CodeBlock(): m.Component<{ spec, text }> {
+export default function CodeBlock(): m.Component<{ spec: string, text: string }> {
 	let codeMirror: null | CodeMirror.Editor = null;
 	return { view, oncreate };
 
-	function oncreate(vnode: m.VnodeDOM<{ spec, text }>) {
+	function oncreate(vnode: VnodeDOM<{ spec: string, text: string }>) {
 		if (vnode.dom.classList.contains("code-block")) {
 			if (!(vnode.dom instanceof HTMLElement)) {
 				throw new Error("CodeMirror for CodeBlock cannot be initialized unless `vnode.dom` is an HTMLElement.");
@@ -38,7 +39,7 @@ export default function CodeBlock(): m.Component<{ spec, text }> {
 		}
 	}
 
-	function view(vnode) {
+	function view(vnode: VnodeDOM<{ spec: string, text: string }>) {
 		const haveText = asString(vnode.attrs.text, vnode.attrs.spec) !== "";
 		if (codeMirror != null) {
 			codeMirror.setValue(asString(vnode.attrs.text, vnode.attrs.spec));
@@ -97,7 +98,7 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 		};
 	}
 
-	function token(stream, state): string | null {
+	function token(stream: any, state: PrestigeState): string | null {
 		const { bodyJustStarted } = state;
 		state.bodyJustStarted = false;
 
@@ -158,7 +159,7 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 		return null;
 	}
 
-	function blankLine(state) {
+	function blankLine(state: PrestigeState) {
 		if (state.context === "request-preamble") {
 			state.context = "request-body";
 			state.bodyJustStarted = true;
@@ -176,7 +177,7 @@ function prettify(text: string, spec: null | string) {
 	return text;
 }
 
-function prettifyJson(json) {
+function prettifyJson(json: string) {
 	try {
 		return JSON.stringify(JSON.parse(json), null, 2);
 	} catch (error) {

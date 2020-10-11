@@ -27,7 +27,7 @@ type SheetPath = string;
 export class Sheet {
 	path: SheetPath;
 	body: string;
-	cookieJar;
+	cookieJar: any;
 
 	constructor(path: SheetPath, body: string, cookieJar = null) {
 		this.path = path;
@@ -166,7 +166,7 @@ function getAllAvailableSources(): Promise<Source[]> {
 			title: "Browser Storage",
 			details: {
 				prefix: "instance:",
-			}
+			},
 		},
 	];
 
@@ -222,7 +222,7 @@ export function refreshAvailableProviders(): Promise<void> {
 		.then(sources => {
 			const providers: Provider<Source>[] = [];
 
-			const typeCounts = {};
+			const typeCounts: Record<string, number> = {};
 
 			for (const source of sources) {
 				typeCounts[source.type] = 1 + (typeCounts[source.type] || -1);

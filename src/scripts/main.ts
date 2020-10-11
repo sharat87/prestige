@@ -148,7 +148,10 @@ function WorkspaceView(): m.Component {
 					title: "Documents",
 					footer: [
 						m("div"),
-						m("div", m(Button, { style: "primary", type: "button", onclick: onDocumentBrowserToggle }, "Close")),
+						m(
+							"div",
+							m(Button, { style: "primary", type: "button", onclick: onDocumentBrowserToggle }, "Close"),
+						),
 					],
 				},
 				m(DocumentBrowser),

@@ -33,9 +33,9 @@ export class Socket {
 		if (event.wasClean) {
 			console.log(`[close] Connection closed cleanly, code=${event.code} reason=${event.reason}`);
 		} else {
-			// e.g. server process killed or network down
-			// event.code is usually 1006 in this case
-			console.log('[close] Connection died');
+			// E.g. server process killed or network down
+			// Event.code is usually 1006 in this case
+			console.log("[close] Connection died");
 		}
 	}
 

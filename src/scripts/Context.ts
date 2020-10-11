@@ -5,22 +5,22 @@ import m from "mithril";
 export interface Context {
 	data: any;
 	run: ((lines: string[], runLineNum: number) => Promise<void>);
-	on: ((string, callback: ((CustomEvent) => void)) => void);
-	off: ((string, callback: ((CustomEvent) => void)) => void);
+	on: ((event: string, callback: ((e: CustomEvent) => void)) => void);
+	off: ((event: string, callback: ((e: CustomEvent) => void)) => void);
 	emit: any;
 	authHeader: (username: string, password: string) => string;
 }
 
 export function makeContext(session: HttpSession): Context {
-	const handlers: Map<string, Set<(CustomEvent) => any>> = new Map();
+	const handlers: Map<string, Set<(e: CustomEvent) => any>> = new Map();
 
 	return { data: {}, on, off, emit, run, authHeader };
 
-	function off(string, callback: (CustomEvent) => void): void {
+	function off(event: string, callback: (e: CustomEvent) => void): void {
 		handlers.get(name)?.delete(callback);
 	}
 
-	function on(string, callback: (CustomEvent) => void): void {
+	function on(event: string, callback: (e: CustomEvent) => void): void {
 		(handlers.get(name) || handlers.set(name, new Set()).get(name))?.add(callback);
 	}
 

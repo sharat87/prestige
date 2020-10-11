@@ -3,7 +3,7 @@ import firebase from "firebase/app";
 import "firebase/firebase-auth";
 import { refreshAvailableProviders } from "./Persistence";
 
-const enum AuthState {
+enum AuthState {
 	PENDING,
 	LOGGED_IN,
 	ANONYMOUS,
@@ -32,18 +32,18 @@ function getCurrentUser() {
 	return currentUser;
 }
 
-function onAuthStateChanged(user) {
+function onAuthStateChanged(user: any) {
 	if (user) {
 		// A user is signed in.
-		authState = AuthState.LOGGED_IN
+		authState = AuthState.LOGGED_IN;
 		currentUser = {
 			uid: user.uid,
 			displayName: user.displayName,
 			email: user.email,
 			isEmailVerified: user.emailVerified,
 			photoUrl: user.photoURL,
-			// isAnonymous: user.isAnonymous,
-			// providerData: user.providerData,
+			// IsAnonymous: user.isAnonymous,
+			// ProviderData: user.providerData,
 		};
 
 	} else {
@@ -70,7 +70,7 @@ function signup(email: string, password: string) {
 
 function login(email: string, password: string) {
 	const prevState = authState;
-	authState = AuthState.PENDING
+	authState = AuthState.PENDING;
 	return firebase.auth()
 		.signInWithEmailAndPassword(email, password)
 		.catch(error => {
@@ -92,7 +92,7 @@ function logout() {
 
 export default {
 	init,
-	AuthState,
+	AuthState: AuthState,
 	getAuthState,
 	getCurrentUser,
 	signup,

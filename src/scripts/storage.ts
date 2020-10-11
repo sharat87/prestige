@@ -5,11 +5,11 @@ import AuthService from "./AuthService";
 export interface Storage {
 	name: string;
 	text: string;
-	cookieJar;
+	cookieJar: any;
 
 	load(): Promise<void>;
 
-	save(delta: { text?: string, cookieJar? }): Promise<void>;
+	save(delta: { text?: string, cookieJar?: any }): Promise<void>;
 }
 
 const INSTANCE_KEY_PREFIX = "instance:";
@@ -34,32 +34,6 @@ interface StorageSource {
 	};
 }
 
-export function loadSources(): Promise<Storage[]> {
-	const sources: Storage[] = [];
-
-	const currentUser = AuthService.getCurrentUser();
-	if (currentUser == null) {
-		return Promise.resolve(sources);
-	}
-
-	const db = firebase.firestore();
-
-	return new Promise((resolve, reject) => {
-		db.collection(`s/${currentUser.uid}/s`)
-			.get()
-			.then(snapshot => {
-				snapshot.forEach(doc => {
-					sources.push(createProviderForStorage(doc.data()));
-				});
-				resolve(sources);
-			})
-			.catch(error => {
-				console.error("Error loading sources: ", error);
-				reject(error);
-			});
-	});
-}
-
 function createProviderForStorage(source: StorageSource) {
 	console.log("createProviderForStorage", source);
 	return source;
@@ -68,9 +42,9 @@ function createProviderForStorage(source: StorageSource) {
 class LocalStorageImpl implements Storage {
 	name: string;
 	text: string;
-	cookieJar;
+	cookieJar: any;
 
-	constructor(name) {
+	constructor(name: string) {
 		this.name = name;
 		this.text = "";
 		this.cookieJar = {};
@@ -90,9 +64,9 @@ class LocalStorageImpl implements Storage {
 		return Promise.resolve();
 	}
 
-	save(delta) {
+	save(delta: { text?: string, cookieJar?: any }) {
 		let haveChanges = false;
-		if (delta.text != null && typeof delta.text === "string") {
+		if (delta.text != null) {
 			this.text = delta.text;
 			haveChanges = true;
 		}

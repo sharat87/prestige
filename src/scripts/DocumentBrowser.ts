@@ -3,14 +3,14 @@ import { getAllAvailableProviders, getSheet, Provider, Source } from "./Persiste
 import Button from "./Button";
 
 export function DocumentBrowser(): m.Component {
-    return { view };
+	return { view };
 
-    function view() {
+	function view() {
 		const providers: Provider<Source>[] = getAllAvailableProviders();
 		console.log("All providers", providers);
 
-        return [
-        	providers.map(renderProvider),
+		return [
+			providers.map(renderProvider),
 			m("p", [
 				"Connect more endpoints: ",
 				m(Button, "GitHub Repo"),
@@ -18,7 +18,7 @@ export function DocumentBrowser(): m.Component {
 				m(Button, "Google Drive"),
 			]),
 		];
-    }
+	}
 }
 
 function renderProvider(provider: Provider<Source>) {

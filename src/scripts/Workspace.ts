@@ -197,7 +197,7 @@ export default class Workspace {
 		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10);
 		this.codeMirror?.replaceRange(
 			"###\n\nGET http://httpbin.org/get?name=sherlock\n\n",
-			{ line: lineNum, ch: 0 }
+			{ line: lineNum, ch: 0 },
 		);
 		this.codeMirror?.setCursor(lineNum + 2, 0);
 		this.codeMirror?.focus();
@@ -216,7 +216,7 @@ export default class Workspace {
 		this.codeMirror?.replaceRange(
 			event.currentTarget.dataset.pretty + "\n",
 			{ line: parseInt(event.currentTarget.dataset.start, 10), ch: 0 },
-			{ line: 1 + parseInt(event.currentTarget.dataset.end, 10), ch: 0 }
+			{ line: 1 + parseInt(event.currentTarget.dataset.end, 10), ch: 0 },
 		);
 	}
 
