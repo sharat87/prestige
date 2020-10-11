@@ -10,8 +10,7 @@ export interface RequestDetails {
 	body: string;
 }
 
-export async function extractRequest(lines: string[], runLineNum: number, context: Context)
-	: Promise<null | RequestDetails> {
+export async function extractRequest(lines: string[], runLineNum: number, context: Context): Promise<RequestDetails> {
 
 	const structure = computeStructure(lines);
 
@@ -55,7 +54,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 
 	if (isInScript) {
 		alert("Script block started above, not ended above.");
-		return null;
+		throw new Error("Script block started above, not ended above.");
 	}
 
 	const bodyLines: string[] = [];
@@ -112,7 +111,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 	}
 
 	if (queryParams.length > 0) {
-		const paramsObject = {};
+		const paramsObject: Record<string, string> = {};
 		for (const param of queryParams) {
 			const parts = param.split("=");
 			paramsObject[parts[0]] = parts.length > 1 ? parts.slice(1).join("=") : "";
@@ -142,7 +141,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 	return details;
 }
 
-export enum BlockType {
+export const enum BlockType {
 	PAGE,
 	PREAMBLE,
 	PREAMBLE_ENDED,

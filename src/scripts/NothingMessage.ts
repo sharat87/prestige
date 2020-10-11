@@ -1,11 +1,10 @@
-import m from "mithril";
+import m, { VnodeDOM } from "mithril";
 
-export const NothingMessage: m.Component<{ message?: string, extraMessage?: string }> = {
-	view(vnode) {
-		let message = vnode.attrs.message || "Nothing to show here.";
-		if (vnode.attrs.extraMessage) {
-			message += " " + vnode.attrs.extraMessage;
-		}
-		return m("p", m("em", message));
-	},
-};
+export default { view };
+
+function view(vnode: VnodeDOM<{ message?: string, extraMessage?: string }>) {
+	return m("p.i", [
+		vnode.attrs.message || "Nothing to show here.",
+		vnode.attrs.extraMessage && " " + vnode.attrs.extraMessage,
+	]);
+}

@@ -1,8 +1,8 @@
 import m from "mithril";
-import { Modal } from "./Modal";
+import Modal from "./Modal";
 import Button from "./Button";
 
-enum Option {
+const enum Option {
 	Proxy,
 	DisplayMode,
 }
@@ -51,7 +51,7 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 				],
 			},
 			[
-				m("section.form", [
+				m("form.grid", [
 					m("span", "Dark Mode"),
 					m("div", [
 						m("label", { title: "Sync to system's dark mode setting" }, [

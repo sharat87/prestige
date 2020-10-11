@@ -3,7 +3,7 @@ import firebase from "firebase/app";
 import "firebase/firebase-auth";
 import { refreshAvailableProviders } from "./Persistence";
 
-enum AuthState {
+const enum AuthState {
 	PENDING,
 	LOGGED_IN,
 	ANONYMOUS,
@@ -13,6 +13,8 @@ interface User {
 	uid: string;
 	displayName: string;
 	email: string;
+	isEmailVerified: boolean;
+	photoUrl: string;
 }
 
 let authState: AuthState = AuthState.PENDING;
@@ -38,11 +40,11 @@ function onAuthStateChanged(user) {
 			uid: user.uid,
 			displayName: user.displayName,
 			email: user.email,
+			isEmailVerified: user.emailVerified,
+			photoUrl: user.photoURL,
+			// isAnonymous: user.isAnonymous,
+			// providerData: user.providerData,
 		};
-		// const emailVerified = user.emailVerified;
-		// const photoURL = user.photoURL;
-		// const isAnonymous = user.isAnonymous;
-		// const providerData = user.providerData;
 
 	} else {
 		// No user is signed in, or a user has signed out.

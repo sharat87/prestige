@@ -14,8 +14,10 @@ interface Cookie {
 interface SuccessResult {
 	ok: true,
 	response: any,
-	cookies: Map<string, Cookie[]>,
-	cookieChanges: {
+	history: any[],
+	proxy: null | string,
+	cookies: null | CookieJar,
+	cookieChanges?: {
 		added: number,
 		modified: number,
 		removed: number,
@@ -31,6 +33,8 @@ interface FailureResult {
 	request: any,
 	timeTaken?: number,
 }
+
+type AnyResult = SuccessResult | FailureResult;
 
 interface ExecuteResponse {
 	status: number,
@@ -114,7 +118,7 @@ export default class HttpSession {
 					this.result.ok = true;
 					if ((this.result as SuccessResult).cookies) {
 						(this.result as SuccessResult).cookieChanges =
-							this.cookieJar.update((this.result as SuccessResult).cookies);
+							this.cookieJar.overwrite((this.result as SuccessResult).cookies);
 					}
 				}
 			})
@@ -152,7 +156,7 @@ export default class HttpSession {
 				this.result = res;
 				if (this.result != null) {
 					this.result.ok = true;
-					this.cookieJar.update((this.result as SuccessResult).cookies);
+					this.cookieJar.overwrite((this.result as SuccessResult).cookies);
 				}
 			})
 			.catch(error => {
@@ -161,7 +165,7 @@ export default class HttpSession {
 			});
 	}
 
-	async _execute(request) {
+	async _execute(request: any): Promise<null | AnyResult> {
 		console.info("Executing", request);
 		if (request == null) {
 			return null;
@@ -195,7 +199,7 @@ export default class HttpSession {
 				options.body = body;
 			}
 
-			const headersObject = {};
+			const headersObject: Record<string, string> = {};
 			for (const [name, value] of headers) {
 				headersObject[name] = value;
 			}
@@ -244,6 +248,7 @@ export default class HttpSession {
 			return {
 				ok: true,
 				proxy: null,
+				request,
 				response: {
 					status: response.status,
 					statusText: response.statusText,
@@ -257,7 +262,7 @@ export default class HttpSession {
 					},
 				},
 				history: [],
-				cookies: [],
+				cookies: null,
 			};
 
 		} else {

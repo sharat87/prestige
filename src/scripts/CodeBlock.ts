@@ -15,7 +15,7 @@ import "codemirror/addon/comment/comment";
 import "codemirror/mode/javascript/javascript";
 import "codemirror/mode/htmlmixed/htmlmixed";
 import "codemirror/lib/codemirror.css";
-import { NothingMessage } from "./NothingMessage";
+import NothingMessage from "./NothingMessage";
 
 export default function CodeBlock(): m.Component<{ spec, text }> {
 	let codeMirror: null | CodeMirror.Editor = null;
@@ -45,7 +45,7 @@ export default function CodeBlock(): m.Component<{ spec, text }> {
 		}
 
 		return haveText
-			? m(".code-block", { style: { display: haveText ? "" : "none" } })
+			? m(".code-block.mono.pa0", { style: { display: haveText ? "" : "none" } })
 			: m(NothingMessage);
 	}
 

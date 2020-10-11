@@ -1,9 +1,5 @@
 import m from "mithril";
 
-export const PageEnd = {
-    view: () => m(
-        "p",
-        { style: { margin: "2em 0 3em", textAlign: "center", fontSize: "2em" } },
-        "❦",
-    ),
+export default {
+    view: () => m("p.f3.tc.mt4.mb5", "❦"),
 };

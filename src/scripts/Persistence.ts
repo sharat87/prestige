@@ -2,8 +2,8 @@ import AuthService from "./AuthService";
 import firebase from "firebase";
 
 let currentProviders: Provider<Source>[] = [];
-//*
-type Source =
+
+export type Source =
 	LocalSource
 	| CloudSource
 	;
@@ -24,7 +24,7 @@ interface CloudSource {
 
 type SheetPath = string;
 
-class Sheet {
+export class Sheet {
 	path: SheetPath;
 	body: string;
 	cookieJar;
@@ -36,7 +36,7 @@ class Sheet {
 	}
 }
 
-abstract class Provider<S extends Source> {
+export abstract class Provider<S extends Source> {
 	source: S;
 	entries: string[];
 
@@ -211,13 +211,7 @@ function createProviderForSource(source: Source): Provider<Source> {
 	throw new Error(`Unrecognized persistence source type: '${ (source as any).type }'.`);
 }
 
-function getSourceKey(source: Source) {
-	return source.type + ":" + (
-		source.details == null ? null : JSON.stringify(source.details, Object.keys(source.details).sort())
-	);
-}
-
-const providerRegistry = {};
+const providerRegistry: Map<string, Provider<Source>> = new Map();
 
 export function getAllAvailableProviders(): Provider<Source>[] {
 	return currentProviders;
@@ -228,14 +222,18 @@ export function refreshAvailableProviders(): Promise<void> {
 		.then(sources => {
 			const providers: Provider<Source>[] = [];
 
-			for (const source of sources) {
-				const key = getSourceKey(source);
+			const typeCounts = {};
 
-				if (providerRegistry[key] == null) {
-					providerRegistry[key] = createProviderForSource(source);
+			for (const source of sources) {
+				typeCounts[source.type] = 1 + (typeCounts[source.type] || -1);
+				const key = source.type + (typeCounts[source.type] > 0 ? ":" + typeCounts[source.type] : "");
+				let provider = providerRegistry.get(key);
+
+				if (provider == null) {
+					providerRegistry.set(key, provider = createProviderForSource(source));
 				}
 
-				providers.push(providerRegistry[key]);
+				providers.push(provider);
 			}
 
 			return currentProviders = providers;
@@ -249,4 +247,17 @@ export function refreshAvailableProviders(): Promise<void> {
 		.catch(error => {
 			console.error("Unable to refresh available providers", error);
 		});
+}
+
+export function getSheet(qualifiedName: string): Promise<Sheet> {
+	const [providerKey, ...pathParts] = qualifiedName.split("/");
+	const path = pathParts.join("/");
+
+	const provider = providerRegistry.get(providerKey);
+	if (provider == null) {
+		console.error("Couldn't get provider for sheet", qualifiedName);
+		return Promise.reject(new Error("Couldn't get provider for key " + providerKey));
+	}
+
+	return provider.load(path);
 }

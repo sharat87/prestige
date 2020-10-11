@@ -56,7 +56,7 @@ export default class Workspace {
 		}
 
 		if (this.storage.cookieJar) {
-			this.session.cookieJar.update(this.storage.cookieJar);
+			this.session.cookieJar.overwrite(this.storage.cookieJar);
 			m.redraw();
 		}
 
@@ -72,6 +72,7 @@ export default class Workspace {
 		delete (CodeMirror as any).keyMap.macDefault["Cmd-["];
 		delete (CodeMirror as any).keyMap.macDefault["Cmd-]"];
 
+		console.log("Initializing CodeMirror for Workspace.");
 		this.codeMirror = CodeMirror(element, {
 			mode: "prestige",
 			lineNumbers: true,
@@ -132,6 +133,7 @@ export default class Workspace {
 			return;
 		}
 
+		console.log("Updating editor display in workspace.");
 		this.codeMirror.clearGutter("prestige");
 
 		const lines: string[] = this.lines;
@@ -150,12 +152,8 @@ export default class Workspace {
 
 			if (type === BlockType.PAGE && startLine.startsWith("###")) {
 				const el = document.createElement("span");
-				el.classList.add("icon", "add-widget");
+				el.classList.add("icon", "add-widget", "cm-tag", "ml2", "pointer", "underline");
 				el.innerHTML = "+new";
-				el.style.cursor = "pointer";
-				el.style.marginLeft = "1.5ch";
-				el.style.color = "green";
-				el.style.textDecoration = "underline";
 				el.title = "Insert new request here.";
 				el.dataset.lineNum = start.toString();
 				el.addEventListener("click", this.onNewClicked);
@@ -176,11 +174,8 @@ export default class Workspace {
 					const pretty = JSON.stringify(JSON.parse(pageContent), null, 2);
 					if (pageContent !== pretty) {
 						const el = document.createElement("span");
-						el.classList.add("icon");
+						el.classList.add("icon", "washed-blue", "bg-dark-blue", "pointer");
 						el.innerHTML = BracesSVG.content;
-						el.style.backgroundColor = "#09F";
-						el.style.color = "white";
-						el.style.cursor = "pointer";
 						el.title = "Prettify JSON body.";
 						el.dataset.start = start.toString();
 						el.dataset.end = end.toString();
