@@ -15,8 +15,6 @@ import ResultPane from "./ResultPane";
 import { Socket } from "./Socket";
 import { firebaseConfig, isDev } from "./Env";
 
-declare const process: { env: any };
-
 window.addEventListener("load", () => {
 	const root = document.createElement("main");
 	root.setAttribute("id", "app");
@@ -34,7 +32,7 @@ window.addEventListener("load", () => {
 
 function WorkspaceView(): m.Component {
 	const workspace = new Workspace();
-	const socket: Socket = new Socket();
+	const socket: null | Socket = isDev() ? new Socket() : null;
 
 	const enum VisiblePopup {
 		None,
@@ -77,7 +75,7 @@ function WorkspaceView(): m.Component {
 					m(".f6.i.ml3", "Just an HTTP client by Shrikant."),
 				]),
 				m(".flex.items-stretch", [
-					isDev() && m(
+					socket && m(
 						NavLink,
 						{
 							class: {
