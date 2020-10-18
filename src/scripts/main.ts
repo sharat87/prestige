@@ -112,20 +112,22 @@ function WorkspaceView(): m.Component {
 						{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
 						["Options ", m(ChevronDown)],
 					),
-					authState === AuthController.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
-					authState === AuthController.AuthState.ANONYMOUS && m(
-						NavLink,
-						{ onclick: onLoginFormToggle, isActive: popup === VisiblePopup.LoginForm },
-						"LogIn/SignUp",
-					),
-					authState === AuthController.AuthState.LOGGED_IN && m(
-						NavLink,
-						{ onclick: AuthController.logout },
-						[
-							AuthController.getCurrentUser()?.displayName || AuthController.getCurrentUser()?.email,
-							": Log out",
-						],
-					),
+					isDev() && [
+						authState === AuthController.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
+						authState === AuthController.AuthState.ANONYMOUS && m(
+							NavLink,
+							{ onclick: onLoginFormToggle, isActive: popup === VisiblePopup.LoginForm },
+							"LogIn/SignUp",
+						),
+						authState === AuthController.AuthState.LOGGED_IN && m(
+							NavLink,
+							{ onclick: AuthController.logout },
+							[
+								AuthController.getCurrentUser()?.displayName || AuthController.getCurrentUser()?.email,
+								": Log out",
+							],
+						),
+					],
 					m(NavLink, { href: "help.html" }, ["Help", m(ExternalLink)]),
 					m(NavLink, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
 				]),
