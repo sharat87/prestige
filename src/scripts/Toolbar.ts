@@ -1,9 +1,10 @@
-import m, { VnodeDOM } from "mithril";
+import m from "mithril";
+import type { VnodeDOM, Children } from "mithril";
 
 interface Attrs {
-	left?: any;
-	right?: any;
-	peripherals?: any;
+	left?: Children;
+	right?: Children;
+	peripherals?: Children;
 }
 
 export default {

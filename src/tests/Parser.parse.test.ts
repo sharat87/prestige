@@ -1,5 +1,4 @@
 import { Block, BlockType, parse } from "../scripts/Parser";
-import { makeMockContext } from "./utils";
 
 test("single line input with one request", async () => {
 	const structure: Block[] = parse([

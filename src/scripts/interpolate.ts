@@ -1,4 +1,6 @@
-export default function interpolate(content: string, context: any): string {
+import type { Context } from "./Context";
+
+export default function interpolate(content: string, context: Context): string {
 	const keys: string[] = [];
 	const values: any[] = [];
 

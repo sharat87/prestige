@@ -9,8 +9,8 @@ test("single line input with one request", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("GET");
-	expect(request!.url).toBe("http://httpbin.org");
+	expect(request.method).toBe("GET");
+	expect(request.url).toBe("http://httpbin.org");
 });
 
 test("get request on first and only non-blank line", async () => {
@@ -22,8 +22,8 @@ test("get request on first and only non-blank line", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("GET");
-	expect(request!.url).toBe("http://httpbin.org");
+	expect(request.method).toBe("GET");
+	expect(request.url).toBe("http://httpbin.org");
 });
 
 test("get request with blank lines around", async () => {
@@ -36,8 +36,8 @@ test("get request with blank lines around", async () => {
 	], 1, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("GET");
-	expect(request!.url).toBe("http://httpbin.org");
+	expect(request.method).toBe("GET");
+	expect(request.url).toBe("http://httpbin.org");
 });
 
 test("get request with one query param", async () => {
@@ -49,8 +49,8 @@ test("get request with one query param", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("GET");
-	expect(request!.url).toBe("http://httpbin.org/get?name=sherlock");
+	expect(request.method).toBe("GET");
+	expect(request.url).toBe("http://httpbin.org/get?name=sherlock");
 });
 
 test("get request with query param with special characters", async () => {
@@ -62,8 +62,8 @@ test("get request with query param with special characters", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("GET");
-	expect(request!.url).toBe("http://httpbin.org/get?crazy=this%20crazy%3Fstuff%26with%3Da%20bang!");
+	expect(request.method).toBe("GET");
+	expect(request.url).toBe("http://httpbin.org/get?crazy=this%20crazy%3Fstuff%26with%3Da%20bang!");
 });
 
 test("get request with multiple query params", async () => {
@@ -77,8 +77,8 @@ test("get request with multiple query params", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("GET");
-	expect(request!.url).toBe("http://httpbin.org/get?first=sherlock&last=holmes&brother=mycroft");
+	expect(request.method).toBe("GET");
+	expect(request.url).toBe("http://httpbin.org/get?first=sherlock&last=holmes&brother=mycroft");
 });
 
 test("get request with headers and multiple query params", async () => {
@@ -93,11 +93,11 @@ test("get request with headers and multiple query params", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("GET");
-	expect(Array.from(request!.headers)).toEqual([
+	expect(request.method).toBe("GET");
+	expect(Array.from(request.headers)).toEqual([
 		["x-one", "value one"],
 	]);
-	expect(request!.url).toBe("http://httpbin.org/get?first=sherlock&last=holmes&brother=mycroft");
+	expect(request.url).toBe("http://httpbin.org/get?first=sherlock&last=holmes&brother=mycroft");
 });
 
 test("post request with one line body", async () => {
@@ -110,9 +110,9 @@ test("post request with one line body", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("POST");
-	expect(request!.url).toBe("http://httpbin.org");
-	expect(request!.body).toBe("body goes here");
+	expect(request.method).toBe("POST");
+	expect(request.url).toBe("http://httpbin.org");
+	expect(request.body).toBe("body goes here");
 });
 
 test("get request with an ending", async () => {
@@ -129,9 +129,9 @@ test("get request with an ending", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("POST");
-	expect(request!.url).toBe("http://httpbin.org");
-	expect(request!.body).toBe("body goes here");
+	expect(request.method).toBe("POST");
+	expect(request.url).toBe("http://httpbin.org");
+	expect(request.body).toBe("body goes here");
 });
 
 test("pokemon graphql", async () => {
@@ -177,10 +177,10 @@ test("pokemon graphql", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("POST");
-	expect(request!.url).toBe("https://graphql-pokemon.now.sh/");
-	expect(Array.from(request!.headers)).toEqual([["content-type", "application/graphql"]]);
-	expect(request!.body).toBe(queryText);
+	expect(request.method).toBe("POST");
+	expect(request.url).toBe("https://graphql-pokemon.now.sh/");
+	expect(Array.from(request.headers)).toEqual([["content-type", "application/graphql"]]);
+	expect(request.body).toBe(queryText);
 });
 
 test("slack post message", async () => {
@@ -195,13 +195,13 @@ test("slack post message", async () => {
 	], 0, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("POST");
-	expect(request!.url).toBe("https://slack.com/api/chat.postMessage");
-	expect(Array.from(request!.headers)).toEqual([
+	expect(request.method).toBe("POST");
+	expect(request.url).toBe("https://slack.com/api/chat.postMessage");
+	expect(Array.from(request.headers)).toEqual([
 		["authorization", "Bearer token"],
 		["content-type", "application/json; charset=UTF-8"],
 	]);
-	expect(request!.body).toBe("{\"channel\":\"#general\",\"text\":\"A message from the API!\"}");
+	expect(request.body).toBe("{\"channel\":\"#general\",\"text\":\"A message from the API!\"}");
 });
 
 test("get request with single script", async () => {
@@ -215,8 +215,8 @@ test("get request with single script", async () => {
 	], 3, context);
 
 	expect(request).toBeDefined();
-	expect(request!.method).toBe("GET");
-	expect(request!.url).toBe("http://httpbin.org/get");
+	expect(request.method).toBe("GET");
+	expect(request.url).toBe("http://httpbin.org/get");
 });
 
 test("run inside script should fail", async () => {
