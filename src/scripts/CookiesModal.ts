@@ -25,7 +25,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar, onClose: any }>) {
 							{
 								class: "bg-washed-red dark-red hover-bg-dark-red hover-washed-red",
 								// TODO: Cookie jar is not saved after deletion here.
-								onclick: () => vnode.attrs.cookieJar.delete(`${domain}\t${path}\t${name}`),
+								onclick: () => vnode.attrs.cookieJar.delete(domain, path, name),
 							},
 							"Del",
 						),

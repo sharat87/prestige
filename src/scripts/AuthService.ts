@@ -1,6 +1,6 @@
 import m from "mithril";
 import firebase from "firebase/app";
-import "firebase/firebase-auth";
+import "firebase/auth";
 import { refreshAvailableProviders } from "./Persistence";
 
 enum AuthState {

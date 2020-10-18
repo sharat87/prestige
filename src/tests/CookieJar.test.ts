@@ -77,3 +77,103 @@ test("add one domain, update one domain cookies, using objects API", () => {
 	expect(jar.get("host1", "/", "name13")).toBeNull();
 	expect(jar.get("host1", "/", "name14")).toStrictEqual({ value: "value14", expires: "" });
 });
+
+test("add single domain cookies", () => {
+	const jar = new CookieJar();
+
+	jar.overwrite({
+		host1: {
+			"/": {
+				name11: { value: "value11", expires: "" },
+				name12: { value: "value12", expires: "" },
+			},
+		},
+		host2: {
+			"/": {
+				name11: { value: "value11", expires: "" },
+				name12: { value: "value12", expires: "" },
+			},
+		},
+	});
+
+	expect(jar.toJSON()).toStrictEqual({
+		host1: {
+			"/": {
+				name11: {
+					expires: "",
+					value: "value11"
+				},
+				name12: {
+					expires: "",
+					value: "value12"
+				},
+			},
+		},
+		host2: {
+			"/": {
+				name11: {
+					expires: "",
+					value: "value11"
+				},
+				name12: {
+					expires: "",
+					value: "value12"
+				},
+			},
+		},
+	});
+});
+
+test("messed up store shouldn't choke", () => {
+	const jar = new CookieJar();
+
+	jar.overwrite({
+		host1: {
+			"/": {
+				name11: { value: "value11", expires: "" },
+				name12: { value: "value12", expires: "" },
+			},
+		},
+	});
+
+	expect(jar.get("missing_host", "/", "name11")).toBeNull();
+	expect(jar.get("host1", "/missing_path", "name11")).toBeNull();
+	expect(jar.get("host1", "/", "missing_name")).toBeNull();
+});
+
+test("deleting cookies", () => {
+	const jar = new CookieJar();
+
+	const original = {
+		host1: {
+			"/": {
+				name11: { value: "value11", expires: "" },
+				name12: { value: "value12", expires: "" },
+			},
+		},
+	};
+
+	jar.overwrite(original);
+	expect(jar.store).toStrictEqual(original);
+
+	jar.delete("host1", "/", "missing_name");
+	expect(jar.store).toStrictEqual(original);
+
+	jar.delete("host1", "/missing_path", "name11");
+	expect(jar.store).toStrictEqual(original);
+
+	jar.delete("missing_host", "/", "name11");
+	expect(jar.store).toStrictEqual(original);
+
+	jar.delete("host1", "/", "name11");
+	expect(jar.store).toStrictEqual({
+		host1: {
+			"/": {
+				name12: { value: "value12", expires: "" },
+			},
+		},
+	});
+
+	jar.delete("host1", "/", "name12");
+	expect(jar.store).toStrictEqual({});
+});

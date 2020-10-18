@@ -48,7 +48,7 @@ const bundler = new Bundler(["src/index.pug", "src/help.pug"], {
 	cache: !isProduction,
 	autoInstall: false,
 	sourceMaps: !isProduction,
-	minify: isProduction,
+	minify: !isProduction,
 	logLevel: isProduction ? 4 : 3,
 	detailedReport: true,
 });

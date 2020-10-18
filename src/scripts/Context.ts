@@ -1,10 +1,10 @@
-import HttpSession from "./HttpSession";
+import HttpSession, { AnyResult } from "./HttpSession";
 import { isPromise } from "./utils";
 import m from "mithril";
 
 export interface Context {
 	data: any;
-	run: ((lines: string[], runLineNum: number) => Promise<void>);
+	run: ((lines: string[], runLineNum: number) => Promise<AnyResult>);
 	on: ((event: string, callback: ((e: CustomEvent) => void)) => void);
 	off: ((event: string, callback: ((e: CustomEvent) => void)) => void);
 	emit: any;
@@ -24,8 +24,8 @@ export function makeContext(session: HttpSession): Context {
 		(handlers.get(name) || handlers.set(name, new Set()).get(name))?.add(callback);
 	}
 
-	function run(lines: string[], runLineNum: number): Promise<void> {
-		return session.run(lines, runLineNum);
+	function run(lines: string[], runLineNum: number = 0): Promise<AnyResult> {
+		return session.runTop(lines, runLineNum, true);
 	}
 
 	function emit(name: string, detail: any) {

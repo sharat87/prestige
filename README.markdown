@@ -5,8 +5,11 @@
 
 > Under the abstractions, it's all just stardust interacting with text.
 
-This is a *simple*, *text-based*, *in-browser*, HTTP client app that I wanted for myself and wished someone would build
-it one day. Well, had to do it myself in the end.
+This is a *powerful*, *text-based*, *in-browser*, HTTP client app that I wanted for myself and wished someone would
+build it one day. Well, had to do it myself in the end.
+
+Check out the [User Guide](https://prestigemad.com/help.html) to learn how Prestige can be a powerful addition to your
+toolset.
 
 ## Under the Hood
 
@@ -29,42 +32,43 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 ## Developing
 
-For development, use the following command to start a development server on port 3040:
+For development, use the following command to start a development server on port 3040 (requires Node v12+):
 
     yarn start
 
-PS: If you don't have yarn installed, please do a `npm install -g yarn` first.
+PS: If you don't have yarn installed, please do an `npm install -g yarn` first.
 
 Once this is running, the app can be accessed at <http://localhost:3040/index.html> and the help document can be
 accessed at <http://localhost:3040/help.html>. Note that just <http://localhost:3040> doesn't currently work, we have to
-explicitly specify the `index.html` file.
+explicitly specify the `index.html` part.
 
 ## Inspirations
 
 - HTTP Client for Sublime Text: <https://requester.org/>.
 - HTTP Client for VS Code: <https://github.com/Huachao/vscode-restclient>.
 - REST Client for IntelliJ based IDEs: <https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html>.
+- My own Vim extension towards a very similar concept: <https://github.com/sharat87/roast.vim>.
 
 More: <https://github.com/marmelab/awesome-rest>.
-
-Selectable sessions support like <https://httpie.org/>?
-
-Also support proxies from <https://nordicapis.com/10-free-to-use-cors-proxies/> to execute CORS requests?
 
 ## Some public APIs play with
 
 1. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
 1. [httpbin.org](http://httpbin.org) &mdash; Great for meta-testing and JSON/form-data related experiments.
 1. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
-1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL.
+1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL, but requires a personal auth token.
+1. [A Curated List of 100 Cool and Fun Public APIs to Inspire Your Next Project](https://medium.com/better-programming/a-curated-list-of-100-cool-and-fun-public-apis-to-inspire-your-next-project-7600ce3e9b3)
 
 ## Rough Roadmap
 
 - Tests (at least for syntax parsing).
 - A desktop app with <https://github.com/webview/webview> or something similar.
-- Ability to start client and server with a single `docker-compose` command.
+- A browser extension that, when installed, would make it so that we don't need the proxy anymore.
+- Dockerfiles and ability to start client and server with a single `docker-compose` command.
 - Response handler scripts.
-- Create a rough SVG Logo.
+- Websocket based communication with the proxy.
+- Ability to open/edit documents from GitHub, Google Drive and Dropbox.
+- Move to Gulp+Rollup based build system, away from Parcel.
 
 ## Why the domain?
 
@@ -79,7 +83,14 @@ like this:
 > **Me**: I'll just stick mad into the domain name! \
 > **SO**: What's for dinner?
 
-And so we have [prestigemad.com](https://prestigemad.com).
+Turns out that domain name was indeed available; and so we have [prestigemad.com](https://prestigemad.com).
+
+## Contributing
+
+Contributions (code, tests, docs) are welcome, but if it's even slightly non-trivial or more than a few lines of
+changes, I'd appreciate it if you [opened an issue](https://github.com/sharat87/prestige/issues/new) to discuss before
+working towards a PR. Among other things, this can help avoid overlaps where we're both working on the same thing, and
+we realize it only after you open a PR.
 
 ## License
 

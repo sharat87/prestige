@@ -3,7 +3,6 @@ import m from "mithril";
 import OptionsModal from "./Options";
 import Workspace from "./Workspace";
 import firebase from "firebase/app";
-import "firebase/firebase-app";
 import AuthController from "./AuthService";
 import { DocumentBrowser } from "./DocumentBrowser";
 import Modal from "./Modal";
@@ -14,6 +13,7 @@ import LoginFormModal from "./LoginFormModal";
 import { NavLink } from "./NavLink";
 import ResultPane from "./ResultPane";
 import { Socket } from "./Socket";
+import { firebaseConfig, isDev } from "./Env";
 
 declare const process: { env: any };
 
@@ -27,22 +27,14 @@ window.addEventListener("load", () => {
 		"/doc/:docName...": WorkspaceView,
 	});
 
-	firebase.initializeApp({
-		apiKey: process.env.PRESTIGE_FIRESTORE_API_KEY,
-		authDomain: process.env.PRESTIGE_FIRESTORE_AUTH_DOMAIN,
-		databaseURL: process.env.PRESTIGE_FIRESTORE_DATABASE_URL,
-		projectId: process.env.PRESTIGE_FIRESTORE_PROJECT_ID,
-		storageBucket: process.env.PRESTIGE_FIRESTORE_STORAGE_BUCKET,
-		messagingSenderId: process.env.PRESTIGE_FIRESTORE_MESSAGING_SENDER_ID,
-		appId: process.env.PRESTIGE_FIRESTORE_APP_ID,
-	});
+	firebase.initializeApp(firebaseConfig());
 
 	AuthController.init();
 });
 
 function WorkspaceView(): m.Component {
 	const workspace = new Workspace();
-	const socket = new Socket();
+	const socket: Socket = new Socket();
 
 	const enum VisiblePopup {
 		None,
@@ -85,7 +77,7 @@ function WorkspaceView(): m.Component {
 					m(".f6.i.ml3", "Just an HTTP client by Shrikant."),
 				]),
 				m(".flex.items-stretch", [
-					m(
+					isDev() || m(
 						NavLink,
 						{
 							class: {
@@ -105,7 +97,7 @@ function WorkspaceView(): m.Component {
 							}[socket.readyState],
 						],
 					),
-					m(
+					isDev() || m(
 						NavLink,
 						{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowser },
 						["Doc: ", workspace.storage.name, m(ChevronDown)],
@@ -115,7 +107,7 @@ function WorkspaceView(): m.Component {
 						{ onclick: onCookiesToggle, isActive: popup === VisiblePopup.Cookies },
 						[`Cookies (${ workspace.cookieJar.size }) `, m(ChevronDown)],
 					),
-					m(
+					isDev() || m(
 						NavLink,
 						{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
 						["Options ", m(ChevronDown)],

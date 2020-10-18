@@ -65,7 +65,8 @@ export default class CookieJar {
 				}
 			} else {
 				++removed;
-				this.delete(key);
+				const [domain, path, name] = key.split("\t");
+				this.delete(domain, path, name);
 			}
 		}
 
@@ -86,7 +87,7 @@ export default class CookieJar {
 	get(domain: string, path: string, name: string): Morsel | null {
 		try {
 			return this.store[domain][path][name] ?? null;
-		} catch (error) {
+		} catch (error: any) {
 			if (error instanceof TypeError) {
 				return null;
 			} else {
@@ -95,7 +96,7 @@ export default class CookieJar {
 		}
 	}
 
-	set(key: string, morsel: Morsel) {
+	set(key: string, morsel: Morsel): void {
 		const [domain, path, name] = key.split("\t");
 		if (this.store[domain] == null) {
 			this.store[domain] = {};
@@ -109,9 +110,7 @@ export default class CookieJar {
 		this.recomputeSize();
 	}
 
-	delete(key: string) {
-		const [domain, path, name] = key.split("\t");
-
+	delete(domain: string, path: string, name: string): void {
 		if (this.store[domain] == null || this.store[domain][path] == null) {
 			return;
 		}

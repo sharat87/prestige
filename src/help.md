@@ -2,11 +2,12 @@
 
 > Just an HTTP Client, by Shrikant.
 
-Prestige is a minimal-UI HTTP client, intended for use as a development tool. In some ways, it is similar in what tools
-like [Postman](https://postman.co) or [Insomnia](https://insomnia.rest) address, but with a different and far more
-flexible take. For starters, there's no input boxes for URLs, drop-downs for methods etc. All that UI is done away with.
-Instead, the interface is inspired by a traditional text editors and IDEs. For example, the following a POST request
-with details that should be self-explanatory.
+Prestige is a text-based HTTP client, intended for use as an API development tool. In some ways, it is similar to
+[Postman](https://postman.co) or [Insomnia](https://insomnia.rest), but with a more UI-less design. This translates to
+being highly flexible. For starters, there's no input boxes for URLs, drop-downs for methods etc. All that UI is done
+away with. Instead, the interface looks like a traditional text editor and the requests are to be written as plain text.
+
+For example, the following a POST request with details that should be self-explanatory.
 
 ```
 POST http://my-awesome-api.com/users
@@ -19,10 +20,9 @@ Content-Type: application/json
 }
 ```
 
-To the uninitiated, that might seem less useful and less powerful to a fancy UI based tool, but since it's just text,
-it's extremely malleable. Prestige provides tools like clever templating, Javascript powered post body generation,
-pre-execution callbacks etc., that power you to play with APIs at new speeds. Welcome to parts of the past that remind
-of the future.
+This might seem less powerful compared to a fancy UI based tool, but since it's just text, it's extremely malleable.
+Prestige provides tools like templating, Javascript powered post body generation, pre-execution callbacks etc., that
+power you to play with APIs at new speeds.
 
 This document is the definitive user guide for Prestige. If you have questions, suggestions, or bug reports to make,
 GitHub Issues is currently the best place to do so. Thank you for trying out Prestige, I hope you like it!

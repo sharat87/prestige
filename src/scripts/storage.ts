@@ -1,6 +1,4 @@
-import firebase from "firebase/app";
-import "firebase/firebase-firestore";
-import AuthService from "./AuthService";
+import "firebase/firestore";
 
 export interface Storage {
 	name: string;

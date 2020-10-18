@@ -2,108 +2,82 @@ import m from "mithril";
 import Modal from "./Modal";
 import Button from "./Button";
 
-const enum Option {
-	Proxy,
-	DisplayMode,
+const OptionNames = {
+	Proxy: "proxy",
+	DisplayMode: "displayMode",
 }
 
-const data: Map<Option, string> = new Map([
-	[Option.Proxy, ""],
-	[Option.DisplayMode, "system"],
-]);
+const PREFIX = "option:";
 
-const watches: Map<Option, ((option: Option, value: string) => void)[]> = new Map();
-
-export const get = data.get.bind(data);
-
-export function watch(option: Option, fn: (option: Option, value: string) => void): void {
-	const fns = watches.get(option) || [];
-	if (!watches.has(option)) {
-		watches.set(option, fns);
+function get(name: string): any {
+	const rawValue = localStorage.getItem(PREFIX + name);
+	try {
+		return rawValue != null ? JSON.parse(rawValue) : null;
+	} catch (error: any) {
+		localStorage.removeItem(PREFIX + name);
+		return null;
 	}
-	fns.push(fn);
 }
 
-function set(option: Option, value: string): void {
-	if (value === data.get(option)) {
+function set(name: string, value: any): void {
+	const valueString: string = JSON.stringify(value);
+
+	if (valueString === get(name)) {
 		return;
 	}
 
-	data.set(option, value);
-
-	for (const fn of watches.get(option) || []) {
-		fn(option, value);
-	}
+	localStorage.setItem(PREFIX + name, valueString);
 }
 
 export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 	return { view };
 
 	function view(vnode: m.VnodeDOM<{ doClose: () => void}>) {
-		const displayMode = get(Option.DisplayMode);
+		const displayMode = get(OptionNames.DisplayMode) ?? "system";
 		return m(
 			Modal,
 			{
-				title: "Options (WIP, currently does nothing)",
-				footer: [
-					m(Button, { style: "primary", onclick: doSave }, "Save"),
-					m(Button, { class: "is-light is-danger", onclick: vnode.attrs.doClose }, "Cancel"),
-				],
+				title: "Options",
+				footer: m(Button, { style: "primary", onclick: vnode.attrs.doClose }, "Close"),
 			},
-			[
-				m("form.grid", [
-					m("span", "Dark Mode"),
-					m("div", [
-						m("label", { title: "Sync to system's dark mode setting" }, [
-							m("input", {
-								type: "radio",
-								name: "displayMode",
-								value: "system",
-								checked: displayMode === "system",
-							}),
-							m("span", "System"),
-						]),
-						m("label", [
-							m("input", {
-								type: "radio",
-								name: "displayMode",
-								value: "light",
-								checked: displayMode === "light",
-							}),
-							m("span", "Light"),
-						]),
-						m("label", [
-							m("input", {
-								type: "radio",
-								name: "displayMode",
-								value: "dark",
-								checked: displayMode === "dark",
-							}),
-							m("span", "Dark"),
-						]),
+			m("form.grid", { onchange: onChange }, [
+				m(".b", "Dark Mode (WIP)"),
+				m(".flex", [
+					m("label.flex", { title: "Sync to system's dark mode setting." }, [
+						m("input", {
+							type: "radio",
+							name: OptionNames.DisplayMode,
+							value: "system",
+							checked: displayMode === "system",
+						}),
+						m(".ml1", "System"),
 					]),
-					m("span", "Toolbar Style"),
-					m("div", [
-						m("label", [
-							m("input", { type: "radio", name: "toolbarStyle", value: "icons" }),
-							m("span", "Icons"),
-						]),
-						m("label", [
-							m("input", { type: "radio", name: "toolbarStyle", value: "text", checked: true }),
-							m("span", "Text"),
-						]),
-						m("label", [
-							m("input", { type: "radio", name: "toolbarStyle", value: "both" }),
-							m("span", "Icons & Text"),
-						]),
+					m("label.flex.ml3", { title: "Always use light mode." }, [
+						m("input", {
+							type: "radio",
+							name: OptionNames.DisplayMode,
+							value: "light",
+							checked: displayMode === "light",
+						}),
+						m(".ml1", "Light"),
+					]),
+					m("label.flex.ml3", { title: "Always use dark mode." }, [
+						m("input", {
+							type: "radio",
+							name: OptionNames.DisplayMode,
+							value: "dark",
+							checked: displayMode === "dark",
+						}),
+						m(".ml1", "Dark"),
 					]),
 				]),
-			],
+			]),
 		);
 	}
 
-	function doSave(/* Event */): void {
-		// TODO: Implement setting, saving (and loading) options.
-		console.warn("Saving options is WIP.");
+	function onChange(event: Event): void {
+		if (event.target instanceof HTMLInputElement) {
+			set(event.target.name, event.target.value);
+		}
 	}
 }

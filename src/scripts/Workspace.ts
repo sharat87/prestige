@@ -1,13 +1,11 @@
 import HttpSession from "./HttpSession";
-import { Storage, loadStorage } from "./storage";
+import { loadStorage, Storage } from "./storage";
 import m from "mithril";
 import CodeMirror from "codemirror";
-import { BlockType, computeStructure } from "./Parser";
+import { BlockType, parse } from "./Parser";
 import BracesSVG from "remixicon/icons/Development/braces-line.svg";
 import CookieJar from "./CookieJar";
-
-// Expected environment variables.
-declare const process: { env: { PRESTIGE_PROXY_URL: string } };
+import { proxyUrl } from "./Env";
 
 const DEFAULT_EDITOR_CONTENT = `GET http://httpbin.org/get?name=haha
 
@@ -34,7 +32,7 @@ export default class Workspace {
 		this._content = "";
 		this._lines = null;
 		this.prevExecuteBookmark = null;
-		this.session = new HttpSession(process.env.PRESTIGE_PROXY_URL);
+		this.session = new HttpSession(proxyUrl());
 		this.flashQueue = [];
 		this.widgetMarks = [];
 
@@ -137,7 +135,7 @@ export default class Workspace {
 		this.codeMirror.clearGutter("prestige");
 
 		const lines: string[] = this.lines;
-		const structure = computeStructure(lines);
+		const structure2 = parse(lines);
 
 		for (const mark of this.widgetMarks.splice(0, this.widgetMarks.length)) {
 			mark.clear();
@@ -147,49 +145,50 @@ export default class Workspace {
 			this.codeMirror.removeLineClass(i, "background", "line-javascript");
 		}
 
-		for (const { start, end, type } of structure) {
-			const startLine = lines[start];
+		for (const block of structure2) {
+			const startLine: string = lines[block.start];
 
-			if (type === BlockType.PAGE && startLine.startsWith("###")) {
+			if (block.type === BlockType.PAGE_BREAK) {
 				const el = document.createElement("span");
 				el.classList.add("icon", "add-widget", "cm-tag", "ml2", "pointer", "underline");
 				el.innerHTML = "+new";
 				el.title = "Insert new request here.";
-				el.dataset.lineNum = start.toString();
+				el.dataset.lineNum = block.start.toString();
 				el.addEventListener("click", this.onNewClicked);
 				this.widgetMarks.push(this.codeMirror.setBookmark(
-					{ line: start, ch: startLine.length },
+					{ line: block.start, ch: startLine.length },
 					{ widget: el, insertLeft: true },
 				));
 
-				if (startLine.startsWith("### javascript")) {
-					for (let i = start; i <= end + 1; ++i) {
-						this.codeMirror.addLineClass(i, "background", "line-javascript");
-					}
+			} else if (block.type === BlockType.JAVASCRIPT) {
+				for (let i = block.start; i <= block.end + 1; ++i) {
+					this.codeMirror.addLineClass(i, "background", "line-javascript");
 				}
 
-			} else if (type === BlockType.BODY && startLine.startsWith("{")) {
-				const pageContent = lines.slice(start, end + 1).join("\n");
+			} else if (block.type === BlockType.HTTP_REQUEST && block.payload != null) {
+				const pageContent = lines.slice(block.payload.start, block.payload.end + 1).join("\n");
+				let pretty: null | string = null;
+
 				try {
-					const pretty = JSON.stringify(JSON.parse(pageContent), null, 2);
-					if (pageContent !== pretty) {
-						const el = document.createElement("span");
-						el.classList.add("icon", "washed-blue", "bg-dark-blue", "pointer");
-						el.innerHTML = BracesSVG.content;
-						el.title = "Prettify JSON body.";
-						el.dataset.start = start.toString();
-						el.dataset.end = end.toString();
-						el.dataset.pretty = pretty;
-						el.addEventListener("click", this.onPrettifyClicked);
-						this.codeMirror.setGutterMarker(start, "prestige", el);
-					}
-
+					pretty = JSON.stringify(JSON.parse(pageContent), null, 2);
 				} catch (e) {
-					console.error("Error adding prettify button on line " + start, e);
+					// If the JSON is invalid, we can't prettify it.
+				}
 
+				if (pretty != null && pageContent !== pretty) {
+					const el = document.createElement("span");
+					el.classList.add("icon", "washed-blue", "bg-dark-blue", "pointer");
+					el.innerHTML = BracesSVG.content;
+					el.title = "Prettify JSON body.";
+					el.dataset.start = block.payload.start.toString();
+					el.dataset.end = block.payload.end.toString();
+					el.dataset.pretty = pretty;
+					el.addEventListener("click", this.onPrettifyClicked);
+					this.codeMirror.setGutterMarker(block.payload.start, "prestige", el);
 				}
 
 			}
+
 		}
 	}
 

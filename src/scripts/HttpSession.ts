@@ -1,15 +1,8 @@
 import m from "mithril";
 import CookieJar from "./CookieJar";
-import { extractRequest, RequestDetails } from "./Parser";
+import type { RequestDetails } from "./Parser";
+import { extractRequest } from "./Parser";
 import { makeContext } from "./Context";
-
-interface Cookie {
-	domain: string,
-	path: string,
-	name: string,
-	value: string,
-	expires: string,
-}
 
 interface SuccessResult {
 	ok: true,
@@ -34,7 +27,7 @@ interface FailureResult {
 	timeTaken?: number,
 }
 
-type AnyResult = SuccessResult | FailureResult;
+export type AnyResult = SuccessResult | FailureResult;
 
 interface ExecuteResponse {
 	status: number,
@@ -45,14 +38,14 @@ interface ExecuteResponse {
 
 export default class HttpSession {
 	cookieJar: CookieJar;
-	_isLoading: boolean;
+	private loadingCounter: number;
 	proxy: null | string;
-	result: SuccessResult | FailureResult | null;
+	result: AnyResult | null;
 
 	constructor(proxy: null | string = null) {
 		// These are persistent throughout a session.
 		this.cookieJar = new CookieJar();
-		this._isLoading = false;
+		this.loadingCounter = 0;
 		this.proxy = proxy;
 
 		// These should reset for each execute action.
@@ -84,58 +77,20 @@ export default class HttpSession {
 	}
 
 	get isLoading(): boolean {
-		return this._isLoading;
+		return this.loadingCounter > 0;
 	}
 
-	set isLoading(value: boolean) {
-		this._isLoading = value;
+	pushLoading() {
+		++this.loadingCounter;
 		m.redraw();
 	}
 
-	runTop(lines: string[], cursorLine: number): Promise<void> {
-		if (this.isLoading) {
-			alert("There's a request currently pending. Please wait for it to finish.");
-			return Promise.reject();
-		}
-
-		const startTime = Date.now();
-		this.isLoading = true;
-		let request: any = null;
-
-		// TODO: Use a separate context type and object, instead of `this`.
-		const context = makeContext(this);
-		return extractRequest(lines, cursorLine, context)
-			.then(async (req) => {
-				request = req;
-				await context.emit("BeforeExecute", { request });
-				return this._execute(request);
-			})
-			.then(res => {
-				this.isLoading = false;
-				console.log("Execute Result", res);
-				this.result = res;
-				if (this.result != null) {
-					this.result.ok = true;
-					if ((this.result as SuccessResult).cookies) {
-						(this.result as SuccessResult).cookieChanges =
-							this.cookieJar.overwrite((this.result as SuccessResult).cookies);
-					}
-				}
-			})
-			.catch(error => {
-				this.isLoading = false;
-				this.result = { ok: false, error, request };
-				return Promise.reject(error);
-			})
-			.finally(() => {
-				if (this.result != null) {
-					this.result.timeTaken = Date.now() - startTime;
-				}
-				m.redraw();
-			});
+	popLoading() {
+		--this.loadingCounter;
+		m.redraw();
 	}
 
-	run(lines: string | string[], runLineNum: string | number = 0): Promise<void> {
+	async runTop(lines: string | string[], runLineNum: string | number, silent: boolean = false): Promise<AnyResult> {
 		if (typeof lines === "string") {
 			lines = lines.split("\n");
 		}
@@ -144,181 +99,213 @@ export default class HttpSession {
 			runLineNum = parseInt(runLineNum, 10);
 		}
 
-		let request: any = null;
+		if (!silent && this.isLoading) {
+			alert("There's a request currently pending. Please wait for it to finish.");
+			return Promise.reject();
+		}
 
-		return extractRequest(lines, runLineNum, makeContext(this))
-			.then(req => {
-				request = req;
-				return this._execute(request);
-			})
-			.then(res => {
-				console.log("Got run response for", request);
-				this.result = res;
-				if (this.result != null) {
-					this.result.ok = true;
-					this.cookieJar.overwrite((this.result as SuccessResult).cookies);
-				}
-			})
-			.catch(error => {
-				this.result = { ok: false, error, request };
-				return Promise.reject(error);
-			});
+		const startTime = Date.now();
+		this.pushLoading();
+		let request: null | RequestDetails = null;
+
+		const context = makeContext(this);
+		let result: null | AnyResult = null;
+
+		try {
+			request = await extractRequest(lines, runLineNum, context);
+			if (!silent) {
+				await context.emit("BeforeExecute", { request });
+			}
+
+			result = await this.execute(request);
+			console.log(`Got runTop result (silent=${ silent })`, this.result);
+
+			if (this.result != null && this.result.ok && this.result.cookies) {
+				this.result.cookieChanges = this.cookieJar.overwrite(this.result.cookies);
+			}
+
+		} catch (error: any) {
+			result = { ok: false, error, request };
+
+		} finally {
+			if (result != null) {
+				result.timeTaken = Date.now() - startTime;
+			}
+
+			this.popLoading();
+
+		}
+
+		this.result = result;
+		return result;
 	}
 
-	async _execute(request: any): Promise<null | AnyResult> {
+	async execute(request: RequestDetails): Promise<AnyResult> {
 		console.info("Executing", request);
-		if (request == null) {
-			return null;
+
+		if (request.method === "") {
+			throw new Error("Method cannot be empty!");
 		}
 
-		const { url, headers, body } = request;
-
-		let method = request.method;
-		if (method == null || method === "") {
-			method = "GET";
-		}
-
-		if (url == null || url === "") {
+		if (request.url === "") {
 			throw new Error("URL cannot be empty!");
 		}
 
-		const options: RequestInit = {
-			cache: "no-store",
-			credentials: "same-origin",
-		};
+		const proxy = this.getProxyUrl(request);
 
-		const proxy = this.getProxyUrl({ method, url, headers, body });
 		// TODO: Let the timeout be set by the user.
 		const timeout = 5 * 60;  // Seconds.
 
 		if (proxy == null || proxy === "") {
-			options.method = method;
-			options.headers = headers;
-
-			if (typeof body === "string" && body !== "") {
-				options.body = body;
-			}
-
-			const headersObject: Record<string, string> = {};
-			for (const [name, value] of headers) {
-				headersObject[name] = value;
-			}
-
-			const response = await m.request({
-				url,
-				method,
-				headers: headersObject,
-				body,
-				withCredentials: true,
-				serialize(data: any): any {
-					return data;
-				},
-				config(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): XMLHttpRequest | void {
-					xhr.addEventListener("readystatechange", event => {
-						/* Use xhr.readyState to show progress.
-						0 UNSENT Client has been created. open() not called yet.
-						1 OPENED open() has been called.
-						2 HEADERS_RECEIVED send() has been called, and headers and status are available.
-						3 LOADING Downloading; responseText holds partial data.
-						4 DONE The operation is complete.
-						 */
-					});
-				},
-				extract(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): ExecuteResponse {
-					const lines: string[] = xhr.getAllResponseHeaders().trim().split(/[\r\n]+/);
-					const responseHeaders: string[][] = [];
-
-					for (const headerLine of lines) {
-						const parts = headerLine.split(":");
-						const name = parts.shift();
-						if (name != null) {
-							responseHeaders.push([name, parts.join(":").trim()]);
-						}
-					}
-
-					return {
-						status: xhr.status,
-						statusText: xhr.statusText,
-						headers: responseHeaders,
-						body: xhr.responseText,
-					};
-				},
-			});
-
-			return {
-				ok: true,
-				proxy: null,
-				request,
-				response: {
-					status: response.status,
-					statusText: response.statusText,
-					url,
-					headers: response.headers,
-					body: response.body,
-					request: {
-						url,
-						body: null,
-						...options,
-					},
-				},
-				history: [],
-				cookies: null,
-			};
+			return this.executeDirect(request);
 
 		} else {
-			options.method = "POST";
-			options.headers = new Headers({
+			return this.executeWithProxy(request, { timeout, proxy });
+
+		}
+	}
+
+	async executeDirect(request: RequestDetails): Promise<AnyResult> {
+		const { method, url, headers, body } = request;
+
+		const options: RequestInit = {
+			cache: "no-store",
+			credentials: "same-origin",
+			method: request.method,
+			headers: request.headers,
+		};
+
+		if (body !== "") {
+			options.body = body;
+		}
+
+		const headersObject: Record<string, string> = {};
+		for (const [name, value] of headers) {
+			headersObject[name] = value;
+		}
+
+		const response = await m.request({
+			url,
+			method,
+			headers: headersObject,
+			body,
+			withCredentials: true,
+			serialize(data: any): any {
+				return data;
+			},
+			config(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): XMLHttpRequest | void {
+				xhr.addEventListener("readystatechange", event => {
+					/* Use xhr.readyState to show progress.
+					0 UNSENT Client has been created. open() not called yet.
+					1 OPENED open() has been called.
+					2 HEADERS_RECEIVED send() has been called, and headers and status are available.
+					3 LOADING Downloading; responseText holds partial data.
+					4 DONE The operation is complete.
+					 */
+				});
+			},
+			extract(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): ExecuteResponse {
+				const lines: string[] = xhr.getAllResponseHeaders().trim().split(/[\r\n]+/);
+				const responseHeaders: string[][] = [];
+
+				for (const headerLine of lines) {
+					const parts = headerLine.split(":");
+					const name = parts.shift();
+					if (name != null) {
+						responseHeaders.push([name, parts.join(":").trim()]);
+					}
+				}
+
+				return {
+					status: xhr.status,
+					statusText: xhr.statusText,
+					headers: responseHeaders,
+					body: xhr.responseText,
+				};
+			},
+		});
+
+		return {
+			ok: true,
+			proxy: null,
+			request,
+			response: {
+				status: response.status,
+				statusText: response.statusText,
+				url,
+				headers: response.headers,
+				body: response.body,
+				request: {
+					url,
+					body: null,
+					...options,
+				},
+			},
+			history: [],
+			cookies: null,
+		};
+	}
+
+	async executeWithProxy(
+		request: RequestDetails,
+		{ timeout, proxy }: { timeout: number, proxy: string }
+	): Promise<AnyResult> {
+
+		const { method, url, headers, body } = request;
+
+		const options: RequestInit = {
+			cache: "no-store",
+			credentials: "same-origin",
+			method: "POST",
+			headers: new Headers({
 				"Content-Type": "application/json",
 				"Accept": "application/json",
-			});
-
-			const requestHeaders = Array.from(headers.entries());
-			options.body = JSON.stringify({
+			}),
+			body: JSON.stringify({
 				url,
 				method,
-				headers: requestHeaders,
+				headers: Array.from(headers.entries()),
 				timeout,
 				cookies: this.cookieJar,
 				body,
-			});
+			})
+		};
 
-			const response = await fetch(proxy, options);
+		const response = await fetch(proxy, options);
 
-			const textResponse = await response.text();
-			let data;
+		const textResponse = await response.text();
+		let data;
 
-			try {
-				data = JSON.parse(textResponse);
-			} catch (error) {
-				if (!(error instanceof SyntaxError)) {
-					throw error;
-				}
-				// The proxy server didn't return a valid JSON, this is most likely due to a server error on the proxy.
-				data = {
-					ok: false,
-					proxy,
-					error: {
-						title: "Error parsing response from the proxy",
-						message: textResponse,
-					},
-				};
+		try {
+			data = JSON.parse(textResponse);
+		} catch (error) {
+			if (!(error instanceof SyntaxError)) {
+				throw error;
 			}
+			// The proxy server didn't return a valid JSON, this is most likely due to a server error on the proxy.
+			data = {
+				ok: false,
+				proxy,
+				error: {
+					title: "Error parsing response from the proxy",
+					message: textResponse,
+				},
+			};
+		}
 
-			data.proxy = proxy;
+		data.proxy = proxy;
 
-			if (typeof data.ok === "undefined") {
-				console.error("Unexpected protocol response from proxy", data);
-				return data;
+		if (typeof data.ok === "undefined") {
+			console.error("Unexpected protocol response from proxy", data);
+			return data;
 
-			} else if (data.ok) {
-				console.log("response ok data", data);
-				return data;
+		} else if (data.ok) {
+			console.log("response ok data", data);
+			return data;
 
-			} else {
-				console.error("response non-ok data", data);
-				return Promise.reject(new Error(data.error.message));
-
-			}
+		} else {
+			console.error("response non-ok data", data);
+			return Promise.reject(new Error(data.error.message));
 
 		}
 	}
