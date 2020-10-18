@@ -24,7 +24,7 @@ export function makeContext(session: HttpSession): Context {
 		(handlers.get(name) || handlers.set(name, new Set()).get(name))?.add(callback);
 	}
 
-	function run(lines: string[], runLineNum: number = 0): Promise<AnyResult> {
+	function run(lines: string[], runLineNum = 0): Promise<AnyResult> {
 		return session.runTop(lines, runLineNum, true);
 	}
 

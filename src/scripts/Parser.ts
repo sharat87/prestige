@@ -119,7 +119,7 @@ export const enum BlockType {
 
 interface BlockBase {
 	// TODO: The start and end are both inclusive currently, and mark the start and end of *content*, not blank lines
-	//   if any. Change this to have `end` be exclusive, and both figures include whitespace around the block content.
+	//   If any. Change this to have `end` be exclusive, and both figures include whitespace around the block content.
 	type: BlockType;
 	start: number;
 	end: number;
@@ -154,7 +154,7 @@ export function parse(input: string[] | string): Block[] {
 	const blocks: Block[] = [];
 
 	let type: BlockType = BlockType.PAGE_BREAK;
-	let state: string = "begin";
+	let state = "begin";
 	let typeStart: number | null = null;
 	let lastNonBlank = -1;
 	let currentBlock: null | Block = null;
@@ -184,7 +184,7 @@ export function parse(input: string[] | string): Block[] {
 					type: BlockType.JAVASCRIPT,
 					start: -1,
 					end: -1,
-				}
+				};
 			} else {
 				type = BlockType.HTTP_REQUEST;
 				state = "http-before-headers";

@@ -101,11 +101,11 @@ test("add single domain cookies", () => {
 			"/": {
 				name11: {
 					expires: "",
-					value: "value11"
+					value: "value11",
 				},
 				name12: {
 					expires: "",
-					value: "value12"
+					value: "value12",
 				},
 			},
 		},
@@ -113,11 +113,11 @@ test("add single domain cookies", () => {
 			"/": {
 				name11: {
 					expires: "",
-					value: "value11"
+					value: "value11",
 				},
 				name12: {
 					expires: "",
-					value: "value12"
+					value: "value12",
 				},
 			},
 		},

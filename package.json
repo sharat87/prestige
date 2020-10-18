@@ -106,7 +106,7 @@
 				}
 			],
 			"no-shadow": [
-				"warning",
+				"warn",
 				{
 					"allow": [
 						"resolve",

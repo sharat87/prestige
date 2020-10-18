@@ -90,7 +90,7 @@ export default class HttpSession {
 		m.redraw();
 	}
 
-	async runTop(lines: string | string[], runLineNum: string | number, silent: boolean = false): Promise<AnyResult> {
+	async runTop(lines: string | string[], runLineNum: string | number, silent = false): Promise<AnyResult> {
 		if (typeof lines === "string") {
 			lines = lines.split("\n");
 		}
@@ -248,7 +248,7 @@ export default class HttpSession {
 
 	async executeWithProxy(
 		request: RequestDetails,
-		{ timeout, proxy }: { timeout: number, proxy: string }
+		{ timeout, proxy }: { timeout: number, proxy: string },
 	): Promise<AnyResult> {
 
 		const { method, url, headers, body } = request;
@@ -268,7 +268,7 @@ export default class HttpSession {
 				timeout,
 				cookies: this.cookieJar,
 				body,
-			})
+			}),
 		};
 
 		const response = await fetch(proxy, options);

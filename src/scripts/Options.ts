@@ -5,7 +5,7 @@ import Button from "./Button";
 const OptionNames = {
 	Proxy: "proxy",
 	DisplayMode: "displayMode",
-}
+};
 
 const PREFIX = "option:";
 

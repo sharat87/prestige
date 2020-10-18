@@ -228,7 +228,7 @@ test("run inside script should fail", async () => {
 			"const n = 1;",
 			"###",
 			"GET http://httpbin.org/get",
-		], 1, context)
+		], 1, context),
 	)
 		.rejects
 		.toThrow("Can't execute from inside a script block.");
@@ -241,7 +241,7 @@ test("extract request with empty header name", async () => {
 		extractRequest([
 			"GET http://httpbin.org/get",
 			": value of empty header name",
-		], 1, context)
+		], 1, context),
 	)
 		.rejects
 		.toThrow("Header name cannot be blank.");

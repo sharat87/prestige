@@ -20,5 +20,5 @@ export function firebaseConfig() {
 		storageBucket: process.env.PRESTIGE_FIRESTORE_STORAGE_BUCKET,
 		messagingSenderId: process.env.PRESTIGE_FIRESTORE_MESSAGING_SENDER_ID,
 		appId: process.env.PRESTIGE_FIRESTORE_APP_ID,
-	}
+	};
 }
