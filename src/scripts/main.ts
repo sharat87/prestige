@@ -77,7 +77,7 @@ function WorkspaceView(): m.Component {
 					m(".f6.i.ml3", "Just an HTTP client by Shrikant."),
 				]),
 				m(".flex.items-stretch", [
-					isDev() || m(
+					isDev() && m(
 						NavLink,
 						{
 							class: {
@@ -97,7 +97,7 @@ function WorkspaceView(): m.Component {
 							}[socket.readyState],
 						],
 					),
-					isDev() || m(
+					isDev() && m(
 						NavLink,
 						{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowser },
 						["Doc: ", workspace.storage.name, m(ChevronDown)],
@@ -107,7 +107,7 @@ function WorkspaceView(): m.Component {
 						{ onclick: onCookiesToggle, isActive: popup === VisiblePopup.Cookies },
 						[`Cookies (${ workspace.cookieJar.size }) `, m(ChevronDown)],
 					),
-					isDev() || m(
+					isDev() && m(
 						NavLink,
 						{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
 						["Options ", m(ChevronDown)],
