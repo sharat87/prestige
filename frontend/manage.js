@@ -29,7 +29,7 @@ if (fs.existsSync("private-env.txt")) {
 }
 
 if (!process.env.PRESTIGE_BACKEND) {
-	process.env.PRESTIGE_BACKEND = isProduction ? "https://proxy.prestigemad.com/" : "http://localhost:3041";
+	process.env.PRESTIGE_BACKEND = isProduction ? "/api" : "http://localhost:3041";
 }
 
 process.on("unhandledRejection", (reason, promise) => {
