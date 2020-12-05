@@ -68,7 +68,6 @@ def logout_view(request):
 @login_required_json
 def profile_view(request):
 	return JsonResponse({
-		"ok": True,
 		"user": user_plain(request.user),
 	})
 

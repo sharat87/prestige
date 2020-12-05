@@ -19,7 +19,7 @@ const currentUser: Stream<null | User> = Stream()
 const AUTH_URL_BASE = authUrl()
 
 function check(): void {
-	m.request<{ ok: boolean, user: User }>({
+	m.request<{ user: User }>({
 		method: "GET",
 		url: AUTH_URL_BASE + "profile",
 		withCredentials: true,
@@ -96,19 +96,19 @@ function logout() {
 	const prevState = authState
 	authState = AuthState.PENDING
 
-	m.request<{ ok: boolean, user: User }>({
+	m.request<void>({
 		method: "POST",
 		url: AUTH_URL_BASE + "logout",
 		withCredentials: true,
 	})
-		.then(response => {
-			console.log("logout response", response)
+		.then(() => {
 			authState = AuthState.ANONYMOUS
 			currentUser(null)
 		})
 		.catch(() => {
 			authState = prevState
 		})
+		.finally(m.redraw)
 }
 
 export const email: Stream<string> = Stream()
