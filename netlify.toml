@@ -2,7 +2,23 @@
   base = "frontend/"
   publish = "frontend/dist/"
   command = "yarn run build"
-  environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "https://b.prestigemad.com/" }
+  environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "/api/" }
+
+[[redirects]]
+  from = "/api/*"
+  to = "http://api.prestigemad.com/:splat"
+  status = 200
+  force = true
+  headers = { X-From = "Netlify" }
+  # TODO: Add a secret to use signed proxy. See <https://docs.netlify.com/routing/redirects/rewrites-proxies/#signed-proxy-redirects>
+
+[[redirects]]
+  from = "/a/*"
+  to = "http://api.prestigemad.com/a/:splat"
+  status = 200
+  force = true
+  headers = { X-From = "Netlify" }
+  # TODO: Add a secret to use signed proxy. See <https://docs.netlify.com/routing/redirects/rewrites-proxies/#signed-proxy-redirects>
 
 # Following is required for SPAs that handle routing client-side.
 [[redirects]]
