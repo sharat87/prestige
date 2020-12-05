@@ -34,7 +34,7 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 For development, use the following command to start a development server on port 3040 (requires Node v12+):
 
-    yarn start
+    make serve-frontend
 
 PS: If you don't have yarn installed, please do an `npm install -g yarn` first.
 
@@ -61,13 +61,15 @@ More: <https://github.com/marmelab/awesome-rest>.
 
 ## Rough Roadmap
 
-- Tests (at least for syntax parsing).
+- UI Tests?
+- User Guide and User API Reference.
 - A desktop app with <https://github.com/webview/webview> or something similar.
 - A browser extension that, when installed, would make it so that we don't need the proxy anymore.
 - Dockerfiles and ability to start client and server with a single `docker-compose` command.
 - Response handler scripts.
-- Websocket based communication with the proxy.
+- Starter templates instead of a blank new document.
 - Ability to open/edit documents from GitHub, Google Drive and Dropbox.
+- Rich editor features like auto-complete, JSON editing help, hotkeys to start new GET/POST/etc. request etc.
 - Move to Gulp+Rollup based build system, away from Parcel.
 
 ## Why the domain?

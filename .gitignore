@@ -1,12 +1,14 @@
+backend/venv
+backend/db.sqlite3
+
+frontend/node_modules
+frontend/dist
+frontend/coverage
+
+.cache
+yarn-error.log
+
 .DS_Store
 
 /.idea
 *.iml
-
-/node_modules
-
-/dist
-/.cache
-/coverage
-
-/yarn-error.log

@@ -1,0 +1,183 @@
+{
+	"name": "prestige-rest-client",
+	"version": "1.0.0",
+	"description": "Just an HTTP client, by Shrikant.",
+	"author": "Shrikant Sharat Kandula <shrikantsharat.k@gmail.com>",
+	"license": "Apache-2.0",
+	"bugs": {
+		"url": "https://github.com/sharat87/prestige/issues"
+	},
+	"homepage": "https://github.com/sharat87/prestige",
+	"browserslist": [
+		"last 2 Chrome versions",
+		"last 2 Firefox versions",
+		"last 2 Edge versions",
+		"last 2 Safari versions"
+	],
+	"scripts": {
+		"build": "node manage.js build",
+		"start": "node manage.js serve",
+		"lint": "tsc --noEmit --project . && eslint --report-unused-disable-directives src",
+		"lint_fix": "eslint --fix --fix-type problem,suggestion,layout --ignore-path ../.gitignore src",
+		"test": "jest"
+	},
+	"jest": {
+		"preset": "ts-jest",
+		"moduleNameMapper": {
+			"\\.(css|less)$": "identity-obj-proxy"
+		}
+	},
+	"eslintConfig": {
+		"env": {
+			"browser": true,
+			"es6": true
+		},
+		"extends": [
+			"eslint:recommended",
+			"plugin:@typescript-eslint/recommended"
+		],
+		"overrides": [
+			{
+				"files": [
+					"src/scripts/*.ts",
+					"src/tests/*.ts"
+				],
+				"excludedFiles": [
+					"node_modules",
+					"dist",
+					"coverage"
+				]
+			}
+		],
+		"parser": "@typescript-eslint/parser",
+		"parserOptions": {
+			"ecmaVersion": 11,
+			"sourceType": "module"
+		},
+		"plugins": [
+			"@typescript-eslint"
+		],
+		"rules": {
+			"indent": [
+				"error",
+				"tab"
+			],
+			"no-tabs": [
+				"error",
+				{
+					"allowIndentationTabs": true
+				}
+			],
+			"max-len": [
+				"error",
+				{
+					"code": 120,
+					"tabWidth": 4,
+					"ignoreComments": false,
+					"ignoreTrailingComments": false,
+					"ignoreStrings": false,
+					"ignoreTemplateLiterals": false
+				}
+			],
+			"linebreak-style": [
+				"error",
+				"unix"
+			],
+			"no-unused-vars": "error",
+			"no-unused-expressions": "error",
+			"quotes": "off",
+			"@typescript-eslint/quotes": [
+				"error",
+				"double"
+			],
+			"semi": "off",
+			"@typescript-eslint/semi": [
+				"error",
+				"never"
+			],
+			"comma-dangle": "off",
+			"@typescript-eslint/comma-dangle": [
+				"error",
+				"always-multiline"
+			],
+			"capitalized-comments": "error",
+			"eol-last": "error",
+			"no-trailing-spaces": "error",
+			"camelcase": "error",
+			"brace-style": "off",
+			"@typescript-eslint/brace-style": [
+				"error",
+				"1tbs"
+			],
+			"object-curly-spacing": [
+				"error",
+				"always"
+			],
+			"curly": [
+				"error",
+				"all"
+			],
+			"eqeqeq": [
+				"error",
+				"always",
+				{
+					"null": "ignore"
+				}
+			],
+			"no-shadow": [
+				"warn",
+				{
+					"allow": [
+						"resolve",
+						"reject",
+						"done"
+					]
+				}
+			],
+			"no-var": "error",
+			"prefer-const": "error",
+			"no-lonely-if": "error",
+			"no-multiple-empty-lines": "error",
+			"@typescript-eslint/no-for-in-array": "error"
+		}
+	},
+	"devDependencies": {
+		"@babel/core": "^7.11.4",
+		"@rollup/plugin-commonjs": "^15.1.0",
+		"@rollup/plugin-json": "^4.1.0",
+		"@rollup/plugin-node-resolve": "^9.0.0",
+		"@rollup/plugin-typescript": "^6.0.0",
+		"@types/codemirror": "0.0.98",
+		"@types/gulp": "^4.0.7",
+		"@types/jest": "^26.0.14",
+		"@types/lodash": "^4.14.162",
+		"@types/mithril": "^2.0.4",
+		"@typescript-eslint/eslint-plugin": "^4.4.0",
+		"@typescript-eslint/parser": "^4.4.0",
+		"babel-plugin-transform-remove-console": "^6.9.4",
+		"babel-plugin-transform-runtime": "^6.23.0",
+		"babel-preset-env": "^1.7.0",
+		"codemirror": "^5.58.1",
+		"eslint": "^7.10.0",
+		"gulp": "^4.0.2",
+		"identity-obj-proxy": "^3.0.0",
+		"jest": "^26.5.2",
+		"jsdom": "^16.3.0",
+		"jstransformer-markdown-it": "^2.1.0",
+		"less": "^3.11.3",
+		"lodash": "^4.17.20",
+		"mithril": "^2.0.4",
+		"parcel-bundler": "^1.12.4",
+		"postcss-import": "^12.0.1",
+		"pug": "^3.0.0",
+		"remixicon": "^2.5.0",
+		"rollup": "^2.30.0",
+		"rollup-plugin-terser": "^7.0.2",
+		"rollup-plugin-visualizer": "^4.1.1",
+		"sass": "^1.27.0",
+		"tachyons": "^4.12.0",
+		"ts-jest": "^26.4.1",
+		"ts-node": "^9.0.0",
+		"typescript": "^4.0.2"
+	}
+}

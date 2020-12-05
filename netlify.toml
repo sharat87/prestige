@@ -1,7 +1,8 @@
 [build]
-  publish = "dist/"
+  base = "frontend/"
+  publish = "frontend/dist/"
   command = "yarn run build"
-  environment = { NODE_VERSION = "12", PRESTIGE_PROXY_URL = "https://proxy.prestigemad.com/" }
+  environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "https://b.prestigemad.com/" }
 
 # Following is required for SPAs that handle routing client-side.
 [[redirects]]
