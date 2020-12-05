@@ -2,7 +2,7 @@
   base = "frontend/"
   publish = "dist/"
   command = "./build-netlify.sh"
-  environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "/api/" }
+  environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "/api/", PYTHON_VERSION = "3.7" }
 
 [[redirects]]
   from = "/api/*"
