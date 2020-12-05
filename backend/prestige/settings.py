@@ -38,7 +38,7 @@ DEBUG = os.getenv("PRESTIGE_ENV", "production") != "production"
 ALLOWED_HOSTS = [
 	"localhost",
 	"127.0.0.1",
-]
+] if DEBUG else [s.strip() for s in os.getenv("PRESTIGE_ALLOWED_HOSTS", "").split(",") if s and not s.isspace()]
 
 # Application definition
 
