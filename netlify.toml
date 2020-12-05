@@ -1,7 +1,7 @@
 [build]
   base = "frontend/"
   publish = "dist/"
-  command = "yarn run build"
+  command = "./build-netlify.sh"
   environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "/api/" }
 
 [[redirects]]
