@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 
+handler400 = "prestige.error_handlers.handler400"
+handler500 = "prestige.error_handlers.handler500"
+
 urlpatterns = [
     path('', include("proxy.urls")),  # Deprecated.
     path('proxy/', include("proxy.urls")),
