@@ -108,6 +108,7 @@ AUTH_PASSWORD_VALIDATORS = [
 	},
 ]
 
+# Logging
 # https://docs.djangoproject.com/en/3.1/topics/logging/
 LOGGING = {
 	'version': 1,
@@ -142,11 +143,12 @@ LOGGING = {
 	'loggers': {
 		'django': {
 			'handlers': ['console'],
+			'level': 'DEBUG',
 			'propagate': True,
 		},
 		'django.request': {
 			'handlers': ['console', 'mail_admins'],
-			'level': 'ERROR',
+			'level': 'DEBUG',
 			'propagate': False,
 		},
 		'prestige': {
