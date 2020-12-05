@@ -2,3 +2,4 @@ Django
 Requests
 django-cors-headers
 django-oauth-toolkit
+gunicorn
