@@ -1,6 +1,6 @@
 [build]
   base = "frontend/"
-  publish = "frontend/dist/"
+  publish = "dist/"
   command = "yarn run build"
   environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "/api/" }
 
