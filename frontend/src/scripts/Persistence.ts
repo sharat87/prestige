@@ -191,11 +191,9 @@ function createProviderForSource(key: string, source: Source): Provider<Source> 
 
 // TODO: Data in `currentProviders` and `providerRegistry` is the same, in different shapes. Remove one.
 export const providerCache: Map<string, Provider<Source>> = new Map()
-export const currentProviders: Stream<Provider<Source>[]> = Stream()
-
-export function getAllAvailableProviders(): Provider<Source>[] {
-	return currentProviders()
-}
+export const currentProviders: Stream<Provider<Source>[]> = Stream([])
+export const currentSheetName: Stream<null | string> = Stream(null)
+export const currentSheet: Stream<null | Sheet> = Stream(null)
 
 availableSources.map(async function(sources: Source[]): Promise<void> {
 	// Refresh available providers.
@@ -220,6 +218,30 @@ availableSources.map(async function(sources: Source[]): Promise<void> {
 	currentProviders(providers)
 })
 
+Stream.lift((providers: Provider<Source>[], qualifiedName: string | null) => {
+	if (qualifiedName == null || providers == null || providers.length === 0) {
+		currentSheet(null)
+		return
+	}
+
+	const [providerKey, ...pathParts] = qualifiedName.split("/")
+	const path = pathParts.join("/")
+
+	const provider = providerCache.get(providerKey)
+
+	if (provider == null) {
+		console.log("providerCache", providerCache)
+		throw new Error("Couldn't get provider for qualified name " + qualifiedName)
+	}
+
+	provider.load(path)
+		.then((sheet: Sheet) => {
+			currentSheet(sheet)
+		})
+		.finally(m.redraw)
+
+}, currentProviders, currentSheetName)
+
 export async function openSheet(qualifiedName: string): Promise<Sheet> {
 	if (typeof currentProviders() === "undefined") {
 		throw new Error("Providers not initialized yet.")
@@ -231,7 +253,7 @@ export async function openSheet(qualifiedName: string): Promise<Sheet> {
 	const provider = providerCache.get(providerKey)
 
 	if (provider == null) {
-		console.log(providerCache)
+		console.log("providerCache", providerCache)
 		throw new Error("Couldn't get provider for qualified name " + qualifiedName)
 	}
 

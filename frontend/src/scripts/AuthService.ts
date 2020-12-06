@@ -32,6 +32,7 @@ function check(): void {
 		})
 		.catch(() => {
 			authState = AuthState.ANONYMOUS
+			currentUser(null)
 		})
 		.finally(m.redraw)
 }

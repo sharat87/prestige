@@ -1,16 +1,16 @@
 import m from "mithril"
-import { getAllAvailableProviders, Provider, Source } from "./Persistence"
+import { currentProviders, Provider, Source } from "./Persistence"
 import Button from "./Button"
 
 export function DocumentBrowser(): m.Component {
 	return { view }
 
 	function view() {
-		const providers: Provider<Source>[] = getAllAvailableProviders()
+		const providers: Provider<Source>[] = currentProviders()
 		console.log("All providers", providers)
 
 		return [
-			providers.map(renderProvider),
+			providers.length === 0 ? "None yet" : providers.map(p => p.source.title),
 			m("p", [
 				"Connect more endpoints: ",
 				m(Button, "GitHub Repo"),

@@ -5,7 +5,16 @@ import { BlockType, parse } from "./Parser"
 import BracesSVG from "remixicon/icons/Development/braces-line.svg"
 import CookieJar from "./CookieJar"
 import { proxyUrl } from "./Env"
-import { currentProviders, openSheet, Provider, saveSheet, Sheet, Source } from "./Persistence"
+import {
+	currentProviders,
+	currentSheet,
+	currentSheetName,
+	openSheet,
+	Provider,
+	saveSheet,
+	Sheet,
+	Source
+} from "./Persistence"
 import Stream from "mithril/stream"
 import debounce from "lodash/debounce"
 
@@ -59,25 +68,28 @@ export default class Workspace {
 		this.onNewClicked = this.onNewClicked.bind(this)
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this)
 		this.saveChanges = debounce(this.saveChanges.bind(this), 1000, { trailing: true })
+
+		currentSheet.map((value) => {
+			this.currentSheet = value
+
+			if (this.currentSheet != null) {
+				if (!this.currentSheet.body) {
+					this.currentSheet.body = DEFAULT_EDITOR_CONTENT
+				}
+
+				if (this.currentSheet.cookieJar) {
+					this.session.cookieJar.overwrite(this.currentSheet.cookieJar)
+				}
+
+				this.setContent(this.currentSheet.body)
+			}
+
+			m.redraw()
+		})
 	}
 
 	async loadSheet(sheetPath: string): Promise<void> {
-		console.log("Loading sheet", sheetPath)
-		this.currentSheet = null
-		m.redraw()
-
-		this.currentSheet = await openSheet(sheetPath)
-
-		if (!this.currentSheet.body) {
-			this.currentSheet.body = DEFAULT_EDITOR_CONTENT
-		}
-
-		if (this.currentSheet.cookieJar) {
-			this.session.cookieJar.overwrite(this.currentSheet.cookieJar)
-		}
-
-		this.setContent(this.currentSheet.body)
-		m.redraw()
+		currentSheetName(sheetPath)
 	}
 
 	initCodeMirror(element: HTMLElement): void {
