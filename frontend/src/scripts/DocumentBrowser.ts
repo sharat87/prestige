@@ -10,7 +10,7 @@ export function DocumentBrowser(): m.Component {
 		console.log("All providers", providers)
 
 		return [
-			providers.length === 0 ? "None yet" : providers.map(p => p.source.title),
+			providers.length === 0 ? "None yet" : providers.map(renderProvider),
 			m("p", [
 				"Connect more endpoints: ",
 				m(Button, "GitHub Repo"),

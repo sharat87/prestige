@@ -5,16 +5,7 @@ import { BlockType, parse } from "./Parser"
 import BracesSVG from "remixicon/icons/Development/braces-line.svg"
 import CookieJar from "./CookieJar"
 import { proxyUrl } from "./Env"
-import {
-	currentProviders,
-	currentSheet,
-	currentSheetName,
-	openSheet,
-	Provider,
-	saveSheet,
-	Sheet,
-	Source
-} from "./Persistence"
+import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, Sheet, Source } from "./Persistence"
 import Stream from "mithril/stream"
 import debounce from "lodash/debounce"
 
