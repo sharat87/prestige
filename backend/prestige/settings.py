@@ -145,7 +145,7 @@ LOGGING = {
 	'loggers': {
 		'django': {
 			'handlers': ['console'],
-			'level': 'WARNING' if UNIVERSE == "test" else 'DEBUG',
+			'level': 'WARNING',
 			'propagate': True,
 		},
 		'django.request': {

@@ -20,6 +20,7 @@ pip install -r ../e2e-tests/requirements.txt
 
 manage() {
 	DJANGO_SETTINGS_MODULE=prestige.settings \
+		PRESTIGE_UNIVERSE=e2e_tests \
 		PRESTIGE_ENV=development \
 		PRESTIGE_SECRET_KEY=e2e-secret-key \
 		PRESTIGE_CORS_ORIGINS=http://localhost:3045 \
@@ -34,6 +35,8 @@ echo "Backend PID: $backend_server_pid"
 popd
 
 python src/main.py
+
+ls -l shots
 
 kill $backend_server_pid || true
 wait

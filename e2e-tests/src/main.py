@@ -25,6 +25,8 @@ with webdriver.Chrome(options=options) as driver:
 	wait.until(presence_of_element_located((By.CSS_SELECTOR, ".result-pane")))
 	driver.save_screenshot("shots/shot-1.png")
 
+print("Done")
+
 
 '''
 class SearchText(unittest.TestCase):
