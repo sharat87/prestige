@@ -15,15 +15,18 @@ jobs:
 
       - name: Get Chrome driver
         run: |
-          google-chrome --version
+          google-chrome --version | grep -o -m1 '[[:digit:]]+'
 
           CHROME_VERSION=$(google-chrome --version | cut -f 3 -d ' ' | cut -d '.' -f 1)
-          VERSION=$(curl --location --fail --retry 10 http://chromedriver.storage.googleapis.com/LATEST_RELEASE_${CHROME_VERSION})
+          echo "CHROME_VERSION: '$CHROME_VERSION'."
+          VERSION=$(curl --silent --location --fail --retry 3 \
+              http://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION)
 
-          wget -c -nc --retry-connrefused --tries=0 https://chromedriver.storage.googleapis.com/${VERSION}/chromedriver_${ARCH}.zip
-          unzip -o -q chromedriver_${ARCH}.zip
+          wget -c -nc --retry-connrefused --tries=0 -O driver.zip \
+            https://chromedriver.storage.googleapis.com/${VERSION}/chromedriver_linux64.zip
+          unzip -o -q driver.zip
           sudo mv chromedriver /usr/local/bin/chromedriver
-          rm chromedriver_${ARCH}.zip
+          rm driver.zip
 
       # We run the script as `bash run.sh` instead of `./run.sh`, because this way we don't require the `run.sh` file to
       # have the executable permission.

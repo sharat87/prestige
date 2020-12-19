@@ -96,4 +96,4 @@ we realize it only after you open a PR.
 
 ## License
 
-[Apache-2.0](https://github.com/sharat87/prestige/blob/master/LICENSE).
+[Apache-2.0](blob/master/LICENSE). Project includes a [NOTICE](blob/master/NOTICE) file.
