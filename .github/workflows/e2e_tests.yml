@@ -15,7 +15,7 @@ jobs:
 
       - name: Get Chrome driver
         run: |
-          google-chrome --version | grep -o -m1 '[[:digit:]]+'
+          google-chrome --version | grep -o '[[:digit:]]\+' | head
 
           CHROME_VERSION=$(google-chrome --version | cut -f 3 -d ' ' | cut -d '.' -f 1)
           echo "CHROME_VERSION: '$CHROME_VERSION'."
