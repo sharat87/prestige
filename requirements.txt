@@ -3,5 +3,5 @@ dj-database-url
 Requests
 django-cors-headers
 django-oauth-toolkit
-psycopg2
+psycopg2-binary
 gunicorn
