@@ -6,23 +6,27 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.ui import WebDriverWait
 
-options = webdriver.FirefoxOptions()
+options = webdriver.ChromeOptions()
 options.headless = True
-with webdriver.Firefox(options=options) as driver:
+with webdriver.Chrome(options=options) as driver:
 	wait = WebDriverWait(driver, 10)
+	driver.set_window_size(1366, 784)
 	driver.get("https://prestigemad.com")
-	first_result = wait.until(presence_of_element_located((By.CSS_SELECTOR, "header h1")))
+	wait.until(presence_of_element_located((By.CSS_SELECTOR, "header h1")))
 	print(driver.find_element_by_css_selector("header h1 + div").text)
+	wait.until(presence_of_element_located((By.TAG_NAME, "textarea")))
+	driver.find_element_by_css_selector(".CodeMirror .CodeMirror-line").click()
 	driver.find_element_by_css_selector("textarea").send_keys("GET http://httpbin.org/get")
 	driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.ENTER)
 	wait.until(presence_of_element_located((By.CSS_SELECTOR, ".result-pane")))
 	driver.save_screenshot("shot-1.png")
 
 
+'''
 class SearchText(unittest.TestCase):
 	def setUp(self):
 		# create a new Firefox session
-		self.driver = webdriver.Firefox()
+		self.driver = webdriver.Chrome(options=options)
 		# self.driver.implicitly_wait(30)
 		# self.driver.maximize_window()
 		# navigate to the application home page
@@ -50,3 +54,4 @@ class SearchText(unittest.TestCase):
 
 if __name__ == '__main__':
 	unittest.main()
+'''
