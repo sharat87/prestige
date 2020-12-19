@@ -37,5 +37,5 @@ jobs:
         uses: "actions/upload-artifact@v2"
         with:
           name: "shots"
-          path: "shots"
+          path: "e2e-tests/shots"
           if-no-files-found: "error"
