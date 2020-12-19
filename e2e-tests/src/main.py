@@ -22,7 +22,7 @@ with webdriver.Chrome(options=options) as driver:
 	driver.find_element_by_css_selector(".CodeMirror .CodeMirror-line").click()
 	driver.find_element_by_css_selector("textarea").send_keys("GET http://httpbin.org/get")
 	driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.ENTER)
-	wait.until(presence_of_element_located((By.CSS_SELECTOR, ".result-pane")))
+	wait.until(presence_of_element_located((By.CSS_SELECTOR, ".result-pane .body")))
 	driver.save_screenshot("shots/shot-1.png")
 
 print("Done")
