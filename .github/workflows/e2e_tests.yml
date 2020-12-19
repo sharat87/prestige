@@ -30,6 +30,12 @@ jobs:
 
       # We run the script as `bash run.sh` instead of `./run.sh`, because this way we don't require the `run.sh` file to
       # have the executable permission.
-      - name: Run tests
-        run: |
-          bash run.sh
+      - name: "Run tests"
+        run: "bash run.sh"
+
+      - name: "Upload test results"
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: "shots"
+          path: "shots"
+          if-no-files-found: "error"

@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from selenium import webdriver
@@ -5,6 +6,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.expected_conditions import presence_of_element_located
 from selenium.webdriver.support.ui import WebDriverWait
+
+
+os.makedirs("shots", exist_ok=True)
 
 options = webdriver.ChromeOptions()
 options.headless = True
@@ -19,7 +23,7 @@ with webdriver.Chrome(options=options) as driver:
 	driver.find_element_by_css_selector("textarea").send_keys("GET http://httpbin.org/get")
 	driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.ENTER)
 	wait.until(presence_of_element_located((By.CSS_SELECTOR, ".result-pane")))
-	driver.save_screenshot("shot-1.png")
+	driver.save_screenshot("shots/shot-1.png")
 
 
 '''
