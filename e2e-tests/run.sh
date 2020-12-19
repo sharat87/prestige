@@ -18,9 +18,17 @@ source venv/bin/activate
 pip install -r ../requirements.txt
 pip install -r ../e2e-tests/requirements.txt
 
-backend_env="DJANGO_SETTINGS_MODULE=prestige.settings PRESTIGE_ENV=development PRESTIGE_SECRET_KEY=e2e-secret-key PRESTIGE_CORS_ORIGINS=http://localhost:3045 DATABASE_URL=sqlite:///db.sqlite3"
-$backend_env python manage.py migrate
-$backend_env python manage.py runserver 127.0.0.1:3046 &
+manage() {
+	DJANGO_SETTINGS_MODULE=prestige.settings \
+		PRESTIGE_ENV=development \
+		PRESTIGE_SECRET_KEY=e2e-secret-key \
+		PRESTIGE_CORS_ORIGINS=http://localhost:3045 \
+		DATABASE_URL=sqlite:///db.sqlite3 \
+		python manage.py "$@"
+}
+manage migrate
+manage runserver 127.0.0.1:3046 &
+
 backend_server_pid=$!
 echo "Backend PID: $backend_server_pid"
 popd
