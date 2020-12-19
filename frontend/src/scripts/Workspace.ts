@@ -100,6 +100,7 @@ export default class Workspace {
 			autofocus: true,
 			autoCloseBrackets: true,
 			styleActiveLine: true,
+			scrollPastEnd: true,
 			gutters: ["prestige"],
 			value: this.getContent(),
 			extraKeys: {

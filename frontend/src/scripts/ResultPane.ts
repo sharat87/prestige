@@ -220,8 +220,9 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 		return [
 			text === "" ? m("p.i.pl2", "No body.") : [
 				m("h3.pl2", [
-					"Body ",
-					spec != null && m("small", ` (${ spec })`),
+					"Body",
+					spec != null && m("small.pl1", `(${ spec })`),
+					m("small.pl1", `(${ text.length } bytes)`),
 				]),
 				m(".flex.bb.b--dark-blue", [
 					toggleTab("Text", Tabs.text),

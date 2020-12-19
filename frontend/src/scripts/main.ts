@@ -14,6 +14,8 @@ import ResultPane from "./ResultPane"
 import { isDev } from "./Env"
 import { email } from "./AuthService"
 
+// TODO: UI Freezes when the response body is 1.6MB JSON. Like with `GET https://api.github.com/graphql`.
+
 window.addEventListener("load", () => {
 	const root = document.createElement("main")
 	root.setAttribute("id", "app")

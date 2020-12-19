@@ -6,7 +6,7 @@ import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from requests.cookies import RequestsCookieJar, create_cookie
+from requests.cookies import RequestsCookieJar
 
 log = logging.getLogger(__name__)
 
@@ -27,16 +27,27 @@ def proxy(request):
 
 def run_job(job):
 	url: str = job["url"]
-	headers: Dict[str, str] = {name: value for name, value in job["headers"]}
+	headers: Dict[str, str] = {name: value for name, value in job["headers"]} if job.get("headers") else {}
 	body: str = job.get("body")
-	cookie_jar: RequestsCookieJar = plain_to_cookie_jar(job.get("cookies"))
+	cookies: PlainCookieJarType = job.get("cookies")
 	timeout: int = job.get("timeout", 10)
 
 	session = requests.session()
-	response = session.request(job["method"], url, headers=headers, data=body, timeout=timeout, verify=False)
+
+	if cookies:
+		update_cookie_jar(session.cookies, cookies)
+
+	response = session.request(
+		job.get("method", "GET"),
+		url,
+		headers=headers,
+		data=body,
+		timeout=timeout,
+		verify=False,
+	)
 
 	payload = {
-		"ok": response.ok,
+		"ok": response.ok,  # TODO: This response field is deprecated. HTTP status code 200 serves this purpose already.
 		"id": job.get("id"),
 	}
 
@@ -44,7 +55,7 @@ def run_job(job):
 		payload.update(
 			response=response_to_dict(response, body),
 			history=[response_to_dict(r) for r in response.history],
-			cookies=cookie_jar_to_plain(cookie_jar),
+			cookies=cookie_jar_to_plain(session.cookies),
 		)
 
 	else:
@@ -57,22 +68,18 @@ def run_job(job):
 	return payload
 
 
-def plain_to_cookie_jar(cookies_data: PlainCookieJarType) -> RequestsCookieJar:
-	cookie_jar = RequestsCookieJar()
-
-	for host, by_path in cookies_data.items():
+def update_cookie_jar(cookie_jar: RequestsCookieJar, cookies_data: PlainCookieJarType) -> None:
+	for domain, by_path in cookies_data.items():
 		for path, by_name in by_path.items():
 			for name, value_dict in by_name.items():
-				cookie_jar.set_cookie(create_cookie(
-					name,
-					value_dict.get("value", ""),
-					expires=value_dict.get("expires") or 0,
-					secure=value_dict.get("secure"),
-					domain=host,
+				cookie_jar.set(
+					domain=domain,
 					path=path,
-				))
-
-	return cookie_jar
+					name=name,
+					value=value_dict.get("value", ""),
+					expires=value_dict.get("expires") or None,
+					secure=value_dict.get("secure"),
+				)
 
 
 def cookie_jar_to_plain(cookie_jar: RequestsCookieJar) -> PlainCookieJarType:

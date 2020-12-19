@@ -13,22 +13,28 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 import os
 from pathlib import Path
 
+import dj_database_url
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+UNIVERSE = os.environ.get("PRESTIGE_UNIVERSE", "").lower()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-_missing_env_vars = {
-	"PRESTIGE_SECRET_KEY",
-	"PRESTIGE_CORS_ORIGINS",
-} - os.environ.keys()
+if UNIVERSE != "test":
+	_missing_env_vars = {
+		"DATABASE_URL",
+		"PRESTIGE_SECRET_KEY",
+		"PRESTIGE_CORS_ORIGINS",
+	} - os.environ.keys()
 
-if _missing_env_vars:
-	raise ValueError("Missing required env vars: %r" % _missing_env_vars)
+	if _missing_env_vars:
+		raise ValueError("Missing required env vars: %r" % _missing_env_vars)
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("PRESTIGE_SECRET_KEY")
+SECRET_KEY = "test-key" if UNIVERSE == "test" else os.getenv("PRESTIGE_SECRET_KEY")
 if not SECRET_KEY:
 	raise ValueError("Missing secret key. Please set the env variable PRESTIGE_SECRET_KEY.")
 
@@ -94,11 +100,14 @@ WSGI_APPLICATION = 'prestige.wsgi.application'
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-	'default': {
-		'ENGINE': 'django.db.backends.sqlite3',
-		'NAME': BASE_DIR / 'db.sqlite3',
-	}
+	# This will parse the values of the DATABASE_URL environment variable and convert it to Django's DB config format.
+	# For SQLite, set `DATABASE_URL=sqlite:///path/to/folder/db.sqlite3`
+	"default": {
+		"ENGINE": "django.db.backends.sqlite3",
+		"NAME": "prestige-test.sqlite3",
+	} if UNIVERSE == "test" else dj_database_url.config(conn_max_age=600),
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
@@ -136,7 +145,7 @@ LOGGING = {
 	'loggers': {
 		'django': {
 			'handlers': ['console'],
-			'level': 'DEBUG',
+			'level': 'WARNING' if UNIVERSE == "test" else 'DEBUG',
 			'propagate': True,
 		},
 		'django.request': {
@@ -144,10 +153,6 @@ LOGGING = {
 			'level': 'DEBUG',
 			'propagate': False,
 		},
-		'prestige': {
-			'handlers': ['console', 'mail_admins'],
-			'level': 'DEBUG',
-		}
 	}
 }
 
@@ -171,5 +176,6 @@ STATIC_ROOT = BASE_DIR / "static"
 STATIC_URL = "/static/"
 
 
-CORS_ALLOWED_ORIGINS = [s.strip() for s in os.getenv("PRESTIGE_CORS_ORIGINS", "").split(",")]
-CORS_ALLOW_CREDENTIALS = True
+if UNIVERSE != "test":
+	CORS_ALLOWED_ORIGINS = [s.strip() for s in os.getenv("PRESTIGE_CORS_ORIGINS", "").split(",")]
+	CORS_ALLOW_CREDENTIALS = True

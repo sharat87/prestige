@@ -1,6 +1,7 @@
 #!/bin/sh
 
 DJANGO_SETTINGS_MODULE='prestige.settings'
+DATABASE_URL='sqlite:///db.sqlite3'
 
 PRESTIGE_ENV='development'
 

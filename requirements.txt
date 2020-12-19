@@ -1,4 +1,5 @@
 Django
+dj-database-url
 Requests
 django-cors-headers
 django-oauth-toolkit
