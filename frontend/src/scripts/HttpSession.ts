@@ -94,10 +94,9 @@ export default class HttpSession {
 			}
 
 			result = await this.execute(request)
-			console.log(`Got runTop result (silent=${ silent })`, this.result)
 
-			if (this.result != null && this.result.ok && this.result.cookies) {
-				this.result.cookieChanges = this.cookieJar.overwrite(this.result.cookies)
+			if (result != null && result.ok && result.cookies) {
+				result.cookieChanges = this.cookieJar.overwrite(result.cookies)
 			}
 
 		} catch (error: any) {
@@ -112,6 +111,7 @@ export default class HttpSession {
 
 		}
 
+		console.log("runTop done", this.cookieJar)
 		this.result = result
 		return result
 	}
