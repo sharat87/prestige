@@ -29,7 +29,7 @@ jobs:
           rm driver.zip
 
       - name: "Run tests"
-        run: "python run.py"
+        run: "python3 run.py"
 
       - name: "Upload test results"
         uses: "actions/upload-artifact@v2"
