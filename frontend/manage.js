@@ -63,7 +63,7 @@ if (job === "build") {
 	bundler.bundle();
 
 } else if (job === "serve") {
-	bundler.serve(3040, /*HTTPS = */ false, "localhost");
+	bundler.serve(parseInt(process.env.PORT || "3040", 10), /*HTTPS = */ false, "localhost");
 
 } else {
 	console.log("Unknown job:", job);

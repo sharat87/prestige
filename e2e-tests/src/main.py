@@ -8,6 +8,10 @@ from selenium.webdriver.support.expected_conditions import presence_of_element_l
 from selenium.webdriver.support.ui import WebDriverWait
 
 
+URL = os.getenv("FRONTEND_URL")
+if not URL:
+	raise ValueError("Missing/empty 'FRONTEND_URL' environment variable.")
+
 os.makedirs("shots", exist_ok=True)
 
 options = webdriver.ChromeOptions()
@@ -15,7 +19,7 @@ options.headless = True
 with webdriver.Chrome(options=options) as driver:
 	wait = WebDriverWait(driver, 10)
 	driver.set_window_size(1366, 784)
-	driver.get("https://prestigemad.com")
+	driver.get(URL)
 	wait.until(presence_of_element_located((By.CSS_SELECTOR, "header h1")))
 	print(driver.find_element_by_css_selector("header h1 + div").text)
 	wait.until(presence_of_element_located((By.TAG_NAME, "textarea")))
