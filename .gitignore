@@ -6,6 +6,7 @@ frontend/node_modules
 frontend/dist
 frontend/coverage
 
+e2e-tests/venv
 e2e-tests/drivers
 e2e-tests/shots
 geckodriver.log

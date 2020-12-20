@@ -28,10 +28,8 @@ jobs:
           sudo mv chromedriver /usr/local/bin/chromedriver
           rm driver.zip
 
-      # We run the script as `bash run.sh` instead of `./run.sh`, because this way we don't require the `run.sh` file to
-      # have the executable permission.
       - name: "Run tests"
-        run: "bash run.sh"
+        run: "python run.py"
 
       - name: "Upload test results"
         uses: "actions/upload-artifact@v2"
