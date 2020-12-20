@@ -125,12 +125,17 @@ time.sleep(2)
 subprocess.check_call(
 	[
 		str(e2e_tests_path / "venv" / "bin" / "python"),
-		"src/main.py",
+		"-m",
+		"unittest",
+		"discover",
+		"--start-directory",
+		"src",
 	],
 	cwd=str(e2e_tests_path),
 	env={
 		**os.environ,
 		"PATH": str(e2e_tests_path / "drivers") + ":" + os.environ.get("PATH", ""),
+		"PYTHONPATH": str(e2e_tests_path / "src"),
 		"FRONTEND_URL": f"http://localhost:{frontend_port}",
 	},
 )
