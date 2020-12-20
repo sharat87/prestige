@@ -1,11 +1,10 @@
 import atexit
-import http.server
 import logging
 import os
-import sys
+import subprocess
 import time
 from pathlib import Path
-import subprocess
+from typing import List
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -13,53 +12,49 @@ log = logging.getLogger(__name__)
 frontend_port = 3045
 backend_port = frontend_port + 1
 
-backend_proc = None
-frontend_proc = None
+child_processes: List[subprocess.Popen] = []
 
 
 @atexit.register
 def kill_all():
-	if backend_proc is not None:
-		log.info("Killing backend.")
-		backend_proc.kill()
-	if frontend_proc is not None:
-		log.info("Killing frontend.")
-		frontend_proc.kill()
+	for proc in child_processes:
+		if proc is not None and proc.poll() is None:
+			log.info("Killing process %r.", proc)
+			proc.kill()
 
 
-e2e_tests_path = Path(".")
-backend_path = (e2e_tests_path / ".." / "backend").resolve()
-frontend_path = (e2e_tests_path / ".." / "frontend").resolve()
+def make_venv(location: Path, prompt: str = None):
+	prompt = prompt or location.name
+	location = location / "venv"
+	if not location.exists():
+		log.info("Creating new venv at %r.", location)
+		subprocess.check_call(["python3", "-m", "venv", "--prompt", prompt, str(location)])
+
+
+def pip_deps(venv_parent: Path, requirements_parent: Path = None):
+	subprocess.check_call([
+		str(venv_parent / "venv" / "bin" / "python"),
+		"-m",
+		"pip",
+		"install",
+		"-r",
+		str((requirements_parent or venv_parent) / "requirements.txt"),
+	])
+
+
+e2e_tests_path = Path(".").resolve()
+backend_path = (e2e_tests_path.parent / "backend").resolve()
+frontend_path = (e2e_tests_path.parent / "frontend").resolve()
 
 log.debug("e2e_tests_path: %r.", e2e_tests_path)
 log.debug("backend_path: %r.", backend_path)
 log.debug("frontend_path: %r.", frontend_path)
 
-if not (e2e_tests_path / "venv").exists():
-	log.info("Creating new venv at %r.", e2e_tests_path / "venv")
-	subprocess.check_call(["python3", "-m", "venv", "--prompt", "stockfish-e2e", str(e2e_tests_path / "venv")])
+make_venv(e2e_tests_path)
+pip_deps(e2e_tests_path)
 
-subprocess.check_call([
-	str(e2e_tests_path / "venv" / "bin" / "python"),
-	"-m",
-	"pip",
-	"install",
-	"-r",
-	str(e2e_tests_path / "requirements.txt"),
-])
-
-if not (backend_path / "venv").exists():
-	log.info("Creating new venv at %r.", backend_path / "venv")
-	subprocess.check_call(["python3", "-m", "venv", "--prompt", "stockfish-backend", str(backend_path / "venv")])
-
-subprocess.check_call([
-	str(backend_path / "venv" / "bin" / "python"),
-	"-m",
-	"pip",
-	"install",
-	"-r",
-	str(backend_path / ".." / "requirements.txt"),
-])
+make_venv(backend_path)
+pip_deps(backend_path, backend_path.parent)
 
 backend_env = {
 	**os.environ,
@@ -82,7 +77,7 @@ subprocess.check_call(
 	env=backend_env,
 )
 
-backend_proc = subprocess.Popen(
+child_processes.append(subprocess.Popen(
 	[
 		str(backend_path / "venv" / "bin" / "python"),
 		"manage.py",
@@ -92,7 +87,7 @@ backend_proc = subprocess.Popen(
 	],
 	cwd=str(backend_path),
 	env=backend_env,
-)
+))
 
 subprocess.check_call(
 	["yarn", "install"],
@@ -108,7 +103,7 @@ subprocess.check_call(
 	},
 )
 
-frontend_proc = subprocess.Popen(
+child_processes.append(subprocess.Popen(
 	[
 		str(backend_path / "venv" / "bin" / "python"),
 		"-m",
@@ -116,7 +111,7 @@ frontend_proc = subprocess.Popen(
 		str(frontend_port),
 	],
 	cwd=str(frontend_path / "dist"),
-)
+))
 
 # Take a moment for the servers to have come up.
 time.sleep(2)
