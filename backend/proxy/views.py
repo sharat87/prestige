@@ -1,6 +1,7 @@
 import json
 import logging
-from typing import Dict, Union
+from http import HTTPStatus
+from typing import Dict, Union, Any
 
 import requests
 from django.http import JsonResponse
@@ -21,12 +22,12 @@ PlainCookieJarType = Dict[str, Dict[str, Dict[str, Dict[str, Union[str, int, boo
 
 @require_POST
 @csrf_exempt
-def proxy(request):
-	return JsonResponse(run_job(json.loads(request.body.decode("utf-8"))))
+def proxy(request) -> JsonResponse:
+	job: Dict[str, Any] = request.parsed_body
+	url: str = job.get("url")
+	if not url:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing URL in payload", data={})
 
-
-def run_job(job):
-	url: str = job["url"]
 	headers: Dict[str, str] = {name: value for name, value in job["headers"]} if job.get("headers") else {}
 	body: str = job.get("body")
 	cookies: PlainCookieJarType = job.get("cookies")
@@ -46,26 +47,13 @@ def run_job(job):
 		verify=False,
 	)
 
-	payload = {
-		"ok": response.ok,  # TODO: This response field is deprecated. HTTP status code 200 serves this purpose already.
+	return JsonResponse(status=HTTPStatus.OK, data={
+		"ok": True,  # TODO: This response field is deprecated. HTTP status code 200 serves this purpose already.
 		"id": job.get("id"),
-	}
-
-	if response.ok:
-		payload.update(
-			response=response_to_dict(response, body),
-			history=[response_to_dict(r) for r in response.history],
-			cookies=cookie_jar_to_plain(session.cookies),
-		)
-
-	else:
-		payload.update(
-			error={
-				"message": response.reason,
-			},
-		)
-
-	return payload
+		"response": response_to_dict(response, body),
+		"history": [response_to_dict(r) for r in response.history],
+		"cookies": cookie_jar_to_plain(session.cookies),
+	})
 
 
 def update_cookie_jar(cookie_jar: RequestsCookieJar, cookies_data: PlainCookieJarType) -> None:
@@ -101,7 +89,7 @@ def cookie_jar_to_plain(cookie_jar: RequestsCookieJar) -> PlainCookieJarType:
 			"secure": cookie.secure,
 		}
 
-	return dict(plain)
+	return plain
 
 
 def response_to_dict(response: requests.Response, body=None):

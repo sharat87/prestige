@@ -12,3 +12,6 @@ test-backend:
 
 serve-frontend:
 	@cd frontend && yarn && yarn start
+
+test-frontend:
+	@cd frontend && yarn && yarn test

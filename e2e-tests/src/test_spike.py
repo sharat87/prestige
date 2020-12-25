@@ -22,7 +22,6 @@ class SearchText(unittest.TestCase):
 	def setUp(self):
 		self.driver = webdriver.Chrome(options=options)
 		self.wait = WebDriverWait(self.driver, 10)
-		# self.driver.implicitly_wait(30)
 		self.driver.set_window_size(1366, 784)
 		self.driver.get(URL)
 
