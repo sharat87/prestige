@@ -1,4 +1,5 @@
 import json
+import logging
 from http import HTTPStatus
 
 from django.test import SimpleTestCase
@@ -20,6 +21,16 @@ class JobMixin:
 
 
 class MessedUpInput(SimpleTestCase, JobMixin):
+	def setUp(self) -> None:
+		# Since tests in this class are technically invalid, we get a warning log, but they are irrelevant here since
+		# we are deliberately testing for failure. So we up the level of this category to ERROR.
+		logger = logging.getLogger("django.request")
+		self._original_level = logger.getEffectiveLevel()
+		logger.setLevel(logging.ERROR)
+
+	def tearDown(self) -> None:
+		logging.getLogger("django.request").setLevel(self._original_level)
+
 	def test_invalid_json(self):
 		response = self.client.post(
 			reverse("index"),
@@ -45,10 +56,19 @@ class MessedUpInput(SimpleTestCase, JobMixin):
 
 	def test_missing_url(self):
 		response = self.job({})
-
 		self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
-
 		self.assertEqual(response.json(), {})
+
+	def test_url_numeric(self):
+		response = self.job({
+			"url": 123,
+		})
+		self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
+		self.assertEqual(response.json(), {
+			"error": {
+				"message": "URL should be a string.",
+			},
+		})
 
 
 class HttpMethods(SimpleTestCase, JobMixin):

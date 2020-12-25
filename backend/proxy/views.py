@@ -1,4 +1,3 @@
-import json
 import logging
 from http import HTTPStatus
 from typing import Dict, Union, Any
@@ -24,9 +23,20 @@ PlainCookieJarType = Dict[str, Dict[str, Dict[str, Dict[str, Union[str, int, boo
 @csrf_exempt
 def proxy(request) -> JsonResponse:
 	job: Dict[str, Any] = request.parsed_body
+
+	method: str = job.get("method", "GET")
+
 	url: str = job.get("url")
+
 	if not url:
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing URL in payload", data={})
+
+	if not isinstance(url, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Incorrect data type of URL", data={
+			"error": {
+				"message": "URL should be a string.",
+			},
+		})
 
 	headers: Dict[str, str] = {name: value for name, value in job["headers"]} if job.get("headers") else {}
 	body: str = job.get("body")
@@ -38,14 +48,21 @@ def proxy(request) -> JsonResponse:
 	if cookies:
 		update_cookie_jar(session.cookies, cookies)
 
-	response = session.request(
-		job.get("method", "GET"),
-		url,
-		headers=headers,
-		data=body,
-		timeout=timeout,
-		verify=False,
-	)
+	try:
+		response = session.request(
+			method=method,
+			url=url,
+			headers=headers,
+			data=body,
+			timeout=timeout,
+			verify=False,
+		)
+	except requests.exceptions.MissingSchema:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid URL in body", data={
+			"error": {
+				"message": "Invalid URL: '{0}'. Perhaps you meant 'http://{0}'".format(url),
+			},
+		})
 
 	return JsonResponse(status=HTTPStatus.OK, data={
 		"ok": True,  # TODO: This response field is deprecated. HTTP status code 200 serves this purpose already.
