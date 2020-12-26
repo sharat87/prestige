@@ -24,9 +24,13 @@ Prestige exists thanks to the work of the following open source projects (not ex
 weren't listed here, but still were just as helpful):
 
 1. [Mithril](https://mithril.js.org/) &mdash; powers the code structure and provides a scaffolding for the interactivity.
-1. [Parcel](https://parceljs.org/) &mdash; powers the building and bundling of application assets for deployment.
-1. [TypeScript](https://www.typescriptlang.org/) &mdash; powers the script compilation and static checking within Parcel.
 1. [CodeMirror](https://codemirror.net/) &mdash; powers the code editor and syntax-highlighted code blocks.
+1. [TypeScript](https://www.typescriptlang.org/) &mdash; powers the script compilation and static checking within Parcel.
+1. [Django](https://www.djangoproject.com/) &mdash; powers the backend infrastructure including cloud storage, proxy etc.
+1. [Python](https://www.python.org/) &mdash; powers the backend and end-to-end tests.
+1. [Tachyons](http://tachyons.io/) &mdash; powers the styling and theming infrastructure.
+1. [Parcel](https://parceljs.org/) &mdash; powers the building and bundling of application assets for deployment.
+1. [Selenium](https://www.selenium.dev/) &mdash; powers the end-to-end testing workflow.
 
 A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
 

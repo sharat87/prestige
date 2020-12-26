@@ -1,5 +1,6 @@
 backend/venv
 backend/db.sqlite3
+backend/e2e-db.sqlite3
 __pycache__
 
 frontend/node_modules
