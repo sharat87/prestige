@@ -26,5 +26,5 @@ urlpatterns = [
     path('storage/', include("storage.urls")),
     path('auth/', include("auth_api.urls")),
     path('oauth/', include("oauth2_provider.urls", namespace='oauth2_provider')),
-    path('admin/', admin.site.urls),
+    path('a/', admin.site.urls),
 ]

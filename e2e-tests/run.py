@@ -43,7 +43,7 @@ def logger_inject(fn):
 	:return: Decorated function.
 	"""
 
-	@wraps(fn)  # This makes some Django's internal reflection based checks fail.
+	@wraps(fn)
 	def wrapped(*args, **kwargs):
 		name = ("" if fn.__module__ == "__main__" else fn.__module__ + ".") + fn.__name__
 		return fn(logging.getLogger(name), *args, **kwargs)

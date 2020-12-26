@@ -1,0 +1,14 @@
+[
+	{
+		"model": "auth_api.user",
+		"fields": {
+			"email": "u1@host.com",
+			"username": "u1",
+			"password": "pbkdf2_sha256$216000$hAmJvwjj2h4I$hGP416PYQLomJ0Tq5x7hd0FJ3Ier+S8b/O9uZIyxN+E=",
+			"is_superuser": false,
+			"is_staff": false,
+			"is_active": true,
+			"date_joined": "2020-01-01T07:00:00Z"
+		}
+	}
+]

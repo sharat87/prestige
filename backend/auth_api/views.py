@@ -1,3 +1,6 @@
+import logging
+from http import HTTPStatus
+
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -6,6 +9,9 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 
 from .utils import login_required_json
+
+
+log = logging.getLogger(__name__)
 
 
 @require_POST
@@ -35,22 +41,27 @@ def signup_view(request):
 @require_POST
 @csrf_exempt
 def login_view(request):
-	username = request.POST["email"]
-	password = request.POST["password"]
+	email = request.parsed_body.get("email")
+	if not email:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing email", data={})
 
-	user = auth.authenticate(request, username=username, password=password)
+	if not isinstance(email, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid email", data={})
+
+	password = request.parsed_body.get("password")
+	if not password:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing password", data={})
+
+	if not isinstance(password, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid password", data={})
+
+	user = auth.authenticate(request, email=email, password=password)
 	if user is None:
-		return JsonResponse({
-			"ok": False,
-			"error": {
-				"message": "Login failed",
-			},
-		})
+		return JsonResponse(status=HTTPStatus.UNAUTHORIZED, reason="Login failed", data={})
 
 	auth.login(request, user)
 
 	return JsonResponse({
-		"ok": True,
 		"user": user_plain(request.user),
 	})
 
@@ -59,9 +70,7 @@ def login_view(request):
 @csrf_exempt
 def logout_view(request):
 	auth.logout(request)
-	return JsonResponse({
-		"ok": True,
-	})
+	return JsonResponse({})
 
 
 @require_GET
