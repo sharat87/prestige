@@ -1,11 +1,11 @@
 import m from "mithril"
-import HttpSession from "../scripts/HttpSession";
+import HttpSession from "../scripts/HttpSession"
 
 jest.mock("mithril")
 const mockedRequestFn = m.request as jest.Mock
 
 test("execute direct get", async () => {
-	const session = new HttpSession();
+	const session = new HttpSession()
 
 	mockedRequestFn.mockResolvedValue({
 		status: 200,
