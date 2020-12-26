@@ -5,6 +5,7 @@ import subprocess
 import time
 from pathlib import Path
 from typing import List
+from timeit import default_timer as timer
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
@@ -33,21 +34,32 @@ def kill_all():
 
 
 def main():
+	start = timer()
 	make_venv(e2e_tests_path)
 	pip_deps(e2e_tests_path)
-
 	make_venv(backend_path)
 	pip_deps(backend_path, backend_path.parent)
+	venvs_time = timer() - start
 
+	start = timer()
 	backend_server_process()
 	frontend_server_process()
 	httpbin_server_process()
+	prelude_processes_time = timer() - start
 
 	# Take a moment for the servers to have come up.
 	time.sleep(2)
 
+	start = timer()
 	run_tests()
-	log.info("Fin.")
+	tests_time = timer() - start
+
+	log.info(
+		"Times venvs_time=%0.2fs prelude_processes_time=%0.2fs tests_time=%0.2fs",
+		venvs_time,
+		prelude_processes_time,
+		tests_time,
+	)
 
 
 def make_venv(location: Path, prompt: str = None):
