@@ -2,12 +2,14 @@ import atexit
 import logging
 import os
 import subprocess
+import threading
 import time
+from functools import wraps
 from pathlib import Path
 from timeit import default_timer as timer
-from typing import List
+from typing import List, Dict, IO
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG, format="%(levelname)s\t%(name)s %(message)s")
 log = logging.getLogger(__name__)
 
 frontend_port: int = 3045
@@ -33,18 +35,32 @@ def kill_all():
 			proc.kill()
 
 
+def logger_inject(fn):
+	"""
+	Decorates a function to add an additional first positional parameter to the function, which is a `logging.Logger`
+	instance with the name set to the function's fully qualified name.
+	:param fn: Function to add the log parameter as the first positional parameter.
+	:return: Decorated function.
+	"""
+
+	@wraps(fn)  # This makes some Django's internal reflection based checks fail.
+	def wrapped(*args, **kwargs):
+		name = ("" if fn.__module__ == "__main__" else fn.__module__ + ".") + fn.__name__
+		return fn(logging.getLogger(name), *args, **kwargs)
+
+	return wrapped
+
+
 def main():
 	start = timer()
-	make_venv(e2e_tests_path)
-	pip_deps(e2e_tests_path)
 	make_venv(backend_path)
 	pip_deps(backend_path, backend_path.parent)
 	venvs_time = timer() - start
 
 	start = timer()
-	backend_server_process()
-	frontend_server_process()
-	httpbin_server_process()
+	prestige_backend()
+	prestige_frontend()
+	httpbin()
 	prelude_processes_time = timer() - start
 
 	# Take a moment for the servers to have come up.
@@ -62,29 +78,38 @@ def main():
 	)
 
 
-def make_venv(location: Path, prompt: str = None):
+def make_venv(location: Path, prompt: str = None, logger: logging.Logger = None):
 	prompt = prompt or location.name
 	location = location / "venv"
 	if not location.exists():
 		log.info("Creating new venv at %r.", location)
-		subprocess.check_call(["python3", "-m", "venv", "--prompt", prompt, str(location)])
+		spawn_process(
+			["python3", "-m", "venv", "--prompt", prompt, str(location)],
+			log_target=logger,
+		).wait()
 
 
-def pip_deps(venv_parent: Path, requirements_parent: Path = None):
-	subprocess.check_call([
-		str(venv_parent / "venv" / "bin" / "python"),
-		"-m",
-		"pip",
-		"install",
-		"-r",
-		str((requirements_parent or venv_parent) / "requirements.txt"),
-	])
+def pip_deps(venv_parent: Path, requirements_parent: Path = None, logger: logging.Logger = None):
+	spawn_process(
+		[
+			str(venv_parent / "venv" / "bin" / "python"),
+			"-m",
+			"pip",
+			"install",
+			"-r",
+			str((requirements_parent or venv_parent) / "requirements.txt"),
+		],
+		log_target=logger,
+	).wait()
 
 
-def backend_server_process():
+@logger_inject
+def prestige_backend(fn_log):
 	# 1. Backend server process.
+	make_venv(e2e_tests_path, logger=fn_log)
+	pip_deps(e2e_tests_path, logger=fn_log)
+
 	backend_env = {
-		**os.environ,
 		"DJANGO_SETTINGS_MODULE": "prestige.settings",
 		"PRESTIGE_UNIVERSE": "e2e_tests",
 		"PRESTIGE_ENV": "development",
@@ -93,18 +118,19 @@ def backend_server_process():
 		"DATABASE_URL": "sqlite:///e2e-db.sqlite3",
 	}
 
-	log.info("Run migrations on backend server.")
-	subprocess.check_call(
+	fn_log.info("Run migrations on backend server.")
+	spawn_process(
 		[
 			str(backend_path / "venv" / "bin" / "python"),
 			"manage.py",
 			"migrate",
 		],
-		cwd=str(backend_path),
+		log_target=fn_log,
+		cwd=backend_path,
 		env=backend_env,
-	)
+	).wait()
 
-	child_processes.append(subprocess.Popen(
+	child_processes.append(spawn_process(
 		[
 			str(backend_path / "venv" / "bin" / "python"),
 			"manage.py",
@@ -112,12 +138,42 @@ def backend_server_process():
 			"--noreload",
 			str(backend_port),
 		],
-		cwd=str(backend_path),
+		log_target=fn_log,
+		cwd=backend_path,
 		env=backend_env,
 	))
 
 
-def frontend_server_process():
+def spawn_process(cmd, *, log_target: logging.Logger, cwd: Path = None, env: Dict[str, str] = None) -> subprocess.Popen:
+	kwargs = {}
+
+	if cwd is not None:
+		kwargs["cwd"] = str(cwd)
+
+	if env is not None:
+		kwargs["env"] = {**os.environ, **env}
+
+	if log_target is not None:
+		kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+	process = subprocess.Popen(cmd, **kwargs)
+
+	if log_target is not None:
+		pipe_file_to_log(process.stdout, log_target, logging.INFO)
+		pipe_file_to_log(process.stderr, log_target, logging.WARNING)
+
+	return process
+
+
+def pipe_file_to_log(file: IO, logger: logging.Logger, level: int):
+	def watcher():
+		for line in file:
+			logger.log(level, "%s", line.decode("UTF-8")[:-1])
+
+	threading.Thread(target=watcher, daemon=True).start()
+
+
+def prestige_frontend():
 	# 2. Frontend server process.
 	subprocess.check_call(
 		[
@@ -149,7 +205,7 @@ def frontend_server_process():
 	))
 
 
-def httpbin_server_process():
+def httpbin():
 	# 3. A local httpbin server process.
 	child_processes.append(subprocess.Popen(
 		[
