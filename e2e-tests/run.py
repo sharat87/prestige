@@ -4,8 +4,8 @@ import os
 import subprocess
 import time
 from pathlib import Path
-from typing import List
 from timeit import default_timer as timer
+from typing import List
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger(__name__)
