@@ -71,7 +71,7 @@ function login(email: string, password: string): Promise<void> {
 	const prevState = authState
 	authState = AuthState.PENDING
 
-	return m.request<{ ok: boolean, user: User }>({
+	return m.request<void>({
 		method: "POST",
 		url: AUTH_URL_BASE + "login",
 		withCredentials: true,
@@ -80,11 +80,10 @@ function login(email: string, password: string): Promise<void> {
 			password,
 		},
 	})
-		.then(response => {
-			console.log("login response", response)
+		.then(() => {
 			authState = AuthState.LOGGED_IN
 			currentUser({
-				email: response.user.email,
+				email,
 			})
 		})
 		.catch(error => {

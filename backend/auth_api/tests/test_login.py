@@ -9,7 +9,7 @@ from django.urls import reverse
 APPLICATION_JSON = "application/json"
 
 
-class LoginTest(TestCase):
+class LoginTests(TestCase):
 	fixtures = ["users.json"]
 
 	def setUp(self) -> None:
