@@ -1,4 +1,4 @@
-name: End to end tests
+name: All tests
 
 on:
   workflow_dispatch:
@@ -10,6 +10,59 @@ on:
       - "master"
 
 jobs:
+  backend_tests:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - uses: "actions/checkout@v2"
+
+      - name: "Setup Python 3.8"
+        uses: "actions/setup-python@v2"
+        with:
+          python-version: 3.8
+
+      - name: "Install Dependencies"
+        run: |
+          pip install flake8
+          pip install -r ../requirements.txt
+
+      - name: "Lint"
+        run: |
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+      - name: "Test"
+        env:
+          PRESTIGE_UNIVERSE: "test"
+        run: "python manage.py test"
+
+  frontend_tests:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Setup Node
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: 14
+
+      - name: Install Dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Lint
+        run: yarn run lint
+
+      - name: Test
+        run: yarn test
+
   e2e_tests:
     runs-on: ubuntu-latest
 
