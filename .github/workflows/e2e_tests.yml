@@ -1,9 +1,16 @@
 name: End to end tests
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "master"
+  pull_request:
+    branches:
+      - "master"
 
 jobs:
-  all:
+  e2e_tests:
     runs-on: ubuntu-latest
 
     defaults:
