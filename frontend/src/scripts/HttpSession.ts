@@ -46,7 +46,7 @@ export default class HttpSession {
 		// These are persistent throughout a session.
 		this.cookieJar = new CookieJar()
 		this.loadingCounter = 0
-		this.proxy = proxy
+		this.proxy = proxy == null ? null : String(proxy)
 
 		// These should reset for each execute action.
 		this.result = null
@@ -169,17 +169,6 @@ export default class HttpSession {
 			serialize(data: any): any {
 				return data
 			},
-			config(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): XMLHttpRequest | void {
-				xhr.addEventListener("readystatechange", () => {
-					/* Use xhr.readyState to show progress.
-					0 UNSENT Client has been created. open() not called yet.
-					1 OPENED open() has been called.
-					2 HEADERS_RECEIVED send() has been called, and headers and status are available.
-					3 LOADING Downloading; responseText holds partial data.
-					4 DONE The operation is complete.
-					 */
-				})
-			},
 			extract(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): ExecuteResponse {
 				const lines: string[] = xhr.getAllResponseHeaders().trim().split(/[\r\n]+/)
 				const responseHeaders: string[][] = []
@@ -293,11 +282,19 @@ export default class HttpSession {
 	}
 
 	getProxyUrl({ url }: RequestDetails): null | string {
-		return this.proxy && this.proxy.includes("://localhost")
+		if (this.proxy == null || this.proxy === "") {
+			return null
+		}
+
+		return isLocalUrl(this.proxy)
 			? this.proxy
-			: url.includes("://localhost")
+			: isLocalUrl(url)
 				? null
 				: this.proxy
 	}
 
+}
+
+function isLocalUrl(url: string): boolean {
+	return url.includes("://localhost") || url.includes("://127.0.0.1")
 }
