@@ -12,6 +12,8 @@ URL = os.getenv("FRONTEND_URL")
 if not URL:
 	raise ValueError("Missing/empty 'FRONTEND_URL' environment variable.")
 
+HTTPBIN = os.getenv("HTTPBIN_URL", "http://httpbin.org")
+
 os.makedirs("shots", exist_ok=True)
 
 options = webdriver.ChromeOptions()
@@ -34,7 +36,7 @@ class SearchText(unittest.TestCase):
 		self.wait.until(presence_of_element_located((By.TAG_NAME, "textarea")))
 		self.driver.find_element_by_css_selector(".CodeMirror .CodeMirror-line").click()
 		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.HOME)
-		self.driver.find_element_by_css_selector("textarea").send_keys("GET http://httpbin.org/get\n\n###\n\n")
+		self.driver.find_element_by_css_selector("textarea").send_keys("GET " + HTTPBIN + "/get\n\n###\n\n")
 		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.HOME)
 		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.COMMAND, Keys.HOME)
 		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.ENTER)
