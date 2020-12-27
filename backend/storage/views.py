@@ -20,9 +20,6 @@ def ls_view(request):
 def get_view(request, slug: str):
 	document = get_object_or_404(Document, user=request.user, slug=slug)
 	return JsonResponse({
-		"ok": True,
-		"name": document.name,
-		"slug": document.slug,
 		"body": document.body,
 	})
 

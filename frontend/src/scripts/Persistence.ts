@@ -129,7 +129,7 @@ class CloudProvider extends Provider<CloudSource> {
 			throw new Error("Cannot load sheets on cloud, since user not logged in.")
 		}
 
-		const response = await m.request<{ ok: boolean, body: string }>({
+		const response = await m.request<{ body: string }>({
 			method: "GET",
 			url: STORAGE_URL_BASE + "get/" + sheetPath,
 			withCredentials: true,

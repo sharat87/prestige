@@ -9,11 +9,7 @@ def login_required_json(view_fn):
 	def login_required_json_wrapper(request, *args, **kwargs):
 		return view_fn(request, *args, **kwargs) if request.user.is_authenticated else JsonResponse(
 			status=HTTPStatus.UNAUTHORIZED,
-			data={
-				"error": {
-					"message": "You need to be logged in to access this.",
-				},
-			},
+			data={},
 		)
 
 	return login_required_json_wrapper
