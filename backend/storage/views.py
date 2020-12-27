@@ -33,10 +33,7 @@ def patch_view(request, slug: str):
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Nothing to patch", data={})
 
 	count = Document.objects.filter(user=request.user, slug=slug).update(**updates)
-	if count:
-		return JsonResponse({})
-	else:
-		return HttpResponseNotFound()
+	return JsonResponse({}) if count else HttpResponseNotFound()
 
 
 class StorageCrud(View):

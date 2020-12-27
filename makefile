@@ -15,3 +15,10 @@ serve-frontend:
 
 test-frontend:
 	@cd frontend && yarn && yarn test
+
+test-e2e:
+	@cd e2e-tests && python3 run.py
+
+test-all: test-frontend test-backend test-e2e
+
+.PHONY: serve-backend serve-frontend test-all test-frontend test-backend test-e2e

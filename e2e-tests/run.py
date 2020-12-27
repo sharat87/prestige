@@ -115,7 +115,7 @@ def prestige_backend(fn_log):
 		"PRESTIGE_ENV": "development",
 		"PRESTIGE_SECRET_KEY": "e2e-secret-key",
 		"PRESTIGE_CORS_ORIGINS": f"http://localhost:{frontend_port}",
-		"DATABASE_URL": "sqlite:///e2e-db.sqlite3",
+		"DATABASE_URL": "sqlite://:memory:",
 	}
 
 	fn_log.info("Run migrations on backend server.")
