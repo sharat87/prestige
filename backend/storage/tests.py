@@ -69,7 +69,7 @@ class PatchTests(TestCase):
 
 	def run_patch(self, slug, **kwargs):
 		return self.client.patch(
-			reverse("patch_view", kwargs={"slug": slug}),
+			reverse("crud_single", kwargs={"slug": slug}),
 			content_type=APPLICATION_JSON,
 			data=json.dumps(kwargs),
 		)

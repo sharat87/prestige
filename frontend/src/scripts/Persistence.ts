@@ -148,7 +148,7 @@ class CloudProvider extends Provider<CloudSource> {
 		// TODO: Verify if the save was successful.
 		await m.request({
 			method: "PATCH",
-			url: STORAGE_URL_BASE + "patch/" + sheet.path,
+			url: STORAGE_URL_BASE + sheet.path,
 			withCredentials: true,
 			body: {
 				body: sheet.body,
