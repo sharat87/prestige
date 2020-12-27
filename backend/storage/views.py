@@ -2,28 +2,13 @@ from http import HTTPStatus
 
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.views import View
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_GET, require_http_methods
+from django.views.decorators.http import require_http_methods
 
 from auth_api.utils import login_required_json
 from .models import Document
-
-
-@require_GET
-@login_required_json
-def ls_view(request):
-	return JsonResponse({
-		"entries": list(request.user.document_set.values("name", "slug")),
-	})
-
-
-@require_GET
-@login_required_json
-def get_view(request, slug: str):
-	document = get_object_or_404(Document, user=request.user, slug=slug)
-	return JsonResponse({
-		"body": document.body,
-	})
 
 
 @require_http_methods(["PATCH"])
@@ -52,3 +37,27 @@ def patch_view(request, slug: str):
 		return JsonResponse({})
 	else:
 		return HttpResponseNotFound()
+
+
+class StorageCrud(View):
+	http_method_names = ["get", "post", "patch", "delete", "head", "options", "trace"]
+
+	@method_decorator(login_required_json)
+	def get(self, request, *args, slug: str = None, **kwargs):
+		if slug:
+			return self.single(request, slug)
+		else:
+			return self.listing(request)
+
+	@staticmethod
+	def listing(request):
+		return JsonResponse({
+			"entries": list(request.user.document_set.values("name", "slug")),
+		})
+
+	@staticmethod
+	def single(request, slug):
+		document = get_object_or_404(Document, user=request.user, slug=slug)
+		return JsonResponse({
+			"body": document.body,
+		})

@@ -110,7 +110,7 @@ class CloudProvider extends Provider<CloudSource> {
 
 		const response = await m.request<{ ok: boolean, entries: { name: string, slug: string }[] }>({
 			method: "GET",
-			url: STORAGE_URL_BASE + "ls",
+			url: STORAGE_URL_BASE,
 			withCredentials: true,
 		})
 
@@ -131,7 +131,7 @@ class CloudProvider extends Provider<CloudSource> {
 
 		const response = await m.request<{ body: string }>({
 			method: "GET",
-			url: STORAGE_URL_BASE + "get/" + sheetPath,
+			url: STORAGE_URL_BASE + sheetPath,
 			withCredentials: true,
 		})
 

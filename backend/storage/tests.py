@@ -14,7 +14,7 @@ class ListingTests(TestCase):
 
 	def test_ls(self):
 		self.client.login(email="u1@host.com", password="u1-password")
-		response = self.client.get(reverse("ls_view"))
+		response = self.client.get(reverse("crud"))
 
 		self.assertEqual(response.status_code, HTTPStatus.OK)
 		self.assertEqual(response.json(), {
@@ -31,8 +31,7 @@ class ListingTests(TestCase):
 		})
 
 	def test_ls_without_login(self):
-		response = self.client.get(reverse("ls_view"))
-
+		response = self.client.get(reverse("crud"))
 		self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 		self.assertEqual(response.json(), {})
 
@@ -42,7 +41,7 @@ class DocumentGettingTests(TestCase):
 
 	def test_get(self):
 		self.client.login(email="u1@host.com", password="u1-password")
-		response = self.client.get(reverse("get_view", kwargs={"slug": "one"}))
+		response = self.client.get(reverse("crud_single", kwargs={"slug": "one"}))
 
 		self.assertEqual(response.status_code, HTTPStatus.OK)
 		self.assertEqual(response.json(), {
@@ -50,18 +49,18 @@ class DocumentGettingTests(TestCase):
 		})
 
 	def test_get_without_login(self):
-		response = self.client.get(reverse("get_view", kwargs={"slug": "one"}))
+		response = self.client.get(reverse("crud_single", kwargs={"slug": "one"}))
 		self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
 		self.assertEqual(response.json(), {})
 
 	def test_get_different_user(self):
 		self.client.login(email="u1@host.com", password="u1-password")
-		response = self.client.get(reverse("get_view", kwargs={"slug": "2-one"}))
+		response = self.client.get(reverse("crud_single", kwargs={"slug": "2-one"}))
 		self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
 	def test_get_missing_doc(self):
 		self.client.login(email="u1@host.com", password="u1-password")
-		response = self.client.get(reverse("get_view", kwargs={"slug": "missing-document"}))
+		response = self.client.get(reverse("crud_single", kwargs={"slug": "missing-document"}))
 		self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
 
 
