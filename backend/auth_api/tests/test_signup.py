@@ -1,10 +1,9 @@
 import json
-import logging
 from http import HTTPStatus
 
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
-
 
 APPLICATION_JSON = "application/json"
 
@@ -23,6 +22,7 @@ class SignupTests(TestCase):
 		)
 
 		self.assertEqual(response.status_code, HTTPStatus.CREATED)
+		self.assertEqual(get_user_model().objects.filter(email="new1@host.com").count(), 1)
 
 	def test_signup_duplicate_email(self):
 		response = self.client.post(
@@ -74,6 +74,7 @@ class SignupTests(TestCase):
 				"message": "Missing/empty email field in body.",
 			},
 		})
+		self.assertEqual(get_user_model().objects.filter(email="new1@host.com").count(), 0)
 
 	def test_missing_password(self):
 		response = self.client.post(
@@ -90,6 +91,7 @@ class SignupTests(TestCase):
 				"message": "Missing/empty password field in body.",
 			},
 		})
+		self.assertEqual(get_user_model().objects.filter(email="new2@host.com").count(), 0)
 
 	def test_missing_username(self):
 		response = self.client.post(
@@ -103,13 +105,14 @@ class SignupTests(TestCase):
 
 		self.assertEqual(response.status_code, HTTPStatus.CREATED)
 		self.assertEqual(response.json(), {})
+		self.assertEqual(get_user_model().objects.filter(email="new3@host.com").count(), 1)
 
 	def test_empty_username(self):
 		response = self.client.post(
 			reverse("signup"),
 			content_type=APPLICATION_JSON,
 			data=json.dumps({
-				"email": "new3@host.com",
+				"email": "new4@host.com",
 				"password": "new-password",
 				"username": "",
 			}),
@@ -121,3 +124,4 @@ class SignupTests(TestCase):
 				"message": "Empty username field in body.",
 			},
 		})
+		self.assertEqual(get_user_model().objects.filter(email="new4@host.com").count(), 0)

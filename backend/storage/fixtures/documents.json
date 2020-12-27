@@ -5,9 +5,9 @@
 			"user": [
 				"u1@host.com"
 			],
-			"name": "one",
+			"name": "First's One",
 			"slug": "one",
-			"body": "GET http://httpbin.org/get",
+			"body": "First one's body",
 			"created_at": "2020-02-01T06:30:00Z",
 			"updated_at": "2020-02-01T06:30:00Z"
 		}
@@ -18,9 +18,9 @@
 			"user": [
 				"u1@host.com"
 			],
-			"name": "two",
+			"name": "First's Two",
 			"slug": "two",
-			"body": "GET http://httpbin.org/get",
+			"body": "First two's body",
 			"created_at": "2020-02-01T06:31:00Z",
 			"updated_at": "2020-02-01T06:31:00Z"
 		}
@@ -31,9 +31,9 @@
 			"user": [
 				"u2@host.com"
 			],
-			"name": "2-one",
+			"name": "Second's One",
 			"slug": "2-one",
-			"body": "GET http://httpbin.org/get",
+			"body": "Second one's body",
 			"created_at": "2020-02-01T06:31:00Z",
 			"updated_at": "2020-02-01T06:31:00Z"
 		}

@@ -1,4 +1,6 @@
-from django.http import JsonResponse
+from http import HTTPStatus
+
+from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_http_methods
@@ -28,16 +30,25 @@ def get_view(request, slug: str):
 @login_required_json
 @csrf_exempt
 def patch_view(request, slug: str):
-	document = get_object_or_404(Document, user=request.user, slug=slug)
-	is_changed = False
+	updates = {}
 
-	if "body" in request.parsed_body and request.parsed_body["body"] != document.body:
-		document.body = request.parsed_body["body"]
-		is_changed = True
+	body = request.parsed_body.get("body")
+	if body is not None:
+		if not isinstance(body, str):
+			return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid body", data={})
+		updates["body"] = body
 
-	if is_changed:
-		document.save()
+	name = request.parsed_body.get("name")
+	if name is not None:
+		if not isinstance(name, str):
+			return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid name", data={})
+		updates["name"] = name
 
-	return JsonResponse({
-		"ok": True,
-	})
+	if not updates:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Nothing to patch", data={})
+
+	count = Document.objects.filter(user=request.user, slug=slug).update(**updates)
+	if count:
+		return JsonResponse({})
+	else:
+		return HttpResponseNotFound()
