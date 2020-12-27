@@ -42,38 +42,20 @@ function getAuthState() {
 }
 
 function signup(email: string, password: string): Promise<void> {
-	const prevState = authState
-	authState = AuthState.PENDING
-
-	return m.request<{ ok: boolean, user: User }>({
-		method: "POST",
-		url: AUTH_URL_BASE + "signup",
-		withCredentials: true,
-		body: {
-			email,
-			password,
-		},
-	})
-		.then(response => {
-			console.log("signup response", response)
-			authState = AuthState.LOGGED_IN
-			currentUser({
-				email: response.user.email,
-			})
-		})
-		.catch(error => {
-			console.log("profile error", error)
-			authState = prevState
-		})
+	return authAction("signup", email, password)
 }
 
 function login(email: string, password: string): Promise<void> {
+	return authAction("login", email, password)
+}
+
+function authAction(urlPath: string, email: string, password: string): Promise<void> {
 	const prevState = authState
 	authState = AuthState.PENDING
 
 	return m.request<void>({
 		method: "POST",
-		url: AUTH_URL_BASE + "login",
+		url: AUTH_URL_BASE + urlPath,
 		withCredentials: true,
 		body: {
 			email,

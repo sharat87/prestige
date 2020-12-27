@@ -49,46 +49,46 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
-	'django.contrib.admin',
-	'django.contrib.auth',
-	'django.contrib.contenttypes',
-	'django.contrib.sessions',
-	'django.contrib.messages',
-	'django.contrib.staticfiles',
-	'corsheaders',
-	'oauth2_provider',
-	'proxy',
-	'auth_api',
-	'storage',
+	"django.contrib.admin",
+	"django.contrib.auth",
+	"django.contrib.contenttypes",
+	"django.contrib.sessions",
+	"django.contrib.messages",
+	"django.contrib.staticfiles",
+	"corsheaders",
+	"oauth2_provider",
+	"proxy",
+	"auth_api",
+	"storage",
 ]
 
 MIDDLEWARE = [
-	'django.middleware.security.SecurityMiddleware',
-	'django.contrib.sessions.middleware.SessionMiddleware',
-	'corsheaders.middleware.CorsMiddleware',
-	'django.middleware.common.CommonMiddleware',
-	'django.middleware.csrf.CsrfViewMiddleware',
-	'django.contrib.auth.middleware.AuthenticationMiddleware',
-	'django.contrib.messages.middleware.MessageMiddleware',
-	'django.middleware.clickjacking.XFrameOptionsMiddleware',
+	"django.middleware.security.SecurityMiddleware",
+	"django.contrib.sessions.middleware.SessionMiddleware",
+	"corsheaders.middleware.CorsMiddleware",
+	"django.middleware.common.CommonMiddleware",
+	"django.middleware.csrf.CsrfViewMiddleware",
+	"django.contrib.auth.middleware.AuthenticationMiddleware",
+	"django.contrib.messages.middleware.MessageMiddleware",
+	"django.middleware.clickjacking.XFrameOptionsMiddleware",
 	"prestige.middlewares.parsed_body.ParsedBodyMiddleware",
 ]
 
 AUTH_USER_MODEL = "auth_api.User"
 
-ROOT_URLCONF = 'prestige.urls'
+ROOT_URLCONF = "prestige.urls"
 
 TEMPLATES = [
 	{
-		'BACKEND': 'django.template.backends.django.DjangoTemplates',
-		'DIRS': [],
-		'APP_DIRS': True,
-		'OPTIONS': {
-			'context_processors': [
-				'django.template.context_processors.debug',
-				'django.template.context_processors.request',
-				'django.contrib.auth.context_processors.auth',
-				'django.contrib.messages.context_processors.messages',
+		"BACKEND": "django.template.backends.django.DjangoTemplates",
+		"DIRS": [],
+		"APP_DIRS": True,
+		"OPTIONS": {
+			"context_processors": [
+				"django.template.context_processors.debug",
+				"django.template.context_processors.request",
+				"django.contrib.auth.context_processors.auth",
+				"django.contrib.messages.context_processors.messages",
 			],
 		},
 	},
@@ -104,7 +104,7 @@ DATABASES = {
 	# For SQLite, set `DATABASE_URL=sqlite:///path/to/folder/db.sqlite3`
 	"default": {
 		"ENGINE": "django.db.backends.sqlite3",
-		"NAME": "prestige-test.sqlite3",
+		"NAME": ":memory:",
 	} if UNIVERSE == "test" else dj_database_url.config(conn_max_age=600),
 }
 
@@ -113,41 +113,41 @@ DATABASES = {
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
 	{
-		'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+		"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
 	},
 ]
 
 # Logging
 # https://docs.djangoproject.com/en/3.1/topics/logging/
 LOGGING = {
-	'version': 1,
-	'disable_existing_loggers': False,
-	'formatters': {
-		'verbose': {
-			'format': '{levelname} {asctime} {name} {message}',
-			'style': '{',
+	"version": 1,
+	"disable_existing_loggers": False,
+	"formatters": {
+		"verbose": {
+			"format": "{levelname} {asctime} {name} {message}",
+			"style": "{",
 		},
 	},
-	'handlers': {
-		'console': {
-			'class': 'logging.StreamHandler',
-			'formatter': 'verbose',
+	"handlers": {
+		"console": {
+			"class": "logging.StreamHandler",
+			"formatter": "verbose",
 		},
-		'mail_admins': {
-			'level': 'ERROR',
-			'class': 'django.utils.log.AdminEmailHandler',
+		"mail_admins": {
+			"level": "ERROR",
+			"class": "django.utils.log.AdminEmailHandler",
 		},
 	},
-	'loggers': {
-		'django': {
-			'handlers': ['console'],
-			'level': 'WARNING',
-			'propagate': True,
+	"loggers": {
+		"django": {
+			"handlers": ["console"],
+			"level": "WARNING",
+			"propagate": True,
 		},
-		'django.request': {
-			'handlers': ['console', 'mail_admins'],
-			'level': 'DEBUG',
-			'propagate': False,
+		"django.request": {
+			"handlers": ["console", "mail_admins"],
+			"level": "ERROR" if UNIVERSE == "test" else "DEBUG",
+			"propagate": False,
 		},
 	}
 }

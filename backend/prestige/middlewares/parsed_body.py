@@ -12,8 +12,12 @@ class ParsedBodyMiddleware:
 
 	def __call__(self, request):
 		request.parsed_body = None
+		content_type = request.META.get("CONTENT_TYPE", "")
 
-		if request.method in ALLOWED_METHODS and "application/json" in request.META["CONTENT_TYPE"]:
+		if request.method == 'GET':
+			request.parsed_body = request.GET
+
+		elif request.method in ALLOWED_METHODS and "application/json" in content_type:
 			try:
 				request.parsed_body = json.loads(request.body)
 			except json.JSONDecodeError as error:
@@ -22,9 +26,6 @@ class ParsedBodyMiddleware:
 						"message": str(error),
 					},
 				})
-
-		elif request.method == 'GET':
-			request.parsed_body = request.GET
 
 		elif request.method == 'POST':
 			request.parsed_body = request.POST

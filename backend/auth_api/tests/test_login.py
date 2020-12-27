@@ -16,13 +16,6 @@ class LoginTests(TestCase):
 		self.u1_email = "u1@host.com"
 		self.u1_password = "u1-password"
 
-		logger = logging.getLogger("django.request")
-		self._original_log_level = logger.getEffectiveLevel()
-		logger.setLevel(logging.ERROR)
-
-	def tearDown(self) -> None:
-		logging.getLogger("django.request").setLevel(self._original_log_level)
-
 	def test_login_valid_urlencoded(self):
 		response = self.client.post(
 			reverse("login"),

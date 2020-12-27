@@ -21,16 +21,6 @@ class JobMixin:
 
 
 class MessedUpInput(SimpleTestCase, JobMixin):
-	def setUp(self) -> None:
-		# Since tests in this class are technically invalid, we get a warning log, but they are irrelevant here since
-		# we are deliberately testing for failure. So we up the level of this category to ERROR.
-		logger = logging.getLogger("django.request")
-		self._original_level = logger.getEffectiveLevel()
-		logger.setLevel(logging.ERROR)
-
-	def tearDown(self) -> None:
-		logging.getLogger("django.request").setLevel(self._original_level)
-
 	def test_invalid_json(self):
 		response = self.client.post(
 			reverse("index"),

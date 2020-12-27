@@ -11,7 +11,6 @@ from .models import Document
 @login_required_json
 def ls_view(request):
 	return JsonResponse({
-		"ok": True,
 		"entries": list(request.user.document_set.values("name", "slug")),
 	})
 
