@@ -39,18 +39,19 @@ export default function ResultPane(): m.Component<Attrs, State> {
 		}
 
 		if (!result.ok) {
+			const error = result.error ?? {}
 			return m(".result-pane.error", { class: vnode.attrs.class }, [
 				m(Toolbar),
 				m(".body", [
 					m("h2.pl2", "Error executing request"),
-					result.error.title != null && m("h3", result.error.title),
-					result.error.message && m(
+					error.title != null && m("h3", error.title),
+					m(
 						"pre.message.overflow-x-auto.overflow-y-hidden.ph2",
-						result.error.message,
+						error.message || "Unknown error occurred.",
 					),
-					result.error.stack && m("details", [
+					error.stack && m("details", [
 						m("summary.pointer", "Stack trace"),
-						m("pre.ph2.ml2", result.error.stack),
+						m("pre.ph2.ml2", error.stack),
 					]),
 					result.request && [
 						m("h2.pl2", "Request details"),

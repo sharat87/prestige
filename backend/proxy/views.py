@@ -29,7 +29,18 @@ def proxy(request) -> JsonResponse:
 	url: str = job.get("url")
 
 	if not url:
-		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing URL in payload", data={})
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing URL in payload", data={
+			"error": {
+				"message": "Missing endpoint URL to proxy to.",
+			},
+		})
+
+	if not is_url_allowed(url):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Endpoint not allowed", data={
+			"error": {
+				"message": "This URL is not allowed on this proxy.",
+			},
+		})
 
 	if not isinstance(url, str):
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Incorrect data type of URL", data={
@@ -150,3 +161,17 @@ def get_body_in_response(response: requests.Response):
 		return response.content.decode(encoding=charset)
 
 	return response.content
+
+
+def is_url_allowed(url: str):
+	if not url:
+		return False
+
+	parts = url.split("/")
+	if len(parts) < 3:
+		return False
+
+	host_port = parts[2]
+	host = (host_port.split(":")[0] if ":" in host_port else host_port).lower()
+
+	return host not in {"localhost", "127.0.0.1"}

@@ -22,7 +22,11 @@ interface SuccessResult {
 
 interface FailureResult {
 	ok: false,
-	error: any,
+	error?: {
+		title?: string,
+		message?: string,
+		stack?: string,
+	},
 	request: any,
 	timeTaken?: number,
 }
@@ -235,10 +239,7 @@ export default class HttpSession {
 		}
 
 		const response = await fetch(proxy, options)
-		console.log("Response", response)
-
 		const textResponse = await response.text()
-		console.log("Text Response", textResponse)
 		let data
 
 		try {
@@ -283,7 +284,7 @@ export default class HttpSession {
 
 		} else {
 			console.error("response non-ok data", data)
-			return Promise.reject(new Error(data.error.message))
+			return Promise.reject(new Error(data.error?.message))
 
 		}
 	}
