@@ -60,6 +60,8 @@ export abstract class Provider<S extends Source> {
 	abstract load(sheetPath: SheetPath): Promise<Sheet>
 
 	abstract save(sheet: Sheet): Promise<void>
+
+	abstract create(path: string, name: string): Promise<void>
 }
 
 class BrowserProvider extends Provider<LocalSource> {
@@ -97,6 +99,12 @@ class BrowserProvider extends Provider<LocalSource> {
 		localStorage.setItem(this.prefix + path + ":name", name)
 		localStorage.setItem(this.prefix + path + ":body", body)
 		localStorage.setItem(this.prefix + path + ":cookieJar", JSON.stringify(cookieJar))
+	}
+
+	create(path: string, name: string): Promise<void> {
+		localStorage.setItem(this.prefix + path + ":name", name)
+		localStorage.setItem(this.prefix + path + ":body", "")
+		return this.loadRootListing()
 	}
 }
 
@@ -154,6 +162,18 @@ class CloudProvider extends Provider<CloudSource> {
 				body: sheet.body,
 			},
 		})
+	}
+
+	create(path: string, name: string): Promise<void> {
+		return m.request({
+			method: "POST",
+			url: STORAGE_URL_BASE + path,
+			withCredentials: true,
+			body: {
+				name,
+			}
+		})
+			.then(() => this.loadRootListing())
 	}
 }
 

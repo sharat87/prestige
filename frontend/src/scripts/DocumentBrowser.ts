@@ -38,16 +38,18 @@ function renderProvider(provider: Provider<Source>) {
 		m(
 			"a.pv1.ph2.db.hover-bg-washed-blue.dark-blue",
 			{
-				onclick: onNewClicked,
+				onclick,
 				href: "#",
 			},
 			"+ New Sheet",
 		),
 	])
-}
 
-function onNewClicked(event: MouseEvent) {
-	event.preventDefault()
-	const name = prompt("Sheet Name")
-	console.log("Create sheet", name)
+	function onclick(event: MouseEvent) {
+		event.preventDefault()
+		const name = prompt("Sheet Name")
+		if (name != null) {
+			provider.create("", name)
+		}
+	}
 }

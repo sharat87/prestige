@@ -117,8 +117,6 @@ export default class HttpSession {
 	}
 
 	async execute(request: RequestDetails): Promise<AnyResult> {
-		console.info("Executing", request)
-
 		if (request.method === "") {
 			throw new Error("Method cannot be empty!")
 		}
@@ -237,17 +235,26 @@ export default class HttpSession {
 		}
 
 		const response = await fetch(proxy, options)
+		console.log("Response", response)
 
 		const textResponse = await response.text()
+		console.log("Text Response", textResponse)
 		let data
 
 		try {
-			data = {
-				ok: true,
-				response: null,
-				history: [],
-				cookies: {},
-				...JSON.parse(textResponse),
+			if (response.status == 200) {
+				data = {
+					ok: true,
+					response: null,
+					history: [],
+					cookies: {},
+					...JSON.parse(textResponse),
+				}
+			} else {
+				data = {
+					ok: false,
+					...JSON.parse(textResponse),
+				}
 			}
 		} catch (error) {
 			if (!(error instanceof SyntaxError)) {

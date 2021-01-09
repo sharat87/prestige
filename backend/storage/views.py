@@ -1,61 +1,142 @@
 from http import HTTPStatus
 
+from django.db import IntegrityError
 from django.http import JsonResponse, HttpResponseNotFound
 from django.shortcuts import get_object_or_404
-from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods
 
 from auth_api.utils import login_required_json
 from .models import Document
 
 
-class DocumentCrud(View):
-	http_method_names = ["get", "post", "patch", "delete", "head", "options", "trace"]
+@require_http_methods(["GET", "POST"])
+@login_required_json
+@csrf_exempt
+def index_view(request):
+	method = request.method
 
-	@method_decorator(login_required_json)
-	@method_decorator(csrf_exempt)
-	def dispatch(self, request, *args, **kwargs):
-		return super().dispatch(request, *args, **kwargs)
-
-	@classmethod
-	def get(cls, request, *args, slug: str = None, **kwargs):
-		if slug:
-			return cls.single(request, slug)
-		else:
-			return cls.listing(request)
-
-	@staticmethod
-	def listing(request):
+	if method == "GET":
 		return JsonResponse({
 			"entries": list(request.user.document_set.values("name", "slug")),
 		})
 
-	@staticmethod
-	def single(request, slug):
-		document = get_object_or_404(Document, user=request.user, slug=slug)
-		return JsonResponse({
-			"body": document.body,
+	elif method == "POST":
+		return create_document(request)
+
+	else:
+		raise ValueError(f"Unexpected method in request: {request.method}.")
+
+
+@require_http_methods(["GET", "PATCH", "DELETE"])
+@login_required_json
+@csrf_exempt
+def single_view(request, slug: str):
+	method = request.method
+
+	if method == "GET":
+		return get_document(request, slug)
+
+	elif method == "PATCH":
+		return patch_document(request, slug)
+
+	elif method == "DELETE":
+		return delete_document(request, slug)
+
+	else:
+		raise ValueError(f"Unexpected method in request: {request.method}.")
+
+
+def get_document(request, slug: str):
+	document = get_object_or_404(Document, user=request.user, slug=slug)
+	return JsonResponse({
+		"body": document.body,
+	})
+
+
+def patch_document(request, slug: str):
+	updates = {}
+
+	body = request.parsed_body.get("body")
+	if body is not None:
+		if not isinstance(body, str):
+			return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid body", data={})
+		updates["body"] = body
+
+	name = request.parsed_body.get("name")
+	if name is not None:
+		if not isinstance(name, str):
+			return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid name", data={})
+		updates["name"] = name
+
+	if not updates:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Nothing to patch", data={})
+
+	count = Document.objects.filter(user=request.user, slug=slug).update(**updates)
+	return JsonResponse({}) if count else HttpResponseNotFound()
+
+
+def create_document(request):
+	if not isinstance(request.parsed_body, dict):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
+			"error": {
+				"message": "Invalid request payload.",
+			},
 		})
 
-	@staticmethod
-	def patch(request, *args, slug: str = None, **kwargs):
-		updates = {}
+	name = request.parsed_body.pop("name", None)
 
-		body = request.parsed_body.get("body")
-		if body is not None:
-			if not isinstance(body, str):
-				return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid body", data={})
-			updates["body"] = body
+	if not name:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
+			"error": {
+				"message": "Missing name in payload.",
+			},
+		})
 
-		name = request.parsed_body.get("name")
-		if name is not None:
-			if not isinstance(name, str):
-				return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid name", data={})
-			updates["name"] = name
+	if not isinstance(name, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
+			"error": {
+				"message": "Invalid value for name.",
+			},
+		})
 
-		if not updates:
-			return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Nothing to patch", data={})
+	body = request.parsed_body.pop("body", "")
 
-		count = Document.objects.filter(user=request.user, slug=slug).update(**updates)
-		return JsonResponse({}) if count else HttpResponseNotFound()
+	if not isinstance(body, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
+			"error": {
+				"message": "Invalid value for body.",
+			},
+		})
+
+	if request.parsed_body:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
+			"error": {
+				"message": "Unknown extra fields: " + ", ".join(map(repr, request.parsed_body.keys())) + ".",
+			},
+		})
+
+	try:
+		document = request.user.document_set.create(name=name, body=body)
+	except IntegrityError as error:
+		error_message = str(error)
+		if ".user_id" in error_message and ".name" in error_message:
+			return JsonResponse(status=HTTPStatus.CONFLICT, data={
+				"error": {
+					"messages": "There's already a document by that name. Please use a different name.",
+				},
+			})
+		raise
+
+	return JsonResponse(status=HTTPStatus.CREATED, data={
+		"id": document.id,
+	})
+
+
+def delete_document(request, slug):
+	count, _ = request.user.document_set.filter(slug=slug).delete()
+
+	if not count:
+		return JsonResponse(status=HTTPStatus.NOT_FOUND, data={})
+
+	return JsonResponse(status=HTTPStatus.NO_CONTENT, data={})

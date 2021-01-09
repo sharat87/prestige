@@ -57,6 +57,14 @@ def proxy(request) -> JsonResponse:
 			timeout=timeout,
 			verify=False,
 		)
+
+	except requests.exceptions.ConnectionError:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Proxied endpoint unreachable", data={
+			"error": {
+				"message": "Error connecting to host at {}.".format(url),
+			},
+		})
+
 	except requests.exceptions.MissingSchema:
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid URL in body", data={
 			"error": {

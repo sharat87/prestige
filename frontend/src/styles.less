@@ -290,6 +290,43 @@ form.grid {
 	}
 }
 
+.toasts {
+	width: 360px;
+	z-index: 99;
+	pointer-events: none;
+
+	> * {
+		pointer-events: auto;
+		animation: toast .1s;
+
+		&.close {
+			animation: toast-close .1s;
+		}
+	}
+}
+
+@keyframes toast {
+	from {
+		opacity: 0;
+		transform: translateY(2rem);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes toast-close {
+	from {
+		opacity: 1;
+		transform: none;
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-2rem);
+	}
+}
+
 
 /* Editor Theming */
 

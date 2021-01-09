@@ -1,4 +1,4 @@
-# Prestige <sup>&alpha;</sup>
+# Prestige <sup>&alpha;</sup> <img align=right src="https://img.shields.io/badge/Made_With-Boring_Tech-F09?style=for-the-badge">
 
 **Just an HTTP client, by [@sharat87](https://sharats.me). Available at [prestigemad.com](https://prestigemad.com)
 ([Why that domain?](#why-the-domain)).**
@@ -10,6 +10,9 @@ build it one day. Well, had to do it myself in the end.
 
 Check out the [User Guide](https://prestigemad.com/help.html) to learn how Prestige can be a powerful addition to your
 toolset.
+
+**Why is Prestige tagged as Alpha Software?**: Two reasons. One, the primary experiences and documented features are not
+yet very stable. Two, the syntax and API are not final yet.
 
 ## Under the Hood
 

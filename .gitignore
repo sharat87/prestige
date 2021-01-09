@@ -6,6 +6,7 @@ __pycache__
 frontend/node_modules
 frontend/dist
 frontend/coverage
+__snapshots__
 
 e2e-tests/venv
 e2e-tests/drivers

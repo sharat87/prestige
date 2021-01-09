@@ -1,8 +1,8 @@
-import type { VnodeDOM } from "mithril"
+import type { Vnode, VnodeDOM } from "mithril"
 import m from "mithril"
 import OptionsModal from "./Options"
 import Workspace from "./Workspace"
-import AuthController from "./AuthService"
+import AuthController, { email } from "./AuthService"
 import { DocumentBrowser } from "./DocumentBrowser"
 import Modal from "./Modal"
 import Button from "./Button"
@@ -12,7 +12,7 @@ import LoginFormModal from "./LoginFormModal"
 import { NavLink } from "./NavLink"
 import ResultPane from "./ResultPane"
 import { isDev } from "./Env"
-import { email } from "./AuthService"
+import Toaster from "./Toaster";
 
 // TODO: UI Freezes when the response body is 1.6MB JSON. Like with `GET https://api.github.com/graphql`.
 
@@ -24,12 +24,52 @@ window.addEventListener("load", () => {
 	document.getElementById("loadingBox")?.remove()
 
 	m.route(root, "/doc/browser/master", {
-		"/doc/:path...": WorkspaceView,
+		"/doc/:path...": {
+			render: (vnode: Vnode) => m(Layout, m(WorkspaceView, vnode.attrs))
+		},
 		// "/:404...": errorPageComponent,
 	})
 
 	AuthController.check()
 })
+
+const Layout: m.Component = {
+	view(vnode: m.VnodeDOM): m.Children {
+		return [
+			vnode.children,
+			m(".toasts.pa4.fixed.right-0.top-0", Toaster.map(toast => m(
+				".f5.pa3.mb2.br2.shadow-2",
+				{
+					class: {
+						success: "bg-washed-green dark-green",
+						danger: "bg-washed-red dark-red",
+					}[toast.type],
+					key: toast.id,
+					onbeforeremove({ dom }: m.VnodeDOM): Promise<Event> {
+						dom.classList.add("close")
+						return new Promise(resolve => {
+							dom.addEventListener("animationend", resolve)
+						})
+					},
+				},
+				[
+					m("button.bn.br-pill.fr.pointer", {
+						type: "button",
+						class: {
+							success: "bg-light-green dark-green",
+							danger: "bg-light-red dark-red",
+						}[toast.type],
+						onclick(event: Event) {
+							(event.target as HTMLButtonElement).style.display = "none"
+							Toaster.remove(toast.id)
+						},
+					}, m.trust("&times;")),
+					toast.id + ": " + toast.message,
+				],
+			))),
+		]
+	}
+}
 
 function WorkspaceView(): m.Component {
 	const workspace = new Workspace()
@@ -79,7 +119,7 @@ function WorkspaceView(): m.Component {
 					m(
 						NavLink,
 						{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowser },
-						["Doc: ", workspace.currentSheetQualifiedPath(), m(ChevronDown)],
+						["Sheet: ", workspace.currentSheetQualifiedPath(), m(ChevronDown)],
 					),
 					m(
 						NavLink,
