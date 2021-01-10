@@ -13,10 +13,6 @@ jobs:
   backend_tests:
     runs-on: "ubuntu-latest"
 
-    defaults:
-      run:
-        working-directory: "backend"
-
     steps:
       - uses: "actions/checkout@v2"
 
@@ -25,26 +21,11 @@ jobs:
         with:
           python-version: 3.8
 
-      - name: "Install Dependencies"
-        run: |
-          pip install flake8
-          pip install -r ../requirements.txt
-
-      - name: "Lint"
-        run: |
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-
-      - name: "Test"
-        env:
-          PRESTIGE_UNIVERSE: "test"
-        run: "python manage.py test"
+      - name: "Lint and test backend"
+        run: "make lint-backend test-backend"
 
   frontend_tests:
     runs-on: "ubuntu-latest"
-
-    defaults:
-      run:
-        working-directory: "frontend"
 
     steps:
       - uses: "actions/checkout@v2"
