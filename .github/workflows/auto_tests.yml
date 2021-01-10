@@ -54,14 +54,8 @@ jobs:
         with:
           node-version: 14
 
-      - name: "Install Dependencies"
-        run: "yarn install --frozen-lockfile"
-
-      - name: "Lint"
-        run: "yarn run lint"
-
-      - name: "Test"
-        run: "yarn test"
+      - name: "Lint and test frontend"
+        run: "make lint-frontend test-frontend"
 
   e2e_tests:
     runs-on: "ubuntu-latest"

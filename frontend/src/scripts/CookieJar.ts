@@ -16,7 +16,7 @@ export default class CookieJar {
 		this.size = 0
 	}
 
-	clear() {
+	clear(): void {
 		this.store = {}
 		this.size = 0
 	}
@@ -25,7 +25,7 @@ export default class CookieJar {
 		return this.store
 	}
 
-	private recomputeSize() {
+	private recomputeSize(): void {
 		let count = 0
 
 		for (const byPath of Object.values(this.store)) {

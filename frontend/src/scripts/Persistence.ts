@@ -171,7 +171,7 @@ class CloudProvider extends Provider<CloudSource> {
 			withCredentials: true,
 			body: {
 				name,
-			}
+			},
 		})
 			.then(() => this.loadRootListing())
 	}

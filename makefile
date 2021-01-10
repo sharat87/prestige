@@ -13,8 +13,14 @@ test-backend:
 serve-frontend:
 	@cd frontend && yarn && yarn start
 
-test-frontend:
-	@cd frontend && yarn install --frozen-lockfile && npx jest
+lint-frontend: frontend/node_modules
+	@cd frontend && npx tsc --noEmit --project . && npx eslint --report-unused-disable-directives src
+
+test-frontend: frontend/node_modules
+	@cd frontend && npx jest
+
+frontend/node_modules: frontend/package.json frontend/yarn.lock
+	@cd frontend && yarn install --frozen-lockfile
 
 test-e2e:
 	@cd e2e-tests && python3 run.py

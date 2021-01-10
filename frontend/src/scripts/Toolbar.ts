@@ -1,5 +1,5 @@
+import type { Children, VnodeDOM } from "mithril"
 import m from "mithril"
-import type { VnodeDOM, Children } from "mithril"
 
 interface Attrs {
 	left?: Children;
@@ -8,7 +8,7 @@ interface Attrs {
 }
 
 export default {
-	view: (vnode: VnodeDOM<Attrs>) => m(".toolbar", (vnode.attrs.left || vnode.attrs.right) && [
+	view: (vnode: VnodeDOM<Attrs>): m.Children => m(".toolbar", (vnode.attrs.left || vnode.attrs.right) && [
 		m(".bar", [
 			m(".left", vnode.attrs.left),
 			m(".right", vnode.attrs.right),

@@ -12,7 +12,7 @@ import LoginFormModal from "./LoginFormModal"
 import { NavLink } from "./NavLink"
 import ResultPane from "./ResultPane"
 import { isDev } from "./Env"
-import Toaster from "./Toaster";
+import Toaster from "./Toaster"
 
 // TODO: UI Freezes when the response body is 1.6MB JSON. Like with `GET https://api.github.com/graphql`.
 
@@ -25,7 +25,7 @@ window.addEventListener("load", () => {
 
 	m.route(root, "/doc/browser/master", {
 		"/doc/:path...": {
-			render: (vnode: Vnode) => m(Layout, m(WorkspaceView, vnode.attrs))
+			render: (vnode: Vnode) => m(Layout, m(WorkspaceView, vnode.attrs)),
 		},
 		// "/:404...": errorPageComponent,
 	})
@@ -68,7 +68,7 @@ const Layout: m.Component = {
 				],
 			))),
 		]
-	}
+	},
 }
 
 function WorkspaceView(): m.Component {

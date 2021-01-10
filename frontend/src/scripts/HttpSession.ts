@@ -243,7 +243,7 @@ export default class HttpSession {
 		let data
 
 		try {
-			if (response.status == 200) {
+			if (response.status === 200) {
 				data = {
 					ok: true,
 					response: null,
