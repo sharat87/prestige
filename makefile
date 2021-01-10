@@ -13,7 +13,7 @@ serve-backend: backend/venv
 lint-backend: backend/venv
 	@cd backend \
 		&& source venv/bin/activate \
-		&& pip install -r flake8 \
+		&& pip install flake8 \
 		&& flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 
 test-backend: backend/venv
