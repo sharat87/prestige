@@ -251,6 +251,8 @@ class PostTests(TestCase):
 
 
 class DeleteTests(TestCase):
+	fixtures = ["users.json", "documents.json"]
+
 	def test_valid(self):
 		self.client.login(email="u1@host.com", password="u1-password")
 		response = self.client.delete(

@@ -1,5 +1,4 @@
 import json
-import logging
 from http import HTTPStatus
 
 from django.test import SimpleTestCase
@@ -47,7 +46,11 @@ class MessedUpInput(SimpleTestCase, JobMixin):
 	def test_missing_url(self):
 		response = self.job({})
 		self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
-		self.assertEqual(response.json(), {})
+		self.assertEqual(response.json(), {
+			"error": {
+				"message": "Missing endpoint URL to proxy to.",
+			},
+		})
 
 	def test_url_numeric(self):
 		response = self.job({

@@ -35,17 +35,17 @@ def proxy(request) -> JsonResponse:
 			},
 		})
 
-	if not is_url_allowed(url):
-		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Endpoint not allowed", data={
-			"error": {
-				"message": "This URL is not allowed on this proxy.",
-			},
-		})
-
 	if not isinstance(url, str):
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Incorrect data type of URL", data={
 			"error": {
 				"message": "URL should be a string.",
+			},
+		})
+
+	if not is_url_allowed(url):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Endpoint not allowed", data={
+			"error": {
+				"message": "This URL is not allowed on this proxy.",
 			},
 		})
 
