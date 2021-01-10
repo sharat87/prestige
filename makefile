@@ -29,8 +29,7 @@ makemigrations migrate: backend/venv
 backend/venv: requirements.txt
 	@mkdir -p backend
 	@test -d backend/venv || python3 -m venv --prompt prestige backend/venv
-	@source backend/venv/bin/activate \
-	@pip install -r requirements.txt
+	@source backend/venv/bin/activate && pip install -r requirements.txt
 
 ###
 # Frontend targets
@@ -52,8 +51,17 @@ frontend/node_modules: frontend/package.json frontend/yarn.lock
 # Miscellaneous / Project-wide targets
 ###
 
-test-e2e:
-	@cd e2e-tests && python3 run.py
+test-e2e: e2e-tests/drivers/chromedriver
+	@cd e2e-tests && PATH="$$PWD/drivers:$$PATH" python3 run.py
+
+e2e-tests/drivers/chromedriver:
+	@export CHROME_VERSION="$$(google-chrome --version | cut -f 3 -d ' ' | cut -d '.' -f 1)" \
+		&& VERSION="$$(curl --silent --location --fail --retry 3 http://chromedriver.storage.googleapis.com/LATEST_RELEASE_$$CHROME_VERSION)" \
+		&& wget -c -nc --retry-connrefused --tries=0 -O chromedriver.zip https://chromedriver.storage.googleapis.com/$$VERSION/chromedriver_linux64.zip
+	@unzip -o -q chromedriver.zip
+	@mkdir -p $$(dirname $@)
+	@sudo mv chromedriver $@
+	@rm chromedriver.zip
 
 test-all: lint-frontend test-frontend test-backend test-e2e
 
