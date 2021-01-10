@@ -10,11 +10,10 @@ serve-backend: backend/venv
 		&& set -e && source env.sh && set +e \
 		&& python manage.py runserver 127.0.0.1:3041
 
-lint-backend: backend/venv
+lint-backend: backend/venv backend/venv/bin/flake8
 	@cd backend \
 		&& source venv/bin/activate \
-		&& pip install flake8 \
-		&& flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+		&& flake8 . --extend-exclude "venv" --select=E9,F63,F7,F82 --show-source --statistics
 
 test-backend: backend/venv
 	@cd backend \
@@ -32,6 +31,9 @@ backend/venv: requirements.txt
 	@mkdir -p backend
 	@test -d backend/venv || python3 -m venv --prompt prestige backend/venv
 	@source backend/venv/bin/activate && pip install -r requirements.txt
+
+backend/venv/bin/flake8: backend/venv
+	@source backend/venv/bin/activate && pip install flake8
 
 ###
 # Frontend targets
