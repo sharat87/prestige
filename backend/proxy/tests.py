@@ -37,7 +37,6 @@ class MessedUpInput(SimpleTestCase, JobMixin):
 		self.assertEqual(response.status_code, HTTPStatus.OK)
 
 		data = response.json()
-		self.assertTrue(data["ok"])
 		body = json.loads(data["response"]["body"])
 		self.assertEqual(body["args"], {
 			"one": "two",
@@ -76,7 +75,6 @@ class HttpMethods(SimpleTestCase, JobMixin):
 		self.assertEqual(response.status_code, HTTPStatus.OK)
 
 		data = response.json()
-		self.assertTrue(data["ok"])
 		body = json.loads(data["response"]["body"])
 		self.assertEqual(body["args"], {
 			"one": "two",
@@ -102,7 +100,6 @@ class CookieTests(SimpleTestCase, JobMixin):
 		self.assertEqual(response.status_code, HTTPStatus.OK)
 
 		data = response.json()
-		self.assertTrue(data["ok"])
 		body = json.loads(data["response"]["body"])
 		self.assertEqual(body["cookies"], {
 			"three": "three-value",
@@ -116,7 +113,6 @@ class CookieTests(SimpleTestCase, JobMixin):
 		self.assertEqual(response.status_code, HTTPStatus.OK)
 
 		data = response.json()
-		self.assertTrue(data["ok"])
 		body = json.loads(data["response"]["body"])
 		self.assertEqual(body["cookies"], {
 			"first": "first-value",
