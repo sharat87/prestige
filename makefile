@@ -1,5 +1,8 @@
 SHELL := bash
 
+help:
+	@echo 'Please see the makefile for available targets.'
+
 ###
 # Backend targets
 ###
@@ -7,13 +10,14 @@ SHELL := bash
 serve-backend: backend/venv
 	@cd backend \
 		&& source venv/bin/activate \
-		&& set -e && source env.sh && set +e \
+		&& set -o allexport \
+		&& source env.sh \
 		&& python manage.py runserver 127.0.0.1:3041
 
 lint-backend: backend/venv backend/venv/bin/flake8
 	@cd backend \
 		&& source venv/bin/activate \
-		&& flake8 . --extend-exclude "venv" --select=E9,F63,F7,F82 --show-source --statistics
+		&& flake8 . --extend-exclude venv --select=E9,F63,F7,F82 --show-source --statistics
 
 test-backend: backend/venv
 	@cd backend \
@@ -24,7 +28,8 @@ test-backend: backend/venv
 makemigrations migrate: backend/venv
 	@cd backend \
 		&& source venv/bin/activate \
-		&& set -e && source env.sh && set +e \
+		&& set -o allexport \
+		&& source env.sh \
 		&& python manage.py $@
 
 backend/venv: requirements.txt
@@ -39,8 +44,11 @@ backend/venv/bin/flake8: backend/venv
 # Frontend targets
 ###
 
-serve-frontend:
-	@cd frontend && yarn && yarn start
+build-frontend: frontend/node_modules
+	@cd frontend && node manage.js build
+
+serve-frontend: frontend/node_modules
+	@cd frontend && node manage.js serve
 
 lint-frontend: frontend/node_modules
 	@cd frontend && npx tsc --noEmit --project . && npx eslint --report-unused-disable-directives src
@@ -49,7 +57,11 @@ test-frontend: frontend/node_modules
 	@cd frontend && npx jest
 
 frontend/node_modules: frontend/package.json frontend/yarn.lock
-	@cd frontend && yarn install --frozen-lockfile
+	@if [[ frontend/package.json -nt frontend/yarn.lock ]]; then \
+			cd frontend && yarn install; \
+		else \
+			cd frontend && yarn install --frozen-lockfile; \
+		fi
 
 ###
 # Miscellaneous / Project-wide targets
@@ -69,4 +81,4 @@ e2e-tests/drivers/chromedriver:
 
 test-all: lint-frontend test-frontend test-backend test-e2e
 
-.PHONY: serve-backend serve-frontend test-all test-frontend test-backend test-e2e
+.PHONY: help serve-backend lint-backend test-backend build-frontend serve-frontend lint-frontend test-frontend test-e2e test-all

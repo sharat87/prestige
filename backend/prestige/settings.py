@@ -173,5 +173,12 @@ STATIC_URL = "/static/"
 
 
 if UNIVERSE != "test":
-	CORS_ALLOWED_ORIGINS = [s.strip() for s in os.getenv("PRESTIGE_CORS_ORIGINS", "").split(",")]
+	CORS_ALLOWED_ORIGINS = [s.strip() for s in os.getenv("PRESTIGE_CORS_ORIGINS", "").split(",") if not s.isspace()]
 	CORS_ALLOW_CREDENTIALS = True
+
+
+PROXY_DISALLOW_HOSTS = {
+	s.strip()
+	for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "").split(",")
+	if not s.isspace()
+} if "PRESTIGE_PROXY_DISALLOW_HOSTS" in os.environ else {"localhost", "127.0.0.1"}

@@ -1,6 +1,8 @@
 import { extractRequest } from "../scripts/Parser"
 import { makeMockContext } from "./utils"
 
+console.log = jest.fn()
+
 test("single line input with one request", async () => {
 	const context = makeMockContext()
 

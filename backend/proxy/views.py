@@ -1,8 +1,9 @@
 import logging
 from http import HTTPStatus
-from typing import Dict, Union, Any
+from typing import Dict, Union, Any, Optional
 
 import requests
+from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
@@ -26,7 +27,7 @@ def proxy(request) -> JsonResponse:
 
 	method: str = job.get("method", "GET")
 
-	url: str = job.get("url")
+	url: Optional[str] = job.get("url")
 
 	if not url:
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing URL in payload", data={
@@ -50,8 +51,8 @@ def proxy(request) -> JsonResponse:
 		})
 
 	headers: Dict[str, str] = {name: value for name, value in job["headers"]} if job.get("headers") else {}
-	body: str = job.get("body")
-	cookies: PlainCookieJarType = job.get("cookies")
+	body: Optional[str] = job.get("body")
+	cookies: Optional[PlainCookieJarType] = job.get("cookies")
 	timeout: int = job.get("timeout", 10)
 
 	session = requests.session()
@@ -84,7 +85,6 @@ def proxy(request) -> JsonResponse:
 		})
 
 	return JsonResponse(status=HTTPStatus.OK, data={
-		"ok": True,  # TODO: This response field is deprecated. HTTP status code 200 serves this purpose already.
 		"id": job.get("id"),
 		"response": response_to_dict(response, body),
 		"history": [response_to_dict(r) for r in response.history],
@@ -107,9 +107,12 @@ def update_cookie_jar(cookie_jar: RequestsCookieJar, cookies_data: PlainCookieJa
 
 
 def cookie_jar_to_plain(cookie_jar: RequestsCookieJar) -> PlainCookieJarType:
-	plain = {}
+	plain: PlainCookieJarType = {}
 
 	for cookie in cookie_jar:
+		if cookie.value is None:
+			continue
+
 		domain = cookie.domain
 		path = cookie.path
 
@@ -119,11 +122,13 @@ def cookie_jar_to_plain(cookie_jar: RequestsCookieJar) -> PlainCookieJarType:
 		if path not in plain[domain]:
 			plain[domain][path] = {}
 
-		plain[domain][path][cookie.name] = {
+		details = plain[domain][path][cookie.name] = {
 			"value": cookie.value,
-			"expires": cookie.expires,
 			"secure": cookie.secure,
 		}
+
+		if cookie.expires is not None:
+			details["expires"] = cookie.expires
 
 	return plain
 
@@ -149,6 +154,9 @@ def get_body_in_response(response: requests.Response):
 		return None
 
 	content_type = response.headers.get("Content-Type")
+	if not content_type:
+		return None
+
 	media_type, *args = map(str.strip, content_type.split(";"))
 
 	if media_type.startswith("text/") or media_type in TEXT_CONTENT_TYPES:
@@ -174,4 +182,4 @@ def is_url_allowed(url: str):
 	host_port = parts[2]
 	host = (host_port.split(":")[0] if ":" in host_port else host_port).lower()
 
-	return host not in {"localhost", "127.0.0.1"}
+	return host not in settings.PROXY_DISALLOW_HOSTS

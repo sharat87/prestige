@@ -1,5 +1,7 @@
 import { Block, BlockType, parse } from "../scripts/Parser"
 
+console.log = jest.fn()
+
 test("single line input with one request", async () => {
 	const structure: Block[] = parse([
 		"GET http://httpbin.org",
@@ -30,7 +32,7 @@ test("comment and a request", async () => {
 	expect(structure).toStrictEqual([
 		{
 			type: BlockType.HTTP_REQUEST,
-			start: 1,
+			start: 0,
 			end: 1,
 			header: {
 				start: 1,
@@ -52,7 +54,7 @@ test("get request on first and only non-blank line", async () => {
 		{
 			type: BlockType.HTTP_REQUEST,
 			start: 0,
-			end: 0,
+			end: 1,
 			header: {
 				start: 0,
 				end: 0,
@@ -73,8 +75,8 @@ test("get request with blank lines around", async () => {
 	expect(structure).toStrictEqual([
 		{
 			type: BlockType.HTTP_REQUEST,
-			start: 1,
-			end: 1,
+			start: 0,
+			end: 2,
 			header: {
 				start: 1,
 				end: 1,
@@ -123,7 +125,7 @@ test("two get requests", async () => {
 		{
 			type: BlockType.HTTP_REQUEST,
 			start: 0,
-			end: 0,
+			end: 1,
 			header: {
 				start: 0,
 				end: 0,
@@ -138,7 +140,7 @@ test("two get requests", async () => {
 		},
 		{
 			type: BlockType.HTTP_REQUEST,
-			start: 4,
+			start: 3,
 			end: 4,
 			header: {
 				start: 4,
@@ -165,7 +167,7 @@ test("get request with an ending", async () => {
 		{
 			type: BlockType.HTTP_REQUEST,
 			start: 0,
-			end: 2,
+			end: 3,
 			header: {
 				start: 0,
 				end: 0,
@@ -184,7 +186,7 @@ test("get request with an ending", async () => {
 		{
 			type: BlockType.HTTP_REQUEST,
 			start: 5,
-			end: 5,
+			end: 6,
 			header: {
 				start: 5,
 				end: 5,
@@ -225,7 +227,7 @@ test("one js and one request block", async () => {
 		{
 			type: BlockType.HTTP_REQUEST,
 			start: 3,
-			end: 3,
+			end: 4,
 			header: {
 				start: 3,
 				end: 3,

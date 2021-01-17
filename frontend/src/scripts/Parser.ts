@@ -13,6 +13,7 @@ export interface RequestDetails {
 export async function extractRequest(lines: string[], runLineNum: number, context: Context): Promise<RequestDetails> {
 
 	const structure: Block[] = parse(lines)
+	console.log("structure", structure)
 
 	const scriptBlocks: JavascriptBlock[] = []
 	let requestBlock: null | HttpRequestBlock = null
@@ -163,7 +164,7 @@ export function parse(input: string[] | string): Block[] {
 
 		if (line.startsWith("###")) {
 			if (currentBlock) {
-				currentBlock.end = lastNonBlank
+				currentBlock.end = index - 1
 				if (currentBlock.type === BlockType.HTTP_REQUEST) {
 					if (currentBlock.payload == null) {
 						currentBlock.header.end = lastNonBlank
@@ -214,7 +215,7 @@ export function parse(input: string[] | string): Block[] {
 				state = "http-headers"
 				currentBlock = {
 					type: BlockType.HTTP_REQUEST,
-					start: index,
+					start: lastNonBlank + 1,
 					end: index,
 					header: {
 						start: index,
@@ -226,7 +227,8 @@ export function parse(input: string[] | string): Block[] {
 			} else if (state === "http-before-headers") {
 				state = "http-headers"
 				if (currentBlock && currentBlock.type === BlockType.HTTP_REQUEST) {
-					currentBlock.start = currentBlock.header.start = index
+					currentBlock.start = lastNonBlank + 1
+					currentBlock.header.start = index
 				}
 			} else if (state === "http-before-payload") {
 				state = "http-payload"
@@ -251,7 +253,7 @@ export function parse(input: string[] | string): Block[] {
 	}
 
 	if (currentBlock) {
-		currentBlock.end = lastNonBlank
+		currentBlock.end = lines.length - 1
 		if (currentBlock.type === BlockType.HTTP_REQUEST) {
 			if (currentBlock.payload == null) {
 				currentBlock.header.end = lastNonBlank
