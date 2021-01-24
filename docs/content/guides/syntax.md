@@ -1,3 +1,7 @@
+---
+title: "Syntax"
+---
+
 # Syntax
 
 This document describes the syntax structure that Prestige understands to execute requests.

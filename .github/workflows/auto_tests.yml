@@ -38,28 +38,28 @@ jobs:
       - name: "Lint and test frontend"
         run: "make lint-frontend test-frontend"
 
-  e2e_tests:
-    runs-on: "ubuntu-latest"
-
-    steps:
-      - uses: "actions/checkout@v2"
-
-      - name: "Setup Python 3.8"
-        uses: "actions/setup-python@v2"
-        with:
-          python-version: 3.8
-
-      - name: "Setup Node"
-        uses: "actions/setup-node@v2.1.2"
-        with:
-          node-version: 14
-
-      - name: "Run tests"
-        run: "make test-e2e"
-
-      - name: "Upload test results"
-        uses: "actions/upload-artifact@v2"
-        with:
-          name: "shots"
-          path: "e2e-tests/shots"
-          if-no-files-found: "error"
+# e2e_tests:
+#   runs-on: "ubuntu-latest"
+#
+#   steps:
+#     - uses: "actions/checkout@v2"
+#
+#     - name: "Setup Python 3.8"
+#       uses: "actions/setup-python@v2"
+#       with:
+#         python-version: 3.8
+#
+#     - name: "Setup Node"
+#       uses: "actions/setup-node@v2.1.2"
+#       with:
+#         node-version: 14
+#
+#     - name: "Run tests"
+#       run: "make test-e2e"
+#
+#     - name: "Upload test results"
+#       uses: "actions/upload-artifact@v2"
+#       with:
+#         name: "shots"
+#         path: "e2e-tests/shots"
+#         if-no-files-found: "error"

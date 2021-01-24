@@ -20,8 +20,8 @@ serve-backend: venv
 		&& python manage.py runserver 127.0.0.1:3041
 
 lint-backend: venv/bin/flake8
-	@cd backend \
-		&& source venv/bin/activate \
+	@source venv/bin/activate \
+		&& cd backend \
 		&& flake8 . --extend-exclude venv --select=E9,F63,F7,F82 --show-source --statistics
 
 test-backend: venv
