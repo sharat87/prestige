@@ -116,12 +116,11 @@ venv/make_sentinel: requirements.txt
 test-all: lint-frontend test-frontend test-backend test-e2e
 
 netlify: build-frontend build-backend build-docs
-	rm -rf dist
-	mv frontend/dist .
+	rm -rf frontend/dist
 	# Copy favicon to hashless filename for docs to show the favicon.
-	cp dist/favicon.*.ico dist/favicon.ico
-	mv docs/site dist
-	mv backend/static dist
-	du -sh dist || true
+	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
+	mv docs/site frontend/dist/
+	mv backend/static frontend/dist/
+	du -sh frontend/dist || true
 
 .PHONY: help serve-backend lint-backend test-backend build-frontend serve-frontend lint-frontend test-frontend test-e2e test-all venv
