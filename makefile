@@ -124,7 +124,7 @@ netlify:
 	cd backend \
 		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= DATABASE_URL='sqlite://:memory:' python manage.py collectstatic
 	mv backend/static frontend/dist/
-	cd docs && mkdocs serve --dev-addr 127.0.0.1:3042
+	cd docs && mkdocs build
 	mv docs/site frontend/dist/
 	du -sh frontend/dist || true
 
