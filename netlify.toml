@@ -1,6 +1,9 @@
 [build]
-  publish = "dist/"
-  command = "make netlify"
+  # The base directory cannot be the project root since if it is, Netlify will pick the `runtime.txt` file which is not
+  # in Netlify's format. It is instead in Heroku's format.
+  base = "frontend/"
+  publish = "../dist/"
+  command = "cd .. && make netlify"
   environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "/api/", PYTHON_VERSION = "3.7" }
 
 [[redirects]]
