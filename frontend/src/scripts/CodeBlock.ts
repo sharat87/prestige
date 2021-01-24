@@ -21,29 +21,38 @@ import NothingMessage from "./NothingMessage"
 
 export default function CodeBlock(): m.Component<{ spec: string, text: string }> {
 	let codeMirror: null | CodeMirror.Editor = null
+	let prevText: null | string = null
+	let prevSpec: null | string = null
 	return { view, oncreate }
 
 	function oncreate(vnode: VnodeDOM<{ spec: string, text: string }>) {
+		console.log("Created new CodeBlock", vnode.attrs)
 		if (vnode.dom.classList.contains("code-block")) {
 			if (!(vnode.dom instanceof HTMLElement)) {
 				throw new Error("CodeMirror for CodeBlock cannot be initialized unless `vnode.dom` is an HTMLElement.")
 			}
 
+			const { text, spec } = vnode.attrs
 			codeMirror = CodeMirror(vnode.dom, {
 				mode: vnode.attrs.spec,
 				readOnly: true,
 				lineNumbers: true,
 				foldGutter: true,
 				gutters: ["CodeMirror-linenumbers", "CodeMirror-foldgutter"],
-				value: asString(vnode.attrs.text, vnode.attrs.spec),
+				value: asString(text, spec),
 			})
+			prevText = text
+			prevSpec = spec
 		}
 	}
 
 	function view(vnode: VnodeDOM<{ spec: string, text: string }>) {
 		const haveText = asString(vnode.attrs.text, vnode.attrs.spec) !== ""
-		if (codeMirror != null) {
-			codeMirror.setValue(asString(vnode.attrs.text, vnode.attrs.spec))
+		const { text, spec } = vnode.attrs
+		if (codeMirror != null && (spec !== prevSpec || text !== prevText)) {
+			codeMirror.setValue(asString(text, spec))
+			prevText = text
+			prevSpec = spec
 		}
 
 		return haveText

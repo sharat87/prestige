@@ -7,3 +7,6 @@ PRESTIGE_ENV='development'
 
 PRESTIGE_SECRET_KEY='=sez4lhfn@nh86)ylzgl(5k*5kkd+la(dzfsisvdk9ezj2958-'
 PRESTIGE_CORS_ORIGINS='http://localhost:3040'
+
+# Enable proxying to all hosts, including localhost.
+PRESTIGE_PROXY_DISALLOW_HOSTS=

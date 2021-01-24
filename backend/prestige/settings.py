@@ -179,6 +179,6 @@ if UNIVERSE != "test":
 
 PROXY_DISALLOW_HOSTS = {
 	s.strip()
-	for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "").split(",")
+	for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "localhost, 127.0.0.1").split(",")
 	if not s.isspace()
-} if "PRESTIGE_PROXY_DISALLOW_HOSTS" in os.environ else {"localhost", "127.0.0.1"}
+}

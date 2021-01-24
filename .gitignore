@@ -1,4 +1,6 @@
-backend/venv
+private-env.txt
+venv
+
 backend/db.sqlite3
 backend/e2e-db.sqlite3
 __pycache__
@@ -8,7 +10,6 @@ frontend/dist
 frontend/coverage
 __snapshots__
 
-e2e-tests/venv
 e2e-tests/drivers
 e2e-tests/shots
 geckodriver.log

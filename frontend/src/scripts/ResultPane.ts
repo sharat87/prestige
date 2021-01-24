@@ -223,7 +223,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 				m("h3.pl2", [
 					"Body",
 					spec != null && m("small.pl1", `(${ spec })`),
-					m("small.pl1", `(${ text.length } bytes)`),
+					m("small.pl1", `(${ humanSizeRep(text.length) })`),
 				]),
 				m(".flex.bb.b--dark-blue", [
 					toggleTab("Text", Tabs.text),
@@ -231,7 +231,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 					spec === "image/svg+xml" && toggleTab("Image", Tabs.svgImage),
 				]),
 			],
-			m("div",
+			text !== "" && m("div",
 				{ style: { display: (text !== "" && visibleTab === Tabs.text) ? "" : "none" } },
 				m(CodeBlock, {
 					text,
@@ -277,4 +277,21 @@ function getContentTypeFromHeaders(headers: Headers | Map<string, string> | stri
 	}
 
 	return null
+}
+
+function humanSizeRep(size: number) {
+	if (size < 1024) {
+		return size + " bytes"
+	}
+
+	const sizeLabels = ["bytes", "KiB", "MiB", "GiB", "TiB"]
+	let labelIndex = 0
+	let fileSize = ""
+
+	do {
+		fileSize = size.toFixed(2) + " " + sizeLabels[labelIndex++]
+		size /= 1024
+	} while (size > 1)
+
+	return fileSize
 }

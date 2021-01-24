@@ -62,6 +62,8 @@ export abstract class Provider<S extends Source> {
 	abstract save(sheet: Sheet): Promise<void>
 
 	abstract create(path: string, name: string): Promise<void>
+
+	abstract delete(path: string): Promise<void>
 }
 
 class BrowserProvider extends Provider<LocalSource> {
@@ -104,6 +106,14 @@ class BrowserProvider extends Provider<LocalSource> {
 	create(path: string, name: string): Promise<void> {
 		localStorage.setItem(this.prefix + path + ":name", name)
 		localStorage.setItem(this.prefix + path + ":body", "")
+		return this.loadRootListing()
+	}
+
+	delete(path: string): Promise<void> {
+		// TODO: Iterate over all of localStorage and delete all keys with path as prefix.
+		localStorage.removeItem(this.prefix + path + ":name")
+		localStorage.removeItem(this.prefix + path + ":body")
+		localStorage.removeItem(this.prefix + path + ":cookieJar")
 		return this.loadRootListing()
 	}
 }
@@ -172,6 +182,15 @@ class CloudProvider extends Provider<CloudSource> {
 			body: {
 				name,
 			},
+		})
+			.then(() => this.loadRootListing())
+	}
+
+	delete(path: string): Promise<void> {
+		return m.request({
+			method: "DELETE",
+			url: STORAGE_URL_BASE + path,
+			withCredentials: true,
 		})
 			.then(() => this.loadRootListing())
 	}

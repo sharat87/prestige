@@ -17,7 +17,7 @@ const Input = {
 	},
 }
 
-export default function (initialVnode: VnodeDOM<{ onClose: any }>) {
+export default function (initialVnode: VnodeDOM<{ onClose: (event?: Event) => void }>): m.Component {
 	const { onClose } = initialVnode.attrs
 
 	return { view, oncreate }
@@ -65,7 +65,7 @@ export default function (initialVnode: VnodeDOM<{ onClose: any }>) {
 	function onLoginSubmit(event: Event) {
 		event.preventDefault()
 		AuthController.login((event.target as any).loginEmail.value, (event.target as any).loginPassword.value)
-			.then(onClose)
+			.then(() => onClose())
 			.catch(error => {
 				console.error("Error logging in", error)
 				alert("Error logging in: [" + error.code + "] " + error.message)

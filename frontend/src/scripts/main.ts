@@ -27,7 +27,7 @@ window.addEventListener("load", () => {
 		"/doc/:path...": {
 			render: (vnode: Vnode) => m(Layout, m(WorkspaceView, vnode.attrs)),
 		},
-		// "/:404...": errorPageComponent,
+		// TODO: "/:404...": errorPageComponent,
 	})
 
 	AuthController.check()
@@ -73,10 +73,11 @@ const Layout: m.Component = {
 
 function WorkspaceView(): m.Component {
 	const workspace = new Workspace()
+	let redrawCount = 0
 
 	const enum VisiblePopup {
 		None,
-		DocumentBrowser,
+		DocumentBrowserPopup,
 		Options,
 		Cookies,
 		LoginForm,
@@ -87,6 +88,7 @@ function WorkspaceView(): m.Component {
 	return {
 		view,
 		oncreate,
+		onremove,
 		oninit: loadSheet,
 		onupdate: loadSheet,
 	}
@@ -99,11 +101,17 @@ function WorkspaceView(): m.Component {
 	}
 
 	function oncreate() {
-		document.addEventListener("keydown", event => {
-			if (event.key === "Escape") {
-				workspace.codeMirror?.focus()
-			}
-		})
+		document.addEventListener("keydown", onKeyDown)
+	}
+
+	function onremove() {
+		document.removeEventListener("keydown", onKeyDown)
+	}
+
+	function onKeyDown(event: KeyboardEvent) {
+		if (event.key === "Escape") {
+			workspace.codeMirror?.focus()
+		}
 	}
 
 	function view() {
@@ -116,9 +124,14 @@ function WorkspaceView(): m.Component {
 				]),
 				m(".flex.items-stretch", [
 					!workspace.isChangesSaved && m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
-					m(
+					isDev() && m(
+						"code.flex.items-center.ph1.bg-washed-red.dark-red",
+						{ style: { lineHeight: 1.15 } },
+						["m.redraw: ", ++redrawCount],
+					),
+					isDev() && m(
 						NavLink,
-						{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowser },
+						{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowserPopup },
 						["Sheet: ", workspace.currentSheetQualifiedPath(), m(ChevronDown)],
 					),
 					m(
@@ -131,21 +144,20 @@ function WorkspaceView(): m.Component {
 						{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
 						["Options ", m(ChevronDown)],
 					),
-					authState === AuthController.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
-					authState === AuthController.AuthState.ANONYMOUS && m(
-						NavLink,
-						{ onclick: onLoginFormToggle, isActive: popup === VisiblePopup.LoginForm },
-						"LogIn/SignUp",
-					),
-					authState === AuthController.AuthState.LOGGED_IN && m(
-						NavLink,
-						{ onclick: AuthController.logout },
-						[
-							email(),
-							": Log out",
-						],
-					),
-					m(NavLink, { href: "help.html" }, ["Help", m(ExternalLink)]),
+					isDev() && [
+						authState === AuthController.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
+						authState === AuthController.AuthState.ANONYMOUS && m(
+							NavLink,
+							{ onclick: onLoginFormToggle, isActive: popup === VisiblePopup.LoginForm },
+							"LogIn/SignUp",
+						),
+						authState === AuthController.AuthState.LOGGED_IN && m(
+							NavLink,
+							{ onclick: AuthController.logout },
+							[email(), ": Log out"],
+						),
+					],
+					m(NavLink, { href: "/docs/" }, "Docs"),
 					m(NavLink, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
 				]),
 			]),
@@ -153,7 +165,7 @@ function WorkspaceView(): m.Component {
 				m(EditorPane, { workspace }),
 				m(ResultPane, { workspace }),
 			]),
-			popup === VisiblePopup.DocumentBrowser && m(
+			popup === VisiblePopup.DocumentBrowserPopup && m(
 				Modal,
 				{
 					title: "Documents (work in progress)",
@@ -181,7 +193,7 @@ function WorkspaceView(): m.Component {
 	}
 
 	function onDocumentBrowserToggle() {
-		popup = popup === VisiblePopup.DocumentBrowser ? VisiblePopup.None : VisiblePopup.DocumentBrowser
+		popup = popup === VisiblePopup.DocumentBrowserPopup ? VisiblePopup.None : VisiblePopup.DocumentBrowserPopup
 	}
 
 	function onCookiesToggle() {

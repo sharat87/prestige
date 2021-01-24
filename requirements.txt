@@ -1,3 +1,4 @@
+# backend server
 Django
 dj-database-url
 Requests
@@ -5,3 +6,16 @@ django-cors-headers
 django-oauth-toolkit
 psycopg2-binary
 gunicorn
+
+# e2e tests
+selenium
+httpbin
+flask
+
+# docs
+mkdocs
+
+# linting
+flake8
+flake8-tabs
+mypy

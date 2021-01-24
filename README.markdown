@@ -11,17 +11,17 @@ build it one day. Well, had to do it myself in the end.
 Check out the [User Guide](https://prestigemad.com/help.html) to learn how Prestige can be a powerful addition to your
 toolset.
 
-**Why is Prestige tagged as Alpha Software?**: Two reasons. One, the primary experiences and documented features are not
-yet very stable. Two, the syntax and API are not final yet.
+**Why is Prestige labeled as Alpha Software?**: Two reasons. One, the primary experiences and documented features are
+not yet very stable. Two, the syntax and API are not final yet.
 
 ## Under the Hood
 
-Note that this is a sad, but working implementation of the idea, carrying a metric tonne of tech debt and shamefully
-inefficient code. It is particularly lacking in test cases, but a test framework and a test running infrastructure is
-there (so that's a good place to contribute if you want to get started). However, I use Prestige all day every day at my
-job, and it's fairly stable. When I find something lacking/breaking, I tend to either immediately fix it or defer it to
-EOD. All this said, Prestige should be considered alpha software. I'll change the status to beta once there's better
-test coverage.
+Note that today, this is a hobby side-project, with a ton of inefficient code and features just rich enough for my daily
+work to get by. It is particularly lacking in test cases, but a test framework and a test running infrastructure is
+there (so that's a good place to contribute if you want to get started). However, I use Prestige all day, every day at
+my job, and it's fairly stable in that. When I find something lacking/breaking, I tend to either immediately fix it (if
+it's a small thing) or defer it to a weekend. All this said, Prestige should be considered alpha software. I'll change
+the status to beta once there's better test coverage and documentation.
 
 Prestige exists thanks to the work of the following open source projects (not exhaustive, thanks to all those who
 weren't listed here, but still were just as helpful):
@@ -34,27 +34,29 @@ weren't listed here, but still were just as helpful):
 1. [Tachyons](http://tachyons.io/) &mdash; powers the styling and theming infrastructure.
 1. [Parcel](https://parceljs.org/) &mdash; powers the building and bundling of application assets for deployment.
 1. [Selenium](https://www.selenium.dev/) &mdash; powers the end-to-end testing workflow.
+1. [MkDocs](https://www.mkdocs.org/) &mdash; powers the documentation site.
 
 A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
 
 ## Developing
 
-For development, use the following command to start a development server on port 3040 (requires Node v12+):
+Please ensure you have Node >= v12 (with yarn) and Python >= v3.7 (with pip) before trying the following commands.
 
-    make serve-frontend
+The project contains a powerful makefile that makes getting started with development quite easy. Here's a quick summary
+of some of the targets:
 
-PS: If you don't have yarn installed, please do an `npm install -g yarn` first.
-
-Once this is running, the app can be accessed at <http://localhost:3040/index.html> and the help document can be
-accessed at <http://localhost:3040/help.html>. Note that just <http://localhost:3040> doesn't currently work, we have to
-explicitly specify the `index.html` part.
+1. `make serve-frontend` &mdash; Starts a server for the frontend at port 3040.
+	Note: Please go to <http://localhost:3040/index.html>, since <http://localhost:3040/> doesn't work for some reason.
+1. `make serve-backend` &mdash; Starts a server for the backend at port 3041.
+1. `make serve-docs` &mdash; Starts a server for the documentation site at 3042.
+1. `make test-*` &mdash; Test frontend/backend/e2e (depending on what's in place of `*`).
 
 ## Inspirations
 
-- HTTP Client for Sublime Text: <https://requester.org/>.
-- HTTP Client for VS Code: <https://github.com/Huachao/vscode-restclient>.
-- REST Client for IntelliJ based IDEs: <https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html>.
-- My own Vim extension towards a very similar concept: <https://github.com/sharat87/roast.vim>.
+- HTTP Client for Sublime Text: [Requester](https://github.com/kylebebak/Requester).
+- HTTP Client for VS Code: [vscode-restclient](https://github.com/Huachao/vscode-restclient).
+- REST Client for IntelliJ based IDEs: [JetBrains HTTP Client](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html).
+- My own Vim extension towards a very similar concept: [roast.vim](https://github.com/sharat87/roast.vim).
 
 More: <https://github.com/marmelab/awesome-rest>.
 
@@ -77,7 +79,6 @@ More: <https://github.com/marmelab/awesome-rest>.
 - Starter templates instead of a blank new document.
 - Ability to open/edit documents from GitHub, Google Drive and Dropbox.
 - Rich editor features like auto-complete, JSON editing help, hotkeys to start new GET/POST/etc. request etc.
-- Move to Gulp+Rollup based build system, away from Parcel.
 
 ## Why the domain?
 

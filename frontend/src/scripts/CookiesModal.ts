@@ -51,7 +51,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar, onClose: any }>): m.Childr
 		[
 			m(
 				".mw-100.overflow-x-auto.relative.mh2",
-				m("table.collapse", [
+				rows.length === 0 ? "No cookies in your jar!" : m("table.collapse", [
 					m("thead",
 						m("tr", [
 							m("th", "#"),

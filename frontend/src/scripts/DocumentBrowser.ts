@@ -27,13 +27,27 @@ function renderProvider(provider: Provider<Source>) {
 			provider.source.title,
 		]),
 		provider.entries.map(entry => {
-			return m(
-				"a.pv1.ph2.db.hover-bg-washed-blue.dark-blue",
-				{
-					href: `#/doc/${ provider.key }/${ entry.path }`,
-				},
-				entry.name,
-			)
+			return m("div", [
+				m(
+					"a.pv1.ph2.dib.hover-bg-washed-blue.dark-blue",
+					{
+						href: `#/doc/${ provider.key }/${ entry.path }`,
+					},
+					entry.name,
+				),
+				m(
+					"a.ml2.ph1.br-pill.no-underline.dark-red.hover-washed-red.hover-bg-dark-red",
+					{
+						href: "#",
+						onclick(event: Event) {
+							console.log("Deleting", entry)
+							provider.delete(entry.path)
+							event.preventDefault()
+						},
+					},
+					m.trust("&times;"),
+				),
+			])
 		}),
 		m(
 			"a.pv1.ph2.db.hover-bg-washed-blue.dark-blue",
@@ -52,4 +66,5 @@ function renderProvider(provider: Provider<Source>) {
 			provider.create("", name)
 		}
 	}
+
 }

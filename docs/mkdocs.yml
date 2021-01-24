@@ -1,0 +1,30 @@
+site_name: "Prestige Docs"
+
+docs_dir: "content"
+
+theme:
+  name: "mkdocs"
+  custom_dir: "theme"
+
+# FIXME: Search in docs is not working!
+plugins: []
+  # - search:
+  #     lang: "en"
+  #     prebuild_index: "python"
+
+markdown_extensions:
+  - "toc":
+      permalink: true
+  - "attr_list"
+  - "admonition"
+
+nav:
+  - "index.md"
+  - "Guides":
+    - "guides/syntax.md"
+    - "guides/response-pane.md"
+    - "guides/javascript-blocks.md"
+    - "guides/templating.md"
+    - "guides/cookies.md"
+  - "tips.md"
+  - "about.md"
