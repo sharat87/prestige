@@ -115,12 +115,16 @@ venv/make_sentinel: requirements.txt
 
 test-all: lint-frontend test-frontend test-backend test-e2e
 
-netlify: build-frontend build-backend build-docs
+netlify:
 	rm -rf frontend/dist
+	cd frontend && node manage.js build
 	# Copy favicon to hashless filename for docs to show the favicon.
 	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
-	mv docs/site frontend/dist/
+	cd backend \
+		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= DATABASE_URL='sqlite://:memory:' python manage.py collectstatic
 	mv backend/static frontend/dist/
+	cd docs && mkdocs serve --dev-addr 127.0.0.1:3042
+	mv docs/site frontend/dist/
 	du -sh frontend/dist || true
 
 .PHONY: help serve-backend lint-backend test-backend build-frontend serve-frontend lint-frontend test-frontend test-e2e test-all venv
