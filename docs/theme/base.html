@@ -27,8 +27,6 @@
 	{%- endblock %}
 
 	{%- block libs %}
-		<script src="https://code.jquery.com/jquery-1.10.2.min.js" defer></script>
-		<script src="{{ 'js/bootstrap.js'|url }}" defer></script>
 		{%- if config.theme.highlightjs %}
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
 		{%- for lang in config.theme.hljs_languages %}
@@ -44,19 +42,20 @@
 	<body>
 		<div class="flex">
 			<nav class="w-20 br b--blue">
-				<h2 class="mb3">
+				<h2 class="brand">
 					{%- block site_name %}
-					<a class="f2" href="{{ nav.homepage.url|url }}">{{ config.site_name }}</a>
+					<a href="{{ nav.homepage.url|url }}">{{ config.site_name }}</a>
 					{%- endblock %}
 				</h2>
+				<a href="#" class="mv2">Prestige Home</a>
 				{%- block search_button %}
 				{%- if 'search' in config['plugins'] %}
-				<a href="#" id="searchBtn" class="db pa2 mv2"><i class="fa fa-search"></i> Search</a>
+				<a href="#" id="searchBtn" class="mv2"><i class="fa fa-search"></i> Search</a>
 				{%- endif %}
 				{%- endblock %}
 				{%- block repo %}
 				{%- if page and page.edit_url %}
-				<a href="{{ page.edit_url }}" class="db pa2 mv2">
+				<a href="{{ page.edit_url }}" class="db mv2">
 					{%- if config.repo_name == 'GitHub' -%}
 					<i class="fa fa-github"></i>
 					{%- elif config.repo_name == 'Bitbucket' -%}
@@ -67,7 +66,7 @@
 					<span class="ml1">Edit on {{ config.repo_name }}</span>
 				</a>
 				{%- elif config.repo_url %}
-				<a href="{{ config.repo_url }}" class="db pa2 mv2">
+				<a href="{{ config.repo_url }}" class="db mv2">
 					{%- if config.repo_name == 'GitHub' -%}
 					<i class="fa fa-github"></i>
 					{%- elif config.repo_name == 'Bitbucket' -%}
@@ -85,21 +84,21 @@
 				{%- endfor %}
 				{%- endif %}
 			</nav>
-			<div class="w-60 mh2" role="main">
+			<main class="w-60" role="main">
 				{%- block content %}
 				{% include "content.html" %}
 				{%- endblock %}
 				{%- if page and (page.next_page or page.previous_page) %}
 				<div class="mt5 flex justify-between">
 					<a rel="prev" {% if page.previous_page %}href="{{ page.previous_page.url|url }}" class="ph3 pv2 br2 bg-washed-blue dark-blue hover-bg-dark-blue hover-washed-blue"{% else %}href="#" class="bg-silver moon-gray"{% endif %}>
-						<i class="fa fa-arrow-left"></i> Previous
+						&larr; Previous
 					</a>
 					<a rel="next" {% if page.next_page %}href="{{ page.next_page.url|url }}" class="ph3 pv2 br2 bg-washed-blue dark-blue hover-bg-dark-blue hover-washed-blue"{% else %}href="#" class="bg-silver moon-gray"{% endif %}>
-						Next <i class="fa fa-arrow-right"></i>
+						Next &rarr;
 					</a>
 				</div>
 				{%- endif %}
-			</div>
+			</main>
 			<aside class="w-20">{% include "toc.html" %}</aside>
 		</div>
 
@@ -108,7 +107,7 @@
 			<hr>
 			<p>
 				{%- if config.copyright %}{{ config.copyright }}{%- endif %}
-				Documentation built with <a href="https://www.mkdocs.org/" target="_blank">MkDocs</a>.
+				Documentation built with <a href="https://www.mkdocs.org/" target="_blank" rel="noopener">MkDocs</a>.
 			</p>
 		{%- endblock %}
 		</footer>

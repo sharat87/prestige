@@ -9,7 +9,7 @@ theme:
   custom_dir: "theme"
 
 # FIXME: Search in docs is not working!
-plugins: []
+# plugins: []
   # - search:
   #     lang: "en"
   #     prebuild_index: "python"
