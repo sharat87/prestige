@@ -141,34 +141,38 @@ hr {
 	border-top: 1px solid #aaa;
 }
 
-pre, .rst-content tt {
+code, kbd {
+	font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+	font-size: .9rem;
+}
+
+pre {
 	max-width: 100%;
-	border: solid 1px #e1e4e5;
+	border: solid 1px #CCC;
 	overflow-x: auto;
+	background-color: #F9F9F9;
 }
 
 code {
 	padding: 2px 5px;
-	border: solid 1px #e1e4e5;
+	border: solid 1px #DDD;
 	white-space: pre-wrap;
 	word-wrap: break-word;
+	background-color: #EEE;
 }
 
-pre code {
+pre > code {
 	display: block;
-	background: transparent;
 	border: none;
 	white-space: pre;
 	word-wrap: normal;
-	font-family: SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-	font-size: .9rem;
-	color: inherit;
 	word-break: normal;
+	background-color: transparent;
 }
 
 kbd {
 	padding: 2px 4px;
-	font-size: .9rem;;
+	font-size: .9rem;
 	border-radius: 3px;
 	border-width: 1px 2px 2px 1px;
 	border-style: solid;

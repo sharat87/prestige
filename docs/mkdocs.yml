@@ -21,6 +21,9 @@ markdown_extensions:
       toc_depth: "2-5"
   - "attr_list"
   - "admonition"
+  # - "codehilite":
+  #     linenums: true
+  #     guess_lang: false
 
 nav:
   - "index.md"

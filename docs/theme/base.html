@@ -16,23 +16,20 @@
 
 	{%- block styles %}
 		<link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-		<link href="{{ 'css/base.css'|url }}" rel="stylesheet">
 		<link rel="stylesheet" href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
-		{%- if config.theme.highlightjs %}
-		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/{{ config.theme.hljs_style }}.min.css">
-		{%- endif %}
 		{%- for path in config['extra_css'] %}
 		<link href="{{ path|url }}" rel="stylesheet">
 		{%- endfor %}
+		<link href="{{ 'css/base.css'|url }}" rel="stylesheet">
 	{%- endblock %}
 
 	{%- block libs %}
 		{%- if config.theme.highlightjs %}
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script> -->
 		{%- for lang in config.theme.hljs_languages %}
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/{{lang}}.min.js"></script>
+		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/{{lang}}.min.js"></script> -->
 		{%- endfor %}
-		<script>hljs.initHighlightingOnLoad();</script>
+		<script>//hljs.initHighlightingOnLoad();</script>
 		{%- endif %}
 	{%- endblock %}
 
