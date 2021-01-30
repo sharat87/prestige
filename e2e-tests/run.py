@@ -76,6 +76,11 @@ def prestige_backend(ready_event: Optional[threading.Event] = None):
 		env=backend_env,
 	).wait()
 
+	def on_output(line):
+		if not ready_event.is_set() and line and "Starting development server at" in line:
+			log.info("Backend Ready")
+			ready_event.set()
+
 	spawn_process(
 		[
 			venv_bin / "python",
@@ -86,13 +91,11 @@ def prestige_backend(ready_event: Optional[threading.Event] = None):
 		],
 		cwd=backend_path,
 		env=backend_env,
+		on_output=ready_event and on_output,
 	)
 
-	if ready_event is not None:
-		ready_event.set()
 
-
-def spawn_process(cmd, *, cwd: Path = None, env: Dict[str, str] = None) -> subprocess.Popen:
+def spawn_process(cmd, *, cwd: Path = None, env: Dict[str, str] = None, on_output=None) -> subprocess.Popen:
 	kwargs: Dict[str, Any] = {
 		"cwd": str(cwd or root_path),
 	}
@@ -109,6 +112,13 @@ def spawn_process(cmd, *, cwd: Path = None, env: Dict[str, str] = None) -> subpr
 	if log_target is not None:
 		pipe_file_to_log(process.stdout, log_target, logging.INFO)
 		pipe_file_to_log(process.stderr, log_target, logging.WARNING)
+
+	if on_output is not None:
+		class Handler(logging.Handler):
+			def handle(self, record):
+				on_output(record.args[0])
+
+		log_target.addHandler(Handler())
 
 	child_processes.append(process)
 	return process
@@ -134,6 +144,11 @@ def prestige_frontend(ready_event: Optional[threading.Event] = None):
 		},
 	).wait()
 
+	def on_output(line):
+		if not ready_event.is_set() and line and "Serving HTTP on" in line:
+			log.info("Frontend Ready")
+			ready_event.set()
+
 	spawn_process(
 		[
 			venv_bin / "python",
@@ -142,14 +157,17 @@ def prestige_frontend(ready_event: Optional[threading.Event] = None):
 			frontend_port,
 		],
 		cwd=frontend_path / "dist",
+		on_output=ready_event and on_output,
 	)
-
-	if ready_event is not None:
-		ready_event.set()
 
 
 def httpbin(ready_event: Optional[threading.Event] = None):
 	# 3. A local httpbin server process.
+	def on_output(line):
+		if not ready_event.is_set() and line and "Running on" in line:
+			log.info("Httpbin Ready")
+			ready_event.set()
+
 	spawn_process(
 		[
 			venv_bin / "flask",
@@ -161,10 +179,8 @@ def httpbin(ready_event: Optional[threading.Event] = None):
 		env={
 			"FLASK_APP": "httpbin:app",
 		},
+		on_output=ready_event and on_output,
 	)
-
-	if ready_event is not None:
-		ready_event.set()
 
 
 def run_tests():
