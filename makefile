@@ -115,6 +115,13 @@ venv/make_sentinel: requirements.txt
 
 test-all: lint-frontend test-frontend test-backend test-e2e
 
+tmux-session:
+	tmux new-session -d -c $$PWD -s prestige -n backend make serve-backend
+	tmux new-window -c $$PWD -t prestige: -n frontend make serve-frontend
+	tmux new-window -c $$PWD -t prestige: -n docs make serve-docs
+	tmux new-window -c $$PWD -t prestige: -n proxy make serve-proxy
+	tmux set-option remain-on-exit on
+
 netlify:
 	rm -rf frontend/dist
 	cd frontend && node manage.js build

@@ -7,6 +7,7 @@ __pycache__
 
 frontend/node_modules
 frontend/dist
+frontend/dist-serve
 frontend/coverage
 __snapshots__
 

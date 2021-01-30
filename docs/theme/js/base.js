@@ -32,20 +32,27 @@ window.addEventListener("load", function() {
 		searchModal.querySelector("input").select()
 	}
 
-	document.getElementById("searchBtn").addEventListener("click", showSearchModal)
+	const searchBtn = document.getElementById("searchBtn")
+	if (searchBtn != null) {
+		searchBtn.addEventListener("click", showSearchModal)
+	}
 
 	function showSearchModal() {
-		searchModal.classList.add("show")
-		searchModal.querySelector("input").focus()
+		if (searchModal != null) {
+			searchModal.classList.add("show")
+			searchModal.querySelector("input").focus()
+		}
 	}
 
 	// Close search modal when result is selected
 	// The links get added later so listen to parent
-	searchModal.addEventListener("click", (event) => {
-		if (event.target.tagName === 'A') {
-			searchModal.classList.remove("show")
-		}
-	})
+	if (searchModal != null) {
+		searchModal.addEventListener("click", (event) => {
+			if (event.target.tagName === 'A') {
+				searchModal.classList.remove("show")
+			}
+		})
+	}
 
 	// Populate keyboard modal with proper Keys
 	keyboardModal.querySelector('.help.shortcut kbd').innerHTML = "?";
@@ -86,7 +93,9 @@ window.addEventListener("load", function() {
 			case "/":
 			case "?":
 				e.preventDefault()
-				searchModal.classList.remove("show")
+				if (searchModal != null) {
+					searchModal.classList.remove("show")
+				}
 				keyboardModal.classList.add("show")
 				break
 			default: break
@@ -166,7 +175,7 @@ window.addEventListener("load", function() {
 	let last_known_scroll_position = 0;
 	let ticking = false;
 
-	function doSomething(scroll_pos) {
+	function scrollSpy(scroll_pos) {
 		const activeHeaders = {};
 		for (const h of document.body.querySelectorAll("h1, h2")) {
 			if (h.offsetTop > last_known_scroll_position) {
@@ -178,7 +187,10 @@ window.addEventListener("load", function() {
 			a.classList.remove("active")
 		}
 		for (const h of Object.values(activeHeaders)) {
-			document.querySelector(`#aside a[href="#${h.id}"]`).classList.add("active")
+			const el = document.querySelector(`#aside a[href="#${h.id}"]`)
+			if (el != null) {
+				el.classList.add("active")
+			}
 		}
 	}
 
@@ -187,7 +199,7 @@ window.addEventListener("load", function() {
 
 		if (!ticking) {
 			window.requestAnimationFrame(function() {
-				doSomething(last_known_scroll_position);
+				scrollSpy(last_known_scroll_position);
 				ticking = false;
 			});
 

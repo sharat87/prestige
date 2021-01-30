@@ -1,7 +1,3 @@
----
-title: "Syntax"
----
-
 # Syntax
 
 This document describes the syntax structure that Prestige understands to execute requests.
@@ -43,6 +39,26 @@ The method here is not case-sensitive. Writing `GET` and `get` behave exactly th
 !!! note
 	Currently there is no way to split long URLs into multiple lines, so the URL, however long should be in this line
 	only.
+
+Right below this line, we can add any headers to be sent to the request. For example:
+
+```http
+GET http://httpbin.org/headers
+X-My-Name: is not Sherlock
+X-From: an awesome HTTP playground tool
+```
+
+To run this request, we can hit <kbd>Ctrl+Enter</kbd> with cursor on any of these lines. Prestige will execute a `GET`
+request to `http://httpbin.org/headers` with the two headers listed (in addition to headers sent by default like `Host`
+etc.).
+
+!!! note
+	There shouldn't be a blank line between the headers or between the URL line and headers. This is because the
+	presence of a blank line indicates the content after the blank line makes up for the request body section (described
+	under the next heading).
+
+When this request is executed, we can see request headers in the response pane on the right which will show these two
+headers as well.
 
 ## Body Section
 

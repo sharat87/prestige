@@ -2,6 +2,8 @@ site_name: "Prestige Docs"
 
 docs_dir: "content"
 
+repo_url: "https://github.com/sharat87/prestige"
+
 theme:
   name: "mkdocs"
   custom_dir: "theme"
@@ -14,7 +16,9 @@ plugins: []
 
 markdown_extensions:
   - "toc":
+      marker: ""
       permalink: true
+      toc_depth: "2-5"
   - "attr_list"
   - "admonition"
 

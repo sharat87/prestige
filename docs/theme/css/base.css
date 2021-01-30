@@ -28,6 +28,8 @@ body {
 	font-weight: 400;
 	line-height: 1.5;
 	color: #222;
+	--link-blue: #06A;
+	--link-hover-color: #EFF;
 }
 
 body > .container {
@@ -37,6 +39,26 @@ body > .container {
 
 button > * {
 	pointer-events: none;
+}
+
+a {
+	color: var(--link-blue);
+}
+
+nav a, aside a, nav summary, aside summary {
+	text-decoration: none;
+	padding: 6px;
+	display: block;
+	cursor: pointer;
+}
+
+nav a:hover, aside a:hover {
+	background-color: var(--link-hover-color);
+}
+
+nav a.active, aside a.active, nav summary.active, aside summary.active {
+	background-color: var(--link-blue);
+	color: white;
 }
 
 .navbar.fixed-top { /* csslint allow: adjoining-classes */
@@ -220,8 +242,9 @@ footer {
 	display: none;
 	padding-left: .5em;
 	color: inherit;
-	transform: scale(.6);
+	transform: scale(.7);
 	font-size: 90%;
+	text-decoration: none;
 }
 
 h1:hover .headerlink, h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink, h5:hover .headerlink, h6:hover .headerlink{

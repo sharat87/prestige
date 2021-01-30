@@ -294,7 +294,9 @@ export default class HttpSession {
 			return null
 		}
 
-		return isLocalUrl(this.proxy)
+		const isLocalProxy = isLocalUrl(this.proxy) || (isLocalUrl(location.toString()) && !this.proxy.includes("://"))
+
+		return isLocalProxy
 			? this.proxy
 			: isLocalUrl(url)
 				? null

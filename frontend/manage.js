@@ -36,7 +36,7 @@ process.on("unhandledRejection", (reason, promise) => {
 	console.error("Unhandled rejection at: Promise:", promise, "  reason:", reason)
 })
 
-const outDir = "./dist"
+const outDir = job === "serve" ? "./dist-serve" : "./dist"
 const cacheDir = "./.cache"
 
 fs.rmdirSync(outDir, { recursive: true })
