@@ -4,8 +4,9 @@ import logging
 import os
 import subprocess
 import threading
+import time
 from pathlib import Path
-from typing import List, Dict, IO, Any, Optional
+from typing import IO, Any, Dict, List, Optional
 
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s\t%(name)s %(message)s")
 log = logging.getLogger(__name__)
@@ -49,6 +50,7 @@ def main():
 	frontend_ready_event.wait(4)
 	httpbin_ready_event.wait(4)
 
+	time.sleep(5)
 	run_tests()
 
 
