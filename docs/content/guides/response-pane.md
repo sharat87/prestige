@@ -4,7 +4,7 @@ The Response pane shows up the first time we execute a request. As a minimum, it
 the most recently executed request.
 
 1. Time taken for the request to finish.
-1. Changes to cookies, if any. Learn more in the [Cookie Management](#cookie-management) section.
+1. Changes to cookies, if any. Learn more in the [Cookie Management](cookie-management.md) section.
 1. Status code and reason.
 1. Response body.
 1. Response headers.
@@ -20,7 +20,7 @@ GET http://httpbin.org/cookies/set?first=Sherlock
 
 This request sets the cookie called `first` with the value `Sherlock` and then redirects to a different URL.
 
-## Rich data viewing
+## Viewing Rich Data
 
 Some response types can be shown in rich previews. For example, if the response content type is `text/html`, the
 response pane can show that in a small iFrame which is probably more useful than the HTML source in the response body.

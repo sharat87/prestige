@@ -99,7 +99,7 @@ window.addEventListener("load", function() {
 
 	function scrollSpy(scroll_pos) {
 		const activeHeaders = {};
-		for (const h of document.body.querySelectorAll("h1, h2")) {
+		for (const h of document.body.querySelectorAll("h2, h3")) {
 			if (h.offsetTop > last_known_scroll_position) {
 				break
 			}

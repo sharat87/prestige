@@ -23,21 +23,41 @@
 		<link href="{{ 'css/base.css'|url }}" rel="stylesheet">
 	{%- endblock %}
 
-	{%- block libs %}
-		{%- if config.theme.highlightjs %}
-		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script> -->
-		{%- for lang in config.theme.hljs_languages %}
-		<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/{{lang}}.min.js"></script> -->
-		{%- endfor %}
-		<script>//hljs.initHighlightingOnLoad();</script>
-		{%- endif %}
-	{%- endblock %}
-
 	{%- block extrahead %}{% endblock %}
 	</head>
 
 	<body>
-		<div class="flex">
+		<div class="root">
+			<aside class="w-20">
+				<div id="aside" class="fixed top-2 w-100" role="complementary">
+					{% macro toc_item(item) %}
+						{%- if item.level <= config.theme.navigation_depth %}
+						<a href="{{ item.url }}" class="db pa1 {% if item.level == 1 %}b f3{% endif %}">{{ item.title }}</a>
+						{%- for child in item.children %}
+						{{- toc_item(child) }}
+						{%- endfor %}
+						{%- endif %}
+					{%- endmacro %}
+					{%- for item in page.toc %}
+					{{ toc_item(item) }}
+					{%- endfor %}
+				</div>
+			</aside>
+			<main class="w-60" role="main">
+				{%- block content %}
+				{% include "content.html" %}
+				{%- endblock %}
+				{%- if page and (page.next_page or page.previous_page) %}
+				<div class="mt5 flex justify-between">
+					<a rel="prev" {% if page.previous_page %}href="{{ page.previous_page.url|url }}" class="ph3 pv2 br2 bg-washed-blue dark-blue hover-bg-dark-blue hover-washed-blue"{% else %}href="#" class="bg-silver moon-gray"{% endif %}>
+						&larr; Previous
+					</a>
+					<a rel="next" {% if page.next_page %}href="{{ page.next_page.url|url }}" class="ph3 pv2 br2 bg-washed-blue dark-blue hover-bg-dark-blue hover-washed-blue"{% else %}href="#" class="bg-silver moon-gray"{% endif %}>
+						Next &rarr;
+					</a>
+				</div>
+				{%- endif %}
+			</main>
 			<nav class="w-20 br b--blue">
 				<h2 class="brand">
 					{%- block site_name %}
@@ -75,28 +95,10 @@
 				</a>
 				{%- endif %}
 				{%- endblock %}
-				{%- if nav|length>1 %}
 				{%- for nav_item in nav %}
 				{% include "nav-sub.html" %}
 				{%- endfor %}
-				{%- endif %}
 			</nav>
-			<main class="w-60" role="main">
-				{%- block content %}
-				{% include "content.html" %}
-				{%- endblock %}
-				{%- if page and (page.next_page or page.previous_page) %}
-				<div class="mt5 flex justify-between">
-					<a rel="prev" {% if page.previous_page %}href="{{ page.previous_page.url|url }}" class="ph3 pv2 br2 bg-washed-blue dark-blue hover-bg-dark-blue hover-washed-blue"{% else %}href="#" class="bg-silver moon-gray"{% endif %}>
-						&larr; Previous
-					</a>
-					<a rel="next" {% if page.next_page %}href="{{ page.next_page.url|url }}" class="ph3 pv2 br2 bg-washed-blue dark-blue hover-bg-dark-blue hover-washed-blue"{% else %}href="#" class="bg-silver moon-gray"{% endif %}>
-						Next &rarr;
-					</a>
-				</div>
-				{%- endif %}
-			</main>
-			<aside class="w-20">{% include "toc.html" %}</aside>
 		</div>
 
 		<footer>
@@ -111,8 +113,7 @@
 
 	{%- block scripts %}
 		<script>
-			var base_url = {{ base_url | tojson }},
-				shortcuts = {{ config.theme.shortcuts | tojson }};
+			const base_url = {{ base_url | tojson }};
 		</script>
 		<script src="{{ 'js/base.js'|url }}" defer></script>
 		{%- for path in config['extra_javascript'] %}

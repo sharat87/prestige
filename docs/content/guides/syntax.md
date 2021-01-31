@@ -49,36 +49,66 @@ X-From: an awesome HTTP playground tool
 ```
 
 To run this request, we can hit <kbd>Ctrl+Enter</kbd> with cursor on any of these lines. Prestige will execute a `GET`
-request to `http://httpbin.org/headers` with the two headers listed (in addition to headers sent by default like `Host`
-etc.).
+request to `http://httpbin.org/headers` with the two headers listed (in addition to headers sent by default like
+`Content-Size` etc.).
 
 !!! note
 	There shouldn't be a blank line between the headers or between the URL line and headers. This is because the
 	presence of a blank line indicates the content after the blank line makes up for the request body section (described
 	under the next heading).
 
-When this request is executed, we can see request headers in the response pane on the right which will show these two
-headers as well.
+When this request is executed, we can see the request headers in the response pane on the right which will show these
+two headers as well.
 
 ## Body Section
 
-Headers block is a template string
+The body section contains the payload body to be sent along with the HTTP request. This section is optional. If not
+provided, no payload will be sent along with the request.
 
-Body block can be any Javascript expression
+The body section is separated from the headers section by a single blank line. Anything, _anything_ after that single
+blank line, will be considered part of the payload. Even lines starting with a `#` are treated as part of the body, not
+as comments. The end of the body is marked either by end of the document, or by a line starting with `###`. This
+triple-hash marker indicates end of the definition of this request and begins a new one.
+
+Consider the following sheet for example:
+
+```
+POST http://httpbin.org/post
+Content-Type: application/json
+
+{
+  "first": "Chandragupta",
+  "last": "Maurya"
+}
+
+###
+
+GET http://httpbin.org/get?initials=CM
+```
+
+Here, we defined two requests, separated by the line containing `###`. The first is a `POST` request that sends a JSON
+body (an object with two fields). The second is a `GET` request to a different URL.
+
+Requests can be executed by hitting <kbd>Ctrl+Enter</kbd> while the cursor is in the body block, just as in the headers
+block.
 
 ## Separator Lines
 
-## Custom Headers
+Separator lines are the lines starting with `###` that mark the end of one request and the start of another. There is
+another function that these lines can optionally have. The text following the three hash signs can indicate the type of
+content that follows until the next separator line. For example, `### javascript` indicates that everything from the
+next line to the next separator line, is to be treated as Javascript. Just `###` without anything after it indicates
+that what follows is the definition of an HTTP request. Currently, these are the only two types of blocks supported.
 
-We saw how we can set the `Content-Type` header in the previous section, but this can be used to set the values of
-most standard or any custom headers. Here's an example:
+PS: Javascript blocks can be used to define variables (or even functions) that can be used when defining HTTP requests.
+Learn more about this in the [templating guide](templating.md).
 
-```http
-GET http://httpbin.org/headers
-X-My-Awesome-Custom-Header: custom header value here
-Another-Header: another header value
-Header-Names-Are-Case-Insensitive: but values are case sensitive
-```
+## Conclusion
 
-Some standard headers like `Origin`, `Content-Size`, `Cookie` are set by default and usually don't make sense to
-override here.
+That's it. That's all there is to know about Prestige's syntax structures. This topic is deliberately kept simple so
+it's not very hard to grok it. There isn't very many rules in the syntax to remember and ponder over when reading
+someone else's work.
+
+Additionally, this lends itself to being extremely flexible. Prestige takes Javascript embedded in sheets very seriously
+and that provides a lot of power and flexibility to what can be done with even such a simple-looking syntax. A place to
+learn about embedding Javascript is the [guide on Javascript blocks](javascript-blocks.md).

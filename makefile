@@ -131,7 +131,7 @@ netlify:
 	cd backend \
 		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= DATABASE_URL='sqlite://:memory:' python manage.py collectstatic
 	mv backend/static frontend/dist/
-	cd docs && mkdocs build
+	cd docs && mkdocs --strict build
 	mv docs/site frontend/dist/docs
 	du -sh frontend/dist || true
 

@@ -38,9 +38,9 @@ body {
 	--link-hover-color: #EFF;
 }
 
-body > .container {
-	margin-top: 20px;
-	min-height: 400px;
+body > .root {
+	display: flex;
+	flex-direction: row-reverse;
 }
 
 button > * {
@@ -92,19 +92,12 @@ nav [open] summary:after, aside [open] summary:after {
 }
 
 .brand {
-	margin: 0 0 1rem;
+	margin-top: 0;
 	font-size: 1.4rem;
 }
 
 main {
-	margin: 0 2rem;
-}
-
-.navbar.fixed-top { /* csslint allow: adjoining-classes */
-	/* csslint ignore:start */
-	position: -webkit-sticky;
-	position: sticky;
-	/* csslint ignore:end */
+	margin: 0 3rem;
 }
 
 .source-links {
@@ -123,12 +116,12 @@ main {
 }
 
 h1 {
-	font-weight: 400;
-	font-size: 42px;
+	font-size: 2.6rem;
+	font-weight: 500;
 }
 
-h2, h3, h4, h5, h6 {
-	font-weight: 500;
+main h2 {
+	font-size: 1.6rem;
 }
 
 blockquote {
