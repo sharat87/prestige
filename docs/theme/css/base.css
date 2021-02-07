@@ -79,15 +79,17 @@ nav a.active, aside a.active, nav summary.active, aside summary.active {
 	color: white;
 }
 
-nav summary:after, aside summary:after {
-	content: "▼";
-	margin-left: 6px;
+nav summary:before, aside summary:before {
+	content: "▶";
+	margin-right: 6px;
 	display: inline-block;
 	opacity: .9;
+	transform: scaleX(.5);
 }
 
-nav [open] summary:after, aside [open] summary:after {
-	content: "▲";
+nav [open] summary:before, aside [open] summary:before {
+	content: "▼";
+	transform: scaleY(.5);
 }
 
 aside > a:first-child {

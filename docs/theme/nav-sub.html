@@ -1,7 +1,7 @@
 {%- if nav_item.children %}
 <details {% if nav_item.active %}open{% endif %}>
 	<summary class="{% if nav_item.active %}active{% endif %}">{{ nav_item.title }}</summary>
-	<div class="pl3">
+	<div class="pl4">
 		{%- for nav_item in nav_item.children %}
 		{% include "nav-sub.html" %}
 		{%- endfor %}
