@@ -80,8 +80,10 @@
 				"error",
 				"unix"
 			],
-			"no-unused-vars": "error",
-			"no-unused-expressions": "error",
+			"no-unused-vars": "off",
+			"@typescript-eslint/no-unused-vars": "error",
+			"no-unused-expressions": "off",
+			"@typescript-eslint/no-unused-expressions": "error",
 			"quotes": "off",
 			"@typescript-eslint/quotes": [
 				"error",
