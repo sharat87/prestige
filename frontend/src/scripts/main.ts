@@ -157,7 +157,7 @@ function WorkspaceView(): m.Component {
 							[email(), ": Log out"],
 						),
 					],
-					m(NavLink, { href: "/docs/" }, "Docs"),
+					m(NavLink, { href: "/docs/" }, ["Docs", m(ExternalLink)]),
 					m(NavLink, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
 				]),
 			]),

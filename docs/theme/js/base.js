@@ -1,106 +1,81 @@
-function getSearchTerm() {
-	var sPageURL = window.location.search.substring(1);
-	var sURLVariables = sPageURL.split('&');
-	for (var i = 0; i < sURLVariables.length; i++) {
-		var sParameterName = sURLVariables[i].split('=');
-		if (sParameterName[0] == 'q') {
-			return sParameterName[1];
-		}
+const searchModal = document.getElementById("mkdocs_search_modal")
+const keyboardModal = document.getElementById("mkdocs_keyboard_modal")
+
+// Search
+window.addEventListener("load", () => {
+	if (searchModal == null) {
+		return
 	}
-}
 
-window.addEventListener("load", function() {
-	const search_term = getSearchTerm()
-	const searchModal = document.getElementById("mkdocs_search_modal")
-	const keyboardModal = document.getElementById("mkdocs_keyboard_modal")
-
-	if (search_term) {
+	const match = location.search.match(/[\?&]q=([^&]+)/)
+	if (match != null) {
+		searchModal.querySelector("input").value = match[1]
 		showSearchModal()
-		searchModal.querySelector("input").value = search_term
-		searchModal.querySelector("input").select()
 	}
 
 	const searchBtn = document.getElementById("searchBtn")
 	if (searchBtn != null) {
-		console.log("No search btn found")
 		searchBtn.addEventListener("click", showSearchModal)
-	}
-
-	function showSearchModal() {
-		if (searchModal != null) {
-			searchModal.classList.add("show")
-			searchModal.querySelector("input").focus()
-			searchModal.querySelector("input").select()
-			window.doSearch()
-		}
 	}
 
 	// Close search modal when result is selected
 	// The links get added later so listen to parent
-	if (searchModal != null) {
-		searchModal.addEventListener("click", (event) => {
-			if (event.target.tagName === 'A') {
-				searchModal.classList.remove("show")
-			}
-		})
-	}
-
-	// Keyboard navigation
-	document.addEventListener("keydown", e => {
-		if (e.target.matches("input")) {
-			if (e.key === "Escape") {
-				if (e.target.value !== "") {
-					e.preventDefault()
-					e.target.value = ""
-					return true
-				}
-			} else {
-				return true
-			}
-		}
-
-		switch (e.key) {
-			case "Escape":
-				document.querySelector(".modal.show").classList.remove("show")
-				break
-			case "n":
-				click(document.querySelector("a[rel='next']"))
-				break
-			case "p":
-				click(document.querySelector("a[rel='prev']"))
-				break
-			case "/":
-				e.preventDefault();
-				keyboardModal.classList.remove("show")
-				showSearchModal();
-				break
-			case "?":
-				e.preventDefault()
-				if (searchModal != null) {
-					searchModal.classList.remove("show")
-				}
-				keyboardModal.classList.add("show")
-				break
-			default: break
+	searchModal.addEventListener("click", event => {
+		if (event.target.tagName === 'A') {
+			searchModal.classList.remove("show")
 		}
 	})
+})
 
-	for (const el of document.getElementsByTagName("table")) {
-		el.classList.add("table", "table-striped", "table-hover")
+// Keyboard shortcuts
+document.addEventListener("keydown", e => {
+	if (e.target.matches("input")) {
+		if (e.key === "Escape") {
+			if (e.target.value !== "") {
+				e.preventDefault()
+				e.target.value = ""
+				return true
+			}
+		} else {
+			return true
+		}
 	}
 
+	switch (e.key) {
+		case "Escape":
+			const el = document.querySelector(".modal.show")
+			if (el != null) {
+				el.classList.remove("show")
+			}
+			break
+		case "n":
+			click(document.querySelector("a[rel='next']"))
+			break
+		case "p":
+			click(document.querySelector("a[rel='prev']"))
+			break
+		case "/":
+			e.preventDefault()
+			keyboardModal.classList.remove("show")
+			showSearchModal()
+			break
+		case "?":
+			e.preventDefault()
+			if (searchModal != null) {
+				searchModal.classList.remove("show")
+			}
+			keyboardModal.classList.add("show")
+			break
+	}
 })
 
 !(() => { // Scroll spy to auto-highlight current item in TOC.
-	document.addEventListener("scroll", onDocumentScroll);
+	let isRequested = false
 
-	let last_known_scroll_position = 0;
-	let ticking = false;
-
-	function scrollSpy(scroll_pos) {
-		const activeHeaders = {};
+	function scrollSpy() {
+		const activeHeaders = {}
 		for (const h of document.body.querySelectorAll("h2, h3")) {
-			if (h.offsetTop > last_known_scroll_position) {
+			if (h.offsetTop > window.scrollY) {
 				break
 			}
 			activeHeaders[h.tagName] = h
@@ -114,24 +89,20 @@ window.addEventListener("load", function() {
 				el.classList.add("active")
 			}
 		}
+		isRequested = false
 	}
 
-	function onDocumentScroll(event) {
-		last_known_scroll_position = window.scrollY;
-
-		if (!ticking) {
-			window.requestAnimationFrame(function() {
-				scrollSpy(last_known_scroll_position);
-				ticking = false;
-			});
-
-			ticking = true;
+	document.addEventListener("scroll", event => {
+		if (!isRequested) {
+			window.requestAnimationFrame(scrollSpy)
+			isRequested = true
 		}
-	}
-})();
+	})
+})()
 
+// Global click handler
 document.addEventListener("click", (event) => {
-	if (event.target.matches("li.disabled a, a.disabled, a[href='#'], a[href='']")) {
+	if (event.target.matches(".disabled a, a.disabled, a[href='#'], a[href='']")) {
 		event.preventDefault()
 	} else if (event.target.matches("button.close")) {
 		// Close button inside a modal.
@@ -140,7 +111,16 @@ document.addEventListener("click", (event) => {
 		// Mask behind a modal.
 		event.target.classList.remove("show")
 	}
-});
+})
+
+function showSearchModal() {
+	if (searchModal != null) {
+		searchModal.classList.add("show")
+		searchModal.querySelector("input").focus()
+		searchModal.querySelector("input").select()
+		window.doSearch()
+	}
+}
 
 function click(el) {
 	if (el != null) {

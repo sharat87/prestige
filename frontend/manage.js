@@ -42,7 +42,7 @@ const cacheDir = "./.cache"
 fs.rmdirSync(outDir, { recursive: true })
 fs.rmdirSync(cacheDir, { recursive: true })
 
-const bundler = new Bundler(["src/index.pug"], {
+const bundler = new Bundler(["src/index.html"], {
 	outDir,
 	cacheDir,
 	cache: !isProduction,

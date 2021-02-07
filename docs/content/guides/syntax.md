@@ -13,8 +13,8 @@ section. Any such comments in the body section, will be treated as part of the r
 the request (except lines starting with `###`, see next paragraph).
 
 Lines starting with a `###` mark the end of an HTTP request and the beginning of another. Lines with just `###` can be
-used as separator lines between multiple HTTP requests. The position of the cursor when hitting <kbd>Ctrl+Enter</kbd>
-decides which request should run.
+used as separator lines between multiple HTTP requests. The position of the cursor when hitting ((Ctrl+Enter)) decides
+which request should run.
 
 ## Header Section
 
@@ -48,9 +48,9 @@ X-My-Name: is not Sherlock
 X-From: an awesome HTTP playground tool
 ```
 
-To run this request, we can hit <kbd>Ctrl+Enter</kbd> with cursor on any of these lines. Prestige will execute a `GET`
-request to `http://httpbin.org/headers` with the two headers listed (in addition to headers sent by default like
-`Content-Size` etc.).
+To run this request, we can hit ((Ctrl+Enter)) with cursor on any of these lines. Prestige will execute a `GET` request
+to `http://httpbin.org/headers` with the two headers listed (in addition to headers sent by default like `Content-Size`
+etc.).
 
 !!! note
 	There shouldn't be a blank line between the headers or between the URL line and headers. This is because the
@@ -89,8 +89,7 @@ GET http://httpbin.org/get?initials=CM
 Here, we defined two requests, separated by the line containing `###`. The first is a `POST` request that sends a JSON
 body (an object with two fields). The second is a `GET` request to a different URL.
 
-Requests can be executed by hitting <kbd>Ctrl+Enter</kbd> while the cursor is in the body block, just as in the headers
-block.
+Requests can be executed by hitting ((Ctrl+Enter)) while the cursor is in the body block, just as in the headers block.
 
 ## Separator Lines
 

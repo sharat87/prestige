@@ -1,26 +1,27 @@
 site_name: "Prestige Docs"
+site_description: "Documentation for the Prestige HTTP client."
+site_url: "https://prestigemad.com/docs/"
+site_author: "Shrikant Sharat Kandula"
+
+repo_url: "https://github.com/sharat87/prestige"  # TODO: Show a GitHub icon linking to this.
 
 docs_dir: "content"
 
 repo_url: "https://github.com/sharat87/prestige"
 
 theme:
-  name: "mkdocs"
+  name: null
   custom_dir: "theme"
 
-# FIXME: Search in docs is not working!
-# plugins: []
-  # - search:
-  #     lang: "en"
-  #     prebuild_index: "python"
-
 markdown_extensions:
+  - "markdown_ext"  # Local extension for custom behaviour and features.
   - "toc":
       marker: ""
       permalink: true
       toc_depth: "1-5"
   - "attr_list"
   - "admonition"
+  - "smarty"
   # - "codehilite":
   #     linenums: true
   #     guess_lang: false
@@ -33,5 +34,7 @@ nav:
     - "guides/javascript-blocks.md"
     - "guides/templating.md"
     - "guides/cookie-management.md"
+    - "guides/proxy.md"
+    - "guides/editor.md"
   - "tips.md"
   - "about.md"

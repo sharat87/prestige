@@ -3,10 +3,9 @@
 > Just an HTTP Client, by Shrikant.
 
 Prestige is a text-based HTTP client, intended for use as an API development tool. In some ways, it is similar to
-[Postman](https://postman.co){:rel="noopener"} or [Insomnia](https://insomnia.rest){:rel="noopener"}, but with a more
-UI-less design. This translates to being highly flexible. For starters, there's no input boxes for URLs, drop-downs for
-methods etc. All that UI is done away with. Instead, the interface looks like a traditional text editor and the requests
-are to be written as plain text.
+[Postman](https://postman.co) or [Insomnia](https://insomnia.rest), but with a more UI-less design. This translates to
+being highly flexible. For starters, there's no input boxes for URLs, drop-downs for methods etc. All that UI is done
+away with. Instead, the interface looks like a traditional text editor and the requests are to be written as plain text.
 
 For example, the following a POST request with details that should be self-explanatory.
 
@@ -43,8 +42,8 @@ GET http://httpbin.org/get?first=Sherlock&last=Holmes
 ```
 
 Here, we're executing a GET request to the URL <http://httpbin.org/get?first=Sherlock&last=Holmes>. Copy this line over
-to a document in the Prestige app, place your cursor on it and hit <kbd>Ctrl+Enter</kbd>. The GET request will be
-executed, and the response details will show on the right.
+to a document in the Prestige app, place your cursor on it and hit ((Ctrl+Enter)). The GET request will be executed, and
+the response details will show on the right.
 
 Multiple requests should be separated by a line that starts with `###`. Such lines mark the end of a request and start
 of the definition of a new request. For example, we define two different GET requests below:
@@ -59,8 +58,8 @@ GET http://httpbin.org/get?just_last=Holmes
 
 ```
 
-If we place our cursor on the first GET line and hit <kbd>Ctrl+Enter</kbd>, the first one would be executed. Similarly
-for the second request. The request that gets executed depends on where the cursor is *when the hotkey is invoked*.
+If we place our cursor on the first GET line and hit ((Ctrl+Enter)), the first one would be executed. Similarly for the
+second request. The request that gets executed depends on where the cursor is *when the hotkey is invoked*.
 
 As mentioned earlier, a second section can be added for passing request body. Let's execute a simple POST request with a
 JSON body:
@@ -108,8 +107,8 @@ alert("in js block")
 GET http://httpbin.org/get
 ```
 
-If we put the cursor on the last line and hit <kbd>Ctrl+Enter</kbd>, we will see the alert message popup, and the
-request will be executed only *after* we close the alert message.
+If we put the cursor on the last line and hit ((Ctrl+Enter)), we will see the alert message popup, and the request will
+be executed only *after* we close the alert message.
 
 Javascript blocks can be used for simple templating (explained in following section), or for more advanced scripting
 that can customize the way Prestige executes requests. Learn more at the [Javascript Blocks
@@ -130,9 +129,9 @@ this.data.lastName = "Holmes"
 GET http://httpbin.org/get?first=${firstName}&last=${lastName}
 ```
 
-Here, when we place the cursor on the GET line and hit <kbd>Ctrl+Enter</kbd>, Prestige first evaluates the Javascript
-block, and then renders the GET request line as if it's a [template string][], with values from `this.data` in scope.
-So, the request that actually gets executed is the following:
+Here, when we place the cursor on the GET line and hit ((Ctrl+Enter)), Prestige first evaluates the Javascript block,
+and then renders the GET request line as if it's a [template string][], with values from `this.data` in scope.  So, the
+request that actually gets executed is the following:
 
 [template string]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
 

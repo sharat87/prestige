@@ -73,12 +73,12 @@ frontend/node_modules/make_sentinel: frontend/package.json frontend/yarn.lock
 serve-docs: venv
 	@source venv/bin/activate \
 		&& cd docs \
-		&& mkdocs serve --dev-addr 127.0.0.1:3042
+		&& PYTHONPATH=. mkdocs serve --dev-addr 127.0.0.1:3042
 
 build-docs: venv
 	@source venv/bin/activate \
 		&& cd docs \
-		&& mkdocs build
+		&& PYTHONPATH=. mkdocs build
 
 ###
 # End-to-end Testing

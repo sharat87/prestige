@@ -12,20 +12,6 @@ html {
 	min-height: 100%;
 }
 
-/* Replacement for `body { background-attachment: fixed; }`, which has
-   performance issues when scrolling on large displays. See #1394. */
-body::before {
-	content: ' ';
-	position: fixed;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	background-color: #fff;
-	will-change: transform;
-	z-index: -1;
-}
-
 body {
 	margin: 0;
 	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
@@ -38,11 +24,6 @@ body {
 	--link-hover-color: #EFF;
 }
 
-body > .root {
-	display: flex;
-	flex-direction: row-reverse;
-}
-
 button > * {
 	pointer-events: none;
 }
@@ -51,8 +32,34 @@ a {
 	color: var(--link-blue);
 }
 
-nav, main {
-	padding-bottom: 2rem;
+[disabled] {
+	cursor: disallowed;
+	pointer-events: none;
+}
+
+nav, aside {
+	position: fixed;
+	top: 0;
+	bottom: 0;
+	overflow-y: auto;
+	width: 18%;
+	border-style: solid;
+	border-color: var(--link-blue);
+	border-width: 0;
+}
+
+nav {
+	left: 0;
+	border-right-width: 1px;
+}
+
+aside {
+	right: 0;
+}
+
+main {
+	margin: 0 auto;
+	width: 60%;
 }
 
 nav a, aside a, nav summary, aside summary {
@@ -73,22 +80,20 @@ nav a.active, aside a.active, nav summary.active, aside summary.active {
 }
 
 nav summary:after, aside summary:after {
-	content: " ";
+	content: "▼";
 	margin-left: 6px;
 	display: inline-block;
-	width: 6px;
-	height: 6px;
-	border-width: 0 3px 3px 0;
-	border-bottom-right-radius: 2px;
-	border-style: solid;
-	border-color: currentColor;
-	opacity: .8;
-	transform: translateY(-50%) rotate(45deg);
-	transform-origin: center;
+	opacity: .9;
 }
 
 nav [open] summary:after, aside [open] summary:after {
-	transform: rotate(-135deg);
+	content: "▲";
+}
+
+aside > a:first-child {
+	font-weight: 500;
+	font-size: 1.3rem;
+	margin-top: 1rem;
 }
 
 .brand {
@@ -96,12 +101,21 @@ nav [open] summary:after, aside [open] summary:after {
 	font-size: 1.4rem;
 }
 
-main {
-	margin: 0 3rem;
+.np-btns {
+	display: flex;
+	margin: 2rem 1rem;
+	justify-content: space-between;
 }
 
-.source-links {
-	float: right;
+.np-btns a {
+	display: block;
+	width: 40%;
+	margin: 0 6px;
+	text-decoration: none;
+}
+
+.np-btns a[rel="next"] {
+	text-align: right;
 }
 
 .col-md-9 img {
@@ -181,15 +195,13 @@ a:hover code, a:focus code {
 }
 
 footer {
-	margin-top: 0;
-	margin-bottom: 10px;
-	text-align: center;
-}
-
-hr {
+	margin: 3rem 0;
+	padding: 1rem 0;
+	display: flex;
 	border-color: #357edd;
 	border-width: 1px 0 0 0;
-	margin: 0;
+	border-style: solid;
+	justify-content: space-around;
 }
 
 .headerlink {
@@ -204,6 +216,19 @@ hr {
 
 h1:hover .headerlink, h2:hover .headerlink, h3:hover .headerlink, h4:hover .headerlink, h5:hover .headerlink, h6:hover .headerlink {
 	display: inline-block;
+}
+
+p.img {
+	text-align: center;
+}
+
+p.img img {
+	border-radius: 6px;
+	border: 1px solid #CCC;
+	text-align: center;
+	height: 50vh;
+	min-height: 100px;
+	box-shadow: 6px 6px 24px #0002;
 }
 
 .admonition {

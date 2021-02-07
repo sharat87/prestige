@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang=en>
+<head>
+	<meta charset=utf-8>
+	<title>Prestige</title>
+	<link rel="shortcut icon" type=image/png href="assets/favicon.ico">
+	<link rel=icon type=image/png sizes=32x32 href="assets/favicon-32x32.png">
+	<link rel=icon type=image/png sizes=16x16 href="assets/favicon-16x16.png">
+</head>
+<body>
+	<p id=loadingBox style="text-align: center; font: 2em sans-serif; opacity: .7">Loading&hellip;</p>
+
+	<noscript>
+		This is a webapp written in Javascript and as such, requires Javascript to function. Please enable Javascript
+		in your browser or get a better browser like Firefox or Chromium. Thank you for checking us out.
+	</noscript>
+
+	<!-- Using `..` here makes the resulting sourcemap for this stylesheet useless. -->
+	<link rel=stylesheet href="../node_modules/tachyons/src/tachyons.css">
+	<link rel=stylesheet href="styles.less">
+
+	<script src="scripts/main.ts"></script>
+
+	<script>
+		window.goatcounter = {no_onload: localStorage.getItem("noAnalytics") === "1"}
+	</script>
+	<script data-goatcounter="https://prestigemad.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
