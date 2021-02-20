@@ -115,6 +115,9 @@ venv/make_sentinel: requirements.txt
 
 test-all: lint-frontend test-frontend test-backend test-e2e
 
+outdated:
+	cd frontend && yarn outdated
+
 tmux-session:
 	tmux new-session -d -c $$PWD -s prestige -n backend make serve-backend
 	tmux new-window -c $$PWD -t prestige: -n frontend make serve-frontend
