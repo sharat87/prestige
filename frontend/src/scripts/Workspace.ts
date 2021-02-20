@@ -9,17 +9,48 @@ import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, 
 import Stream from "mithril/stream"
 import debounce from "lodash/debounce"
 
-// TODO: Show a few quickstart templates to choose from instead of the same default content for every new sheet.
-//   Like in MS Office apps.
-const DEFAULT_EDITOR_CONTENT = `GET http://httpbin.org/get?name=haha
+const DEFAULT_EDITOR_CONTENT = `# Welcome to Prestige! Your newest developer tool!
+# Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
+# Like this one right here:
+
+GET http://httpbin.org/get?name=haha
 
 ###
+
+# Lines starting with a single '#' like this are comments.
+# Learn more about the syntax at ${window.location.origin}/docs/guides/syntax/.
+# Let's make a POST request!
 
 POST http://httpbin.org/post
 Content-Type: application/x-www-form-urlencoded
 
 username=sherlock&password=elementary
-`
+
+###
+
+# Custom headers, easy as popcorn.
+# Learn more at ${window.location.origin}/docs/guides/syntax/#header-section.
+
+GET http://httpbin.org/headers
+X-Custom1: custom header value one
+X-Custom2: custom header value two
+
+### javascript
+
+// This is a Javascript block, so comments start with '//'.
+// The following will be available for templating in requests *after* this Javascript block.
+// Learn more at ${window.location.origin}/docs/guides/javascript-blocks/.
+this.data.postUrl = "post"
+
+###
+
+# Let's use templates to make the same POST request as before!
+# Learn more at: ${window.location.origin}/docs/guides/templating/.
+POST http://httpbin.org/dollar{postUrl}
+Content-Type: application/x-www-form-urlencoded
+
+username=sherlock&password=elementary
+`.replace(/\bdollar\{/g, "${")
 
 export default class Workspace {
 	codeMirror: null | CodeMirror.Editor
