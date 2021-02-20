@@ -123,16 +123,8 @@
 					"null": "ignore"
 				}
 			],
-			"no-shadow": [
-				"warn",
-				{
-					"allow": [
-						"resolve",
-						"reject",
-						"done"
-					]
-				}
-			],
+			"no-shadow": "off",
+			"@typescript-eslint/no-shadow": "error",
 			"no-var": "error",
 			"prefer-const": "error",
 			"no-lonely-if": "error",

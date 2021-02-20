@@ -8,7 +8,7 @@
 This is a *powerful*, *text-based*, *in-browser*, HTTP client app that I wanted for myself and wished someone would
 build it one day. Well, had to do it myself in the end.
 
-Check out the [User Guide](https://prestigemad.com/help.html) to learn how Prestige can be a powerful addition to your
+Check out the [User Guide](https://prestigemad.com/docs) to learn how Prestige can be a powerful addition to your
 toolset.
 
 **Why is Prestige labeled as Alpha Software?**: Two reasons. One, the primary experiences and documented features are

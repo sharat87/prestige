@@ -2,7 +2,7 @@ import type { VnodeDOM } from "mithril"
 import m from "mithril"
 import Modal from "./Modal"
 import Button from "./Button"
-import AuthController from "./AuthService"
+import * as AuthService from "./AuthService"
 
 interface InputAttrs {
 	id: string;
@@ -64,7 +64,7 @@ export default function (initialVnode: VnodeDOM<{ onClose: (event?: Event) => vo
 
 	function onLoginSubmit(event: Event) {
 		event.preventDefault()
-		AuthController.login((event.target as any).loginEmail.value, (event.target as any).loginPassword.value)
+		AuthService.login((event.target as any).loginEmail.value, (event.target as any).loginPassword.value)
 			.then(() => onClose())
 			.catch(error => {
 				console.error("Error logging in", error)
@@ -82,7 +82,7 @@ export default function (initialVnode: VnodeDOM<{ onClose: (event?: Event) => vo
 			return
 		}
 
-		AuthController.signup((event.target as any).signupEmail.value, password)
+		AuthService.signup((event.target as any).signupEmail.value, password)
 			.then(user => {
 				console.log("User signed up", user)
 				onClose()

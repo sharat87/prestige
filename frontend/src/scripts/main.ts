@@ -2,7 +2,7 @@ import type { Vnode, VnodeDOM } from "mithril"
 import m from "mithril"
 import OptionsModal from "./Options"
 import Workspace from "./Workspace"
-import AuthController, { email } from "./AuthService"
+import * as AuthService from "./AuthService"
 import { DocumentBrowser } from "./DocumentBrowser"
 import Modal from "./Modal"
 import Button from "./Button"
@@ -13,8 +13,6 @@ import { NavLink } from "./NavLink"
 import ResultPane from "./ResultPane"
 import { isDev } from "./Env"
 import Toaster from "./Toaster"
-
-// TODO: UI Freezes when the response body is 1.6MB JSON. Like with `GET https://api.github.com/graphql`.
 
 window.addEventListener("load", () => {
 	const root = document.createElement("main")
@@ -30,7 +28,7 @@ window.addEventListener("load", () => {
 		// TODO: "/:404...": errorPageComponent,
 	})
 
-	AuthController.check()
+	AuthService.check()
 })
 
 const Layout: m.Component = {
@@ -115,7 +113,7 @@ function WorkspaceView(): m.Component {
 	}
 
 	function view() {
-		const authState = AuthController.getAuthState()
+		const authState = AuthService.getAuthState()
 		return [
 			m("header.flex.items-stretch.justify-between.bg-white.relative.bb.b--moon-gray", [
 				m(".flex.items-end", [
@@ -145,16 +143,16 @@ function WorkspaceView(): m.Component {
 						["Options ", m(ChevronDown)],
 					),
 					isDev() && [
-						authState === AuthController.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
-						authState === AuthController.AuthState.ANONYMOUS && m(
+						authState === AuthService.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
+						authState === AuthService.AuthState.ANONYMOUS && m(
 							NavLink,
 							{ onclick: onLoginFormToggle, isActive: popup === VisiblePopup.LoginForm },
 							"LogIn/SignUp",
 						),
-						authState === AuthController.AuthState.LOGGED_IN && m(
+						authState === AuthService.AuthState.LOGGED_IN && m(
 							NavLink,
-							{ onclick: AuthController.logout },
-							[email(), ": Log out"],
+							{ onclick: AuthService.logout },
+							[AuthService.email(), ": Log out"],
 						),
 					],
 					m(NavLink, { href: "/docs/" }, ["Docs", m(ExternalLink)]),
@@ -223,8 +221,11 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 	}
 
 	function view(vnode: VnodeDOM<{ class?: string, workspace: Workspace }>): m.Vnode {
-		vnode.attrs.workspace.doFlashes()
-		vnode.attrs.workspace.codeMirror?.refresh()
-		return m(".editor-pane", m(".body"))
+		const { workspace } = vnode.attrs
+		workspace.doFlashes()
+		workspace.codeMirror?.refresh()
+		return m(".editor-pane", [
+			m(".body"),
+		])
 	}
 }

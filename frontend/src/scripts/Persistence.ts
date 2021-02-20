@@ -1,5 +1,5 @@
 import m from "mithril"
-import AuthService from "./AuthService"
+import * as AuthService from "./AuthService"
 import Stream from "mithril/stream"
 import { storageUrl } from "./Env"
 
@@ -197,7 +197,10 @@ class CloudProvider extends Provider<CloudSource> {
 }
 
 const availableSources: Stream<Source[]> = Stream()
-AuthService.currentUser.map(async function(user): Promise<void> {
+AuthService.currentUser.map(recomputeAvailableSources)
+recomputeAvailableSources(null)
+
+async function recomputeAvailableSources(user: null | AuthService.User): Promise<void> {
 	const sources: Source[] = [
 		{
 			type: "browser",
@@ -216,7 +219,7 @@ AuthService.currentUser.map(async function(user): Promise<void> {
 	}
 
 	availableSources(sources)
-})
+}
 
 function createProviderForSource(key: string, source: Source): Provider<Source> {
 	if (source.type === "browser") {
