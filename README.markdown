@@ -60,7 +60,7 @@ of some of the targets:
 
 More: <https://github.com/marmelab/awesome-rest>.
 
-## Some public APIs play with
+## Some public APIs to play with
 
 1. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
 1. [httpbin.org](http://httpbin.org) &mdash; Great for meta-testing and JSON/form-data related experiments.
@@ -76,7 +76,6 @@ More: <https://github.com/marmelab/awesome-rest>.
 - A browser extension that, when installed, would make it so that we don't need the proxy anymore.
 - Dockerfiles and ability to start client and server with a single `docker-compose` command.
 - Response handler scripts.
-- Starter templates instead of a blank new document.
 - Ability to open/edit documents from GitHub, Google Drive and Dropbox.
 - Rich editor features like auto-complete, JSON editing help, hotkeys to start new GET/POST/etc. request etc.
 

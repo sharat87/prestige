@@ -36,5 +36,6 @@ nav:
     - "guides/cookie-management.md"
     - "guides/proxy.md"
     - "guides/editor.md"
+  - "api-reference.md"
   - "tips.md"
   - "about.md"

@@ -13,6 +13,8 @@
 	{%- endblock %}
 
 	{%- block styles %}
+		<link rel=preconnect href="https://fonts.gstatic.com">
+		<link rel=stylesheet href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,600;1,400;1,600&family=Source+Code+Pro&display=swap">
 		<link rel=stylesheet href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
 		{%- for path in config['extra_css'] %}
 		<link rel=stylesheet href="{{ path|url }}">

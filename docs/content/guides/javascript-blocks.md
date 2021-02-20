@@ -19,17 +19,44 @@ GET http://httpbin.org/get?id=2
 
 Here, we have two HTTP requests defined with a Javascript block in the middle. If we were to execute the first HTTP
 request, the Javascript block **will not** be evaluated. If we were to execute the second HTTP request, the Javascript
-**will** be evaluated before the HTTP request is made.
+**will** be evaluated before the HTTP request is made. This is because only the Javascript blocks that are above the
+request being executed, are evaluated.
 
-If we put the cursor on the GET line and hit ((Ctrl+Enter)), we see that the request is executed and no alert shows up.
-This is because only the Javascript blocks that are above the request being executed, are evaluated.
+Obviously, calling `alert` in a Javascript block here, although awesome, isn't a whole lot useful. Prestige provides
+APIs that can be used within these Javascript blocks to setup template data (see [Templating](./templating.md)), change
+proxy configuration, event handling (coming soon), etc. See the [API reference](../api-reference.md) for full details on
+the APIs available.
 
-Only the ones above the executed request will be run.
+## Evaluation Details
 
-How is Javascript Evaluated: as a function body, can return a promise
+*This is a slightly advanced topic that is not essential to normal usage of Prestige.*
 
-Context details
+The code inside the Javascript blocks is evaluated by first building a `Function` object out of it, and then calling
+that function.
 
-Event handling (example handler sets `Content-Type` based on body data)
+For example, consider the following Javascript block:
 
-API (in a separate page?).
+```
+### javascript
+alert("hello there")
+```
+
+This is converted into the following function:
+
+```javascript
+function () {
+    alert("hello there")
+}
+```
+
+This function is then called as `fn.call(context)`, where the context object is constructed specifically for this
+function and will be available as `this` inside the function body.
+
+Now, if this function returns a `Promise` object, then Prestige will wait for that promise to resolve before proceeding
+further.
+
+## Conclusion
+
+Javascript blocks provide real programming ability making Prestige sheets programmable environments. They also lend a
+lot of flexibility to power users in they way they can execute HTTP requests. Learn more about that in our
+[Templating](./templating.md) guide.
