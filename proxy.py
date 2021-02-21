@@ -89,8 +89,8 @@ class ProxyHandler(BaseHTTPRequestHandler):
 	def get_target_url(self):
 		if self.path.startswith("/docs/"):
 			return "http://localhost:3042/" + self.path[len("/docs/"):]
-		# if self.path.startswith("/livereload.js"):
-		# 	return "http://localhost:3042/livereload.js?port=3042"
+		if self.path.startswith("/livereload.js"):
+			return "http://localhost:3042/livereload.js?port=3042"
 		if self.path.startswith("/api/"):
 			return "http://localhost:3041/" + self.path[len("/api/"):]
 		return "http://localhost:3040" + self.path
