@@ -3,11 +3,10 @@ site_description: "Documentation for the Prestige HTTP client."
 site_url: "https://prestigemad.com/docs/"
 site_author: "Shrikant Sharat Kandula"
 
-repo_url: "https://github.com/sharat87/prestige"  # TODO: Show a GitHub icon linking to this.
+repo_url: "https://github.com/sharat87/prestige"
+edit_uri: "edit/master/docs/content/"
 
 docs_dir: "content"
-
-repo_url: "https://github.com/sharat87/prestige"
 
 theme:
   name: null
