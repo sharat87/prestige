@@ -6,14 +6,16 @@ interface Morsel {
 type Host = string
 type Path = string
 type Name = string
+type StoreType = Record<Host, Record<Path, Record<Name, Morsel>>>
 
 export default class CookieJar {
-	store: Record<Host, Record<Path, Record<Name, Morsel>>>
+	store: StoreType
 	size: number
 
-	constructor() {
-		this.store = {}
+	constructor(store: StoreType = {}) {
+		this.store = store ?? {}
 		this.size = 0
+		this.recomputeSize()
 	}
 
 	clear(): void {
@@ -21,8 +23,12 @@ export default class CookieJar {
 		this.size = 0
 	}
 
-	toJSON(): any {
+	toJSON(): StoreType {
 		return this.store
+	}
+
+	static fromPlain(plain: StoreType): CookieJar {
+		return new CookieJar(plain)
 	}
 
 	private recomputeSize(): void {
@@ -37,7 +43,7 @@ export default class CookieJar {
 		this.size = count
 	}
 
-	private flat(jar = this.store): Map<string, Morsel> {
+	private flat(jar: StoreType = this.store): Map<string, Morsel> {
 		const map: Map<string, Morsel> = new Map()
 
 		for (const [domain, byPath] of Object.entries(jar)) {
@@ -51,7 +57,7 @@ export default class CookieJar {
 		return map
 	}
 
-	overwrite(newCookies: any): { added: number, modified: number, removed: number, any: boolean } {
+	overwrite(newCookies: StoreType): { added: number, modified: number, removed: number, any: boolean } {
 		let modified = 0
 		let removed = 0
 
@@ -95,7 +101,7 @@ export default class CookieJar {
 	get(domain: Host, path: Path, name: Name): Morsel | null {
 		try {
 			return this.store[domain][path][name] ?? null
-		} catch (error: any) {
+		} catch (error: unknown) {
 			if (error instanceof TypeError) {
 				return null
 			} else {

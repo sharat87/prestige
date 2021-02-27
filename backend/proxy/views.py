@@ -1,5 +1,7 @@
+import base64
 import logging
 from http import HTTPStatus
+import json
 from typing import Dict, Union, Any, Optional
 
 import requests
@@ -52,6 +54,7 @@ def proxy(request) -> JsonResponse:
 
 	headers: Dict[str, str] = {name: value for name, value in job["headers"]} if job.get("headers") else {}
 	body: Optional[str] = job.get("body")
+	body_type: Optional[str] = job.get("bodyType")
 	cookies: Optional[PlainCookieJarType] = job.get("cookies")
 	timeout: int = job.get("timeout", 10)
 
@@ -60,12 +63,24 @@ def proxy(request) -> JsonResponse:
 	if cookies:
 		update_cookie_jar(session.cookies, cookies)
 
+	if body_type == "multipart/form-data":
+		# The content-type will be set with an appropriate boundary value by the `request` method below.
+		del headers["content-type"]
+		data = None
+		files = json.loads(body) if body else None
+		for key, value in files.items():
+			files[key] = base64.b64decode(value)
+	else:
+		data = body
+		files = None
+
 	try:
 		response = session.request(
 			method=method,
 			url=url,
 			headers=headers,
-			data=body,
+			data=data,
+			files=files,
 			timeout=timeout,
 			verify=False,
 		)
@@ -149,7 +164,7 @@ def response_to_dict(response: requests.Response, body=None):
 	}
 
 
-def get_body_in_response(response: requests.Response):
+def get_body_in_response(response: requests.Response) -> Optional[str]:
 	if response.headers.get("Content-Length") == "0":
 		return None
 
@@ -157,6 +172,7 @@ def get_body_in_response(response: requests.Response):
 	if not content_type:
 		return None
 
+	content = response.content
 	media_type, *args = map(str.strip, content_type.split(";"))
 
 	if media_type.startswith("text/") or media_type in TEXT_CONTENT_TYPES:
@@ -166,9 +182,12 @@ def get_body_in_response(response: requests.Response):
 			if arg.startswith("charset="):
 				charset = arg[len("charset="):]
 
-		return response.content.decode(encoding=charset)
+		return content.decode(encoding=charset)
 
-	return response.content
+	elif isinstance(content, bytes):
+		return base64.b64encode(content).decode("utf-8")
+
+	return content
 
 
 def is_url_allowed(url: str):

@@ -81,6 +81,9 @@ Yep, JSON! Since the expression after `=` evaluates to an *Object*, as opposed t
 previous examples), Prestige will notice the `Content-Type: application/json` header and just `stringify` the object for
 you before sending it on its merry way as the request payload.
 
+Additionally, this way of using an Javascript expression to build the body is also useful when you want to upload a file
+as part of the request. See our guide on the [File Bucket](./file-bucket.md) for more details.
+
 ## Conclusion
 
 This topic can be a bit daunting when you're new to Prestige, but I urge you to not completely ignore it. You can get by

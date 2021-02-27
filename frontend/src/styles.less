@@ -5,6 +5,7 @@
 html, body {
 	height: 100%;
 	background-color: white;
+	font-family: "Source Sans Pro", sans-serif;
 }
 
 body {
@@ -38,8 +39,8 @@ main {
 	}
 }
 
-.mono {
-	font-family: monospace;
+tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
+	font-family: "Source Code Pro", monospace;
 }
 
 .CodeMirror {
@@ -186,7 +187,7 @@ main {
 .editor-pane div.CodeMirror {
 	height: 100%;
 	background: rgba(0, 0, 0, .02);
-	text-shadow: 1px 1px 2px rgba(0, 0, 0, .06);
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, .03);
 	z-index: 0;
 
 	.CodeMirror-code > div {

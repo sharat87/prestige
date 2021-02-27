@@ -4,11 +4,14 @@ import interpolate from "./interpolate"
 import { Context } from "./Context"
 
 export interface RequestDetails {
-	method: string;
-	url: string;
-	headers: Headers;
-	body: string;
+	method: string
+	url: string
+	headers: Headers
+	bodyType: string
+	body: string
 }
+
+const AsyncFunction = Object.getPrototypeOf(async () => 0).constructor
 
 export async function extractRequest(lines: string[], runLineNum: number, context: Context): Promise<RequestDetails> {
 
@@ -53,6 +56,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 	const details = {
 		method: "GET",
 		url: "",
+		bodyType: "raw",
 		body: "",
 		headers: new Headers(),
 	}
@@ -98,8 +102,23 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 		if (bodyLines[0].startsWith("=")) {
 			// Replace that `=` with `return` and we assume what followed that `=` is a single JS expression.
 			const code = "return " + bodyLines.join("\n").substr(1)
-			const body = new Function(code).call(context)
-			details.body = typeof body === "string" ? body : JSON.stringify(body)
+			const body = await (new AsyncFunction(code).call(context))
+			if (typeof body === "string") {
+				details.body = body
+			} else if (body == null) {
+				details.body = ""
+			} else if (body instanceof FormData) {
+				details.bodyType = "multipart/form-data"
+				details.headers.set("Content-Type", "multipart/form-data")
+				const rawData: Record<string, unknown> = {}
+				for (const [key, value] of body) {
+					// TODO: Why do we need a typecast here?
+					rawData[key] = value
+				}
+				details.body = JSON.stringify(rawData)
+			} else {
+				details.body = JSON.stringify(body)
+			}
 
 		} else {
 			details.body = bodyLines.join("\n")

@@ -33,6 +33,7 @@ nav:
     - "guides/javascript-blocks.md"
     - "guides/templating.md"
     - "guides/cookie-management.md"
+    - "guides/file-bucket.md"
     - "guides/proxy.md"
     - "guides/editor.md"
   - "api-reference.md"

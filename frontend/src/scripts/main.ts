@@ -9,6 +9,7 @@ import Button from "./Button"
 import { ChevronDown, ExternalLink } from "./Icons"
 import CookiesModal from "./CookiesModal"
 import LoginFormModal from "./LoginFormModal"
+import FileBucketModal from "./FileBucketModal"
 import { NavLink } from "./NavLink"
 import ResultPane from "./ResultPane"
 import { isDev } from "./Env"
@@ -17,7 +18,7 @@ import Toaster from "./Toaster"
 window.addEventListener("load", () => {
 	const root = document.createElement("main")
 	root.setAttribute("id", "app")
-	root.classList.add("sans-serif", "h-100")
+	root.classList.add("h-100")
 	document.body.insertAdjacentElement("afterbegin", root)
 	document.getElementById("loadingBox")?.remove()
 
@@ -79,6 +80,7 @@ function WorkspaceView(): m.Component {
 		Options,
 		Cookies,
 		LoginForm,
+		FileBucketPopup,
 	}
 
 	let popup: VisiblePopup = VisiblePopup.None
@@ -135,7 +137,12 @@ function WorkspaceView(): m.Component {
 					m(
 						NavLink,
 						{ onclick: onCookiesToggle, isActive: popup === VisiblePopup.Cookies },
-						[`Cookies (${ workspace.cookieJar.size }) `, m(ChevronDown)],
+						[`Cookies (${ workspace.cookieJar?.size ?? 0 }) `, m(ChevronDown)],
+					),
+					isDev() && m(
+						NavLink,
+						{ onclick: onFileBucketToggle, isActive: popup === VisiblePopup.FileBucketPopup },
+						["FileBucket (-1) ", m(ChevronDown)],
 					),
 					isDev() && m(
 						NavLink,
@@ -187,6 +194,10 @@ function WorkspaceView(): m.Component {
 			popup === VisiblePopup.LoginForm && m(LoginFormModal, {
 				onClose: onLoginFormToggle,
 			} as any),
+			popup === VisiblePopup.FileBucketPopup && m(FileBucketModal, {
+				fileBucket: workspace.fileBucket,
+				onClose: onFileBucketToggle,
+			}),
 		]
 	}
 
@@ -196,6 +207,10 @@ function WorkspaceView(): m.Component {
 
 	function onCookiesToggle() {
 		popup = popup === VisiblePopup.Cookies ? VisiblePopup.None : VisiblePopup.Cookies
+	}
+
+	function onFileBucketToggle() {
+		popup = popup === VisiblePopup.FileBucketPopup ? VisiblePopup.None : VisiblePopup.FileBucketPopup
 	}
 
 	function onLoginFormToggle() {

@@ -149,7 +149,16 @@ LOGGING = {
 			"level": "ERROR" if UNIVERSE == "test" else "DEBUG",
 			"propagate": False,
 		},
-	}
+		"urllib3": {
+			"handlers": ["console"],
+			"level": "WARNING",
+			"propagate": True,
+		},
+	},
+	"root": {
+		"handlers": ["console", "mail_admins"],
+		"level": "ERROR" if UNIVERSE == "test" or not DEBUG else "DEBUG",
+	},
 }
 
 # Internationalization

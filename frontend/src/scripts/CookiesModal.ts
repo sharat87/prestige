@@ -5,11 +5,13 @@ import CookieJar from "./CookieJar"
 
 export default { view }
 
-function view(vnode: VnodeDOM<{ cookieJar: CookieJar, onClose: any }>): m.Children {
+function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, onClose: any }>): m.Children {
+	const cookieJar = vnode.attrs.cookieJar
 	const rows: Vnode[] = []
 	let i = 0
 
-	for (const [domain, byPath] of Object.entries(vnode.attrs.cookieJar.store)) {
+	console.log("cookieJar", cookieJar)
+	for (const [domain, byPath] of cookieJar == null ? [] : Object.entries(cookieJar.store)) {
 		for (const [path, byName] of Object.entries(byPath as any)) {
 			for (const [name, morsel] of Object.entries(byName as any)) {
 				rows.push(m("tr", [
@@ -25,7 +27,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar, onClose: any }>): m.Childr
 							{
 								class: "bg-washed-red dark-red hover-bg-dark-red hover-washed-red",
 								// TODO: Cookie jar is not saved after deletion here.
-								onclick: () => vnode.attrs.cookieJar.delete(domain, path, name),
+								onclick: () => cookieJar?.delete(domain, path, name),
 							},
 							"Del",
 						),
@@ -40,9 +42,9 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar, onClose: any }>): m.Childr
 		{
 			title: "Cookies",
 			footer: [
-				vnode.attrs.cookieJar?.size > 0 ? m(
+				cookieJar != null && cookieJar.size > 0 ? m(
 					Button,
-					{ class: "hover-bg-dark-red hover-washed-red", onclick: () => vnode.attrs.cookieJar.clear() },
+					{ class: "hover-bg-dark-red hover-washed-red", onclick: () => cookieJar.clear() },
 					"Clear all cookies",
 				) : m("div"),
 				m(Button, { style: "primary", onclick: vnode.attrs.onClose }, "Close"),

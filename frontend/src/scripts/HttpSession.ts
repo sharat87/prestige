@@ -1,8 +1,9 @@
 import m from "mithril"
-import CookieJar from "./CookieJar"
+import type CookieJar from "./CookieJar"
 import type { RequestDetails } from "./Parser"
 import { extractRequest } from "./Parser"
 import { makeContext } from "./Context"
+import FileBucket from "./FileBucket"
 
 interface SuccessResult {
 	ok: true,
@@ -40,15 +41,16 @@ interface ExecuteResponse {
 	body: string,
 }
 
+// TODO: Investigate if this class can just be merged in with Workspace.
 export default class HttpSession {
-	cookieJar: CookieJar
+	fileBucket: FileBucket
 	private loadingCounter: number
 	proxy: null | string
 	result: AnyResult | null
 
-	constructor(proxy: null | string = null) {
+	constructor(proxy: null | string = null, fileBucket: FileBucket) {
 		// These are persistent throughout a session.
-		this.cookieJar = new CookieJar()
+		this.fileBucket = fileBucket
 		this.loadingCounter = 0
 		this.proxy = proxy == null ? null : String(proxy)
 
@@ -60,17 +62,17 @@ export default class HttpSession {
 		return this.loadingCounter > 0
 	}
 
-	pushLoading() {
+	pushLoading(): void {
 		++this.loadingCounter
 		m.redraw()
 	}
 
-	popLoading() {
+	popLoading(): void {
 		--this.loadingCounter
 		m.redraw()
 	}
 
-	async runTop(lines: string | string[], runLineNum: string | number, silent = false): Promise<AnyResult> {
+	async runTop(lines: string | string[], runLineNum: string | number, silent = false, cookieJar: CookieJar): Promise<AnyResult> {
 		if (typeof lines === "string") {
 			lines = lines.split("\n")
 		}
@@ -88,7 +90,7 @@ export default class HttpSession {
 		this.pushLoading()
 		let request: null | RequestDetails = null
 
-		const context = makeContext(this)
+		const context = makeContext(this, cookieJar)
 		let result: null | AnyResult = null
 
 		try {
@@ -97,10 +99,10 @@ export default class HttpSession {
 				await context.emit("BeforeExecute", { request })
 			}
 
-			result = await this.execute(request)
+			result = await this.execute(request, cookieJar)
 
 			if (result != null && result.ok && result.cookies) {
-				result.cookieChanges = this.cookieJar.overwrite(result.cookies)
+				result.cookieChanges = cookieJar.overwrite(result.cookies)
 			}
 
 		} catch (error: any) {
@@ -115,12 +117,11 @@ export default class HttpSession {
 
 		}
 
-		console.log("runTop done", this.cookieJar)
 		this.result = result
 		return result
 	}
 
-	async execute(request: RequestDetails): Promise<AnyResult> {
+	async execute(request: RequestDetails, cookieJar: CookieJar): Promise<AnyResult> {
 		if (request.method === "") {
 			throw new Error("Method cannot be empty!")
 		}
@@ -138,7 +139,7 @@ export default class HttpSession {
 			return this.executeDirect(request)
 
 		} else {
-			return this.executeWithProxy(request, { timeout, proxy })
+			return this.executeWithProxy(request, { timeout, proxy }, cookieJar)
 
 		}
 	}
@@ -216,9 +217,10 @@ export default class HttpSession {
 	async executeWithProxy(
 		request: RequestDetails,
 		{ timeout, proxy }: { timeout: number, proxy: string },
+		cookieJar: CookieJar,
 	): Promise<AnyResult> {
 
-		const { method, url, headers, body } = request
+		const { method, url, headers, bodyType, body } = request
 
 		const options: RequestInit = {
 			cache: "no-store",
@@ -233,7 +235,8 @@ export default class HttpSession {
 				method,
 				headers: Array.from(headers.entries()),
 				timeout,
-				cookies: this.cookieJar,
+				cookies: cookieJar,
+				bodyType,
 				body,
 			}),
 		}

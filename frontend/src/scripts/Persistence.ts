@@ -2,6 +2,7 @@ import m from "mithril"
 import * as AuthService from "./AuthService"
 import Stream from "mithril/stream"
 import { storageUrl } from "./Env"
+import CookieJar from "./CookieJar"
 
 const STORAGE_URL_BASE = storageUrl()
 
@@ -94,12 +95,13 @@ class BrowserProvider extends Provider<LocalSource> {
 			cookieJar = JSON.parse(cookieJarString)
 		}
 
-		return new Sheet(sheetPath, body, cookieJar)
+		return new Sheet(sheetPath, body, CookieJar.fromPlain(cookieJar))
 	}
 
 	async save({ path, name, body, cookieJar }: Sheet): Promise<void> {
 		localStorage.setItem(this.prefix + path + ":name", name)
 		localStorage.setItem(this.prefix + path + ":body", body)
+		console.log("saving cookieJar", cookieJar)
 		localStorage.setItem(this.prefix + path + ":cookieJar", JSON.stringify(cookieJar))
 	}
 

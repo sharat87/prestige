@@ -8,6 +8,7 @@ import PageEnd from "./PageEnd"
 import { NavLink } from "./NavLink"
 import NothingMessage from "./NothingMessage"
 import CodeBlock from "./CodeBlock"
+import humanSizeDisplay from "./humanSizeDisplay"
 
 interface Attrs {
 	class?: string;
@@ -193,12 +194,19 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 	const enum Tabs {
 		text,
 		iFrame,
-		svgImage,
+		image,
 	}
 
 	let visibleTab = Tabs.text
 
-	return { view }
+	return { oninit, view }
+
+	function oninit(vnode: VnodeDOM<{ text: string, spec: null | string }>): void {
+		const { spec } = vnode.attrs
+		if (spec?.startsWith("image/")) {
+			visibleTab = Tabs.image
+		}
+	}
 
 	function toggleTab(title: string, tab: Tabs) {
 		return m(NavLink, {
@@ -219,18 +227,19 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 		}
 
 		return [
+			// Tabs.
 			text === "" ? m("p.i.pl2", "No body.") : [
 				m("h3.pl2", [
 					"Body",
 					spec != null && m("small.pl1", `(${ spec })`),
-					m("small.pl1", `(${ humanSizeRep(text.length) })`),
+					m("small.pl1", `(${ humanSizeDisplay(text.length) })`),
 				]),
 				m(".flex.bb.b--dark-blue", [
-					toggleTab("Text", Tabs.text),
+					spec?.startsWith("image/") ? toggleTab("Image", Tabs.image) : toggleTab("Text", Tabs.text),
 					(spec === "text/html" || spec === "image/svg+xml") && toggleTab("iFrame", Tabs.iFrame),
-					spec === "image/svg+xml" && toggleTab("Image", Tabs.svgImage),
 				]),
 			],
+			// Panes.
 			text !== "" && m("div",
 				{ style: { display: (text !== "" && visibleTab === Tabs.text) ? "" : "none" } },
 				m(CodeBlock, {
@@ -242,7 +251,10 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 				src: "data:text/html;base64," + btoa(text),
 				sandbox: "",  // Disable scripts and whole lot of scary stuff in the frame's document.
 			}),
-			visibleTab === Tabs.svgImage && m("img", { src: "data:image/svg+xml;base64," + btoa(text) }),
+			visibleTab === Tabs.image && m(
+				"img",
+				{ src: "data:" + spec + ";charset=utf-8;base64," + (spec?.endsWith("/svg+xml") ? btoa(text) : text) },
+			),
 		]
 	}
 }
@@ -277,21 +289,4 @@ function getContentTypeFromHeaders(headers: Headers | Map<string, string> | stri
 	}
 
 	return null
-}
-
-function humanSizeRep(size: number) {
-	if (size < 1024) {
-		return size + " bytes"
-	}
-
-	const sizeLabels = ["bytes", "KiB", "MiB", "GiB", "TiB"]
-	let labelIndex = 0
-	let fileSize = ""
-
-	do {
-		fileSize = size.toFixed(2) + " " + sizeLabels[labelIndex++]
-		size /= 1024
-	} while (size > 1)
-
-	return fileSize
 }

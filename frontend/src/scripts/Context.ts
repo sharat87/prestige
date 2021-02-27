@@ -3,21 +3,23 @@ import { isPromise } from "./utils"
 import m from "mithril"
 
 export interface Context {
-	data: any;
-	run: ((lines: string[], runLineNum: number) => Promise<AnyResult>);
-	on: ((event: string, callback: ((e: CustomEvent) => void)) => void);
-	off: ((event: string, callback: ((e: CustomEvent) => void)) => void);
-	emit: any;
-	authHeader: (username: string, password: string) => string;
+	data: Record<string, unknown>
+	run: (lines: string[], runLineNum: number) => Promise<AnyResult>
+	on: (event: string, callback: ((e: CustomEvent) => void)) => void
+	off: (event: string, callback: ((e: CustomEvent) => void)) => void
+	emit: (eventName: string, detail: unknown) => Promise<unknown>
+	authHeader: (username: string, password: string) => string
+	multipart: (data: Record<string, string | File>) => FormData
+	fileFromBucket: (fileName: string) => Promise<string>
 }
 
-export function makeContext(session: HttpSession): Context {
-	const handlers: Map<string, Set<(e: CustomEvent) => any>> = new Map()
+export function makeContext(session: HttpSession, cookieJar: CookieJar): Context {
+	const handlers: Map<string, Set<(e: CustomEvent) => unknown>> = new Map()
 
-	return { data: {}, on, off, emit, run, authHeader }
+	return { data: {}, on, off, emit, run, authHeader, multipart, fileFromBucket }
 
 	function run(lines: string[], runLineNum = 0): Promise<AnyResult> {
-		return session.runTop(lines, runLineNum, true)
+		return session.runTop(lines, runLineNum, true, cookieJar)
 	}
 
 	function off(eventName: string, callback: (e: CustomEvent) => void): void {
@@ -29,18 +31,30 @@ export function makeContext(session: HttpSession): Context {
 			?.add(callback)
 	}
 
-	function emit(eventName: string, detail: any = null) {
+	function emit<T>(eventName: string, detail: T | null = null) {
 		const event = new CustomEvent(eventName, { detail })
-		const promises: Promise<void>[] = []
+		const promises: Promise<unknown>[] = []
 
 		for (const fn of handlers.get(eventName) ?? []) {
 			const value = fn(event)
 			if (isPromise(value)) {
-				promises.push(value)
+				promises.push(value as Promise<unknown>)
 			}
 		}
 
 		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises)).finally(m.redraw)
+	}
+
+	function multipart(data: Record<string, string | File>): FormData {
+		const formData = new FormData()
+		for (const [key, value] of Object.entries(data)) {
+			formData.set(key, value)
+		}
+		return formData
+	}
+
+	function fileFromBucket(fileName: string): Promise<string> {
+		return session.fileBucket.load(fileName)
 	}
 
 }

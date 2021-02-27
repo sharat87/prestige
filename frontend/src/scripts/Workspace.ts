@@ -1,6 +1,6 @@
 import HttpSession from "./HttpSession"
 import m from "mithril"
-import CodeMirror from "codemirror"
+import CodeMirror from "./codemirror"
 import { BlockType, parse } from "./Parser"
 import BracesSVG from "remixicon/icons/Development/braces-line.svg"
 import CookieJar from "./CookieJar"
@@ -8,6 +8,7 @@ import { proxyUrl } from "./Env"
 import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, Sheet, Source } from "./Persistence"
 import Stream from "mithril/stream"
 import debounce from "lodash/debounce"
+import FileBucket from "./FileBucket"
 
 const DEFAULT_EDITOR_CONTENT = `# Welcome to Prestige! Your newest developer tool!
 # Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
@@ -58,6 +59,7 @@ export default class Workspace {
 	private _lines: null | string[]
 	private prevExecuteBookmark: null | CodeMirror.TextMarker
 	session: HttpSession
+	fileBucket: FileBucket
 	private flashQueue: any[]
 	private widgetMarks: CodeMirror.TextMarker[]
 	currentSheet: null | Sheet
@@ -70,7 +72,8 @@ export default class Workspace {
 		this._content = ""
 		this._lines = null
 		this.prevExecuteBookmark = null
-		this.session = new HttpSession(proxyUrl())
+		this.fileBucket = new FileBucket()
+		this.session = new HttpSession(proxyUrl(), this.fileBucket)
 		this.flashQueue = []
 		this.widgetMarks = []
 		this.currentSheet = null
@@ -93,14 +96,11 @@ export default class Workspace {
 
 		currentSheet.map((value) => {
 			this.currentSheet = value
+			console.log("should now have this.cookieJar", this.cookieJar)
 
 			if (this.currentSheet != null) {
 				if (!this.currentSheet.body) {
 					this.currentSheet.body = DEFAULT_EDITOR_CONTENT
-				}
-
-				if (this.currentSheet.cookieJar) {
-					this.session.cookieJar.overwrite(this.currentSheet.cookieJar)
 				}
 
 				this.setContent(this.currentSheet.body)
@@ -165,6 +165,7 @@ export default class Workspace {
 
 		this.currentSheet.body = this.getContent()
 
+		console.log("saving this.currentSheet", this.currentSheet)
 		saveSheet(this.currentSheetQualifiedPath(), this.currentSheet)
 			.then(() => {
 				this.isChangesSaved = true
@@ -295,8 +296,8 @@ export default class Workspace {
 		)
 	}
 
-	get cookieJar(): CookieJar {
-		return this.session.cookieJar
+	get cookieJar(): CookieJar | null {
+		return this.currentSheet?.cookieJar ?? null
 	}
 
 	doExecute(): void {
@@ -327,7 +328,7 @@ export default class Workspace {
 
 		this.flashQueue.push({ start: startLine, end: endLine + 1 })
 
-		this.session.runTop(lines, cursorLine)
+		this.session.runTop(lines, cursorLine, false, this.cookieJar)
 			.finally(() => {
 				console.debug("Saving since cookies might've changed after a request execution.")
 				m.redraw()
