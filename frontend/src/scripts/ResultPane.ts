@@ -226,34 +226,30 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 			text = ""
 		}
 
-		return [
+		return text === "" ? m("p.i.pl2", "No body.") : [
+			m("h3.pl2", [
+				"Body",
+				spec != null && m("small.pl1", `(${ spec })`),
+				m("small.pl1", `(${ humanSizeDisplay(text.length) })`),
+			]),
 			// Tabs.
-			text === "" ? m("p.i.pl2", "No body.") : [
-				m("h3.pl2", [
-					"Body",
-					spec != null && m("small.pl1", `(${ spec })`),
-					m("small.pl1", `(${ humanSizeDisplay(text.length) })`),
-				]),
-				m(".flex.bb.b--dark-blue", [
-					spec?.startsWith("image/") ? toggleTab("Image", Tabs.image) : toggleTab("Text", Tabs.text),
-					(spec === "text/html" || spec === "image/svg+xml") && toggleTab("iFrame", Tabs.iFrame),
-				]),
-			],
+			m(".flex.bb.b--dark-blue", [
+				spec?.startsWith("image/") ? toggleTab("Image", Tabs.image) : toggleTab("Text", Tabs.text),
+				(spec === "text/html" || spec === "image/svg+xml") && toggleTab("iFrame", Tabs.iFrame),
+				spec === "image/svg+xml" && toggleTab("Text", Tabs.text),
+			]),
 			// Panes.
-			text !== "" && m("div",
-				{ style: { display: (text !== "" && visibleTab === Tabs.text) ? "" : "none" } },
-				m(CodeBlock, {
-					text,
-					spec: spec ?? "",
-				}),
-			),
+			visibleTab === Tabs.text && m(CodeBlock, { text, spec: spec ?? "" }),
 			visibleTab === Tabs.iFrame && m("iframe.bn.pa0.w-100", {
 				src: "data:text/html;base64," + btoa(text),
-				sandbox: "",  // Disable scripts and whole lot of scary stuff in the frame's document.
+				sandbox: "",  // Disable scripts and whole lot of scary stuff in the iframe's document.
 			}),
 			visibleTab === Tabs.image && m(
 				"img",
-				{ src: "data:" + spec + ";charset=utf-8;base64," + (spec?.endsWith("/svg+xml") ? btoa(text) : text) },
+				{
+					src: "data:" + spec + ";charset=utf-8;base64," +
+						(spec?.endsWith("/svg+xml") ? btoa(text) : text),
+				},
 			),
 		]
 	}
