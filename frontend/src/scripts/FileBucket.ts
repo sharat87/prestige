@@ -44,6 +44,10 @@ export default class FileBucket {
 		})
 	}
 
+	get size(): number {
+		return this.files.size
+	}
+
 	[Symbol.iterator](): Iterator<File> {
 		return this.files.values()
 	}
