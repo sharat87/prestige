@@ -202,6 +202,7 @@ export default class Workspace {
 	/**
 	 * Update gutter, widgets, highlights etc. of the CodeMirror editor. Usually called when the contents of the editor
 	 * change.
+	 * TODO: This runs on *every* character change in the editor. Consequently hurts typing performance.
 	 */
 	updateEditorDisplay(): void {
 		if (this.codeMirror == null) {
@@ -226,8 +227,13 @@ export default class Workspace {
 			const startLine: string = lines[block.start]
 
 			if (block.type === BlockType.PAGE_BREAK) {
+				const buttonClasses = [
+					"ml2", "pointer", "hover-bg-moon-gray", "br4", "pv1", "ph2", "underline", "o-40", "f7",
+					"sans-serif",
+				]
+
 				const el = document.createElement("span")
-				el.classList.add("icon", "add-widget", "cm-tag", "ml2", "pointer", "underline")
+				el.classList.add(...buttonClasses)
 				el.innerHTML = "+new"
 				el.title = "Insert new request here."
 				el.dataset.lineNum = block.start.toString()
@@ -237,8 +243,19 @@ export default class Workspace {
 					{ widget: el, insertLeft: true },
 				))
 
+				const exportBtn = document.createElement("span")
+				exportBtn.classList.add(...buttonClasses)
+				exportBtn.innerHTML = "export&hellip;"
+				exportBtn.title = "Export below request in cURL format."
+				exportBtn.dataset.lineNum = block.start.toString()
+				exportBtn.addEventListener("click", this.onExportClicked)
+				this.widgetMarks.push(this.codeMirror.setBookmark(
+					{ line: block.start, ch: startLine.length },
+					{ widget: exportBtn, insertLeft: true },
+				))
+
 			} else if (block.type === BlockType.JAVASCRIPT) {
-				for (let i = block.start; i <= block.end + 1; ++i) {
+				for (let i = block.start - 1; i <= block.end; ++i) {
 					this.codeMirror.addLineClass(i, "background", "line-javascript")
 				}
 
@@ -277,6 +294,10 @@ export default class Workspace {
 		)
 		this.codeMirror?.setCursor(lineNum + 2, 0)
 		this.codeMirror?.focus()
+	}
+
+	onExportClicked(): void {
+		alert("Work in progress: This feature is not ready yet!")
 	}
 
 	onPrettifyClicked(event: MouseEvent): void {
