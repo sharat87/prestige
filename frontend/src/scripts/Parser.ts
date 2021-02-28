@@ -1,6 +1,7 @@
 import { buildQueryString } from "mithril"
 import interpolate from "./interpolate"
 import { Context } from "./Context"
+import { MultiPartForm } from "./BodyTypes"
 
 export interface RequestDetails {
 	method: string
@@ -103,12 +104,11 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 				details.body = body
 			} else if (body == null) {
 				details.body = ""
-			} else if (body instanceof FormData) {
+			} else if (body instanceof MultiPartForm) {
 				details.bodyType = "multipart/form-data"
 				details.headers.set("Content-Type", "multipart/form-data")
 				const rawData: Record<string, unknown> = {}
 				for (const [key, value] of body) {
-					// TODO: Why do we need a typecast here?
 					rawData[key] = value
 				}
 				details.body = JSON.stringify(rawData)

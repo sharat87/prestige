@@ -1,3 +1,5 @@
+import type { MultiPartFormValue } from "./BodyTypes"
+
 export default class FileBucket {
 	private files: Map<string, File>
 
@@ -17,13 +19,14 @@ export default class FileBucket {
 		return this.files.get(name) ?? null
 	}
 
-	load(name: string): Promise<string> {
+	load(name: string): Promise<MultiPartFormValue> {
 		const file = this.get(name)
 
 		if (file == null) {
 			throw new Error("File not available: " + name)
 		}
 
+		console.log("file", file)
 		const fileReader = new FileReader()
 
 		// Source: <https://developer.mozilla.org/en-US/docs/Web/API/ReadableStream/getReader#examples>
@@ -32,9 +35,12 @@ export default class FileBucket {
 				if (e.target == null) {
 					console.error("Null target in file reader load event handler", e)
 				}
-				const data = btoa(e.target?.result as string)
-				console.log("data from file", data)
-				resolve(data)
+				resolve({
+					body: btoa(e.target?.result as string),
+					name: file.name,
+					type: file.type,
+					size: file.size,
+				})
 			}
 			fileReader.onerror = (e) => {
 				console.error("Error loading file", e)

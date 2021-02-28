@@ -69,7 +69,10 @@ def proxy(request) -> JsonResponse:
 		data = None
 		files = json.loads(body) if body else None
 		for key, value in files.items():
-			files[key] = base64.b64decode(value)
+			if isinstance(value, dict):
+				files[key] = value["name"], base64.b64decode(value["body"]), value["type"]
+			else:
+				files[key] = base64.b64decode(value)
 	else:
 		data = body
 		files = None

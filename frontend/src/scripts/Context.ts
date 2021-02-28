@@ -3,6 +3,8 @@ import HttpSession, { AnyResult } from "./HttpSession"
 import { isPromise } from "./utils"
 import type FileBucket from "./FileBucket"
 import type CookieJar from "./CookieJar"
+import { MultiPartForm } from "./BodyTypes"
+import type { MultiPartFormValue } from "./BodyTypes"
 
 export interface Context {
 	data: Record<string, unknown>
@@ -47,15 +49,15 @@ export function makeContext(session: HttpSession, cookieJar: CookieJar | null, f
 		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises)).finally(m.redraw)
 	}
 
-	function multipart(data: Record<string, string | File>): FormData {
-		const formData = new FormData()
+	function multipart(data: Record<string, string | MultiPartFormValue>): MultiPartForm {
+		const formData = new MultiPartForm()
 		for (const [key, value] of Object.entries(data)) {
 			formData.set(key, value)
 		}
 		return formData
 	}
 
-	function fileFromBucket(fileName: string): Promise<string> {
+	function fileFromBucket(fileName: string): Promise<MultiPartFormValue> {
 		return fileBucket.load(fileName)
 	}
 
