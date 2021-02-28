@@ -1,6 +1,7 @@
 import m, { Vnode, VnodeDOM } from "mithril"
 import Modal from "./Modal"
 import Button from "./Button"
+import Table from "./Table"
 import CookieJar from "./CookieJar"
 
 export default { view }
@@ -51,39 +52,34 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, onClose: any }>): m
 			],
 		},
 		[
-			m(
-				".mw-100.overflow-x-auto.relative.mh2",
-				rows.length === 0 ? "No cookies in your jar!" : m("table.collapse", [
-					m("thead",
-						m("tr", [
-							m("th", "#"),
-							m("th", "Domain"),
-							m("th", "Path"),
-							m("th", "Name"),
-							m("th", "Value"),
-							m("th", "Expires"),
-							m("th", "Actions"),
-						]),
-					),
-					m("tbody", rows),
-					/*
-					M("tfoot",
-						m("tr", [
-							m("td", "+"),
-							m("td", m("input")),
-							m("td", m("input")),
-							m("td", m("input")),
-							m("td", m("input")),
-							m("td", m("input")),
-							m("td", m(
-								Button,
-								{ class: "bg-washed-green dark-green hover-bg-dark-green hover-washed-green" },
-								"Add",
-							)),
-						])
-					),
-					 */
-				]),
+			rows.length === 0 ? "No cookies in your jar!" : m(
+				Table,
+				{
+					thead: m("tr", [
+						m("th", "#"),
+						m("th", "Domain"),
+						m("th", "Path"),
+						m("th", "Name"),
+						m("th", "Value"),
+						m("th", "Expires"),
+						m("th", "Actions"),
+					]),
+					/* TODO: UI in table footer to manually add a new cookie.
+					tfoot: m("tr", [
+						m("td", "+"),
+						m("td", m("input")),
+						m("td", m("input")),
+						m("td", m("input")),
+						m("td", m("input")),
+						m("td", m("input")),
+						m("td", m(
+							Button,
+							{ class: "bg-washed-green dark-green hover-bg-dark-green hover-washed-green" },
+							"Add",
+						)),
+					]), */
+				},
+				rows,
 			),
 			m("p.bg-washed-blue.dark-blue.ba.b--dark-blue.pa2.br2", "These cookies will be used for requests" +
 				" executed by proxy only. For requests that are executed without a proxy, please refer to the browser" +

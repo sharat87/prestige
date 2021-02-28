@@ -18,13 +18,16 @@ export default function CodeBlock(): m.Component<Attrs> {
 		const mode = CodeMirror.getMode(CodeMirror.defaults, vnode.attrs.spec)
 
 		// Code taken from the official runMode addon of CodeMirror.
-		const inputText = asString(vnode.attrs.text, vnode.attrs.spec)
+		const fullText = asString(vnode.attrs.text, vnode.attrs.spec)
 
-		if (inputText === "") {
+		if (fullText === "") {
 			return m(NothingMessage)
 		}
 
-		runMode(inputText, mode, (text: string, style: string | null) => {
+		const isTruncated = fullText.length > 500 * 1000
+		const truncatedText = isTruncated ? fullText.substr(0, 500 * 1000) : fullText
+
+		runMode(truncatedText, mode, (text: string, style: string | null) => {
 			if (text === "\n") {
 				rows.push(m("span", text))
 				col = 0
@@ -57,7 +60,23 @@ export default function CodeBlock(): m.Component<Attrs> {
 			}
 		})
 
-		return m("pre.overflow-x-auto.pa2.mt0.cm-s-default", rows)
+		return [
+			isTruncated && m("p", [
+				"Content too large to show here. You may ",
+				m("a", {
+					href: "#",
+					onclick(event: MouseEvent) {
+						event.preventDefault()
+						// TODO: This window closes immediately after opening. Looks like an ad-blocker issue.
+						// Inform users about this, if they are using an ad-blocker.
+						window.open("data:text/plain;base64," + btoa(fullText), "_blank")
+					},
+				},
+				"view full response in a new tab"),
+				".",
+			]),
+			m("pre.overflow-x-auto.pa2.mt0.cm-s-default", rows),
+		]
 	}
 }
 

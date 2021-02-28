@@ -3,6 +3,7 @@ import Modal from "./Modal"
 import Button from "./Button"
 import humanSizeDisplay from "./humanSizeDisplay"
 import FileBucket from "./FileBucket"
+import Table from "./Table"
 
 export default { oninit, view }
 
@@ -28,10 +29,6 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 			m("td", n++),
 			m("td", file.name),
 			m("td", humanSizeDisplay(file.size)),
-			m("td", [
-				m(Button, "Rename"),
-				m(Button, "Delete"),
-			]),
 		]))
 	}
 
@@ -45,20 +42,21 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 			],
 		},
 		[
-			vnode.state.isDragging && m("div", "drag mask"),
-			m(
-				".mw-100.overflow-x-auto.relative.mh2",
-				rows.length === 0 ? "Let's drop a file in this here bucket!" : m("table.collapse", [
-					m("thead",
-						m("tr", [
-							m("th", "#"),
-							m("th", "Name"),
-							m("th", "Size"),
-							m("th", "Actions"),
-						]),
-					),
-					m("tbody", rows),
-				]),
+			rows.length === 0 ? "Let's drop a file in this here bucket!" : m(
+				Table,
+				{
+					thead: m("tr", [
+						m("th", "#"),
+						m("th", "Name"),
+						m("th", "Size"),
+					]),
+				},
+				rows,
+			),
+			vnode.state.isDragging && m(
+				".aspect-ratio--object.f2.tc.pt5",
+				{ style: { backgroundColor: "#EEEC" } },
+				"Drop here to add to the file bucket!",
 			),
 		],
 	))

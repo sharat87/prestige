@@ -3,7 +3,7 @@ import Workspace from "./Workspace"
 import CodeMirror from "codemirror"
 import { LoadingLabel } from "./LoadingLabel"
 import Toolbar from "./Toolbar"
-import { Table } from "./Table"
+import Table from "./Table"
 import PageEnd from "./PageEnd"
 import { NavLink } from "./NavLink"
 import NothingMessage from "./NothingMessage"
@@ -56,7 +56,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 					]),
 					result.request && [
 						m("h2.pl2", "Request details"),
-						m(Table, [
+						m(Table, { tableClass: "mono" }, [
 							m("tr", [
 								m("th.tl.v-top", "Method"),
 								m("td", result.request.method || m("em", "Empty (which is okay, will just use GET).")),
@@ -153,7 +153,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			]))
 		}
 
-		return rows.length > 0 ? m(Table, rows) : null
+		return rows.length > 0 ? m(Table, { tableClass: "mono" }, rows) : null
 	}
 
 	function renderResponse(response: any, proxy: null | string = null) {
