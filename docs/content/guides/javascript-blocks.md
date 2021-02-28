@@ -41,19 +41,19 @@ For example, consider the following Javascript block:
 alert("hello there")
 ```
 
-This is converted into the following function:
+This is (roughly) converted into the following function:
 
 ```javascript
-function () {
+async function () {
     alert("hello there")
 }
 ```
 
-This function is then called as `fn.call(context)`, where the context object is constructed specifically for this
+This function is then called as `await fn.call(context)`, where the context object is constructed specifically for this
 function and will be available as `this` inside the function body.
 
-Now, if this function returns a `Promise` object, then Prestige will wait for that promise to resolve before proceeding
-further.
+Since this is an async function we are building, you are free to use the `await` syntax to call upon any asynchronous
+tasks inside the Javascript blocks. Prestige will wait for this `async` function to resolve before proceeding.
 
 ## Conclusion
 

@@ -46,11 +46,8 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 	}
 
 	for (const block of scriptBlocks) {
-		const fn = new Function(lines.slice(block.start, block.end + 1).join("\n"))
-		const returnValue = fn.call(context)
-		if (isPromise(returnValue)) {
-			await returnValue
-		}
+		const code = lines.slice(block.start, block.end + 1).join("\n")
+		await (new AsyncFunction(code).call(context))
 	}
 
 	const details = {
