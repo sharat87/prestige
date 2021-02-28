@@ -33,9 +33,9 @@ export class Sheet {
 	path: SheetPath
 	name: string
 	body: string
-	cookieJar: any
+	cookieJar: CookieJar | null
 
-	constructor(path: SheetPath, body: string, cookieJar = null) {
+	constructor(path: SheetPath, body: string, cookieJar: CookieJar | null = null) {
 		this.path = path
 		this.name = path
 		this.body = body

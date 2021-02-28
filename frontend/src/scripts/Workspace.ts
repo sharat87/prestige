@@ -73,7 +73,7 @@ export default class Workspace {
 		this._lines = null
 		this.prevExecuteBookmark = null
 		this.fileBucket = new FileBucket()
-		this.session = new HttpSession(proxyUrl(), this.fileBucket)
+		this.session = new HttpSession(proxyUrl())
 		this.flashQueue = []
 		this.widgetMarks = []
 		this.currentSheet = null
@@ -328,7 +328,7 @@ export default class Workspace {
 
 		this.flashQueue.push({ start: startLine, end: endLine + 1 })
 
-		this.session.runTop(lines, cursorLine, false, this.cookieJar)
+		this.session.runTop(lines, cursorLine, false, this.cookieJar, this.fileBucket)
 			.finally(() => {
 				console.debug("Saving since cookies might've changed after a request execution.")
 				m.redraw()

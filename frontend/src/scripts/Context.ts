@@ -15,7 +15,7 @@ export interface Context {
 	fileFromBucket: (fileName: string) => Promise<string>
 }
 
-export function makeContext(session: HttpSession, cookieJar: CookieJar, fileBucket: FileBucket): Context {
+export function makeContext(session: HttpSession, cookieJar: CookieJar | null, fileBucket: FileBucket): Context {
 	const handlers: Map<string, Set<(e: CustomEvent) => unknown>> = new Map()
 
 	return { data: {}, on, off, emit, run, authHeader, multipart, fileFromBucket }

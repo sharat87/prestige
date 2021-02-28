@@ -74,7 +74,7 @@ export default class HttpSession {
 		lines: string | string[],
 		runLineNum: string | number,
 		silent = false,
-		cookieJar: CookieJar,
+		cookieJar: CookieJar | null,
 		fileBucket: FileBucket,
 	): Promise<AnyResult> {
 
@@ -107,7 +107,7 @@ export default class HttpSession {
 			result = await this.execute(request, cookieJar)
 
 			if (result != null && result.ok && result.cookies) {
-				result.cookieChanges = cookieJar.overwrite(result.cookies as any)
+				result.cookieChanges = cookieJar?.overwrite(result.cookies as any)
 			}
 
 		} catch (error: unknown) {
@@ -130,7 +130,7 @@ export default class HttpSession {
 		return result
 	}
 
-	async execute(request: RequestDetails, cookieJar: CookieJar): Promise<AnyResult> {
+	async execute(request: RequestDetails, cookieJar: CookieJar | null): Promise<AnyResult> {
 		if (request.method === "") {
 			throw new Error("Method cannot be empty!")
 		}
@@ -226,7 +226,7 @@ export default class HttpSession {
 	async executeWithProxy(
 		request: RequestDetails,
 		{ timeout, proxy }: { timeout: number, proxy: string },
-		cookieJar: CookieJar,
+		cookieJar: CookieJar | null,
 	): Promise<AnyResult> {
 
 		const { method, url, headers, bodyType, body } = request

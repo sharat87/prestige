@@ -116,7 +116,7 @@ function runMode(inputText: string, mode: any, callback: ((text: string, style: 
 		if (i) {
 			callback("\n", null)
 		}
-		const stream = new CodeMirror.StringStream(lines[i], null, {
+		const stream = new (CodeMirror as any).StringStream(lines[i], null, {
 			lookAhead(n: number) {
 				return lines[i + n]
 			},

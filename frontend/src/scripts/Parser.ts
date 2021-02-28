@@ -1,4 +1,3 @@
-import { isPromise } from "./utils"
 import { buildQueryString } from "mithril"
 import interpolate from "./interpolate"
 import { Context } from "./Context"
