@@ -8,5 +8,7 @@ export function makeMockContext(): Context {
 		off: jest.fn(),
 		emit: jest.fn(),
 		authHeader: jest.fn(),
+		multipart: jest.fn(),
+		fileFromBucket: jest.fn(),
 	}
 }

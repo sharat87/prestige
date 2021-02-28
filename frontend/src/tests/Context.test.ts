@@ -1,5 +1,7 @@
 import { makeContext } from "../scripts/Context"
 import HttpSession from "../scripts/HttpSession"
+import CookieJar from "../scripts/CookieJar"
+import FileBucket from "../scripts/FileBucket"
 
 jest.mock("../scripts/HttpSession")
 
@@ -8,7 +10,9 @@ beforeEach(() => {
 })
 
 test("basic auth header generation", () => {
-	const context = makeContext(new HttpSession())
+	const cookieJar = new CookieJar()
+	const fileBucket = new FileBucket()
+	const context = makeContext(new HttpSession(), cookieJar, fileBucket)
 
 	expect(context.authHeader("user", "pass"))
 		.toBe("Authorization: Basic dXNlcjpwYXNz")
@@ -18,7 +22,9 @@ test("basic auth header generation", () => {
 })
 
 test("event system in contexts", () => {
-	const context = makeContext(new HttpSession())
+	const cookieJar = new CookieJar()
+	const fileBucket = new FileBucket()
+	const context = makeContext(new HttpSession(), cookieJar, fileBucket)
 
 	const fn1 = jest.fn()
 	const fn2 = jest.fn()
@@ -28,14 +34,14 @@ test("event system in contexts", () => {
 	context.on("one", fn2)
 	context.on("one", fn3)
 	context.on("two", fn3)
-	context.emit("one")
+	context.emit("one", null)
 	expect(fn1).toBeCalledTimes(1)
 	expect(fn2).toBeCalledTimes(1)
 	expect(fn3).toBeCalledTimes(1)
 
 	context.off("one", fn1)
 	context.on("one", fn3)
-	context.emit("one")
+	context.emit("one", null)
 	expect(fn1).toBeCalledTimes(1)
 	expect(fn2).toBeCalledTimes(2)
 	expect(fn3).toBeCalledTimes(2)

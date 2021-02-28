@@ -1,9 +1,9 @@
 import m from "mithril"
 import type CookieJar from "./CookieJar"
+import type FileBucket from "./FileBucket"
 import type { RequestDetails } from "./Parser"
 import { extractRequest } from "./Parser"
 import { makeContext } from "./Context"
-import FileBucket from "./FileBucket"
 
 interface SuccessResult {
 	ok: true,
@@ -43,14 +43,12 @@ interface ExecuteResponse {
 
 // TODO: Investigate if this class can just be merged in with Workspace.
 export default class HttpSession {
-	fileBucket: FileBucket
 	private loadingCounter: number
 	proxy: null | string
 	result: AnyResult | null
 
-	constructor(proxy: null | string = null, fileBucket: FileBucket) {
+	constructor(proxy: null | string = null) {
 		// These are persistent throughout a session.
-		this.fileBucket = fileBucket
 		this.loadingCounter = 0
 		this.proxy = proxy == null ? null : String(proxy)
 
@@ -72,7 +70,14 @@ export default class HttpSession {
 		m.redraw()
 	}
 
-	async runTop(lines: string | string[], runLineNum: string | number, silent = false, cookieJar: CookieJar): Promise<AnyResult> {
+	async runTop(
+		lines: string | string[],
+		runLineNum: string | number,
+		silent = false,
+		cookieJar: CookieJar,
+		fileBucket: FileBucket,
+	): Promise<AnyResult> {
+
 		if (typeof lines === "string") {
 			lines = lines.split("\n")
 		}
@@ -90,7 +95,7 @@ export default class HttpSession {
 		this.pushLoading()
 		let request: null | RequestDetails = null
 
-		const context = makeContext(this, cookieJar)
+		const context = makeContext(this, cookieJar, fileBucket)
 		let result: null | AnyResult = null
 
 		try {
@@ -102,11 +107,15 @@ export default class HttpSession {
 			result = await this.execute(request, cookieJar)
 
 			if (result != null && result.ok && result.cookies) {
-				result.cookieChanges = cookieJar.overwrite(result.cookies)
+				result.cookieChanges = cookieJar.overwrite(result.cookies as any)
 			}
 
-		} catch (error: any) {
-			result = { ok: false, error, request }
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				result = { ok: false, error, request }
+			} else {
+				throw error
+			}
 
 		} finally {
 			if (result != null) {

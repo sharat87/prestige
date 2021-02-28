@@ -1,6 +1,8 @@
+import m from "mithril"
 import HttpSession, { AnyResult } from "./HttpSession"
 import { isPromise } from "./utils"
-import m from "mithril"
+import type FileBucket from "./FileBucket"
+import type CookieJar from "./CookieJar"
 
 export interface Context {
 	data: Record<string, unknown>
@@ -13,13 +15,13 @@ export interface Context {
 	fileFromBucket: (fileName: string) => Promise<string>
 }
 
-export function makeContext(session: HttpSession, cookieJar: CookieJar): Context {
+export function makeContext(session: HttpSession, cookieJar: CookieJar, fileBucket: FileBucket): Context {
 	const handlers: Map<string, Set<(e: CustomEvent) => unknown>> = new Map()
 
 	return { data: {}, on, off, emit, run, authHeader, multipart, fileFromBucket }
 
 	function run(lines: string[], runLineNum = 0): Promise<AnyResult> {
-		return session.runTop(lines, runLineNum, true, cookieJar)
+		return session.runTop(lines, runLineNum, true, cookieJar, fileBucket)
 	}
 
 	function off(eventName: string, callback: (e: CustomEvent) => void): void {
@@ -54,7 +56,7 @@ export function makeContext(session: HttpSession, cookieJar: CookieJar): Context
 	}
 
 	function fileFromBucket(fileName: string): Promise<string> {
-		return session.fileBucket.load(fileName)
+		return fileBucket.load(fileName)
 	}
 
 }
