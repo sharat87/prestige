@@ -13,8 +13,8 @@ export interface Context {
 	off: (event: string, callback: ((e: CustomEvent) => void)) => void
 	emit: (eventName: string, detail: unknown) => Promise<unknown>
 	authHeader: (username: string, password: string) => string
-	multipart: (data: Record<string, string | File>) => FormData
-	fileFromBucket: (fileName: string) => Promise<string>
+	multipart: (data: Record<string, string | MultiPartFormValue>) => MultiPartForm
+	fileFromBucket: (fileName: string) => Promise<MultiPartFormValue>
 }
 
 export function makeContext(session: HttpSession, cookieJar: CookieJar | null, fileBucket: FileBucket): Context {
