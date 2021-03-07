@@ -3,7 +3,6 @@ import type { AnyResult } from "./HttpSession"
 import m from "mithril"
 import CodeMirror from "./codemirror"
 import { BlockType, parse } from "./Parser"
-import BracesSVG from "remixicon/icons/Development/braces-line.svg"
 import CookieJar from "./CookieJar"
 import { proxyUrl } from "./Env"
 import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, Sheet, Source } from "./Persistence"
@@ -291,7 +290,7 @@ export default class Workspace {
 				if (pretty != null && pageContent !== pretty) {
 					const el = document.createElement("span")
 					el.classList.add("icon", "washed-blue", "bg-dark-blue", "pointer")
-					el.innerHTML = BracesSVG.content ?? "{}"
+					el.innerHTML = "{}"
 					el.title = "Prettify JSON body."
 					el.dataset.start = block.payload.start.toString()
 					el.dataset.end = block.payload.end.toString()

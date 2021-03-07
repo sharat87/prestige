@@ -45,10 +45,12 @@ venv/bin/flake8: | venv
 ###
 
 build-frontend: frontend/node_modules
-	@cd frontend && node manage.js build
+	@cd frontend && NODE_ENV=production PRESTIGE_BACKEND=/api \
+		npx parcel build src/index.html --out-dir dist --no-autoinstall --no-source-maps --no-cache
 
 serve-frontend: frontend/node_modules
-	@cd frontend && PORT=3040 PRESTIGE_BACKEND=/api node manage.js serve
+	@cd frontend && NODE_ENV=development PRESTIGE_BACKEND=/api \
+		npx parcel serve src/index.html --out-dir dist-serve --no-autoinstall --port 3040
 
 lint-frontend: frontend/node_modules
 	@cd frontend && npx tsc --noEmit --project . && npx eslint --report-unused-disable-directives src

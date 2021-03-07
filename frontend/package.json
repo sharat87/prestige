@@ -24,7 +24,7 @@
 	"jest": {
 		"preset": "ts-jest",
 		"moduleNameMapper": {
-			"\\.(css|svg)$": "<rootDir>/identity-proxy.js"
+			"\\.css$": "<rootDir>/identity-proxy.js"
 		}
 	},
 	"eslintConfig": {
@@ -140,19 +140,18 @@
 		"@types/jest": "^26.0.20",
 		"@types/lodash": "^4.14.168",
 		"@types/mithril": "^2.0.6",
-		"@typescript-eslint/eslint-plugin": "^4.15.1",
-		"@typescript-eslint/parser": "^4.15.1",
-		"codemirror": "^5.59.2",
-		"eslint": "^7.20.0",
+		"@typescript-eslint/eslint-plugin": "^4.16.1",
+		"@typescript-eslint/parser": "^4.16.1",
+		"codemirror": "^5.59.4",
+		"eslint": "^7.21.0",
 		"jest": "^26.6.3",
 		"less": "^4.1.1",
-		"lodash": "^4.17.20",
+		"lodash": "^4.17.21",
 		"mithril": "^2.0.4",
 		"parcel-bundler": "^1.12.4",
-		"remixicon": "^2.5.0",
 		"tachyons": "^4.12.0",
-		"ts-jest": "^26.5.1",
+		"ts-jest": "^26.5.3",
 		"ts-node": "^9.1.1",
-		"typescript": "^4.1.5"
+		"typescript": "^4.2.3"
 	}
 }

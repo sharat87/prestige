@@ -1,6 +1,21 @@
-import ExternalLinkSVG from "remixicon/icons/System/external-link-fill.svg"
-import ChevronDownSVG from "remixicon/icons/System/arrow-down-s-fill.svg"
+import m from "mithril"
 
-export const ChevronDown = ChevronDownSVG.component
+const IconSVG = {
+	view(vnode: m.VnodeDOM): m.Children {
+		return m("svg.icon", { width: "1rem", height: "1rem", viewBox: "0 0 24 24" }, vnode.children)
+	},
+}
 
-export const ExternalLink = ExternalLinkSVG.component
+export const ChevronDown = {
+	view: (): m.Children => m(IconSVG, [
+		m("path", { d: "M 3 10 l 18 0 l -9 8 z", fill: "currentColor", stroke: "none" }),
+	]),
+}
+
+export const ExternalLink = {
+	view: (): m.Children => m(IconSVG, [
+		m("path", { d: "M 9 9 l -6 0 l 0 12 l 12 0 l 0 -6 ", fill: "none", stroke: "currentColor", "stroke-width": 2 }),
+		m("path", { d: "M 9 15 l 9 -9", fill: "none", stroke: "currentColor", "stroke-width": 2 }),
+		m("path", { d: "M 12 3 l 9 0 l 0 9 Z", fill: "currentColor", stroke: "none" }),
+	]),
+}
