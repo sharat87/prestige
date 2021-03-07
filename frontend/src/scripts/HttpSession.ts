@@ -1,9 +1,6 @@
 import m from "mithril"
 import type CookieJar from "./CookieJar"
-import type FileBucket from "./FileBucket"
 import type { RequestDetails } from "./Parser"
-import { extractRequest } from "./Parser"
-import { makeContext } from "./Context"
 
 interface SuccessResult {
 	ok: true,
@@ -68,89 +65,6 @@ export default class HttpSession {
 	popLoading(): void {
 		--this.loadingCounter
 		m.redraw()
-	}
-
-	async runTop(
-		lines: string | string[],
-		runLineNum: string | number,
-		silent = false,
-		cookieJar: CookieJar | null,
-		fileBucket: FileBucket,
-	): Promise<AnyResult> {
-
-		if (typeof lines === "string") {
-			lines = lines.split("\n")
-		}
-
-		if (typeof runLineNum === "string") {
-			runLineNum = parseInt(runLineNum, 10)
-		}
-
-		if (!silent && this.isLoading) {
-			alert("There's a request currently pending. Please wait for it to finish.")
-			return Promise.reject()
-		}
-
-		const startTime = Date.now()
-		this.pushLoading()
-		let request: null | RequestDetails = null
-
-		const context = makeContext(this, cookieJar, fileBucket)
-		let result: null | AnyResult = null
-
-		try {
-			request = await extractRequest(lines, runLineNum, context)
-			if (!silent) {
-				await context.emit("BeforeExecute", { request })
-			}
-
-			result = await this.execute(request, cookieJar)
-
-			if (result != null && result.ok && result.cookies) {
-				result.cookieChanges = cookieJar?.overwrite(result.cookies as any)
-			}
-
-		} catch (error: unknown) {
-			if (error instanceof Error) {
-				result = { ok: false, error, request }
-			} else {
-				throw error
-			}
-
-		} finally {
-			if (result != null) {
-				result.timeTaken = Date.now() - startTime
-			}
-
-			this.popLoading()
-
-		}
-
-		this.result = result
-		return result
-	}
-
-	async execute(request: RequestDetails, cookieJar: CookieJar | null): Promise<AnyResult> {
-		if (request.method === "") {
-			throw new Error("Method cannot be empty!")
-		}
-
-		if (request.url === "") {
-			throw new Error("URL cannot be empty!")
-		}
-
-		const proxy = this.getProxyUrl(request)
-
-		// TODO: Let the timeout be set by the user.
-		const timeout = 5 * 60  // Seconds.
-
-		if (proxy == null || proxy === "") {
-			return this.executeDirect(request)
-
-		} else {
-			return this.executeWithProxy(request, { timeout, proxy }, cookieJar)
-
-		}
 	}
 
 	async executeDirect(request: RequestDetails): Promise<AnyResult> {

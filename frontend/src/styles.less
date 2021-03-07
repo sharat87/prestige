@@ -17,6 +17,28 @@ body, sans-serif {
 	font-family: "Source Sans Pro", sans-serif;
 }
 
+button {
+	background-color: var(--light-gray);
+	color: var(--black);
+	cursor: pointer;
+	opacity: .9;
+	border: none;
+	border-radius: .25rem;
+	padding-top: var(--spacing-small);
+	padding-bottom: var(--spacing-small);
+	padding-left: var(--spacing-medium);
+	padding-right: var(--spacing-medium);
+
+	&:hover {
+		opacity: 1;
+	}
+
+	&.primary {
+		background-color: var(--blue);
+		color: var(--washed-blue);
+	}
+}
+
 .icon svg {
 	display: inline-block;
 	vertical-align: middle;
@@ -283,6 +305,30 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 	> section {
 		flex-grow: 1;
 	}
+}
+
+.modal2-mask {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	z-index: 100;
+	background-color: #555C;
+}
+
+.modal2 {
+	position: absolute;
+	background-color: var(--white);
+	border-radius: .3rem;
+	width: 50%;
+	left: 50%;
+	transform: translateX(-50%);
+	max-height: 90vh;
+	top: 5vh;
+	z-index: 110;
+	overflow: hidden;
+	box-shadow: 6px 6px 36px #0009;
 }
 
 form.grid {

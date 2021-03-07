@@ -14,6 +14,8 @@ import { NavLink } from "./NavLink"
 import ResultPane from "./ResultPane"
 import { isDev } from "./Env"
 import Toaster from "./Toaster"
+import { exportToCurl } from "./ExportRequests"
+import CodeBlock from "./CodeBlock"
 
 window.addEventListener("load", () => {
 	const root = document.createElement("main")
@@ -129,7 +131,7 @@ function WorkspaceView(): m.Component {
 						{ style: { lineHeight: 1.15 } },
 						["m.redraw: ", ++redrawCount],
 					),
-					isDev() && m(
+					m(
 						NavLink,
 						{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowserPopup },
 						["Sheet: ", workspace.currentSheetQualifiedPath(), m(ChevronDown)],
@@ -139,7 +141,7 @@ function WorkspaceView(): m.Component {
 						{ onclick: onCookiesToggle, isActive: popup === VisiblePopup.Cookies },
 						[`Cookies (${ workspace.cookieJar?.size ?? 0 }) `, m(ChevronDown)],
 					),
-					isDev() && m(
+					m(
 						NavLink,
 						{ onclick: onFileBucketToggle, isActive: popup === VisiblePopup.FileBucketPopup },
 						[`FileBucket (${workspace.fileBucket.size})`, m(ChevronDown)],
@@ -198,6 +200,24 @@ function WorkspaceView(): m.Component {
 				fileBucket: workspace.fileBucket,
 				onClose: onFileBucketToggle,
 			}),
+			workspace.exportingRequest != null && [
+				m(
+					".modal2-mask",
+					{
+						onclick() {
+							workspace.exportingRequest = null
+						},
+					},
+				),
+				m(".modal2", [
+					m(CodeBlock, { text: exportToCurl(workspace.exportingRequest), spec: "shell" }),
+					m("p", [
+						m(Button, { class: "ml3" }, "Copy as one-line (WIP)"),
+						m(Button, { class: "ml3" }, "Copy as multi-line (WIP)"),
+						m(Button, { class: "ml3" }, "Download (WIP)"),
+					]),
+				]),
+			],
 		]
 	}
 

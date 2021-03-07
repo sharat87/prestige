@@ -1,4 +1,5 @@
 import HttpSession from "./HttpSession"
+import type { AnyResult } from "./HttpSession"
 import m from "mithril"
 import CodeMirror from "./codemirror"
 import { BlockType, parse } from "./Parser"
@@ -9,6 +10,9 @@ import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, 
 import Stream from "mithril/stream"
 import debounce from "lodash/debounce"
 import FileBucket from "./FileBucket"
+import type { RequestDetails } from "./Parser"
+import { extractRequest } from "./Parser"
+import { Context, makeContext } from "./Context"
 
 const DEFAULT_EDITOR_CONTENT = `# Welcome to Prestige! Your newest developer tool!
 # Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
@@ -66,6 +70,7 @@ export default class Workspace {
 	currentSheetQualifiedPath: Stream<string>
 	private _disableAutoSave: boolean
 	isChangesSaved: boolean
+	exportingRequest: null | RequestDetails
 
 	constructor() {
 		this.codeMirror = null
@@ -80,6 +85,7 @@ export default class Workspace {
 		this.currentSheetQualifiedPath = Stream()
 		this._disableAutoSave = false
 		this.isChangesSaved = true
+		this.exportingRequest = null
 
 		Stream.lift<[string, Provider<Source>[]], void>((qualifiedPath: string) => {
 			this.loadSheet(qualifiedPath)
@@ -91,6 +97,8 @@ export default class Workspace {
 		this.runAgain = this.runAgain.bind(this)
 		this.doExecute = this.doExecute.bind(this)
 		this.onNewClicked = this.onNewClicked.bind(this)
+		this.onDuplicateClicked = this.onDuplicateClicked.bind(this)
+		this.onExportClicked = this.onExportClicked.bind(this)
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this)
 		this.saveChanges = debounce(this.saveChanges.bind(this), 1000, { trailing: true })
 
@@ -228,8 +236,8 @@ export default class Workspace {
 
 			if (block.type === BlockType.PAGE_BREAK) {
 				const buttonClasses = [
-					"ml2", "pointer", "hover-bg-moon-gray", "br4", "pv1", "ph2", "underline", "o-40", "f7",
-					"sans-serif",
+					"ml2", "pointer", "silver", "hover-black", "hover-bg-near-white", "br4", "pv1", "ph2", "underline",
+					"f7", "sans-serif",
 				]
 
 				const el = document.createElement("span")
@@ -241,6 +249,17 @@ export default class Workspace {
 				this.widgetMarks.push(this.codeMirror.setBookmark(
 					{ line: block.start, ch: startLine.length },
 					{ widget: el, insertLeft: true },
+				))
+
+				const duplicateBtn = document.createElement("span")
+				duplicateBtn.classList.add(...buttonClasses)
+				duplicateBtn.innerHTML = "&times;duplicate"
+				duplicateBtn.title = "Duplicate below request."
+				duplicateBtn.dataset.lineNum = block.start.toString()
+				duplicateBtn.addEventListener("click", this.onDuplicateClicked)
+				this.widgetMarks.push(this.codeMirror.setBookmark(
+					{ line: block.start, ch: startLine.length },
+					{ widget: duplicateBtn, insertLeft: true },
 				))
 
 				const exportBtn = document.createElement("span")
@@ -272,7 +291,7 @@ export default class Workspace {
 				if (pretty != null && pageContent !== pretty) {
 					const el = document.createElement("span")
 					el.classList.add("icon", "washed-blue", "bg-dark-blue", "pointer")
-					el.innerHTML = BracesSVG.content
+					el.innerHTML = BracesSVG.content ?? "{}"
 					el.title = "Prettify JSON body."
 					el.dataset.start = block.payload.start.toString()
 					el.dataset.end = block.payload.end.toString()
@@ -296,8 +315,29 @@ export default class Workspace {
 		this.codeMirror?.focus()
 	}
 
-	onExportClicked(): void {
-		alert("Work in progress: This feature is not ready yet!")
+	onDuplicateClicked(event: MouseEvent): void {
+		const lineNum: number = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
+		const newLines: string[] = [this.lines[lineNum]]
+		for (const line of this.lines.slice(lineNum + 1)) {
+			if (line.startsWith("###")) {
+				newLines.push("")
+				break
+			}
+			newLines.push(line)
+		}
+		this.codeMirror?.replaceRange(
+			newLines.join("\n"),
+			{ line: lineNum, ch: 0 },
+		)
+		this.codeMirror?.setCursor(lineNum + newLines.length + 1, 0)
+		this.codeMirror?.focus()
+	}
+
+	async onExportClicked(event: MouseEvent): Promise<void> {
+		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
+		const context = makeContext(this, this.cookieJar, this.fileBucket)
+		this.exportingRequest = await this.buildRequestAtLine(lineNum + 1, context)
+		m.redraw()
 	}
 
 	onPrettifyClicked(event: MouseEvent): void {
@@ -321,7 +361,42 @@ export default class Workspace {
 		return this.currentSheet?.cookieJar ?? null
 	}
 
+	buildRequestAtLine(lineNum: number, context: Context): Promise<RequestDetails> {
+		if (this.codeMirror == null) {
+			return Promise.reject()
+		}
+
+		if (this.codeMirror.somethingSelected()) {
+			alert("Working from a selection is not supported yet.")
+			return Promise.reject()
+		}
+
+		const lines = this.lines
+
+		this.prevExecuteBookmark?.clear()
+		this.prevExecuteBookmark = this.codeMirror.getDoc().setBookmark(this.codeMirror.getCursor())
+
+		let startLine = lineNum
+		while (startLine >= 0 && !lines[startLine].startsWith("###")) {
+			--startLine
+		}
+
+		let endLine = lineNum
+		while (endLine < lines.length && !lines[endLine].startsWith("###")) {
+			++endLine
+		}
+
+		this.flashQueue.push({ start: startLine, end: endLine + 1 })
+
+		return this.extractRequest(lines, lineNum, context)
+	}
+
 	doExecute(): void {
+		if (this.session.isLoading) {
+			alert("There's a request currently pending. Please wait for it to finish.")
+			return
+		}
+
 		if (this.codeMirror == null) {
 			return
 		}
@@ -349,7 +424,7 @@ export default class Workspace {
 
 		this.flashQueue.push({ start: startLine, end: endLine + 1 })
 
-		this.session.runTop(lines, cursorLine, false, this.cookieJar, this.fileBucket)
+		this.runTop(lines, cursorLine)
 			.finally(() => {
 				console.debug("Saving since cookies might've changed after a request execution.")
 				m.redraw()
@@ -359,6 +434,87 @@ export default class Workspace {
 				}
 				return saveSheet(this.currentSheetQualifiedPath(), this.currentSheet)
 			})
+	}
+
+	async runTop(lines: string | string[], runLineNum: string | number, silent = false): Promise<AnyResult> {
+
+		const startTime = Date.now()
+		this.session.pushLoading()
+		let request: null | RequestDetails = null
+
+		const context = makeContext(this, this.cookieJar, this.fileBucket)
+		let result: null | AnyResult = null
+
+		try {
+			request = await this.extractRequest(lines, runLineNum, context)
+			if (!silent) {
+				await context.emit("BeforeExecute", { request })
+			}
+
+			result = await this.execute(request)
+
+			if (result != null && result.ok && result.cookies) {
+				result.cookieChanges = this.cookieJar?.overwrite(result.cookies as any)
+			}
+
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				result = { ok: false, error, request }
+			} else {
+				throw error
+			}
+
+		} finally {
+			if (result != null) {
+				result.timeTaken = Date.now() - startTime
+			}
+
+			this.session.popLoading()
+
+		}
+
+		this.session.result = result
+		return result
+	}
+
+	async extractRequest(
+		lines: string | string[],
+		runLineNum: string | number,
+		context: Context,
+	): Promise<RequestDetails> {
+
+		if (typeof lines === "string") {
+			lines = lines.split("\n")
+		}
+
+		if (typeof runLineNum === "string") {
+			runLineNum = parseInt(runLineNum, 10)
+		}
+
+		return await extractRequest(lines, runLineNum, context)
+	}
+
+	async execute(request: RequestDetails): Promise<AnyResult> {
+		if (request.method === "") {
+			throw new Error("Method cannot be empty!")
+		}
+
+		if (request.url === "") {
+			throw new Error("URL cannot be empty!")
+		}
+
+		const proxy = this.session.getProxyUrl(request)
+
+		// TODO: Let the timeout be set by the user.
+		const timeout = 5 * 60  // Seconds.
+
+		if (proxy == null || proxy === "") {
+			return this.session.executeDirect(request)
+
+		} else {
+			return this.session.executeWithProxy(request, { timeout, proxy }, this.cookieJar)
+
+		}
 	}
 
 	runAgain(): void {

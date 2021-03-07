@@ -1,5 +1,6 @@
 import m from "mithril"
-import HttpSession, { AnyResult } from "./HttpSession"
+import type Workspace from "./Workspace"
+import { AnyResult } from "./HttpSession"
 import { isPromise } from "./utils"
 import type FileBucket from "./FileBucket"
 import type CookieJar from "./CookieJar"
@@ -17,13 +18,13 @@ export interface Context {
 	fileFromBucket: (fileName: string) => Promise<MultiPartFormValue>
 }
 
-export function makeContext(session: HttpSession, cookieJar: CookieJar | null, fileBucket: FileBucket): Context {
+export function makeContext(workspace: Workspace, cookieJar: CookieJar | null, fileBucket: FileBucket): Context {
 	const handlers: Map<string, Set<(e: CustomEvent) => unknown>> = new Map()
 
 	return { data: {}, on, off, emit, run, authHeader, multipart, fileFromBucket }
 
 	function run(lines: string[], runLineNum = 0): Promise<AnyResult> {
-		return session.runTop(lines, runLineNum, true, cookieJar, fileBucket)
+		return workspace.runTop(lines, runLineNum, true)
 	}
 
 	function off(eventName: string, callback: (e: CustomEvent) => void): void {

@@ -1,8 +1,11 @@
 declare const process: {
-	env: any
+	env: {
+		PRESTIGE_BACKEND: string
+		NODE_ENV: string
+	}
 }
 
-const PRESTIGE_BACKEND = process.env.PRESTIGE_BACKEND.replace(/\/*$/, "/")
+const PRESTIGE_BACKEND = process.env.PRESTIGE_BACKEND?.replace(/\/*$/, "/")
 
 export function isDev(): boolean {
 	return process.env.NODE_ENV === "development"

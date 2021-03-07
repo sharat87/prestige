@@ -22,7 +22,10 @@
 		"test": "jest"
 	},
 	"jest": {
-		"preset": "ts-jest"
+		"preset": "ts-jest",
+		"moduleNameMapper": {
+			"\\.(css|svg)$": "<rootDir>/identity-proxy.js"
+		}
 	},
 	"eslintConfig": {
 		"env": {

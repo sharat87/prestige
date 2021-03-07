@@ -1,12 +1,14 @@
 import m from "mithril"
-import HttpSession from "../scripts/HttpSession"
-import CookieJar from "../scripts/CookieJar"
+import Workspace from "../scripts/Workspace"
+
+console.log = jest.fn()
 
 jest.mock("mithril")
 const mockedRequestFn = m.request as jest.Mock
 
 test("execute direct get", async () => {
-	const session = new HttpSession()
+	const workspace = new Workspace()
+	workspace.session.proxy = null
 
 	mockedRequestFn.mockResolvedValue({
 		status: 200,
@@ -15,17 +17,16 @@ test("execute direct get", async () => {
 		headers: [],
 		body: "response body",
 	})
-	const cookieJar = new CookieJar()
 
-	expect(session instanceof HttpSession).toBeTruthy()
+	expect(workspace instanceof Workspace).toBeTruthy()
 
-	const result = await session.execute({
+	const result = await workspace.execute({
 		method: "GET",
 		url: "http://httpbin.org/get?first=first-value",
 		bodyType: "raw",
 		body: "",
 		headers: new Headers(),
-	}, cookieJar)
+	})
 
 	expect(mockedRequestFn).toBeCalledWith(expect.objectContaining({
 		method: "GET",

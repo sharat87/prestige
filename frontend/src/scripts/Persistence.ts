@@ -77,7 +77,7 @@ class BrowserProvider extends Provider<LocalSource> {
 		for (let i = 0; i < localStorage.length; ++i) {
 			const key = localStorage.key(i)
 			if (key?.startsWith(this.prefix) && key.endsWith(":name")) {
-				const path = key.substr(this.prefix.length)
+				const path = key.substring(this.prefix.length, key.length - ":name".length)
 				paths.push({ path, name: localStorage.getItem(key) ?? path })
 			}
 		}
@@ -106,6 +106,9 @@ class BrowserProvider extends Provider<LocalSource> {
 	}
 
 	create(path: string, name: string): Promise<void> {
+		if (path === "") {
+			path = name
+		}
 		localStorage.setItem(this.prefix + path + ":name", name)
 		localStorage.setItem(this.prefix + path + ":body", "")
 		return this.loadRootListing()

@@ -1,7 +1,10 @@
 import { makeContext } from "../scripts/Context"
+import Workspace from "../scripts/Workspace"
 import HttpSession from "../scripts/HttpSession"
 import CookieJar from "../scripts/CookieJar"
 import FileBucket from "../scripts/FileBucket"
+
+console.log = jest.fn()
 
 jest.mock("../scripts/HttpSession")
 
@@ -12,7 +15,7 @@ beforeEach(() => {
 test("basic auth header generation", () => {
 	const cookieJar = new CookieJar()
 	const fileBucket = new FileBucket()
-	const context = makeContext(new HttpSession(), cookieJar, fileBucket)
+	const context = makeContext(new Workspace(), cookieJar, fileBucket)
 
 	expect(context.authHeader("user", "pass"))
 		.toBe("Authorization: Basic dXNlcjpwYXNz")
@@ -24,7 +27,7 @@ test("basic auth header generation", () => {
 test("event system in contexts", () => {
 	const cookieJar = new CookieJar()
 	const fileBucket = new FileBucket()
-	const context = makeContext(new HttpSession(), cookieJar, fileBucket)
+	const context = makeContext(new Workspace(), cookieJar, fileBucket)
 
 	const fn1 = jest.fn()
 	const fn2 = jest.fn()

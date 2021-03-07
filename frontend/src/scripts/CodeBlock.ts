@@ -4,7 +4,7 @@ import NothingMessage from "./NothingMessage"
 
 interface Attrs {
 	text: string
-	spec: string
+	spec?: string
 }
 
 export default function CodeBlock(): m.Component<Attrs> {
@@ -80,12 +80,20 @@ export default function CodeBlock(): m.Component<Attrs> {
 	}
 }
 
-function asString(text: any, spec: string): string {
+function asString(text: any, spec?: string): string {
 	if (text != null && typeof text !== "string") {
 		text = JSON.stringify(text)
 	}
 
-	return text == null ? "" : prettify(text, spec)
+	if (text == null) {
+		return ""
+	}
+
+	if (spec == null) {
+		return text
+	}
+
+	return prettify(text, spec)
 }
 
 function prettify(text: string, spec: null | string) {

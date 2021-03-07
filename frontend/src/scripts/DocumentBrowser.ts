@@ -1,6 +1,5 @@
 import m from "mithril"
 import { currentProviders, Provider, Source } from "./Persistence"
-import Button from "./Button"
 
 export function DocumentBrowser(): m.Component {
 	return { view }
@@ -11,27 +10,21 @@ export function DocumentBrowser(): m.Component {
 
 		return [
 			providers.length === 0 ? "None yet" : providers.map(renderProvider),
-			m("p", [
-				"Connect more endpoints: ",
-				m(Button, "GitHub Repo"),
-				m(Button, "Dropbox"),
-				m(Button, "Google Drive"),
-			]),
+			m("p", "Integrations with more storage providers coming soon."),
 		]
 	}
 }
 
 function renderProvider(provider: Provider<Source>) {
 	return m("details.mv2.pv1", { open: true }, [
-		m("summary.pointer", [
-			provider.source.title,
-		]),
+		m("summary.pointer", provider.source.title),
 		provider.entries.map(entry => {
 			return m("div", [
 				m(
-					"a.pv1.ph2.dib.hover-bg-washed-blue.dark-blue",
+					m.route.Link,
 					{
-						href: `#/doc/${ provider.key }/${ entry.path }`,
+						class: "pv1 ph2 dib hover-bg-washed-blue dark-blue",
+						href: `/doc/${ provider.key }/${ entry.path }`,
 					},
 					entry.name,
 				),
