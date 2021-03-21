@@ -226,7 +226,9 @@ function WorkspaceView(): m.Component {
 						m(Button, {
 							class: "ml3",
 							onclick() {
-								Exporter.copyCurl(workspace.exportingRequest, {singleLine: false})
+								if (workspace.exportingRequest != null) {
+									Exporter.copyCurl(workspace.exportingRequest, { singleLine: false })
+								}
 							},
 						}, "Copy"),
 						m(Button, { class: "ml3" }, "Download (WIP)"),

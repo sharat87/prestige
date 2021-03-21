@@ -28,6 +28,16 @@ export function exportToCurl(request: RequestDetails, options: Partial<CurlForma
 
 export function copyCurl(request: RequestDetails, options: Partial<CurlFormatOptions> = {}): void {
 	const text = exportToCurl(request, options)
+	const el = document.createElement("textarea")
+	el.style.opacity = "0"
+	el.style.position = "fixed"
+	el.style.top = "0"
+	el.style.pointerEvents = "none"
+	document.body.append(el)
+	el.value = text
+	el.select()
+	document.execCommand("copy")
+	el.remove()
 }
 
 function fillOptionsPartial(options: Partial<CurlFormatOptions>): CurlFormatOptions {

@@ -126,7 +126,7 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 	}
 })
 
-CodeMirror.registerHelper("lint", "prestige", (text: string, options: any): any[] => {
+CodeMirror.registerHelper("lint", "prestige", (text: string/*, options: any*/): any[] => {
 	console.log("linting prestige", text)
 	const flags: any[] = []
 	const lines: string[] = text.split("\n")
