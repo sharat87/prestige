@@ -127,14 +127,13 @@ tmux-session:
 	tmux new-window -c $$PWD -t prestige: -n proxy make serve-proxy
 	tmux set-option remain-on-exit on
 
-netlify:
-	rm -rf frontend/dist
-	cd frontend && node manage.js build
+netlify: build-frontend
 	# Copy favicon to hashless filename for docs to show the favicon.
 	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
 	python3 -m pip install -r requirements.txt
 	cd backend \
-		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= DATABASE_URL='sqlite://:memory:' python manage.py collectstatic
+		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= DATABASE_URL='sqlite://:memory:' \
+		python manage.py collectstatic
 	mv backend/static frontend/dist/
 	cd docs && PYTHONPATH=. mkdocs build
 	mv docs/site frontend/dist/docs
