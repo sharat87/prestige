@@ -14,13 +14,6 @@
 		"last 2 Edge versions",
 		"last 2 Safari versions"
 	],
-	"scripts": {
-		"build": "node manage.js build",
-		"start": "node manage.js serve",
-		"lint": "tsc --noEmit --project . && eslint --report-unused-disable-directives src",
-		"lint_fix": "eslint --fix --fix-type problem,suggestion,layout --ignore-path ../.gitignore src",
-		"test": "jest"
-	},
 	"jest": {
 		"preset": "ts-jest",
 		"moduleNameMapper": {
@@ -142,6 +135,7 @@
 		"@types/mithril": "^2.0.6",
 		"@typescript-eslint/eslint-plugin": "^4.16.1",
 		"@typescript-eslint/parser": "^4.16.1",
+		"acorn": "^8.0.5",
 		"codemirror": "^5.59.4",
 		"eslint": "^7.21.0",
 		"jest": "^26.6.3",

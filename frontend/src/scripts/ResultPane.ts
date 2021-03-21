@@ -177,7 +177,8 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			),
 			m("pre.bg-near-white.pa2.pb3.overflow-x-auto.overflow-y-hidden",
 				response.request.method + " " + response.url),
-			m("a.pl2", { href: response.url, target: "_blank" }, "Open GET request URL in new tab"),
+			response.request.method === "GET"
+				&& m("a.pl2", { href: response.url, target: "_blank" }, "Open GET request URL in new tab"),
 			m("h2.pl2", "Response"),
 			m(RichDataViewer, { text: response.body, spec: responseContentType }),
 			m("h3.pl2", "Headers"),

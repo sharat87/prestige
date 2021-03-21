@@ -10,11 +10,12 @@ import { ChevronDown, ExternalLink } from "./Icons"
 import CookiesModal from "./CookiesModal"
 import LoginFormModal from "./LoginFormModal"
 import FileBucketModal from "./FileBucketModal"
+import ColorPaletteModal from "./ColorPaletteModal"
 import { NavLink } from "./NavLink"
 import ResultPane from "./ResultPane"
 import { isDev } from "./Env"
 import Toaster from "./Toaster"
-import { exportToCurl } from "./ExportRequests"
+import * as Exporter from "./ExportRequests"
 import CodeBlock from "./CodeBlock"
 
 window.addEventListener("load", () => {
@@ -83,6 +84,7 @@ function WorkspaceView(): m.Component {
 		Cookies,
 		LoginForm,
 		FileBucketPopup,
+		ColorPalette,
 	}
 
 	let popup: VisiblePopup = VisiblePopup.None
@@ -119,7 +121,7 @@ function WorkspaceView(): m.Component {
 	function view() {
 		const authState = AuthService.getAuthState()
 		return [
-			m("header.flex.items-stretch.justify-between.bg-white.relative.bb.b--moon-gray", [
+			m("header", [
 				m(".flex.items-end", [
 					m("h1.f3.mh2.mv0", "Prestige"),
 					m(".f6.i.ml3", "Just an HTTP client by Shrikant."),
@@ -127,9 +129,14 @@ function WorkspaceView(): m.Component {
 				m(".flex.items-stretch", [
 					!workspace.isChangesSaved && m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
 					isDev() && m(
-						"code.flex.items-center.ph1.bg-washed-red.dark-red",
-						{ style: { lineHeight: 1.15 } },
-						["m.redraw: ", ++redrawCount],
+						"code.flex.items-center.ph1",
+						{ style: { lineHeight: 1.15, color: "var(--red-3)", background: "var(--red-9)" } },
+						["R", ++redrawCount],
+					),
+					isDev() && m(
+						NavLink,
+						{ onclick: onColorPaletteToggle, isActive: popup === VisiblePopup.ColorPalette },
+						["Palette", m(ChevronDown)],
 					),
 					m(
 						NavLink,
@@ -200,6 +207,9 @@ function WorkspaceView(): m.Component {
 				fileBucket: workspace.fileBucket,
 				onClose: onFileBucketToggle,
 			}),
+			popup === VisiblePopup.ColorPalette && m(ColorPaletteModal, {
+				onClose: onColorPaletteToggle,
+			}),
 			workspace.exportingRequest != null && [
 				m(
 					".modal2-mask",
@@ -210,10 +220,15 @@ function WorkspaceView(): m.Component {
 					},
 				),
 				m(".modal2", [
-					m(CodeBlock, { text: exportToCurl(workspace.exportingRequest), spec: "shell" }),
+					m(CodeBlock, { text: Exporter.exportToCurl(workspace.exportingRequest), spec: "shell" }),
 					m("p", [
 						m(Button, { class: "ml3" }, "Copy as one-line (WIP)"),
-						m(Button, { class: "ml3" }, "Copy as multi-line (WIP)"),
+						m(Button, {
+							class: "ml3",
+							onclick() {
+								Exporter.copyCurl(workspace.exportingRequest, {singleLine: false})
+							},
+						}, "Copy"),
 						m(Button, { class: "ml3" }, "Download (WIP)"),
 					]),
 				]),
@@ -239,6 +254,10 @@ function WorkspaceView(): m.Component {
 
 	function onOptionsToggle() {
 		popup = popup === VisiblePopup.Options ? VisiblePopup.None : VisiblePopup.Options
+	}
+
+	function onColorPaletteToggle() {
+		popup = popup === VisiblePopup.ColorPalette ? VisiblePopup.None : VisiblePopup.ColorPalette
 	}
 }
 

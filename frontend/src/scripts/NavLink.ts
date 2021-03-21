@@ -10,14 +10,10 @@ interface Attrs {
 
 export const NavLink = {
 	view(vnode: m.VnodeDOM<Attrs>): m.Children {
-		const tag = (vnode.attrs.href ? "a.link" : "button.bn.bg-transparent") +
-			(vnode.attrs.isActive ? ".washed-blue.bg-blue" : ".color-inherit.hover-bg-washed-blue.hover-dark-blue") +
-			".br0.pv1.ph2.pointer.flex.items-center"
-
 		return m(
-			tag,
+			(vnode.attrs.href ? "a.link" : "button.bn.bg-transparent") + ".nav-link.pv1.ph2",
 			{
-				class: vnode.attrs.class || "",
+				class: (vnode.attrs.isActive ? "active " : "") + vnode.attrs.class || "",
 				...(vnode.attrs.href ? {
 					href: vnode.attrs.href,
 					target: "_blank",

@@ -7,6 +7,9 @@ interface Attrs {
 	spec?: string
 }
 
+/**
+ * This is just a glorified `pre` element. This is component optimized and only-used for read-only code snippet display.
+ */
 export default function CodeBlock(): m.Component<Attrs> {
 	const tabSize = 4
 
@@ -15,10 +18,16 @@ export default function CodeBlock(): m.Component<Attrs> {
 	function view(vnode: m.VnodeDOM<Attrs>) {
 		const rows: m.Children = []
 		let col = 0
-		const mode = CodeMirror.getMode(CodeMirror.defaults, vnode.attrs.spec)
+
+		let { spec } = vnode.attrs
+		if (spec === "application/json") {
+			spec = "json2"
+		}
+
+		const mode = CodeMirror.getMode(CodeMirror.defaults, spec)
 
 		// Code taken from the official runMode addon of CodeMirror.
-		const fullText = asString(vnode.attrs.text, vnode.attrs.spec)
+		const fullText: string = asString(vnode.attrs.text, vnode.attrs.spec)
 
 		if (fullText === "") {
 			return m(NothingMessage)

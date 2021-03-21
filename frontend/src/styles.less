@@ -1,16 +1,20 @@
+.page-colors() {
+	color: var(--page-foreground);
+	background-color: var(--page-background);
+}
+
 * {
-	scrollbar-color: var(--silver) var(--near-white);
+	scrollbar-color: var(--scrollbar-fg) var(--scrollbar-bg);
 }
 
 html, body {
 	height: 100%;
-	background-color: white;
+	.page-colors;
 }
 
 body {
 	font-size: 14px;
 	--header-height: 30px;
-	--layout-border: 1px solid var(--moon-gray);
 }
 
 body, sans-serif {
@@ -18,8 +22,8 @@ body, sans-serif {
 }
 
 button {
-	background-color: var(--light-gray);
-	color: var(--black);
+	background-color: #0001;
+	color: inherit;
 	cursor: pointer;
 	opacity: .9;
 	border: none;
@@ -31,11 +35,6 @@ button {
 
 	&:hover {
 		opacity: 1;
-	}
-
-	&.primary {
-		background-color: var(--blue);
-		color: var(--washed-blue);
 	}
 }
 
@@ -57,6 +56,14 @@ main {
 	> header {
 		z-index: 20;
 		height: var(--header-height);
+		background-color: var(--page-background);
+		display: flex;
+		justify-content: space-between;
+		align-items: stretch;
+		position: relative;
+		border-width: 0 0 1px 0;
+		border-style: solid;
+		border-color: var(--border-color);
 	}
 
 	> .er-pair {
@@ -64,13 +71,16 @@ main {
 	}
 }
 
-tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
-	font-family: "Source Code Pro", monospace;
+.nav-link {
+	color: var(--page-foreground);
+	border-radius: 0;
+	cursor: pointer;
+	display: flex;
+	align-items: center;
 }
 
-.CodeMirror {
-	color: inherit;
-	line-height: 1.4em;
+tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
+	font-family: "Source Code Pro", monospace;
 }
 
 .editor-pane, .result-pane {
@@ -119,7 +129,7 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 				}
 
 				> header {
-					border-bottom: 1px solid #DDD;
+					border-bottom: 1px solid var(--border-color);
 				}
 
 				> header h2 {
@@ -132,7 +142,7 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 				}
 
 				> footer {
-					border-top: 1px solid #DDD;
+					border-top: 1px solid var(--border-color);
 					display: flex;
 					justify-content: space-between;
 				}
@@ -151,7 +161,7 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 }
 
 .result-pane {
-	border-left: var(--layout-border);
+	border-left: 1px solid var(--border-color);
 
 	&.error {
 		background-color: rgba(255, 0, 0, .05);
@@ -211,8 +221,10 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 
 .editor-pane div.CodeMirror {
 	height: 100%;
-	background: rgba(0, 0, 0, .02);
+	background: var(--page-background);
+	color: var(--page-foreground);
 	text-shadow: 1px 1px 2px rgba(0, 0, 0, .03);
+	line-height: 1.5em;
 	z-index: 0;
 
 	.CodeMirror-code > div {
@@ -220,11 +232,11 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 	}
 
 	.flash {
-		background-color: rgba(119, 0, 255, 0.29);
+		background-color: #DDD;
 	}
 
 	.line-javascript {
-		background-color: var(--washed-yellow);
+		background-color: var(--js-background);
 	}
 
 	&.CodeMirror-focused {
@@ -240,24 +252,15 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 		background-color: var(--white);
 	}
 
-	.cm-header, .cm-strong {
-		font-weight: 500;
-	}
-
 	.cm-tab {
-		// A horizontal line, centered vertically.
-		background-image: linear-gradient(
-			transparent 0%,
-			transparent 45%,
-			#DDD 48%,
-			#DDD 52%,
-			transparent 55%,
-			transparent 100%,
-		);
+		background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24"><path d="M 3 9 l 3 3 l -3 3" stroke="currentColor" stroke-width="2" fill="none"/></svg>');
+		// background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
+		// background-position: right;
+		background-repeat: no-repeat;
 	}
 
 	.CodeMirror-activeline-background {
-		background-color: var(--lightest-blue);
+		background-color: var(--cursor-line-bg);
 	}
 
 	.CodeMirror-activeline-gutter {
@@ -279,31 +282,32 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 	}
 }
 
-.CodeMirror-gutter {
-	background-color: var(--near-white);
-}
-
-.CodeMirror-gutters {
-	border-color: var(--moon-gray);
-}
-
 .CodeMirror-selected, ::selection {
-	background: var(--light-blue) !important;
+	background: var(--selection-bg) !important;
 	text-shadow: none;
 }
 
 .modal {
 	top: var(--header-height);
+	.page-colors;
 	border-bottom-left-radius: 6px;
 	border-width: 0 0 1px 1px;
-	border-color: var(--light-silver);
+	border-color: var(--border-color);
 	border-style: solid;
 	box-shadow: 0 0 24px #0006;
 	overflow: hidden;
 	z-index: 15;
 
+	> header {
+		border-bottom: 1px solid var(--border-color);
+	}
+
 	> section {
 		flex-grow: 1;
+	}
+
+	> footer {
+		border-top: 1px solid var(--border-color);
 	}
 }
 
@@ -384,38 +388,272 @@ form.grid {
 }
 
 
-/* Editor Theming */
+// Theming
 
-.cm-s-default .cm-header {color: blue;}
-.cm-s-default .cm-quote {color: #090;}
-.cm-negative {color: #d44;}
-.cm-positive {color: #292;}
-.cm-header, .cm-strong {font-weight: bold;}
-.cm-em {font-style: italic;}
-.cm-link {text-decoration: underline;}
-.cm-strikethrough {text-decoration: line-through;}
+/* Color naming rules:
+ * 1. Numbered colors should be 1-9 (inclusive) only.
+ * 2. Shade at 1 should be close to black.
+ * 3. Shade at 9 should be close to white.
+ */
 
-.cm-s-default .cm-keyword {color: var(--purple);}
-.cm-s-default .cm-atom {color: #219;}
-.cm-s-default .cm-number {color: #164;}
-.cm-s-default .cm-def {color: var(--light-purple);}
-.cm-s-default .cm-variable,
-.cm-s-default .cm-punctuation,
-.cm-s-default .cm-property,
-.cm-s-default .cm-operator {}
-.cm-s-default .cm-variable-2 {color: #05a;}
-.cm-s-default .cm-variable-3, .cm-s-default .cm-type {color: #085;}
-.cm-s-default .cm-comment {color: var(--dark-blue); font-style: italic;}
-.cm-s-default .cm-string {color: var(--dark-green);}
-.cm-s-default .cm-string-2 {color: #f50;}
-.cm-s-default .cm-meta {color: #555;}
-.cm-s-default .cm-qualifier {color: #555;}
-.cm-s-default .cm-builtin {color: #30a;}
-.cm-s-default .cm-bracket {color: #997;}
-.cm-s-default .cm-tag {color: var(--orange);}
-.cm-s-default .cm-attribute {color: #00c;}
-.cm-s-default .cm-hr {color: #999;}
-.cm-s-default .cm-link {color: #00c;}
+body[data-palette=tomorrow] {
+	--gray-1: #1d1f21;
+	--gray-2: #282a2e;
+	--gray-3: #4d4d4c;
+	--gray-4: #969896;
+	--gray-5: #8e908c;
+	--gray-6: #d6d6d6;
+	--gray-7: #e0e0e0;
+	--gray-9: #ffffff;
 
-.cm-s-default .cm-error {color: #f00;}
-.cm-invalidchar {color: #f00;}
+	--blue-1: hsl(214, 60%, 20%);
+	--blue-3: hsl(214, 45%, 35%);
+	--blue-5: hsl(214, 45%, 47%);
+	--blue-7: hsl(214, 45%, 60%);
+	--blue-9: hsl(214, 60%, 93%);
+
+	--green-1: hsl(72, 100%, 12%);
+	--green-3: hsl(72, 100%, 20%);
+	--green-5: hsl(72, 100%, 27%);
+	--green-7: hsl(72, 60%, 70%);
+	--green-9: hsl(72, 70%, 94%);
+
+	--yellow-1: hsl(47, 100%, 11%);
+	--yellow-3: hsl(43, 100%, 30%);
+	--yellow-5: hsl(47, 100%, 46%);
+	--yellow-7: hsl(47, 70%, 80%);
+	--yellow-9: hsl(47, 80%, 97%);
+
+	--red-1: hsl(0, 67%, 15%);
+	--red-3: hsl(0, 67%, 30%);
+	--red-5: hsl(0, 67%, 47%);
+	--red-7: hsl(0, 67%, 80%);
+	--red-9: hsl(0, 67%, 95%);
+
+	--extra-1: #f5871f;
+	--extra-2: #3e999f;
+	--extra-3: #8959a8;
+	--extra-4: #a3685a;
+
+	--page-background: var(--gray-9);
+	--page-foreground: var(--gray-2);
+	--cursor-line-background: var(--blue-9);
+
+	--cm-page-break: var(--red-5);
+	--cm-def: var(--blue-5);
+	--cm-keyword: var(--green-5);
+	--cm-string: var(--extra-2);
+	--cm-string-2: var(--extra-1);
+}
+
+body[data-palette=base16] {
+	--gray-1: #151515;
+	--gray-2: #202020;
+	--gray-3: #303030;
+	--gray-4: #505050;
+	--gray-5: #808080;
+	--gray-6: #b0b0b0;
+	--gray-7: #e0e0e0;
+	--gray-8: #f5f5f5;
+	--gray-9: #ffffff;
+
+	--primary-1: hsl(312, 24%, 30%);
+	--primary-3: hsl(312, 24%, 43%);
+	--primary-5: hsl(312, 24%, 56%);
+	--primary-7: hsl(312, 44%, 76%);
+	--primary-9: hsl(312, 24%, 96%);
+
+	--blue-3: hsl(197, 50%, 35%);
+	--blue-5: hsl(197, 34%, 56%);
+	--blue-7: hsl(197, 34%, 80%);
+	--blue-8: hsl(197, 34%, 90%);
+	--blue-9: hsl(197, 34%, 95%);
+
+	--green-5: hsl(79, 32%, 51%);
+
+	--yellow-1: hsl(45, 100%, 10%);
+	--yellow-5: hsl(45, 100%, 40%);
+	--yellow-7: hsl(35, 100%, 75%);
+	--yellow-9: hsl(35, 100%, 96%);
+
+	--red-1: hsl(0, 45%, 27%);
+	--red-3: hsl(0, 45%, 46%);
+	--red-5: hsl(0, 50%, 56%);
+	--red-9: hsl(0, 50%, 96%);
+}
+
+body[data-theme=light] {
+	--page-background: var(--gray-9);
+	--page-foreground: var(--gray-2);
+	--scrollbar-bg: var(--page-background);
+	--scrollbar-fg: var(--gray-5);
+	--border-color: var(--gray-6);
+
+	--selection-bg: var(--blue-8);
+
+	--gutter-bg: var(--gray-8);
+	--gutter-fg: var(--gray-6);
+	--gutter-marker-fg: var(--red-3);
+	--gutter-marker-subtle-fg: var(--gray-6);
+	--cursor-color: var(--gray-4);
+
+	--cm-comment: var(--primary-3);
+	--cm-atom: var(--primary-3);
+	--cm-number: var(--primary-3);
+
+	--cm-property: var(--green-5);
+	--cm-attribute: var(--green-5);
+	--cm-keyword: var(--red-3);
+	--cm-string: var(--yellow-5);
+	--cm-string-2: var(--yellow-5);
+
+	--cm-variable: var(--green-5);
+	--cm-variable-2: var(--blue-5);
+	--cm-def: var(--yellow-5);
+	--cm-bracket: var(--gray-2);
+	--cm-tag: var(--red-3);
+	--cm-link: var(--primary-5);
+	--cm-error-bg: var(--red-3);
+	--cm-error-fg: var(--gray-4);
+
+	--cursor-line-bg: var(--blue-9);
+	--match-bracket-fg: var(--gray-8);
+	--match-bracket-bg: var(--blue-5);
+
+	--js-background: var(--yellow-9);
+
+	.nav-link {
+		&:hover {
+			background-color: var(--primary-9);
+			color: var(--primary-3);
+		}
+
+		&.active {
+			background-color: var(--primary-3);
+			color: var(--primary-9);
+		}
+	}
+
+	button {
+		&.primary {
+			background-color: var(--primary-3);
+			color: var(--primary-9);
+		}
+
+		&.danger-light {
+			background-color: var(--red-9);
+			color: var(--red-3);
+
+			&:hover {
+				background-color: var(--red-3);
+				color: var(--red-9);
+			}
+		}
+	}
+
+	.flash {
+		background-color: var(--primary-7);
+	}
+}
+
+body[data-theme=dark] {
+	--page-background: var(--gray-2);
+	--page-foreground: var(--gray-7);
+	--scrollbar-bg: var(--page-background);
+	--scrollbar-fg: var(--gray-6);
+	--border-color: var(--gray-3);
+
+	--selection-bg: var(--gray-3);
+	--gutter-bg: var(--gray-1);
+	--gutter-fg: var(--gray-5);
+	--gutter-marker-fg: var(--red-3);
+	--gutter-marker-subtle-fg: var(--gray-4);
+	--cursor-color: var(--gray-6);
+
+	--cm-comment: var(--primary-7);
+	--cm-atom: var(--primary-5);
+	--cm-number: var(--primary-5);
+
+	--cm-property: var(--green-5);
+	--cm-attribute: var(--green-5);
+	--cm-keyword: var(--red-5);
+	--cm-string: var(--yellow-7);
+
+	--cm-variable: var(--green-5);
+	--cm-variable-2: var(--blue-5);
+	--cm-def: var(--yellow-5);
+	--cm-bracket: var(--gray-7);
+	--cm-tag: var(--red-3);
+	--cm-link: var(--primary-5);
+	--cm-error-bg: var(--red-3);
+	--cm-error-fg: var(--gray-6);
+
+	--cursor-line-bg: var(--gray-1);
+	--match-bracket-fg: var(--gray-9);
+	--match-bracket-bg: transparent;
+
+	--js-background: var(--yellow-1);
+
+	.nav-link {
+		&:hover {
+			background-color: var(--primary-1);
+			color: var(--primary-9);
+		}
+
+		&.active {
+			background-color: var(--primary-1);
+			color: var(--primary-9);
+		}
+	}
+
+	button {
+		&.primary {
+			background-color: var(--primary-3);
+			color: var(--primary-9);
+		}
+
+		&.danger-light {
+			background-color: var(--red-1);
+			color: var(--red-9);
+
+			&:hover {
+				background-color: var(--red-3);
+				color: var(--red-9);
+			}
+		}
+	}
+
+	.flash {
+		background-color: var(--primary-7);
+	}
+}
+
+
+// Editor Theming
+// Order of these styles is important.
+.cm-s-default .CodeMirror-gutters { background: var(--gutter-bg); border-right: 0px; }
+.cm-s-default .CodeMirror-guttermarker { color: var(--gutter-marker-fg); }
+.cm-s-default .CodeMirror-guttermarker-subtle { color: var(--gutter-marker-subtle-fg); }
+.cm-s-default .CodeMirror-linenumber { color: var(--gutter-fg); }
+.cm-s-default .CodeMirror-cursor { border-left: 1px solid var(--cursor-color); }
+
+.cm-s-default span.cm-comment { color: var(--cm-comment); }
+.cm-s-default span.cm-atom { color: var(--cm-atom); }
+.cm-s-default span.cm-number { color: var(--cm-number); }
+
+.cm-s-default span.cm-attribute { color: var(--cm-attribute); }
+.cm-s-default span.cm-keyword { color: var(--cm-keyword); }
+.cm-s-default span.cm-string { color: var(--cm-string); }
+.cm-s-default span.cm-string-2 { color: var(--cm-string-2); }
+.cm-s-default span.cm-property { color: var(--cm-property); }
+
+.cm-s-default span.cm-variable { color: var(--cm-variable); }
+.cm-s-default span.cm-variable-2 { color: var(--cm-variable-2); }
+.cm-s-default span.cm-def { color: var(--cm-def); }
+.cm-s-default span.cm-bracket { color: var(--cm-bracket); }
+.cm-s-default span.cm-tag { color: var(--cm-tag); }
+.cm-s-default span.cm-link { color: var(--cm-link); }
+.cm-s-default span.cm-error { background: var(--cm-error-bg); color: var(--cm-error-fg); }
+
+.cm-s-default .CodeMirror-activeline-background { background: var(--cursor-line-bg); }
+.cm-s-default .CodeMirror-matchingbracket { color: var(--match-bracket-fg) !important; background-color: var(--match-bracket-bg) !important}

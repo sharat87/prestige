@@ -26,7 +26,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, onClose: any }>): m
 						m(
 							Button,
 							{
-								class: "bg-washed-red dark-red hover-bg-dark-red hover-washed-red",
+								class: "danger-light",
 								// TODO: Cookie jar is not saved after deletion here.
 								onclick: () => cookieJar?.delete(domain, path, name),
 							},
@@ -45,7 +45,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, onClose: any }>): m
 			footer: [
 				cookieJar != null && cookieJar.size > 0 ? m(
 					Button,
-					{ class: "hover-bg-dark-red hover-washed-red", onclick: () => cookieJar.clear() },
+					{ class: "danger-light", onclick: () => cookieJar.clear() },
 					"Clear all cookies",
 				) : m("div"),
 				m(Button, { style: "primary", onclick: vnode.attrs.onClose }, "Close"),

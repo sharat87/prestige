@@ -16,6 +16,7 @@ function view(): m.Children {
 			m(CakeRow, { prefix: "green" }),
 			m(CakeRow, { prefix: "yellow" }),
 			m(CakeRow, { prefix: "red" }),
+			m(CakeRow, { prefix: "extra" }),
 		],
 	)
 }

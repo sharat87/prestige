@@ -12,15 +12,18 @@ import "codemirror/addon/fold/foldgutter"
 import "codemirror/addon/fold/foldgutter.css"
 import "codemirror/addon/comment/comment"
 import "codemirror/addon/scroll/scrollpastend"
+import "codemirror/addon/lint/lint"
+import "codemirror/addon/lint/lint.css"
 import "codemirror/mode/javascript/javascript"
 import "codemirror/mode/htmlmixed/htmlmixed"
 import "codemirror/lib/codemirror.css"
+import * as acorn from "acorn/dist/acorn"
 
 interface PrestigeState {
-	context: null | string;
-	bodyJustStarted: boolean;
-	jsState: any;
-	bodyState: any;
+	context: null | string
+	bodyJustStarted: boolean
+	jsState: any
+	bodyState: any
 }
 
 CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<PrestigeState> => {
@@ -45,7 +48,7 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 		}
 	}
 
-	function copyState(state: PrestigeState) {
+	function copyState(state: PrestigeState): PrestigeState {
 		return {
 			context: state.context,
 			bodyJustStarted: state.bodyJustStarted,
@@ -121,6 +124,54 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 			state.bodyJustStarted = true
 		}
 	}
+})
+
+CodeMirror.registerHelper("lint", "prestige", (text: string, options: any): any[] => {
+	console.log("linting prestige", text)
+	const flags: any[] = []
+	const lines: string[] = text.split("\n")
+
+	let inJs = false
+	const currentJsLines: string[] = []
+	let currentJsBeginLineNum = 0
+
+	for (const [i, line] of lines.entries()) {
+		if (inJs && line.startsWith("###")) {
+			const jsCode = "async function _() {\n" + currentJsLines.join("\n") + "\n}"
+			currentJsLines.splice(0, currentJsLines.length)
+			inJs = line.startsWith("### javascript")
+			try {
+				acorn.parse(jsCode, { ecmaVersion: 2019 })
+			} catch (error: unknown) {
+				if (error instanceof SyntaxError) {
+					const loc: { line: number, column: number } = (error as any).loc
+					// Extra 1 below for the function definition line.
+					const actualLineNum: number = currentJsBeginLineNum + loc.line - 1
+					flags.push({
+						message: error.message.replace(loc.line.toString(), (actualLineNum + 1).toString()),
+						severity: "error",
+						from: CodeMirror.Pos(actualLineNum, loc.column),
+						to: CodeMirror.Pos(actualLineNum, loc.column + 1),
+					})
+				}
+			}
+			continue
+		}
+
+		if (line.startsWith("### javascript")) {
+			inJs = true
+			currentJsBeginLineNum = i
+			continue
+		}
+
+		if (!inJs) {
+			continue
+		}
+
+		currentJsLines.push(line)
+	}
+
+	return flags
 })
 
 export default CodeMirror

@@ -28,6 +28,7 @@ export default function (initialVnode: VnodeDOM<{ onClose: (event?: Event) => vo
 			{
 				title: "LogIn / SignUp",
 				footer: [
+					m("div"),
 					m(Button, { onclick: onClose }, "Close"),
 				],
 			},

@@ -3,13 +3,7 @@
 }
 
 html {
-	/* csslint ignore:start */
-	/* The nav header is 3.5rem high, plus 20px for the margin-top of the
-	   main container. */
-	scroll-padding-top: calc(3.5rem + 20px);
-	/* csslint ignore:end */
 	overflow-y: scroll;
-	min-height: 100%;
 }
 
 body {
@@ -17,9 +11,10 @@ body {
 	font-family: "Source Sans Pro", sans-serif;
 	font-size: 16px;
 	font-weight: 400;
-	line-height: 1.3;
+	line-height: 1.5;
 	color: #222;
 	min-height: 100%;
+	background: #F8F8FA;
 	--link-blue: #06A;
 	--link-hover-color: #EFF;
 }
@@ -43,27 +38,33 @@ a {
 
 nav, aside {
 	position: fixed;
-	top: 0;
-	bottom: 0;
+	top: 1rem;
+	bottom: 2rem;
 	overflow-y: auto;
-	width: 18%;
-	border-style: solid;
-	border-color: var(--link-blue);
-	border-width: 0;
+	width: 15rem;
 }
 
 nav {
-	left: 0;
-	border-right-width: 1px;
+	left: calc(50% - 23rem);
+	transform: translateX(-100%);
 }
 
 aside {
-	right: 0;
+	left: calc(50% + 23rem);
+}
+
+nav > :first-child, aside > :first-child {
+	margin-top: 1rem;
 }
 
 main {
-	margin: 0 auto;
+	margin: 1rem auto;
 	width: 60%;
+	max-width: 45rem;
+	background-color: #FFF;
+	padding: .5rem 2rem;
+	border-radius: .3rem;
+	box-shadow: 1px 1px 6px #0003;
 }
 
 nav a, aside a, nav summary, aside summary {
@@ -102,20 +103,19 @@ aside > a:first-child {
 }
 
 .brand {
-	margin-top: 0;
-	font-size: 1.4rem;
+	font-size: 1.6rem;
+	font-weight: bold;
 }
 
 .np-btns {
 	display: flex;
-	margin: 2rem 1rem;
+	margin: 3rem 0 2rem;
 	justify-content: space-between;
 }
 
 .np-btns a {
 	display: block;
 	width: 40%;
-	margin: 0 6px;
 	text-decoration: none;
 }
 
@@ -134,12 +134,21 @@ aside > a:first-child {
 	margin: 20px auto 30px auto;
 }
 
-h1 {
+main > h1:first-child {
 	font-size: 2.6rem;
+	margin-top: 0;
 }
 
 main h2 {
 	font-size: 1.6rem;
+}
+
+main h2, main h3, main h4 {
+	margin: 2rem 0 .5rem;
+}
+
+main h2 + *, main h3 + *, main h4 + * {
+	margin-top: 0;
 }
 
 blockquote {
@@ -199,7 +208,7 @@ a:hover code, a:focus code {
 }
 
 footer {
-	margin: 3rem 0;
+	margin: 3rem 0 1rem;
 	padding: 1rem 0;
 	display: flex;
 	border-color: #357edd;

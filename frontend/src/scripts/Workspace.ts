@@ -7,7 +7,7 @@ import CookieJar from "./CookieJar"
 import { proxyUrl } from "./Env"
 import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, Sheet, Source } from "./Persistence"
 import Stream from "mithril/stream"
-import debounce from "lodash/debounce"
+import throttle from "lodash/throttle"
 import FileBucket from "./FileBucket"
 import type { RequestDetails } from "./Parser"
 import { extractRequest } from "./Parser"
@@ -99,7 +99,7 @@ export default class Workspace {
 		this.onDuplicateClicked = this.onDuplicateClicked.bind(this)
 		this.onExportClicked = this.onExportClicked.bind(this)
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this)
-		this.saveChanges = debounce(this.saveChanges.bind(this), 1000, { trailing: true })
+		this.saveChanges = throttle(this.saveChanges.bind(this), 3000, { trailing: true })
 
 		currentSheet.map((value) => {
 			this.currentSheet = value
@@ -139,7 +139,8 @@ export default class Workspace {
 			autoCloseBrackets: true,
 			styleActiveLine: true,
 			scrollPastEnd: true,
-			gutters: ["prestige"],
+			gutters: ["prestige", "CodeMirror-lint-markers"],
+			lint: true,
 			value: this.getContent(),
 			extraKeys: {
 				"Ctrl-Enter": this.doExecute,
@@ -153,18 +154,22 @@ export default class Workspace {
 		this.updateEditorDisplay()
 
 		this.codeMirror.on("changes", () => {
-			console.debug("Saving since codeMirror fired changes event.", this._disableAutoSave)
 			this._lines = null
 			if (!this._disableAutoSave) {
 				this.isChangesSaved = false
-				this.saveChanges()
 			}
-			this.updateEditorDisplay()
+			this.saveChanges()
 			m.redraw()
 		})
 	}
 
 	saveChanges(): void {
+		this.updateEditorDisplay()
+
+		if (this._disableAutoSave) {
+			return
+		}
+
 		if (this.currentSheet == null) {
 			console.error("Can't save missing sheet. Something's wrong.")
 			return
@@ -196,6 +201,7 @@ export default class Workspace {
 			this.codeMirror.setValue(content)
 			this._disableAutoSave = false
 		}
+		(this.saveChanges as any).flush()
 	}
 
 	get lines(): string[] {
@@ -209,7 +215,6 @@ export default class Workspace {
 	/**
 	 * Update gutter, widgets, highlights etc. of the CodeMirror editor. Usually called when the contents of the editor
 	 * change.
-	 * TODO: This runs on *every* character change in the editor. Consequently hurts typing performance.
 	 */
 	updateEditorDisplay(): void {
 		if (this.codeMirror == null) {
@@ -252,7 +257,7 @@ export default class Workspace {
 
 				const duplicateBtn = document.createElement("span")
 				duplicateBtn.classList.add(...buttonClasses)
-				duplicateBtn.innerHTML = "&times;duplicate"
+				duplicateBtn.innerHTML = "&divide;duplicate"
 				duplicateBtn.title = "Duplicate below request."
 				duplicateBtn.dataset.lineNum = block.start.toString()
 				duplicateBtn.addEventListener("click", this.onDuplicateClicked)

@@ -64,11 +64,7 @@
 		</main>
 
 		<nav>
-			<h2 class="brand">
-				{%- block site_name %}
-				<a href="{{ nav.homepage.url|url }}">{{ config.site_name }}</a>
-				{%- endblock %}
-			</h2>
+			<a class="brand"a href="{{ nav.homepage.url|url }}">{{ config.site_name }}</a>
 			<a href="#" class="mv2">Prestige Home</a>
 			{%- block search_button %}
 			{%- if 'search' in config['plugins'] %}
