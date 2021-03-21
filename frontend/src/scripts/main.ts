@@ -153,7 +153,7 @@ function WorkspaceView(): m.Component {
 						{ onclick: onFileBucketToggle, isActive: popup === VisiblePopup.FileBucketPopup },
 						[`FileBucket (${workspace.fileBucket.size})`, m(ChevronDown)],
 					),
-					isDev() && m(
+					m(
 						NavLink,
 						{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
 						["Options ", m(ChevronDown)],
