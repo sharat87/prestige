@@ -79,8 +79,12 @@ main {
 	align-items: center;
 }
 
+:root {
+	--monospace-font: "Source Code Pro";
+}
+
 tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
-	font-family: "Source Code Pro", monospace;
+	font-family: var(--monospace-font), monospace;
 }
 
 .editor-pane, .result-pane {

@@ -20,6 +20,7 @@ paletteOption.map((value: string) => {
 initOption(paletteOption, "palette", "base16")
 
 const editorFontOption: Stream<string> = Stream("")
+editorFontOption.map(m.redraw)
 initOption(editorFontOption, "editorFont", "Source Code Pro")
 
 function load(name: string): any {
@@ -114,7 +115,10 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 						m("option", { value: "papercolor" }, "Papercolor"),
 					],
 				),
-				m(".b", "Editor Font"),
+				m(".b", [
+					"Editor Font",
+					m("style", "body { --monospace-font: '" + editorFontOption() + "'; }"),
+				]),
 				m(
 					"select",
 					{
