@@ -1,15 +1,11 @@
-.page-colors() {
-	color: var(--page-foreground);
-	background-color: var(--page-background);
-}
-
 * {
 	scrollbar-color: var(--scrollbar-fg) var(--scrollbar-bg);
 }
 
 html, body {
 	height: 100%;
-	.page-colors;
+	color: var(--page-fg);
+	background-color: var(--page-bg);
 }
 
 body {
@@ -19,6 +15,18 @@ body {
 
 body, sans-serif {
 	font-family: "Source Sans Pro", sans-serif;
+}
+
+a {
+	color: var(--link-color);
+}
+
+input {
+	background: transparent;
+	color: inherit;
+	border: 1px solid currentColor;
+	padding: .1rem .2rem;
+	border-radius: 1px;
 }
 
 button {
@@ -36,6 +44,16 @@ button {
 	&:hover {
 		opacity: 1;
 	}
+
+	&.compact {
+		padding: 3px 9px;
+	}
+}
+
+p.info {
+	border: 1px solid currentColor;
+	padding: .2rem .5rem;
+	border-radius: .2rem;
 }
 
 svg.icon {
@@ -49,14 +67,15 @@ svg.icon {
 
 th, td {
 	padding: var(--spacing-small);
-	border: 1px solid var(--light-gray);
+	border: 1px solid var(--border-color);
+	vertical-align: top;
 }
 
 main {
 	> header {
 		z-index: 20;
 		height: var(--header-height);
-		background-color: var(--page-background);
+		background-color: var(--page-bg2);
 		display: flex;
 		justify-content: space-between;
 		align-items: stretch;
@@ -72,19 +91,27 @@ main {
 }
 
 .nav-link {
-	color: var(--page-foreground);
+	color: var(--page-fg);
 	border-radius: 0;
 	cursor: pointer;
 	display: flex;
 	align-items: center;
+
+	&.active {
+		background-color: var(--active-tab-bg);
+		color: var(--active-tab-fg);
+	}
 }
 
 :root {
 	--monospace-font: "Source Code Pro";
+	--monospace-font-size: 16px;
 }
 
 tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
 	font-family: var(--monospace-font), monospace;
+	font-size: var(--monospace-font-size);
+	line-height: calc(var(--monospace-font-size) * 1.3);
 }
 
 .editor-pane, .result-pane {
@@ -98,7 +125,7 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 		position: relative;
 
 		> .bar {
-			border-bottom: 1px solid var(--moon-gray);
+			border-bottom: 1px solid var(--border-color);
 			display: flex;
 			align-items: center;
 			justify-content: space-between;
@@ -195,6 +222,15 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 			margin-top: 1em;
 		}
 
+		.tab-bar {
+			display: flex;
+			border-bottom: 1px solid var(--active-tab-bg);
+
+			.nav-link {
+				border-radius: .25rem .25rem 0 0;
+			}
+		}
+
 		img, svg {
 			max-height: 200px;
 			max-width: 100%;
@@ -225,10 +261,9 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 
 .editor-pane div.CodeMirror {
 	height: 100%;
-	background: var(--page-background);
-	color: var(--page-foreground);
+	background: var(--page-bg);
+	color: var(--page-fg);
 	text-shadow: 1px 1px 2px rgba(0, 0, 0, .03);
-	line-height: 1.5em;
 	z-index: 0;
 
 	.CodeMirror-code > div {
@@ -288,12 +323,13 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 
 .CodeMirror-selected, ::selection {
 	background: var(--selection-bg) !important;
+	color: var(--selection-fg) !important;
 	text-shadow: none;
 }
 
 .modal {
 	top: var(--header-height);
-	.page-colors;
+	background-color: var(--page-bg2);
 	border-bottom-left-radius: 6px;
 	border-width: 0 0 1px 1px;
 	border-color: var(--border-color);
@@ -439,8 +475,8 @@ body[data-palette=tomorrow] {
 	--extra-3: #8959a8;
 	--extra-4: #a3685a;
 
-	--page-background: var(--gray-9);
-	--page-foreground: var(--gray-2);
+	--page-bg: var(--gray-9);
+	--page-fg: var(--gray-2);
 	--cursor-line-background: var(--blue-9);
 
 	--cm-page-break: var(--red-5);
@@ -461,24 +497,31 @@ body[data-palette=base16] {
 	--gray-8: #f5f5f5;
 	--gray-9: #ffffff;
 
-	--primary-1: hsl(312, 24%, 30%);
-	--primary-3: hsl(312, 24%, 43%);
+	--primary-1: hsl(312, 24%, 20%);
+	--primary-2: hsl(312, 24%, 30%);
+	--primary-3: hsl(312, 24%, 40%);
 	--primary-5: hsl(312, 24%, 56%);
 	--primary-7: hsl(312, 44%, 76%);
 	--primary-9: hsl(312, 24%, 96%);
 
+	--blue-1: hsl(197, 50%, 18%);
+	--blue-2: hsl(197, 50%, 25%);
 	--blue-3: hsl(197, 50%, 35%);
 	--blue-5: hsl(197, 34%, 56%);
 	--blue-7: hsl(197, 34%, 80%);
 	--blue-8: hsl(197, 34%, 90%);
 	--blue-9: hsl(197, 34%, 95%);
 
+	--green-1: hsl(79, 32%, 15%);
+	--green-3: hsl(79, 32%, 28%);
 	--green-5: hsl(79, 32%, 51%);
+	--green-7: hsl(79, 32%, 80%);
+	--green-9: hsl(79, 32%, 95%);
 
-	--yellow-1: hsl(45, 100%, 10%);
+	--yellow-1: hsl(45, 60%, 10%);
 	--yellow-5: hsl(45, 100%, 40%);
 	--yellow-7: hsl(35, 100%, 75%);
-	--yellow-9: hsl(35, 100%, 96%);
+	--yellow-9: hsl(35, 70%, 97%);
 
 	--red-1: hsl(0, 45%, 27%);
 	--red-3: hsl(0, 45%, 46%);
@@ -486,14 +529,80 @@ body[data-palette=base16] {
 	--red-9: hsl(0, 50%, 96%);
 }
 
-body[data-theme=light], body[data-theme=auto] {
-	--page-background: var(--gray-9);
-	--page-foreground: var(--gray-2);
-	--scrollbar-bg: var(--page-background);
+body[data-palette=mono] {
+	--gray-1: #151515;
+	--gray-2: #202020;
+	--gray-3: #303030;
+	--gray-4: #505050;
+	--gray-5: #808080;
+	--gray-6: #b0b0b0;
+	--gray-7: #e0e0e0;
+	--gray-8: #f5f5f5;
+	--gray-9: #ffffff;
+
+	--primary-1: var(--gray-1);
+	--primary-2: var(--gray-2);
+	--primary-3: var(--gray-3);
+	--primary-4: var(--gray-4);
+	--primary-5: var(--gray-5);
+	--primary-6: var(--gray-6);
+	--primary-7: var(--gray-7);
+	--primary-8: var(--gray-8);
+	--primary-9: var(--gray-9);
+
+	--blue-1: var(--gray-1);
+	--blue-2: var(--gray-2);
+	--blue-3: var(--gray-3);
+	--blue-4: var(--gray-4);
+	--blue-5: var(--gray-5);
+	--blue-6: var(--gray-6);
+	--blue-7: var(--gray-7);
+	--blue-8: var(--gray-8);
+	--blue-9: var(--gray-9);
+
+	--green-1: var(--gray-1);
+	--green-2: var(--gray-2);
+	--green-3: var(--gray-3);
+	--green-4: var(--gray-4);
+	--green-5: var(--gray-5);
+	--green-6: var(--gray-6);
+	--green-7: var(--gray-7);
+	--green-8: var(--gray-8);
+	--green-9: var(--gray-9);
+
+	--yellow-1: var(--gray-1);
+	--yellow-2: var(--gray-2);
+	--yellow-3: var(--gray-3);
+	--yellow-4: var(--gray-4);
+	--yellow-5: var(--gray-5);
+	--yellow-6: var(--gray-6);
+	--yellow-7: var(--gray-7);
+	--yellow-8: var(--gray-8);
+	--yellow-9: var(--gray-9);
+
+	--red-1: var(--gray-1);
+	--red-2: var(--gray-2);
+	--red-3: var(--gray-3);
+	--red-4: var(--gray-4);
+	--red-5: var(--gray-5);
+	--red-6: var(--gray-6);
+	--red-7: var(--gray-7);
+	--red-8: var(--gray-8);
+	--red-9: var(--gray-9);
+}
+
+.light-theme() {
+	--page-bg: var(--gray-9);
+	--page-bg2: var(--gray-8);  // Used for headers and modals.
+	--page-fg: var(--gray-2);
+	--scrollbar-bg: var(--page-bg);
 	--scrollbar-fg: var(--gray-5);
 	--border-color: var(--gray-6);
 
+	--link-color: var(--blue-5);
+
 	--selection-bg: var(--blue-8);
+	--selection-fg: var(--blue-1);
 
 	--gutter-bg: var(--gray-8);
 	--gutter-fg: var(--gray-6);
@@ -526,15 +635,13 @@ body[data-theme=light], body[data-theme=auto] {
 
 	--js-background: var(--yellow-9);
 
+	--active-tab-fg: var(--primary-9);
+	--active-tab-bg: var(--primary-3);
+
 	.nav-link {
-		&:hover {
+		&:hover:not(.active) {
 			background-color: var(--primary-9);
 			color: var(--primary-3);
-		}
-
-		&.active {
-			background-color: var(--primary-3);
-			color: var(--primary-9);
 		}
 	}
 
@@ -555,19 +662,42 @@ body[data-theme=light], body[data-theme=auto] {
 		}
 	}
 
+	.status {
+		&.is-2xx {
+			background-color: var(--green-3);
+			color: var(--green-9);
+		}
+	}
+
 	.flash {
 		background-color: var(--primary-7);
 	}
+
+	.response {
+		tr:hover {
+			background-color: var(--gray-8);
+		}
+	}
+
+	p.info {
+		background-color: var(--blue-9);
+		color: var(--blue-1);
+	}
 }
 
-body[data-theme=dark] {
-	--page-background: var(--gray-2);
-	--page-foreground: var(--gray-7);
-	--scrollbar-bg: var(--page-background);
+.dark-theme() {
+	--page-bg: var(--gray-2);
+	--page-bg2: var(--gray-1);  // Used for headers and modals.
+	--page-fg: var(--gray-7);
+	--scrollbar-bg: var(--page-bg);
 	--scrollbar-fg: var(--gray-6);
 	--border-color: var(--gray-3);
 
-	--selection-bg: var(--gray-3);
+	--link-color: var(--blue-5);
+
+	--selection-bg: var(--blue-2);
+	--selection-fg: var(--blue-9);
+
 	--gutter-bg: var(--gray-1);
 	--gutter-fg: var(--gray-5);
 	--gutter-marker-fg: var(--red-3);
@@ -592,19 +722,17 @@ body[data-theme=dark] {
 	--cm-error-bg: var(--red-3);
 	--cm-error-fg: var(--gray-6);
 
-	--cursor-line-bg: var(--gray-1);
+	--cursor-line-bg: var(--gray-3);
 	--match-bracket-fg: var(--gray-9);
 	--match-bracket-bg: transparent;
 
 	--js-background: var(--yellow-1);
 
-	.nav-link {
-		&:hover {
-			background-color: var(--primary-1);
-			color: var(--primary-9);
-		}
+	--active-tab-fg: var(--primary-9);
+	--active-tab-bg: var(--primary-2);
 
-		&.active {
+	.nav-link {
+		&:hover:not(.active) {
 			background-color: var(--primary-1);
 			color: var(--primary-9);
 		}
@@ -627,8 +755,40 @@ body[data-theme=dark] {
 		}
 	}
 
+	.status {
+		&.is-2xx {
+			background-color: var(--green-1);
+			color: var(--green-9);
+		}
+	}
+
 	.flash {
 		background-color: var(--primary-7);
+	}
+
+	.response {
+		tr:hover {
+			background-color: var(--gray-3);
+		}
+	}
+
+	p.info {
+		background-color: var(--blue-3);
+		color: var(--blue-9);
+	}
+}
+
+body[data-theme=light], body[data-theme=auto] {
+	.light-theme();
+}
+
+body[data-theme=dark] {
+	.dark-theme();
+}
+
+@media (prefers-color-scheme: dark) {
+	body[data-theme=auto] {
+		.dark-theme();
 	}
 }
 

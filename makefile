@@ -45,11 +45,11 @@ venv/bin/flake8: | venv
 ###
 
 build-frontend: frontend/node_modules
-	@cd frontend && NODE_ENV=production PRESTIGE_BACKEND=/api \
+	@cd frontend && NODE_ENV=production PRESTIGE_BACKEND=$${PRESTIGE_BACKEND:-/api} \
 		npx parcel build src/index.html --out-dir dist --no-autoinstall --no-source-maps --no-cache
 
 serve-frontend: frontend/node_modules
-	@cd frontend && NODE_ENV=development PRESTIGE_BACKEND=/api \
+	@cd frontend && NODE_ENV=development PRESTIGE_BACKEND=$${PRESTIGE_BACKEND:-/api} \
 		npx parcel serve src/index.html --out-dir dist-serve --no-autoinstall --port 3040
 
 lint-frontend: frontend/node_modules
@@ -67,6 +67,10 @@ frontend/node_modules/make_sentinel: frontend/package.json frontend/yarn.lock
 			cd frontend && yarn install --frozen-lockfile; \
 		fi
 	@touch $@
+
+update-browserslist:
+	@cd frontend && \
+		npx browserslist@latest --update-db
 
 ###
 # Documentation
@@ -93,12 +97,13 @@ test-e2e: venv e2e-tests/drivers/chromedriver
 		&& python3 run.py
 
 e2e-tests/drivers/chromedriver:
-	@export CHROME_VERSION="$$(google-chrome --version | cut -f 3 -d ' ' | cut -d '.' -f 1)" \
+	@export CHROME_VERSION="$$((google-chrome --version || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version) | cut -f 3 -d ' ' | cut -d '.' -f 1)" \
 		&& VERSION="$$(curl --silent --location --fail --retry 3 http://chromedriver.storage.googleapis.com/LATEST_RELEASE_$$CHROME_VERSION)" \
-		&& wget -c -nc --retry-connrefused --tries=0 -O chromedriver.zip https://chromedriver.storage.googleapis.com/$$VERSION/chromedriver_linux64.zip
+		&& OS="$$(if [[ $$(uname -s) = Linux ]]; then echo linux64; else echo mac64; fi)" \
+		&& wget -c -nc --retry-connrefused --tries=0 -O chromedriver.zip https://chromedriver.storage.googleapis.com/$$VERSION/chromedriver_$$OS.zip
 	@unzip -o -q chromedriver.zip
 	@mkdir -p $$(dirname $@)
-	@sudo mv chromedriver $@
+	@mv chromedriver $@
 	@rm chromedriver.zip
 
 ###

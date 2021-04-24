@@ -29,6 +29,7 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 			m("td", n++),
 			m("td", file.name),
 			m("td", humanSizeDisplay(file.size)),
+			m("td", ""),
 		]))
 	}
 
@@ -49,6 +50,7 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 						m("th", "#"),
 						m("th", "Name"),
 						m("th", "Size"),
+						m("th", "Actions"),
 					]),
 				},
 				rows,

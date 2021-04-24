@@ -1,5 +1,7 @@
 import m from "mithril"
 import { currentProviders, Provider, Source } from "./Persistence"
+import Table from "./Table"
+import Button from "./Button"
 
 export function DocumentBrowser(): m.Component {
 	return { view }
@@ -10,7 +12,7 @@ export function DocumentBrowser(): m.Component {
 
 		return [
 			providers.length === 0 ? "None yet" : providers.map(renderProvider),
-			m("p", "Integrations with more storage providers coming soon."),
+			m("p", "Integrations with more storage providers like GitHub and Dropbox coming soon."),
 		]
 	}
 }
@@ -18,38 +20,41 @@ export function DocumentBrowser(): m.Component {
 function renderProvider(provider: Provider<Source>) {
 	return m("details.mv2.pv1", { open: true }, [
 		m("summary.pointer", provider.source.title),
-		provider.entries.map(entry => {
-			return m("div", [
-				m(
-					m.route.Link,
-					{
-						class: "pv1 ph2 dib hover-bg-washed-blue dark-blue",
-						href: `/doc/${ provider.key }/${ entry.path }`,
-					},
-					entry.name,
-				),
-				m(
-					"a.ml2.ph1.br-pill.no-underline.dark-red.hover-washed-red.hover-bg-dark-red",
-					{
-						href: "#",
-						onclick(event: Event) {
-							console.log("Deleting", entry)
-							provider.delete(entry.path)
-							event.preventDefault()
-						},
-					},
-					m.trust("&times;"),
-				),
-			])
-		}),
 		m(
-			"a.pv1.ph2.db.hover-bg-washed-blue.dark-blue",
+			"a.pv1.ph2.db",
 			{
 				onclick,
 				href: "#",
 			},
 			"+ New Sheet",
 		),
+		m(Table, [
+			provider.entries.map(entry => m(
+				"tr",
+				[
+					m("td", m(
+						m.route.Link,
+						{
+							class: "pv1 ph2 dib",
+							href: `/doc/${ provider.key }/${ entry.path }`,
+						},
+						entry.name,
+					)),
+					m("td", m(
+						Button,
+						{
+							class: "compact danger-light",
+							onclick(event: Event) {
+								console.log("Deleting", entry)
+								provider.delete(entry.path)
+								event.preventDefault()
+							},
+						},
+						"Del",
+					)),
+				],
+			)),
+		]),
 	])
 
 	function onclick(event: MouseEvent) {

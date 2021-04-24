@@ -113,6 +113,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 				}
 				details.body = JSON.stringify(rawData)
 			} else {
+				details.headers.set("Content-Type", "application/json")
 				details.body = JSON.stringify(body)
 			}
 

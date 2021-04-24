@@ -26,7 +26,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, onClose: any }>): m
 						m(
 							Button,
 							{
-								class: "danger-light",
+								class: "compact danger-light",
 								// TODO: Cookie jar is not saved after deletion here.
 								onclick: () => cookieJar?.delete(domain, path, name),
 							},
@@ -81,7 +81,7 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, onClose: any }>): m
 				},
 				rows,
 			),
-			m("p.bg-washed-blue.dark-blue.ba.b--dark-blue.pa2.br2", "These cookies will be used for requests" +
+			m("p.info", "These cookies will be used for requests" +
 				" executed by proxy only. For requests that are executed without a proxy, please refer to the browser" +
 				" console. This is a browser-level security restriction."),
 		],

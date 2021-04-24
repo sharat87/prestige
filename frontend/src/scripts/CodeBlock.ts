@@ -16,13 +16,7 @@ export default function CodeBlock(): m.Component<Attrs> {
 	return { view }
 
 	function view(vnode: m.VnodeDOM<Attrs>) {
-		const rows: m.Children = []
-		let col = 0
-
-		let { spec } = vnode.attrs
-		if (spec === "application/json") {
-			spec = "json2"
-		}
+		const { spec } = vnode.attrs
 
 		const mode = CodeMirror.getMode(CodeMirror.defaults, spec)
 
@@ -36,9 +30,14 @@ export default function CodeBlock(): m.Component<Attrs> {
 		const isTruncated = fullText.length > 500 * 1000
 		const truncatedText = isTruncated ? fullText.substr(0, 500 * 1000) : fullText
 
+		const lineNumEls: m.Children = [m("div", 1)]
+		const rows: m.Children = []
+		let col = 0
+
 		runMode(truncatedText, mode, (text: string, style: string | null) => {
 			if (text === "\n") {
 				rows.push(m("span", text))
+				lineNumEls.push(m("div", lineNumEls.length + 1))
 				col = 0
 				return
 			}
@@ -84,7 +83,10 @@ export default function CodeBlock(): m.Component<Attrs> {
 				"view full response in a new tab"),
 				".",
 			]),
-			m("pre.overflow-x-auto.pa2.mt0.cm-s-default", rows),
+			m("pre.overflow-x-auto.mt0.cm-s-default.flex", [
+				m(".o-60.br.b--silver.tr.ph1.mr2", lineNumEls),
+				m("div", rows),
+			]),
 		]
 	}
 }

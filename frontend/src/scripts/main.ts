@@ -1,12 +1,12 @@
 import type { Vnode, VnodeDOM } from "mithril"
 import m from "mithril"
-import OptionsModal from "./Options"
+import OptionsModal, { editorFontOption, editorFontSizeOption } from "./Options"
 import Workspace from "./Workspace"
 import * as AuthService from "./AuthService"
 import { DocumentBrowser } from "./DocumentBrowser"
 import Modal from "./Modal"
 import Button from "./Button"
-import { ChevronDown, ExternalLink } from "./Icons"
+import { ExternalLink } from "./Icons"
 import CookiesModal from "./CookiesModal"
 import LoginFormModal from "./LoginFormModal"
 import FileBucketModal from "./FileBucketModal"
@@ -136,34 +136,34 @@ function WorkspaceView(): m.Component {
 					isDev() && m(
 						NavLink,
 						{ onclick: onColorPaletteToggle, isActive: popup === VisiblePopup.ColorPalette },
-						["Palette", m(ChevronDown)],
+						"Palette",
 					),
 					m(
 						NavLink,
 						{ onclick: onDocumentBrowserToggle, isActive: popup === VisiblePopup.DocumentBrowserPopup },
-						["Sheet: ", workspace.currentSheetQualifiedPath(), m(ChevronDown)],
+						["📃 Sheet: ", workspace.currentSheetQualifiedPath()],
 					),
 					m(
 						NavLink,
 						{ onclick: onCookiesToggle, isActive: popup === VisiblePopup.Cookies },
-						[`Cookies (${ workspace.cookieJar?.size ?? 0 }) `, m(ChevronDown)],
+						`🍪 Cookies (${ workspace.cookieJar?.size ?? 0 }) `,
 					),
 					m(
 						NavLink,
 						{ onclick: onFileBucketToggle, isActive: popup === VisiblePopup.FileBucketPopup },
-						[`FileBucket (${workspace.fileBucket.size})`, m(ChevronDown)],
+						`🗃 FileBucket (${workspace.fileBucket.size})`,
 					),
 					m(
 						NavLink,
 						{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
-						["Options ", m(ChevronDown)],
+						"⚙️ Options ",
 					),
 					isDev() && [
 						authState === AuthService.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
 						authState === AuthService.AuthState.ANONYMOUS && m(
 							NavLink,
 							{ onclick: onLoginFormToggle, isActive: popup === VisiblePopup.LoginForm },
-							"LogIn/SignUp",
+							"🕵️‍♀️ LogIn/SignUp",
 						),
 						authState === AuthService.AuthState.LOGGED_IN && m(
 							NavLink,
@@ -178,6 +178,8 @@ function WorkspaceView(): m.Component {
 			m(".er-pair.flex.items-stretch.justify-stretch", [
 				m(EditorPane, { workspace }),
 				m(ResultPane, { workspace }),
+				m("style", "body { --monospace-font: '" + editorFontOption() + "'; }"),
+				m("style", "body { --monospace-font-size: " + editorFontSizeOption() + "px; }"),
 			]),
 			popup === VisiblePopup.DocumentBrowserPopup && m(
 				Modal,

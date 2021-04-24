@@ -32,14 +32,19 @@ class BaseTestCase(unittest.TestCase):
 		else:
 			options = webdriver.ChromeOptions()
 			options.headless = True
+			options.capabilities["goog:loggingPrefs"] = {
+				"browser": "ALL",
+			}
 			self.driver = webdriver.Chrome(options=options)
 
-		self.driver.set_window_size(1366, 784)
+		self.driver.set_window_size(1366, 1200)
 		self.wait = WebDriverWait(self.driver, 10)
 
 		self.driver.get(self.prestige_base)
 
 	def tearDown(self):
+		for entry in self.driver.get_log("browser"):
+			print(entry)
 		self.driver.quit()
 
 	def shot(self, title: str = None):

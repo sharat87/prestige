@@ -10,6 +10,11 @@ type DisplayMode = "auto" | "light" | "dark"
 const displayModeOption: Stream<DisplayMode> = Stream()
 displayModeOption.map((value: DisplayMode) => {
 	document.body.dataset.theme = value
+	// Following meta property changes color of native UI controls in Chrome. No Firefox support yet.
+	const colorSchemeMeta = document.head.querySelector("meta[name=color-scheme]")
+	if (colorSchemeMeta instanceof HTMLMetaElement) {  // Also does a null-check.
+		colorSchemeMeta.content = value === "auto" ? "light dark" : value
+	}
 })
 initOption(displayModeOption, "displayMode", "auto")
 
@@ -19,11 +24,20 @@ paletteOption.map((value: string) => {
 })
 initOption(paletteOption, "palette", "base16")
 
-const editorFontOption: Stream<string> = Stream("")
+const editorFontOption: Stream<string> = Stream()
 editorFontOption.map(m.redraw)
 initOption(editorFontOption, "editorFont", "Source Code Pro")
 
-function load(name: string): any {
+const editorFontSizeOption: Stream<string> = Stream()
+editorFontSizeOption.map(m.redraw)
+initOption(editorFontSizeOption, "editorFontSize", "16")
+
+export {
+	editorFontOption,
+	editorFontSizeOption,
+}
+
+function load<T>(name: string): null | T {
 	const rawValue = localStorage.getItem(PREFIX + name)
 	try {
 		return rawValue != null ? JSON.parse(rawValue) : null
@@ -33,7 +47,7 @@ function load(name: string): any {
 	}
 }
 
-function save(name: string, value: any): void {
+function save<T>(name: string, value: T): void {
 	const valueString: string = JSON.stringify(value)
 
 	if (valueString === load(name)) {
@@ -110,15 +124,13 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 					},
 					[
 						m("option", { value: "base16" }, "Base 16"),
+						m("option", { value: "mono" }, "Mono"),
 						m("option", { value: "tomorrow" }, "Tomorrow"),
 						m("option", { value: "solarized" }, "Solarized"),
 						m("option", { value: "papercolor" }, "Papercolor"),
 					],
 				),
-				m(".b", [
-					"Editor Font",
-					m("style", "body { --monospace-font: '" + editorFontOption() + "'; }"),
-				]),
+				m(".b", "Editor Font"),
 				m(
 					"select",
 					{
@@ -132,6 +144,17 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 						m("option", { value: "Consolas" }, "Consolas"),
 						m("option", { value: "Monaco" }, "Monaco"),
 					],
+				),
+				m(".b", "Editor Font Size"),
+				m(
+					"input",
+					{
+						type: "number",
+						value: editorFontSizeOption(),
+						oninput(event: Event) {
+							editorFontSizeOption((event.target as HTMLInputElement).value)
+						},
+					},
 				),
 			]),
 		)

@@ -135,27 +135,6 @@ export default function ResultPane(): m.Component<Attrs, State> {
 		])
 	}
 
-	function renderHeaders(headers: Headers | IterableIterator<[name: string, value: string]>) {
-		if (headers == null) {
-			return null
-		}
-
-		if (headers instanceof Headers) {
-			headers = headers.entries()
-		}
-
-		const rows: m.Vnode[] = []
-
-		for (const [name, value] of headers) {
-			rows.push(m("tr.hover-bg-near-white", [
-				m("td.v-top", name.replace(/\b\w/g, s => s.toUpperCase())),
-				m("td", value),
-			]))
-		}
-
-		return rows.length > 0 ? m(Table, { tableClass: "mono" }, rows) : null
-	}
-
 	function renderResponse(response: any, proxy: null | string = null) {
 		const responseContentType = getContentTypeFromHeaders(response && response.headers)
 		const requestContentType = getContentTypeFromHeaders(response && response.request.headers)
@@ -164,30 +143,73 @@ export default function ResultPane(): m.Component<Attrs, State> {
 		}
 
 		const skin = ({
-			2: ".bg-dark-green.washed-green",
-			3: ".bg-dark-blue.washed-blue",
-			4: ".bg-dark-red.washed-red",
-			5: ".bg-dark-red.washed-red",
+			2: "is-2xx",
+			3: "bg-dark-blue washed-blue",
+			4: "bg-dark-red washed-red",
+			5: "bg-dark-red washed-red",
 		} as Record<number, string>)[response.status.toString()[0]] || ".bg-dark-blue.washed-blue"
 
 		return response && m(".response", [
 			m(
-				".f2.pa2" + skin,
+				".status.f2.pa2",
+				{ class: skin },
 				`${ response.status } ${ response.statusText }`,
 			),
-			m("pre.bg-near-white.pa2.pb3.overflow-x-auto.overflow-y-hidden",
-				response.request.method + " " + response.url),
+			m("pre.pa2.pb3.overflow-x-auto.overflow-y-hidden", response.request.method + " " + response.url),
 			response.request.method === "GET"
 				&& m("a.pl2", { href: response.url, target: "_blank" }, "Open GET request URL in new tab"),
 			m("h2.pl2", "Response"),
 			m(RichDataViewer, { text: response.body, spec: responseContentType }),
 			m("h3.pl2", "Headers"),
-			renderHeaders(response.headers) || m(NothingMessage, nothingMessageAttrs),
+			m(HeadersTable, { headers: response.headers }, m(NothingMessage, nothingMessageAttrs)),
 			m("h2.pl2", "Request"),
 			m(RichDataViewer, { text: response.request.body, spec: requestContentType }),
 			m("h3.pl2", "Headers"),
-			renderHeaders(response.request.headers) || m(NothingMessage, nothingMessageAttrs),
+			m(HeadersTable, { headers: response.request.headers }, m(NothingMessage, nothingMessageAttrs)),
 		])
+	}
+}
+
+function HeadersTable(): m.Component<{ headers: Headers | [name: string, value: string][] }> {
+	let isSorted = false
+
+	return { view }
+
+	function view(vnode: m.VnodeDOM<{ headers: Headers | [name: string, value: string][] }>) {
+		const { headers } = vnode.attrs
+
+		if (headers == null) {
+			return vnode.children
+		}
+
+		let headersArray: [name: string, value: string][] =
+			headers instanceof Headers ? Array.from(headers.entries()) : headers
+
+		if (isSorted) {
+			headersArray = headersArray.concat().sort()
+		}
+
+		const rows: m.Vnode[] = []
+
+		for (const [name, value] of headersArray) {
+			rows.push(m("tr", [
+				m("td", name.replace(/\b\w/g, s => s.toUpperCase())),
+				m("td", value),
+			]))
+		}
+
+		return rows.length > 0 ? [
+			m("label.ph2", [
+				m("input", {
+					type: "checkbox",
+					onchange(event: Event) {
+						isSorted = (event.target as HTMLInputElement).checked
+					},
+				}),
+				m("span.pl1", "Sorted"),
+			]),
+			m(Table, { tableClass: "mono" }, rows),
+		] : null
 	}
 }
 
@@ -211,7 +233,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 
 	function toggleTab(title: string, tab: Tabs) {
 		return m(NavLink, {
-			class: "br2 br--top mh1",
+			class: "tab br2 br--top mh1",
 			isActive: visibleTab === tab,
 			onclick() {
 				visibleTab = tab
@@ -234,7 +256,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 				m("small.pl1", `(${ humanSizeDisplay(text.length) })`),
 			]),
 			// Tabs.
-			m(".flex.bb.b--dark-blue", [
+			m(".tab-bar.bb.b--dark-blue", [
 				spec?.startsWith("image/") ? toggleTab("Image", Tabs.image) : toggleTab("Text", Tabs.text),
 				(spec === "text/html" || spec === "image/svg+xml") && toggleTab("iFrame", Tabs.iFrame),
 				spec === "image/svg+xml" && toggleTab("Text", Tabs.text),
