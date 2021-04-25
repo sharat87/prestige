@@ -144,16 +144,17 @@ export default function ResultPane(): m.Component<Attrs, State> {
 
 		const skin = ({
 			2: "is-2xx",
-			3: "bg-dark-blue washed-blue",
-			4: "bg-dark-red washed-red",
-			5: "bg-dark-red washed-red",
-		} as Record<number, string>)[response.status.toString()[0]] || ".bg-dark-blue.washed-blue"
+			3: "is-3xx",
+			4: "is-4xx",
+			5: "is-5xx",
+		} as Record<number, string>)[response.status.toString()[0]] ?? ""
 
 		return response && m(".response", [
 			m(
 				".status.f2.pa2",
 				{ class: skin },
-				`${ response.status } ${ response.statusText }`,
+				response.status + " " +
+					response.statusText.toLowerCase().replace(/\b[a-z]/g, (x: string[]) => x[0].toUpperCase()),
 			),
 			m("pre.pa2.pb3.overflow-x-auto.overflow-y-hidden", response.request.method + " " + response.url),
 			response.request.method === "GET"
@@ -256,7 +257,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 				m("small.pl1", `(${ humanSizeDisplay(text.length) })`),
 			]),
 			// Tabs.
-			m(".tab-bar.bb.b--dark-blue", [
+			m(".tab-bar", [
 				spec?.startsWith("image/") ? toggleTab("Image", Tabs.image) : toggleTab("Text", Tabs.text),
 				(spec === "text/html" || spec === "image/svg+xml") && toggleTab("iFrame", Tabs.iFrame),
 				spec === "image/svg+xml" && toggleTab("Text", Tabs.text),

@@ -127,7 +127,6 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 						m("option", { value: "mono" }, "Mono"),
 						m("option", { value: "tomorrow" }, "Tomorrow"),
 						m("option", { value: "solarized" }, "Solarized"),
-						m("option", { value: "papercolor" }, "Papercolor"),
 					],
 				),
 				m(".b", "Editor Font"),

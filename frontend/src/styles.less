@@ -234,6 +234,7 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 		img, svg {
 			max-height: 200px;
 			max-width: 100%;
+			margin: .3rem;
 		}
 
 		iframe {
@@ -304,6 +305,12 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 
 	.CodeMirror-activeline-gutter {
 		font-weight: bold;
+	}
+
+	.CodeMirror-gutter-wrapper .icon {
+		background-color: var(--primary-2);
+		color: var(--primary-9);
+		cursor: pointer;
 	}
 
 	span.CodeMirror-matchingbracket {
@@ -436,6 +443,217 @@ form.grid {
  * 3. Shade at 9 should be close to white.
  */
 
+.light-theme() {
+	--page-bg: var(--gray-9);
+	--page-bg2: var(--gray-8);  // Used for headers and modals.
+	--page-fg: var(--gray-2);
+	--scrollbar-bg: var(--page-bg);
+	--scrollbar-fg: var(--gray-5);
+	--border-color: var(--gray-6);
+
+	--link-color: var(--blue-5);
+
+	--selection-bg: var(--blue-8);
+	--selection-fg: var(--blue-1);
+
+	--gutter-bg: var(--gray-8);
+	--gutter-fg: var(--gray-6);
+	--gutter-marker-fg: var(--red-3);
+	--gutter-marker-subtle-fg: var(--gray-6);
+	--cursor-color: var(--gray-4);
+
+	--cm-comment: var(--primary-3);
+	--cm-atom: var(--primary-3);
+	--cm-number: var(--primary-3);
+
+	--cm-property: var(--green-5);
+	--cm-attribute: var(--green-5);
+	--cm-keyword: var(--red-3);
+	--cm-string: var(--yellow-5);
+	--cm-string-2: var(--yellow-5);
+
+	--cm-variable: var(--green-5);
+	--cm-variable-2: var(--blue-5);
+	--cm-def: var(--yellow-5);
+	--cm-bracket: var(--gray-2);
+	--cm-tag: var(--red-3);
+	--cm-link: var(--primary-5);
+	--cm-error-bg: var(--red-3);
+	--cm-error-fg: var(--gray-4);
+
+	--cursor-line-bg: var(--blue-9);
+	--match-bracket-fg: var(--gray-8);
+	--match-bracket-bg: var(--blue-5);
+
+	--js-background: var(--yellow-9);
+
+	--active-tab-fg: var(--primary-9);
+	--active-tab-bg: var(--primary-3);
+
+	--nav-link-hover-bg-light: var(--primary-9);
+	--nav-link-hover-fg-light: var(--primary-1);
+
+	.nav-link:hover:not(.active) {
+		background-color: var(--nav-link-hover-bg-light);
+		color: var(--nav-link-hover-fg-light);
+	}
+
+	button {
+		&.primary {
+			background-color: var(--primary-3);
+			color: var(--primary-9);
+		}
+
+		&.danger-light {
+			background-color: var(--red-9);
+			color: var(--red-3);
+
+			&:hover {
+				background-color: var(--red-3);
+				color: var(--red-9);
+			}
+		}
+	}
+
+	.status {
+		&.is-2xx {
+			background-color: var(--green-3);
+			color: var(--green-9);
+		}
+		&.is-3xx {
+			background-color: var(--blue-3);
+			color: var(--blue-9);
+		}
+		&.is-4xx, &.is-5xx {
+			background-color: var(--red-3);
+			color: var(--red-9);
+		}
+	}
+
+	.flash {
+		background-color: var(--primary-7);
+	}
+
+	.response {
+		tr:hover {
+			background-color: var(--gray-8);
+		}
+	}
+
+	p.info {
+		background-color: var(--blue-9);
+		color: var(--blue-1);
+	}
+}
+
+.dark-theme() {
+	--page-bg: var(--gray-2);
+	--page-bg2: var(--gray-1);  // Used for headers and modals.
+	--page-fg: var(--gray-7);
+	--scrollbar-bg: var(--page-bg);
+	--scrollbar-fg: var(--gray-6);
+	--border-color: var(--gray-3);
+
+	--link-color: var(--blue-5);
+
+	--selection-bg: var(--blue-2);
+	--selection-fg: var(--blue-9);
+
+	--gutter-bg: var(--gray-1);
+	--gutter-fg: var(--gray-5);
+	--gutter-marker-fg: var(--red-3);
+	--gutter-marker-subtle-fg: var(--gray-4);
+	--cursor-color: var(--gray-6);
+
+	--cm-comment: var(--primary-7);
+	--cm-atom: var(--primary-5);
+	--cm-number: var(--primary-5);
+
+	--cm-property: var(--green-5);
+	--cm-attribute: var(--green-5);
+	--cm-keyword: var(--red-5);
+	--cm-string: var(--yellow-7);
+
+	--cm-variable: var(--green-5);
+	--cm-variable-2: var(--blue-5);
+	--cm-def: var(--yellow-5);
+	--cm-bracket: var(--gray-7);
+	--cm-tag: var(--red-3);
+	--cm-link: var(--primary-5);
+	--cm-error-bg: var(--red-3);
+	--cm-error-fg: var(--gray-6);
+
+	--cursor-line-bg: var(--gray-3);
+	--match-bracket-fg: var(--gray-9);
+	--match-bracket-bg: transparent;
+
+	--js-background: var(--yellow-1);
+
+	--active-tab-fg: var(--primary-9);
+	--active-tab-bg: var(--primary-2);
+
+	--nav-link-hover-bg-dark: var(--primary-1);
+	--nav-link-hover-fg-dark: var(--primary-9);
+
+	.nav-link:hover:not(.active) {
+		background-color: var(--nav-link-hover-bg-dark);
+		color: var(--nav-link-hover-fg-dark);
+	}
+
+	button {
+		&.primary {
+			background-color: var(--primary-3);
+			color: var(--primary-9);
+		}
+
+		&.danger-light {
+			background-color: var(--red-1);
+			color: var(--red-9);
+
+			&:hover {
+				background-color: var(--red-3);
+				color: var(--red-9);
+			}
+		}
+	}
+
+	.status {
+		&.is-2xx {
+			background-color: var(--green-1);
+			color: var(--green-9);
+		}
+	}
+
+	.flash {
+		background-color: var(--primary-7);
+	}
+
+	.response {
+		tr:hover {
+			background-color: var(--gray-3);
+		}
+	}
+
+	p.info {
+		background-color: var(--blue-3);
+		color: var(--blue-9);
+	}
+}
+
+body[data-theme=light], body[data-theme=auto] {
+	.light-theme();
+}
+
+body[data-theme=dark] {
+	.dark-theme();
+}
+
+@media (prefers-color-scheme: dark) {
+	body[data-theme=auto] {
+		.dark-theme();
+	}
+}
+
 body[data-palette=tomorrow] {
 	--gray-1: #1d1f21;
 	--gray-2: #282a2e;
@@ -444,12 +662,27 @@ body[data-palette=tomorrow] {
 	--gray-5: #8e908c;
 	--gray-6: #d6d6d6;
 	--gray-7: #e0e0e0;
+	--gray-8: #f7f7f7;
 	--gray-9: #ffffff;
 
+	--primary-1: hsl(184, 80%, 13%);
+	--primary-1: hsl(184, 70%, 20%);
+	--primary-3: hsl(184, 50%, 30%);
+	--primary-4: hsl(184, 47%, 35%);
+	--primary-5: hsl(184, 44%, 43%);
+	--primary-6: hsl(184, 55%, 50%);
+	--primary-7: hsl(184, 60%, 60%);
+	--primary-9: hsl(184, 70%, 84%);
+	--primary-9: hsl(184, 90%, 96%);
+
 	--blue-1: hsl(214, 60%, 20%);
+	--blue-2: hsl(214, 55%, 30%);
 	--blue-3: hsl(214, 45%, 35%);
-	--blue-5: hsl(214, 45%, 47%);
-	--blue-7: hsl(214, 45%, 60%);
+	--blue-4: hsl(214, 45%, 42%);
+	--blue-5: hsl(214, 45%, 49%);
+	--blue-6: hsl(214, 45%, 55%);
+	--blue-7: hsl(214, 45%, 67%);
+	--blue-8: hsl(214, 45%, 82%);
 	--blue-9: hsl(214, 60%, 93%);
 
 	--green-1: hsl(72, 100%, 12%);
@@ -529,6 +762,71 @@ body[data-palette=base16] {
 	--red-9: hsl(0, 50%, 96%);
 }
 
+body[data-palette=solarized] {
+	--gray-1: #002b36;
+	--gray-2: #073642;
+	--gray-3: #115662;
+	--gray-4: #586e75;
+	--gray-5: #839496;
+	--gray-6: #93a1a1;
+	--gray-7: #e0d8c3;
+	--gray-8: #eee8d5;
+	--gray-9: #fdf6e3;
+
+	--primary-1: hsl(175, 80%, 13%);
+	--primary-2: hsl(175, 75%, 18%);
+	--primary-3: hsl(175, 70%, 25%);
+	--primary-4: hsl(175, 65%, 32%);
+	--primary-5: hsl(175, 59%, 40%);
+	--primary-6: hsl(175, 60%, 50%);
+	--primary-7: hsl(175, 65%, 60%);
+	--primary-8: hsl(175, 90%, 85%);
+	--primary-9: hsl(175, 90%, 93%);
+
+	--blue-1: hsl(205, 90%, 12%);
+	--blue-2: hsl(205, 85%, 20%);
+	--blue-3: hsl(205, 80%, 30%);
+	--blue-4: hsl(205, 75%, 40%);
+	--blue-5: hsl(205, 69%, 49%);
+	--blue-6: hsl(205, 75%, 60%);
+	--blue-7: hsl(205, 80%, 70%);
+	--blue-8: hsl(205, 85%, 82%);
+	--blue-9: hsl(205, 94%, 97%);
+
+	--green-1: hsl(68, 100%, 12%);
+	--green-2: hsl(68, 100%, 18%);
+	--green-3: hsl(68, 100%, 25%);
+	--green-4: hsl(68, 100%, 32%);
+	--green-5: hsl(68, 100%, 38%);
+	--green-6: hsl(68, 100%, 48%);
+	--green-7: hsl(68, 100%, 66%);
+	--green-8: hsl(68, 100%, 79%);
+	--green-9: hsl(68, 100%, 87%);
+
+	--yellow-1: hsl(45, 100%, 12%);
+	--yellow-2: hsl(45, 100%, 18%);
+	--yellow-3: hsl(45, 100%, 25%);
+	--yellow-4: hsl(45, 100%, 30%);
+	--yellow-5: hsl(45, 100%, 35%);
+	--yellow-6: hsl(45, 100%, 50%);
+	--yellow-7: hsl(45, 100%, 66%);
+	--yellow-8: hsl(45, 100%, 79%);
+	--yellow-9: hsl(45, 100%, 87%);
+
+	--red-1: hsl(1, 95%, 12%);
+	--red-2: hsl(1, 90%, 16%);
+	--red-3: hsl(1, 82%, 30%);
+	--red-4: hsl(1, 76%, 40%);
+	--red-5: hsl(1, 71%, 52%);
+	--red-6: hsl(1, 80%, 66%);
+	--red-7: hsl(1, 86%, 80%);
+	--red-8: hsl(1, 90%, 90%);
+	--red-9: hsl(1, 97%, 96%);
+
+	--nav-link-hover-bg-light: var(--gray-7);
+	--nav-link-hover-bg-dark: var(--gray-2);
+}
+
 body[data-palette=mono] {
 	--gray-1: #151515;
 	--gray-2: #202020;
@@ -589,207 +887,6 @@ body[data-palette=mono] {
 	--red-7: var(--gray-7);
 	--red-8: var(--gray-8);
 	--red-9: var(--gray-9);
-}
-
-.light-theme() {
-	--page-bg: var(--gray-9);
-	--page-bg2: var(--gray-8);  // Used for headers and modals.
-	--page-fg: var(--gray-2);
-	--scrollbar-bg: var(--page-bg);
-	--scrollbar-fg: var(--gray-5);
-	--border-color: var(--gray-6);
-
-	--link-color: var(--blue-5);
-
-	--selection-bg: var(--blue-8);
-	--selection-fg: var(--blue-1);
-
-	--gutter-bg: var(--gray-8);
-	--gutter-fg: var(--gray-6);
-	--gutter-marker-fg: var(--red-3);
-	--gutter-marker-subtle-fg: var(--gray-6);
-	--cursor-color: var(--gray-4);
-
-	--cm-comment: var(--primary-3);
-	--cm-atom: var(--primary-3);
-	--cm-number: var(--primary-3);
-
-	--cm-property: var(--green-5);
-	--cm-attribute: var(--green-5);
-	--cm-keyword: var(--red-3);
-	--cm-string: var(--yellow-5);
-	--cm-string-2: var(--yellow-5);
-
-	--cm-variable: var(--green-5);
-	--cm-variable-2: var(--blue-5);
-	--cm-def: var(--yellow-5);
-	--cm-bracket: var(--gray-2);
-	--cm-tag: var(--red-3);
-	--cm-link: var(--primary-5);
-	--cm-error-bg: var(--red-3);
-	--cm-error-fg: var(--gray-4);
-
-	--cursor-line-bg: var(--blue-9);
-	--match-bracket-fg: var(--gray-8);
-	--match-bracket-bg: var(--blue-5);
-
-	--js-background: var(--yellow-9);
-
-	--active-tab-fg: var(--primary-9);
-	--active-tab-bg: var(--primary-3);
-
-	.nav-link {
-		&:hover:not(.active) {
-			background-color: var(--primary-9);
-			color: var(--primary-3);
-		}
-	}
-
-	button {
-		&.primary {
-			background-color: var(--primary-3);
-			color: var(--primary-9);
-		}
-
-		&.danger-light {
-			background-color: var(--red-9);
-			color: var(--red-3);
-
-			&:hover {
-				background-color: var(--red-3);
-				color: var(--red-9);
-			}
-		}
-	}
-
-	.status {
-		&.is-2xx {
-			background-color: var(--green-3);
-			color: var(--green-9);
-		}
-	}
-
-	.flash {
-		background-color: var(--primary-7);
-	}
-
-	.response {
-		tr:hover {
-			background-color: var(--gray-8);
-		}
-	}
-
-	p.info {
-		background-color: var(--blue-9);
-		color: var(--blue-1);
-	}
-}
-
-.dark-theme() {
-	--page-bg: var(--gray-2);
-	--page-bg2: var(--gray-1);  // Used for headers and modals.
-	--page-fg: var(--gray-7);
-	--scrollbar-bg: var(--page-bg);
-	--scrollbar-fg: var(--gray-6);
-	--border-color: var(--gray-3);
-
-	--link-color: var(--blue-5);
-
-	--selection-bg: var(--blue-2);
-	--selection-fg: var(--blue-9);
-
-	--gutter-bg: var(--gray-1);
-	--gutter-fg: var(--gray-5);
-	--gutter-marker-fg: var(--red-3);
-	--gutter-marker-subtle-fg: var(--gray-4);
-	--cursor-color: var(--gray-6);
-
-	--cm-comment: var(--primary-7);
-	--cm-atom: var(--primary-5);
-	--cm-number: var(--primary-5);
-
-	--cm-property: var(--green-5);
-	--cm-attribute: var(--green-5);
-	--cm-keyword: var(--red-5);
-	--cm-string: var(--yellow-7);
-
-	--cm-variable: var(--green-5);
-	--cm-variable-2: var(--blue-5);
-	--cm-def: var(--yellow-5);
-	--cm-bracket: var(--gray-7);
-	--cm-tag: var(--red-3);
-	--cm-link: var(--primary-5);
-	--cm-error-bg: var(--red-3);
-	--cm-error-fg: var(--gray-6);
-
-	--cursor-line-bg: var(--gray-3);
-	--match-bracket-fg: var(--gray-9);
-	--match-bracket-bg: transparent;
-
-	--js-background: var(--yellow-1);
-
-	--active-tab-fg: var(--primary-9);
-	--active-tab-bg: var(--primary-2);
-
-	.nav-link {
-		&:hover:not(.active) {
-			background-color: var(--primary-1);
-			color: var(--primary-9);
-		}
-	}
-
-	button {
-		&.primary {
-			background-color: var(--primary-3);
-			color: var(--primary-9);
-		}
-
-		&.danger-light {
-			background-color: var(--red-1);
-			color: var(--red-9);
-
-			&:hover {
-				background-color: var(--red-3);
-				color: var(--red-9);
-			}
-		}
-	}
-
-	.status {
-		&.is-2xx {
-			background-color: var(--green-1);
-			color: var(--green-9);
-		}
-	}
-
-	.flash {
-		background-color: var(--primary-7);
-	}
-
-	.response {
-		tr:hover {
-			background-color: var(--gray-3);
-		}
-	}
-
-	p.info {
-		background-color: var(--blue-3);
-		color: var(--blue-9);
-	}
-}
-
-body[data-theme=light], body[data-theme=auto] {
-	.light-theme();
-}
-
-body[data-theme=dark] {
-	.dark-theme();
-}
-
-@media (prefers-color-scheme: dark) {
-	body[data-theme=auto] {
-		.dark-theme();
-	}
 }
 
 

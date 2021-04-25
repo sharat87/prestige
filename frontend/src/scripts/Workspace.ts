@@ -294,8 +294,8 @@ export default class Workspace {
 
 				if (pretty != null && pageContent !== pretty) {
 					const el = document.createElement("span")
-					el.classList.add("icon", "washed-blue", "bg-dark-blue", "pointer")
-					el.innerHTML = "{}"
+					el.classList.add("icon")
+					el.innerText = "{}"
 					el.title = "Prettify JSON body."
 					el.dataset.start = block.payload.start.toString()
 					el.dataset.end = block.payload.end.toString()
