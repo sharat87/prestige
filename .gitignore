@@ -9,6 +9,7 @@ frontend/node_modules
 frontend/dist
 frontend/dist-serve
 frontend/coverage
+frontend/.parcel-cache
 __snapshots__
 
 e2e-tests/drivers
