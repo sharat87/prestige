@@ -74,7 +74,7 @@ def proxy(request) -> JsonResponse:
 			else:
 				files[key] = base64.b64decode(value)
 	else:
-		data = body
+		data = None if body is None else body.encode("utf-8")
 		files = None
 
 	try:

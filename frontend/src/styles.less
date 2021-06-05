@@ -195,9 +195,6 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 	border-left: 1px solid var(--border-color);
 
 	&.error {
-		background-color: rgba(255, 0, 0, .05);
-		color: #622;
-
 		.message {
 			font-size: 1.1em;
 		}
@@ -540,6 +537,11 @@ form.grid {
 		}
 	}
 
+	.result-pane.error {
+		background-color: var(--red-9);
+		color: var(--red-1);
+	}
+
 	p.info {
 		background-color: var(--blue-9);
 		color: var(--blue-1);
@@ -632,6 +634,11 @@ form.grid {
 		tr:hover {
 			background-color: var(--gray-3);
 		}
+	}
+
+	.result-pane.error {
+		background-color: var(--red-1);
+		color: var(--red-9);
 	}
 
 	p.info {
@@ -752,6 +759,8 @@ body[data-palette=base16] {
 	--green-9: hsl(79, 32%, 95%);
 
 	--yellow-1: hsl(45, 60%, 10%);
+	--yellow-3: hsl(45, 90%, 25%);
+	--yellow-4: hsl(45, 100%, 32%);
 	--yellow-5: hsl(45, 100%, 40%);
 	--yellow-7: hsl(35, 100%, 75%);
 	--yellow-9: hsl(35, 70%, 97%);
@@ -813,7 +822,7 @@ body[data-palette=solarized] {
 	--yellow-8: hsl(45, 100%, 79%);
 	--yellow-9: hsl(45, 100%, 87%);
 
-	--red-1: hsl(1, 95%, 12%);
+	--red-1: hsl(1, 80%, 10%);
 	--red-2: hsl(1, 90%, 16%);
 	--red-3: hsl(1, 82%, 30%);
 	--red-4: hsl(1, 76%, 40%);

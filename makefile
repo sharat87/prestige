@@ -17,7 +17,7 @@ serve-backend: venv
 		&& cd backend \
 		&& set -o allexport \
 		&& source env.sh \
-		&& python manage.py runserver 127.0.0.1:3041
+		&& PYTHONUTF8=1 python manage.py runserver 127.0.0.1:3041
 
 lint-backend: venv/bin/flake8
 	@source venv/bin/activate \
