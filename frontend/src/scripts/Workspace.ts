@@ -436,12 +436,19 @@ export default class Workspace {
 					console.error("Can't save missing sheet. Something's wrong.")
 					return
 				}
-				return saveSheet(this.currentSheetQualifiedPath(), this.currentSheet)
+				return this.saveCurrentSheet()
 			})
 	}
 
-	async runTop(lines: string | string[], runLineNum: string | number, silent = false): Promise<AnyResult> {
+	async saveCurrentSheet(): Promise<void> {
+		if (this.currentSheet != null) {
+			return saveSheet(this.currentSheetQualifiedPath(), this.currentSheet)
+		} else {
+			return Promise.reject()
+		}
+	}
 
+	async runTop(lines: string | string[], runLineNum: string | number, silent = false): Promise<AnyResult> {
 		const startTime = Date.now()
 		this.session.pushLoading()
 		let request: null | RequestDetails = null
@@ -551,4 +558,14 @@ export default class Workspace {
 			})
 		}
 	}
+
+	async deleteCookie(domain: string, path: string, name: string): Promise<void> {
+		if (this.cookieJar != null) {
+			this.cookieJar.delete(domain, path, name)
+			return this.saveCurrentSheet()
+		} else {
+			return Promise.resolve()
+		}
+	}
+
 }

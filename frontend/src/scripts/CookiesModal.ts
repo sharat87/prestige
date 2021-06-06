@@ -3,15 +3,15 @@ import Modal from "./Modal"
 import Button from "./Button"
 import Table from "./Table"
 import CookieJar from "./CookieJar"
+import type Workspace from "./Workspace"
 
 export default { view }
 
-function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, onClose: any }>): m.Children {
+function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, workspace: Workspace, onClose: any }>): m.Children {
 	const cookieJar = vnode.attrs.cookieJar
 	const rows: Vnode[] = []
 	let i = 0
 
-	console.log("cookieJar", cookieJar)
 	for (const [domain, byPath] of cookieJar == null ? [] : Object.entries(cookieJar.store)) {
 		for (const [path, byName] of Object.entries(byPath as any)) {
 			for (const [name, morsel] of Object.entries(byName as any)) {
@@ -28,7 +28,8 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, onClose: any }>): m
 							{
 								class: "compact danger-light",
 								// TODO: Cookie jar is not saved after deletion here.
-								onclick: () => cookieJar?.delete(domain, path, name),
+								onclick: () => vnode.attrs.workspace.deleteCookie(domain, path, name)
+								,
 							},
 							"Del",
 						),

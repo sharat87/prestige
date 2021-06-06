@@ -200,6 +200,7 @@ function WorkspaceView(): m.Component {
 			}),
 			popup === VisiblePopup.Cookies && m(CookiesModal, {
 				cookieJar: workspace.cookieJar,
+				workspace,
 				onClose: onCookiesToggle,
 			}),
 			popup === VisiblePopup.LoginForm && m(LoginFormModal, {
