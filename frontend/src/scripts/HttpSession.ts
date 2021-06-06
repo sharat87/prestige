@@ -66,6 +66,7 @@ export default class HttpSession {
 	}
 
 	async executeDirect(request: RequestDetails): Promise<AnyResult> {
+		const startTime = Date.now()
 		const { method, url, headers, body } = request
 
 		const options: RequestInit = {
@@ -114,6 +115,21 @@ export default class HttpSession {
 			},
 		})
 
+		if (response.status === 0) {
+			// This means that the request was indeed successful and the browser has the response data, but due to some
+			// CORS restriction, the browser won't let us access the data.
+			// See <https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS/Errors/CORSNotSupportingCredentials>.
+			return {
+				ok: false,
+				error: {
+					title: "CORS Error",
+					message: "CORS Error when reading response data.\nPlease visit browser console for more details.",
+				},
+				request,
+				timeTaken: Date.now() - startTime,
+			}
+		}
+
 		return {
 			ok: true,
 			proxy: null,
@@ -132,6 +148,7 @@ export default class HttpSession {
 			},
 			history: [],
 			cookies: null,
+			timeTaken: Date.now() - startTime,
 		}
 	}
 
