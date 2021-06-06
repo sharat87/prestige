@@ -9,7 +9,6 @@ gunicorn
 
 # e2e tests
 selenium
-httpbin
 flask
 
 # docs

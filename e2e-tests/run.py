@@ -13,7 +13,7 @@ log = logging.getLogger(__name__)
 
 frontend_port: int = 3045
 backend_port: int = frontend_port + 1
-httpbin_port: int = frontend_port + 2
+httpbun_port: int = frontend_port + 2
 
 child_processes: List[subprocess.Popen] = []
 
@@ -43,12 +43,12 @@ def main():
 	frontend_ready_event = threading.Event()
 	threading.Thread(target=prestige_frontend, args=(frontend_ready_event, )).start()
 
-	httpbin_ready_event = threading.Event()
-	threading.Thread(target=httpbin, args=(httpbin_ready_event, )).start()
+	httpbun_ready_event = threading.Event()
+	threading.Thread(target=httpbun, args=(httpbun_ready_event, )).start()
 
 	backend_ready_event.wait(4)
 	frontend_ready_event.wait(4)
-	httpbin_ready_event.wait(4)
+	httpbun_ready_event.wait(4)
 
 	time.sleep(5)
 	run_tests()
@@ -161,24 +161,24 @@ def prestige_frontend(ready_event: Optional[threading.Event] = None):
 	)
 
 
-def httpbin(ready_event: Optional[threading.Event] = None):
-	# 3. A local httpbin server process.
+def httpbun(ready_event: Optional[threading.Event] = None):
+	# 3. A local httpbun server process.
 	def on_output(line):
-		if not ready_event.is_set() and line and "Running on" in line:
-			log.info("Httpbin Ready")
+		if not ready_event.is_set() and line and "Serving on" in line:
+			log.info("Httpbun Ready")
 			ready_event.set()
 
 	spawn_process(
 		[
-			venv_bin / "flask",
+			"docker",
 			"run",
+			"--rm",
+			"-e",
+			"HOST=0.0.0.0",
 			"-p",
-			httpbin_port,
+            httpbun_port + ":80",
+			"ghcr.io/sharat87/httpbun",
 		],
-		cwd=e2e_tests_path,
-		env={
-			"FLASK_APP": "httpbin:app",
-		},
 		on_output=ready_event and on_output,
 	)
 
@@ -198,7 +198,7 @@ def run_tests():
 			"PATH": str(e2e_tests_path / "drivers") + ":" + os.environ.get("PATH", ""),
 			"PYTHONPATH": str(e2e_tests_path / "src"),
 			"FRONTEND_URL": f"http://localhost:{frontend_port}",
-			"HTTPBIN_URL": f"http://localhost:{httpbin_port}",
+			"HTTPBUN_URL": f"http://localhost:{httpbun_port}",
 		},
 	).wait()
 

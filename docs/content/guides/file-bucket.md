@@ -13,7 +13,7 @@ do:
 
 1. Now create a request in the editor like the following:
 
-        POST http://httpbin.org/post
+        POST http://httpbun.com/post
 
         = this.multipart({
             file: await this.fileFromBucket("article_about_prestige.md")

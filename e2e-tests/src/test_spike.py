@@ -21,7 +21,7 @@ class BaseTestCase(unittest.TestCase):
 			raise unittest.SkipTest
 
 	def setUp(self):
-		self.httpbin_base = os.getenv("HTTPBIN_URL", "http://httpbin.org")
+		self.httpbun_base = os.getenv("HTTPBUN_URL", "https://httpbun.com")
 		self.prestige_base = os.getenv("FRONTEND_URL", "https://prestigemad.com")
 
 		browser = os.environ.get("PRESTIGE_SELENIUM_BROWSER", "chrome").lower()
@@ -66,7 +66,7 @@ class SearchText(BaseTestCase):
 	def test_search_by_text(self):
 		self.wait.until(presence_of_element_located((By.CSS_SELECTOR, "header h1")))
 		print(self.driver.find_element_by_css_selector("header h1 + div").text)
-		self.editor_send_keys("GET " + self.httpbin_base + "/get\n\n###\n\n")
+		self.editor_send_keys("GET " + self.httpbun_base + "/get\n\n###\n\n")
 		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.HOME)
 		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.COMMAND, Keys.HOME)
 		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.ENTER)

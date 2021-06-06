@@ -17,7 +17,7 @@ const DEFAULT_EDITOR_CONTENT = `# Welcome to Prestige! Your newest developer too
 # Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
 # Like this one right here:
 
-GET http://httpbin.org/get?name=haha
+GET http://httpbun.com/get?name=haha
 
 ###
 
@@ -25,7 +25,7 @@ GET http://httpbin.org/get?name=haha
 # Learn more about the syntax at ${window.location.origin}/docs/guides/syntax/.
 # Let's make a POST request!
 
-POST http://httpbin.org/post
+POST http://httpbun.com/post
 Content-Type: application/x-www-form-urlencoded
 
 username=sherlock&password=elementary
@@ -35,7 +35,7 @@ username=sherlock&password=elementary
 # Custom headers, easy as popcorn.
 # Learn more at ${window.location.origin}/docs/guides/syntax/#header-section.
 
-GET http://httpbin.org/headers
+GET http://httpbun.com/headers
 X-Custom1: custom header value one
 X-Custom2: custom header value two
 
@@ -50,7 +50,7 @@ this.data.postUrl = "post"
 
 # Let's use templates to make the same POST request as before!
 # Learn more at: ${window.location.origin}/docs/guides/templating/.
-POST http://httpbin.org/dollar{postUrl}
+POST http://httpbun.com/dollar{postUrl}
 Content-Type: application/x-www-form-urlencoded
 
 username=sherlock&password=elementary
@@ -312,7 +312,7 @@ export default class Workspace {
 	onNewClicked(event: MouseEvent): void {
 		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
 		this.codeMirror?.replaceRange(
-			"###\n\nGET http://httpbin.org/get?name=sherlock\n\n",
+			"###\n\nGET http://httpbun.com/get?name=sherlock\n\n",
 			{ line: lineNum, ch: 0 },
 		)
 		this.codeMirror?.setCursor(lineNum + 2, 0)

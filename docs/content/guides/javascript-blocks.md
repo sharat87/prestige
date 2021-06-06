@@ -6,7 +6,7 @@ Javascript blocks begin with the line `### javascript`. That is, when the page-b
 For example, consider the following sheet:
 
 ```
-GET http://httpbin.org/get?id=1
+GET http://httpbun.com/get?id=1
 
 ### javascript
 
@@ -14,7 +14,7 @@ alert("ha")
 
 ###
 
-GET http://httpbin.org/get?id=2
+GET http://httpbun.com/get?id=2
 ```
 
 Here, we have two HTTP requests defined with a Javascript block in the middle. If we were to execute the first HTTP

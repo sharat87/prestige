@@ -19,19 +19,19 @@ which request should run.
 ## Header Section
 
 The header section contains the request method (`GET`, `POST`, `PUT` etc.) and the full absolute URL (_e.g._,
-`http://httpbin.org/get`), in the first line and then followed by any optional custom headers, one per line.
+`http://httpbun.com/get`), in the first line and then followed by any optional custom headers, one per line.
 
 Here's an example of a simple GET request without any custom headers:
 
 ```http
-GET http://httpbin.org/get
+GET http://httpbun.com/get
 ```
 
 This is a full valid request. Hitting `Ctrl+Enter` while the cursor is on this line will execute a `GET` request to the
-URL `http://httpbin.org/get`. Any query parameters can be appended to the URL in their standard form. Here's an example:
+URL `http://httpbun.com/get`. Any query parameters can be appended to the URL in their standard form. Here's an example:
 
 ```http
-GET http://httpbin.org/get?first=Sherlock&last=Holmes
+GET http://httpbun.com/get?first=Sherlock&last=Holmes
 ```
 
 The method here is not case-sensitive. Writing `GET` and `get` behave exactly the same.
@@ -43,13 +43,13 @@ The method here is not case-sensitive. Writing `GET` and `get` behave exactly th
 Right below this line, we can add any headers to be sent to the request. For example:
 
 ```http
-GET http://httpbin.org/headers
+GET http://httpbun.com/headers
 X-My-Name: is not Sherlock
 X-From: an awesome HTTP playground tool
 ```
 
 To run this request, we can hit ((Ctrl+Enter)) with cursor on any of these lines. Prestige will execute a `GET` request
-to `http://httpbin.org/headers` with the two headers listed (in addition to headers sent by default like `Content-Size`
+to `http://httpbun.com/headers` with the two headers listed (in addition to headers sent by default like `Content-Size`
 etc.).
 
 !!! note
@@ -73,7 +73,7 @@ triple-hash marker indicates end of the definition of this request and begins a 
 Consider the following sheet for example:
 
 ```
-POST http://httpbin.org/post
+POST http://httpbun.com/post
 Content-Type: application/json
 
 {
@@ -83,7 +83,7 @@ Content-Type: application/json
 
 ###
 
-GET http://httpbin.org/get?initials=CM
+GET http://httpbun.com/get?initials=CM
 ```
 
 Here, we defined two requests, separated by the line containing `###`. The first is a `POST` request that sends a JSON

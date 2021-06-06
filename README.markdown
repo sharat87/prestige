@@ -62,8 +62,8 @@ More: <https://github.com/marmelab/awesome-rest>.
 
 ## Some public APIs to play with
 
+1. [httpbun.com](https://httpbun.com) &mdash; Great for meta-testing and JSON/form-data related experiments.
 1. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
-1. [httpbin.org](http://httpbin.org) &mdash; Great for meta-testing and JSON/form-data related experiments.
 1. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
 1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL, but requires a personal auth token.
 1. [A Curated List of 100 Cool and Fun Public APIs to Inspire Your Next Project](https://medium.com/better-programming/a-curated-list-of-100-cool-and-fun-public-apis-to-inspire-your-next-project-7600ce3e9b3)

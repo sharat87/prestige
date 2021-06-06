@@ -31,7 +31,7 @@ class MessedUpInput(SimpleTestCase, JobMixin):
 
 	def test_missing_optional_input_fields(self):
 		response = self.job({
-			"url": "http://httpbin.org/get?one=two",
+			"url": "http://httpbun.org/get?one=two",
 		})
 
 		self.assertEqual(response.status_code, HTTPStatus.OK)
@@ -67,7 +67,7 @@ class HttpMethods(SimpleTestCase, JobMixin):
 	def test_standard_get(self):
 		response = self.job({
 			"method": "GET",
-			"url": "http://httpbin.org/get?one=two",
+			"url": "http://httpbun.org/get?one=two",
 			"headers": {},
 			"cookies": {},
 		})
@@ -85,9 +85,9 @@ class CookieTests(SimpleTestCase, JobMixin):
 
 	def test_include_cookies(self):
 		response = self.job({
-			"url": "http://httpbin.org/cookies",
+			"url": "http://httpbun.org/cookies",
 			"cookies": {
-				"httpbin.org": {
+				"httpbun.org": {
 					"/cookies": {
 						"three": {
 							"value": "three-value",
@@ -107,7 +107,7 @@ class CookieTests(SimpleTestCase, JobMixin):
 
 	def test_cookies_in_response(self):
 		response = self.job({
-			"url": "http://httpbin.org/cookies/set?first=first-value",
+			"url": "http://httpbun.org/cookies/set?first=first-value",
 		})
 
 		self.assertEqual(response.status_code, HTTPStatus.OK)

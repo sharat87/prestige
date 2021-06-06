@@ -7,25 +7,25 @@ test("single line input with one request", async () => {
 	const context = makeMockContext()
 
 	const request = await extractRequest([
-		"GET http://httpbin.org",
+		"GET http://httpbun.com",
 	], 0, context)
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("GET")
-	expect(request.url).toBe("http://httpbin.org")
+	expect(request.url).toBe("http://httpbun.com")
 })
 
 test("get request on first and only non-blank line", async () => {
 	const context = makeMockContext()
 
 	const request = await extractRequest([
-		"GET http://httpbin.org",
+		"GET http://httpbun.com",
 		"",
 	], 0, context)
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("GET")
-	expect(request.url).toBe("http://httpbin.org")
+	expect(request.url).toBe("http://httpbun.com")
 })
 
 test("get request with blank lines around", async () => {
@@ -33,46 +33,46 @@ test("get request with blank lines around", async () => {
 
 	const request = await extractRequest([
 		"",
-		"GET http://httpbin.org",
+		"GET http://httpbun.com",
 		"",
 	], 1, context)
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("GET")
-	expect(request.url).toBe("http://httpbin.org")
+	expect(request.url).toBe("http://httpbun.com")
 })
 
 test("get request with one query param", async () => {
 	const context = makeMockContext()
 
 	const request = await extractRequest([
-		"GET http://httpbin.org/get",
+		"GET http://httpbun.com/get",
 		"  name=sherlock",
 	], 0, context)
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("GET")
-	expect(request.url).toBe("http://httpbin.org/get?name=sherlock")
+	expect(request.url).toBe("http://httpbun.com/get?name=sherlock")
 })
 
 test("get request with query param with special characters", async () => {
 	const context = makeMockContext()
 
 	const request = await extractRequest([
-		"GET http://httpbin.org/get",
+		"GET http://httpbun.com/get",
 		"  crazy=this crazy?stuff&with=a bang!",
 	], 0, context)
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("GET")
-	expect(request.url).toBe("http://httpbin.org/get?crazy=this%20crazy%3Fstuff%26with%3Da%20bang!")
+	expect(request.url).toBe("http://httpbun.com/get?crazy=this%20crazy%3Fstuff%26with%3Da%20bang!")
 })
 
 test("get request with multiple query params", async () => {
 	const context = makeMockContext()
 
 	const request = await extractRequest([
-		"GET http://httpbin.org/get",
+		"GET http://httpbun.com/get",
 		"  first=sherlock",
 		"  last=holmes",
 		"  brother=mycroft",
@@ -80,14 +80,14 @@ test("get request with multiple query params", async () => {
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("GET")
-	expect(request.url).toBe("http://httpbin.org/get?first=sherlock&last=holmes&brother=mycroft")
+	expect(request.url).toBe("http://httpbun.com/get?first=sherlock&last=holmes&brother=mycroft")
 })
 
 test("get request with headers and multiple query params", async () => {
 	const context = makeMockContext()
 
 	const request = await extractRequest([
-		"GET http://httpbin.org/get",
+		"GET http://httpbun.com/get",
 		"  first=sherlock",
 		"  last=holmes",
 		"  brother=mycroft",
@@ -99,21 +99,21 @@ test("get request with headers and multiple query params", async () => {
 	expect(Array.from(request.headers)).toEqual([
 		["x-one", "value one"],
 	])
-	expect(request.url).toBe("http://httpbin.org/get?first=sherlock&last=holmes&brother=mycroft")
+	expect(request.url).toBe("http://httpbun.com/get?first=sherlock&last=holmes&brother=mycroft")
 })
 
 test("post request with one line body", async () => {
 	const context = makeMockContext()
 
 	const request = await extractRequest([
-		"POST http://httpbin.org",
+		"POST http://httpbun.com",
 		"",
 		"body goes here",
 	], 0, context)
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("POST")
-	expect(request.url).toBe("http://httpbin.org")
+	expect(request.url).toBe("http://httpbun.com")
 	expect(request.body).toBe("body goes here")
 })
 
@@ -121,7 +121,7 @@ test("get request with an ending", async () => {
 	const context = makeMockContext()
 
 	const request = await extractRequest([
-		"POST http://httpbin.org",
+		"POST http://httpbun.com",
 		"",
 		"body goes here",
 		"",
@@ -132,7 +132,7 @@ test("get request with an ending", async () => {
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("POST")
-	expect(request.url).toBe("http://httpbin.org")
+	expect(request.url).toBe("http://httpbun.com")
 	expect(request.body).toBe("body goes here")
 })
 
@@ -213,12 +213,12 @@ test("get request with single script", async () => {
 		"### javascript",
 		"",
 		"###",
-		"GET http://httpbin.org/get",
+		"GET http://httpbun.com/get",
 	], 3, context)
 
 	expect(request).toBeDefined()
 	expect(request.method).toBe("GET")
-	expect(request.url).toBe("http://httpbin.org/get")
+	expect(request.url).toBe("http://httpbun.com/get")
 })
 
 test("run inside script should fail", async () => {
@@ -229,7 +229,7 @@ test("run inside script should fail", async () => {
 			"### javascript",
 			"const n = 1;",
 			"###",
-			"GET http://httpbin.org/get",
+			"GET http://httpbun.com/get",
 		], 1, context),
 	)
 		.rejects
@@ -241,7 +241,7 @@ test("extract request with empty header name", async () => {
 
 	await expect(
 		extractRequest([
-			"GET http://httpbin.org/get",
+			"GET http://httpbun.com/get",
 			": value of empty header name",
 		], 1, context),
 	)

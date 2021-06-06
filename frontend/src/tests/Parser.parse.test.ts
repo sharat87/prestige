@@ -4,7 +4,7 @@ console.log = jest.fn()
 
 test("single line input with one request", async () => {
 	const structure: Block[] = parse([
-		"GET http://httpbin.org",
+		"GET http://httpbun.com",
 	])
 
 	expect(structure).toBeDefined()
@@ -25,7 +25,7 @@ test("single line input with one request", async () => {
 test("comment and a request", async () => {
 	const structure: Block[] = parse([
 		"# a comment goes here",
-		"GET http://httpbin.org",
+		"GET http://httpbun.com",
 	])
 
 	expect(structure).toBeDefined()
@@ -45,7 +45,7 @@ test("comment and a request", async () => {
 
 test("get request on first and only non-blank line", async () => {
 	const structure: Block[] = parse([
-		"GET http://httpbin.org",
+		"GET http://httpbun.com",
 		"",
 	])
 
@@ -67,7 +67,7 @@ test("get request on first and only non-blank line", async () => {
 test("get request with blank lines around", async () => {
 	const structure = parse([
 		"",
-		"GET http://httpbin.org",
+		"GET http://httpbun.com",
 		"",
 	])
 
@@ -88,7 +88,7 @@ test("get request with blank lines around", async () => {
 
 test("post request with one line body", async () => {
 	const structure: Block[] = parse([
-		"POST http://httpbin.org",
+		"POST http://httpbun.com",
 		"",
 		"body goes here",
 	])
@@ -113,7 +113,7 @@ test("post request with one line body", async () => {
 
 test("two get requests", async () => {
 	const structure: Block[] = parse([
-		"GET http://httpbin.org/get",
+		"GET http://httpbun.com/get",
 		"",
 		"###",
 		"",
@@ -153,7 +153,7 @@ test("two get requests", async () => {
 
 test("get request with an ending", async () => {
 	const structure: Block[] = parse([
-		"POST http://httpbin.org",
+		"POST http://httpbun.com",
 		"",
 		"body goes here",
 		"",
@@ -201,7 +201,7 @@ test("one js and one request block", async () => {
 		"### javascript",
 		"void 0",
 		"###",
-		"GET http://httpbin.org",
+		"GET http://httpbun.com",
 		"",
 	])
 

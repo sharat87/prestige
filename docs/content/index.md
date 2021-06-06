@@ -38,10 +38,10 @@ The second section, which is optional, contains the request body.
 First off, let's look at a very simple GET request:
 
 ```http
-GET http://httpbin.org/get?first=Sherlock&last=Holmes
+GET http://httpbun.com/get?first=Sherlock&last=Holmes
 ```
 
-Here, we're executing a GET request to the URL <http://httpbin.org/get?first=Sherlock&last=Holmes>. Copy this line over
+Here, we're executing a GET request to the URL <http://httpbun.com/get?first=Sherlock&last=Holmes>. Copy this line over
 to a document in the Prestige app, place your cursor on it and hit ((Ctrl+Enter)). The GET request will be executed, and
 the response details will show on the right.
 
@@ -50,11 +50,11 @@ of the definition of a new request. For example, we define two different GET req
 
 ```http
 
-GET http://httpbin.org/get?just_first=Sherlock
+GET http://httpbun.com/get?just_first=Sherlock
 
 ###
 
-GET http://httpbin.org/get?just_last=Holmes
+GET http://httpbun.com/get?just_last=Holmes
 
 ```
 
@@ -65,7 +65,7 @@ As mentioned earlier, a second section can be added for passing request body. Le
 JSON body:
 
 ```http
-POST http://httpbin.org/post
+POST http://httpbun.com/post
 Content-Type: application/json
 
 {
@@ -104,7 +104,7 @@ alert("in js block")
 
 ###
 
-GET http://httpbin.org/get
+GET http://httpbun.com/get
 ```
 
 If we put the cursor on the last line and hit ((Ctrl+Enter)), we will see the alert message popup, and the request will
@@ -126,7 +126,7 @@ this.data.lastName = "Holmes"
 
 ###
 
-GET http://httpbin.org/get?first=${firstName}&last=${lastName}
+GET http://httpbun.com/get?first=${firstName}&last=${lastName}
 ```
 
 Here, when we place the cursor on the GET line and hit ((Ctrl+Enter)), Prestige first evaluates the Javascript block,
@@ -136,7 +136,7 @@ request that actually gets executed is the following:
 [template string]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Template_literals
 
 ```
-GET http://httpbin.org/get?first=Sherlock&last=Holmes
+GET http://httpbun.com/get?first=Sherlock&last=Holmes
 ```
 
 That seems simple enough. But, template interpolations (the `${}` thingies) work not just in the query params, it's in
@@ -145,7 +145,7 @@ the whole thing! Method? Check. URL? Check. *Headers*? Check. Here's a slightly 
 ```
 ### javascript
 
-this.data.userPostRequest = "POST http://httpbin.org/post\n" +
+this.data.userPostRequest = "POST http://httpbun.com/post\n" +
     "Content-Type: application/javascript"
 
 ###
@@ -168,7 +168,7 @@ can be placed inside `${}`.
 ### javascript
 
 this.data.nameRequest = (first, last) => {
-    "GET http://httpbin.org/get?first=" + first + "&last=" + last
+    "GET http://httpbun.com/get?first=" + first + "&last=" + last
 }
 
 ###

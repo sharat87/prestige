@@ -18,10 +18,10 @@ What does that mean? That means we can write interpolations in the headers secti
 will be replaced by the value of the expression (`3` in this case). Consider the following example:
 
 ```
-GET http://httpbin.org/get?answer=${2 * 21}
+GET http://httpbun.com/get?answer=${2 * 21}
 ```
 
-When we hit ((Ctrl+Enter)) on this, the request is actually sent to the URL `http://httpbin.org/get?answer=42`.
+When we hit ((Ctrl+Enter)) on this, the request is actually sent to the URL `http://httpbun.com/get?answer=42`.
 
 Internally, Prestige leverages your browser's support for template strings to do the interpolation here. It doesn't
 include a templating engine doing this thing, it's just standard Javascript and your browser.
@@ -33,7 +33,7 @@ instead treated like a static wall of text, just a bunch of characters to be sen
 the following request, the `${2 * 21}` is sent as is, not replaced by `42`.
 
 ```
-POST http://httpbin.org/post
+POST http://httpbun.com/post
 
 answer=${2 * 21}&hero=Arthur
 ```
@@ -44,19 +44,19 @@ payload. That's it. Let's look at a few examples to drive home the point. *All* 
 send the request body `answer=42&hero=Arthur`.
 
 ```
-POST http://httpbin.org/post
+POST http://httpbun.com/post
 
 = "answer=" + (2 * 21) + "&hero=Arthur"
 
 ###
 
-POST http://httpbin.org/post
+POST http://httpbun.com/post
 
 = `answer=${2 * 21}&hero=Arthur`
 
 ###
 
-POST http://httpbin.org/post
+POST http://httpbun.com/post
 
 = (() => {
     // Compute the answer here :)
@@ -68,7 +68,7 @@ POST http://httpbin.org/post
 Have to admit, that's awesome right there! But let's sweeten it further eh? Guess what the following does?
 
 ```
-POST http://httpbin.org/post
+POST http://httpbun.com/post
 Content-Type: application/json
 
 = {

@@ -17,7 +17,7 @@ Additionally, if the request has been through one or more redirects, the respons
 also available in the response pane. Try the following request to see this in action:
 
 ```
-GET http://httpbin.org/cookies/set?first=Sherlock
+GET http://httpbun.com/cookies/set?first=Sherlock
 ```
 
 This request sets the cookie called `first` with the value `Sherlock` and then redirects to a different URL. After

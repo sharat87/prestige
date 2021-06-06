@@ -10,10 +10,10 @@ requests made from inside Prestige and are used only when making further request
 For example, let's execute the following request:
 
 ```
-GET http://httpbin.org/cookies/set?person=Krishna
+GET http://httpbun.com/cookies/set?person=Krishna
 ```
 
-This request's response will set a cookie on the `httpbin.org` domain with the name `person` and the value `Krishna`.
+This request's response will set a cookie on the `httpbun.com` domain with the name `person` and the value `Krishna`.
 After executing this, the Cookies button at the top right should read *Cookies (1)*, indicating that there is one
 cookie.
 
@@ -24,7 +24,7 @@ cookie.
 Now let's run run the following request:
 
 ```
-GET http://httpbin.org/cookies
+GET http://httpbun.com/cookies
 ```
 
 This endpoint fetches the cookies on this domain. In the response we should see the `person=Krishna` cookie.
