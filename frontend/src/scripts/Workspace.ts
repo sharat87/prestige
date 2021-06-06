@@ -62,6 +62,7 @@ export default class Workspace {
 	private _lines: null | string[]
 	private prevExecuteBookmark: null | CodeMirror.TextMarker
 	session: HttpSession
+	defaultProxy: null | string
 	fileBucket: FileBucket
 	private flashQueue: any[]
 	private widgetMarks: CodeMirror.TextMarker[]
@@ -77,7 +78,8 @@ export default class Workspace {
 		this._lines = null
 		this.prevExecuteBookmark = null
 		this.fileBucket = new FileBucket()
-		this.session = new HttpSession(proxyUrl())
+		this.session = new HttpSession()
+		this.defaultProxy = proxyUrl()
 		this.flashQueue = []
 		this.widgetMarks = []
 		this.currentSheet = null
@@ -462,7 +464,7 @@ export default class Workspace {
 				await context.emit("BeforeExecute", { request })
 			}
 
-			result = await this.execute(request)
+			result = await this.execute(request, context)
 
 			if (result != null && result.ok && result.cookies) {
 				result.cookieChanges = this.cookieJar?.overwrite(result.cookies as any)
@@ -505,7 +507,7 @@ export default class Workspace {
 		return await extractRequest(lines, runLineNum, context)
 	}
 
-	async execute(request: RequestDetails): Promise<AnyResult> {
+	async execute(request: RequestDetails, context: Context): Promise<AnyResult> {
 		if (request.method === "") {
 			throw new Error("Method cannot be empty!")
 		}
@@ -514,7 +516,13 @@ export default class Workspace {
 			throw new Error("URL cannot be empty!")
 		}
 
-		const proxy = this.session.getProxyUrl(request)
+		let proxy = "default"
+		if (context.getProxyUrl != null) {
+			proxy = context.getProxyUrl(request)
+		} else {
+			proxy = this.getProxyUrl(request)
+		}
+		console.log("Using proxy", proxy)
 
 		// TODO: Let the timeout be set by the user.
 		const timeout = 5 * 60  // Seconds.
@@ -559,6 +567,22 @@ export default class Workspace {
 		}
 	}
 
+	getProxyUrl({ url }: RequestDetails): null | string {
+		console.log("this.defaultProxy", this.defaultProxy)
+		if (this.defaultProxy == null || this.defaultProxy === "") {
+			return null
+		}
+
+		const isLocalProxy = isLocalUrl(this.defaultProxy)
+			|| (isLocalUrl(location.toString()) && !this.defaultProxy.includes("://"))
+
+		return isLocalProxy
+			? this.defaultProxy
+			: isLocalUrl(url)
+				? null
+				: this.defaultProxy
+	}
+
 	async deleteCookie(domain: string, path: string, name: string): Promise<void> {
 		if (this.cookieJar != null) {
 			this.cookieJar.delete(domain, path, name)
@@ -568,4 +592,8 @@ export default class Workspace {
 		}
 	}
 
+}
+
+function isLocalUrl(url: string): boolean {
+	return url.includes("://localhost") || url.includes("://127.0.0.1")
 }

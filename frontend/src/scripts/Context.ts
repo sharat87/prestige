@@ -6,6 +6,7 @@ import type FileBucket from "./FileBucket"
 import type CookieJar from "./CookieJar"
 import { MultiPartForm } from "./BodyTypes"
 import type { MultiPartFormValue } from "./BodyTypes"
+import type { RequestDetails } from "./Parser"
 
 export interface Context {
 	data: Record<string, unknown>
@@ -16,12 +17,13 @@ export interface Context {
 	authHeader: (username: string, password: string) => string
 	multipart: (data: Record<string, string | MultiPartFormValue>) => MultiPartForm
 	fileFromBucket: (fileName: string) => Promise<MultiPartFormValue>
+	getProxyUrl: null | ((request: RequestDetails) => null | string)
 }
 
 export function makeContext(workspace: Workspace, cookieJar: CookieJar | null, fileBucket: FileBucket): Context {
 	const handlers: Map<string, Set<(e: CustomEvent) => unknown>> = new Map()
 
-	return { data: {}, on, off, emit, run, authHeader, multipart, fileFromBucket }
+	return { data: {}, on, off, emit, run, authHeader, multipart, fileFromBucket, getProxyUrl: null }
 
 	function run(lines: string[], runLineNum = 0): Promise<AnyResult> {
 		return workspace.runTop(lines, runLineNum, true)

@@ -41,13 +41,11 @@ interface ExecuteResponse {
 // TODO: Investigate if this class can just be merged in with Workspace.
 export default class HttpSession {
 	private loadingCounter: number
-	proxy: null | string
 	result: AnyResult | null
 
-	constructor(proxy: null | string = null) {
+	constructor() {
 		// These are persistent throughout a session.
 		this.loadingCounter = 0
-		this.proxy = proxy == null ? null : String(proxy)
 
 		// These should reset for each execute action.
 		this.result = null
@@ -215,22 +213,4 @@ export default class HttpSession {
 		}
 	}
 
-	getProxyUrl({ url }: RequestDetails): null | string {
-		if (this.proxy == null || this.proxy === "") {
-			return null
-		}
-
-		const isLocalProxy = isLocalUrl(this.proxy) || (isLocalUrl(location.toString()) && !this.proxy.includes("://"))
-
-		return isLocalProxy
-			? this.proxy
-			: isLocalUrl(url)
-				? null
-				: this.proxy
-	}
-
-}
-
-function isLocalUrl(url: string): boolean {
-	return url.includes("://localhost") || url.includes("://127.0.0.1")
 }
