@@ -507,7 +507,7 @@ export default class Workspace {
 		return await extractRequest(lines, runLineNum, context)
 	}
 
-	async execute(request: RequestDetails, context: Context): Promise<AnyResult> {
+	async execute(request: RequestDetails, context: null | Context): Promise<AnyResult> {
 		if (request.method === "") {
 			throw new Error("Method cannot be empty!")
 		}
@@ -516,12 +516,8 @@ export default class Workspace {
 			throw new Error("URL cannot be empty!")
 		}
 
-		let proxy = "default"
-		if (context.getProxyUrl != null) {
-			proxy = context.getProxyUrl(request)
-		} else {
-			proxy = this.getProxyUrl(request)
-		}
+		const proxy = context != null && context.getProxyUrl != null
+			? context.getProxyUrl(request) : this.getProxyUrl(request)
 		console.log("Using proxy", proxy)
 
 		// TODO: Let the timeout be set by the user.

@@ -8,7 +8,7 @@ const mockedRequestFn = m.request as jest.Mock
 
 test("execute direct get", async () => {
 	const workspace = new Workspace()
-	workspace.session.proxy = null
+	workspace.defaultProxy = null
 
 	mockedRequestFn.mockResolvedValue({
 		status: 200,
@@ -26,7 +26,7 @@ test("execute direct get", async () => {
 		bodyType: "raw",
 		body: "",
 		headers: new Headers(),
-	})
+	}, null)
 
 	expect(mockedRequestFn).toBeCalledWith(expect.objectContaining({
 		method: "GET",
