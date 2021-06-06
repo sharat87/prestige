@@ -1,5 +1,7 @@
 * {
-	scrollbar-color: var(--scrollbar-fg) var(--scrollbar-bg);
+	scrollbar-color: currentColor transparent;
+	scroll-behavior: smooth;
+	scrollbar-width: thin;
 }
 
 html, body {
@@ -621,8 +623,16 @@ form.grid {
 
 	.status {
 		&.is-2xx {
-			background-color: var(--green-1);
+			background-color: var(--green-3);
 			color: var(--green-9);
+		}
+		&.is-3xx {
+			background-color: var(--blue-3);
+			color: var(--blue-9);
+		}
+		&.is-4xx, &.is-5xx {
+			background-color: var(--red-3);
+			color: var(--red-9);
 		}
 	}
 
