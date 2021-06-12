@@ -16,7 +16,11 @@ export default function CodeBlock(): m.Component<Attrs> {
 	return { view }
 
 	function view(vnode: m.VnodeDOM<Attrs>) {
-		const { spec } = vnode.attrs
+		let { spec } = vnode.attrs
+
+		if (spec == null) {
+			spec = "text"
+		}
 
 		const mode = CodeMirror.getMode(CodeMirror.defaults, spec)
 

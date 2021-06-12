@@ -24,7 +24,10 @@ interface PrestigeState {
 
 CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<PrestigeState> => {
 	const jsMode = CodeMirror.getMode(config, "javascript")
-	const jsonMode = CodeMirror.getMode(config, { name: "javascript", json: true })
+	const jsonMode = CodeMirror.getMode(
+		config,
+		{ name: "javascript", json: true } as CodeMirror.ModeSpec<{json: boolean}>,
+	)
 
 	return {
 		name: "prestige",
