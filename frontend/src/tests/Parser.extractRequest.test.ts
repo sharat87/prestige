@@ -248,3 +248,21 @@ test("extract request with empty header name", async () => {
 		.rejects
 		.toThrow("Header name cannot be blank.")
 })
+
+test("multipart with await from file bucket", async () => {
+	const context = makeMockContext();
+	(context.multipart as jest.Mock).mockReturnValueOnce("multipart data")
+
+	const request = await extractRequest([
+		"POST https://httpbun.com/post",
+		"",
+		"= this.multipart({",
+		"  file: await this.fileFromBucket('data.txt')",
+		"})",
+	], 0, context)
+
+	expect(request).toBeDefined()
+	expect(request.method).toBe("POST")
+	expect(request.url).toBe("https://httpbun.com/post")
+	expect(request.body).toBe("multipart data")
+})

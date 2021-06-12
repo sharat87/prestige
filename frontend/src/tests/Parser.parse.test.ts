@@ -236,3 +236,80 @@ test("one js and one request block", async () => {
 		},
 	])
 })
+
+test("multipart with single string file in single line", async () => {
+	const structure = parse([
+		"POST http://httpbun.com/post",
+		"",
+		"= this.multipart({ file: 'file content' })",
+	])
+
+	expect(structure).toBeDefined()
+	expect(structure).toStrictEqual([
+		{
+			type: BlockType.HTTP_REQUEST,
+			start: 0,
+			end: 2,
+			header: {
+				start: 0,
+				end: 0,
+			},
+			payload: {
+				start: 2,
+				end: 2,
+			},
+		},
+	])
+})
+
+test("multipart with await from bucket in single line", async () => {
+	const structure = parse([
+		"POST http://httpbun.com/post",
+		"",
+		"= this.multipart({ file: await this.fileFromBucket('data.txt') })",
+	])
+
+	expect(structure).toBeDefined()
+	expect(structure).toStrictEqual([
+		{
+			type: BlockType.HTTP_REQUEST,
+			start: 0,
+			end: 2,
+			header: {
+				start: 0,
+				end: 0,
+			},
+			payload: {
+				start: 2,
+				end: 2,
+			},
+		},
+	])
+})
+
+test("multipart with await from bucket in multiple lines", async () => {
+	const structure = parse([
+		"POST http://httpbun.com/post",
+		"",
+		"= this.multipart({",
+		"  file: await this.fileFromBucket('data.txt')",
+		"})",
+	])
+
+	expect(structure).toBeDefined()
+	expect(structure).toStrictEqual([
+		{
+			type: BlockType.HTTP_REQUEST,
+			start: 0,
+			end: 4,
+			header: {
+				start: 0,
+				end: 0,
+			},
+			payload: {
+				start: 2,
+				end: 4,
+			},
+		},
+	])
+})

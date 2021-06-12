@@ -16,11 +16,15 @@
 	],
 	"babel": {
 		"presets": [
-			"@parcel/babel-preset-env",
+			[
+				"@parcel/babel-preset-env",
+				{
+					"ignoreBrowserslistConfig": false
+				}
+			],
 			"@babel/preset-typescript"
 		],
 		"plugins": [
-			"@parcel/babel-plugin-transform-runtime",
 			"babel-plugin-const-enum"
 		]
 	},
@@ -141,7 +145,6 @@
 	"devDependencies": {
 		"@babel/core": "^7.13.16",
 		"@babel/preset-typescript": "^7.13.0",
-		"@parcel/babel-plugin-transform-runtime": "^2.0.0-nightly.1823",
 		"@parcel/transformer-less": "2.0.0-beta.2",
 		"@types/codemirror": "0.0.109",
 		"@types/jest": "^26.0.22",
@@ -151,6 +154,7 @@
 		"@typescript-eslint/parser": "^4.22.0",
 		"acorn": "^8.2.1",
 		"babel-plugin-const-enum": "^1.0.1",
+		"babel-preset-env": "^1.7.0",
 		"codemirror": "^5.61.0",
 		"eslint": "^7.25.0",
 		"jest": "^26.6.3",

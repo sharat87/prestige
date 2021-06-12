@@ -472,6 +472,7 @@ export default class Workspace {
 
 		} catch (error: unknown) {
 			if (error instanceof Error) {
+				console.log("Error extracting and executing request", error)
 				result = { ok: false, error, request }
 			} else {
 				throw error

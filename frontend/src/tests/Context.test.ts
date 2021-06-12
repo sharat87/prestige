@@ -17,11 +17,11 @@ test("basic auth header generation", () => {
 	const fileBucket = new FileBucket()
 	const context = makeContext(new Workspace(), cookieJar, fileBucket)
 
-	expect(context.authHeader("user", "pass"))
-		.toBe("Authorization: Basic dXNlcjpwYXNz")
+	expect(context.basicAuth("user", "pass"))
+		.toBe("Basic dXNlcjpwYXNz")
 
-	expect(context.authHeader("another user", "another password"))
-		.toBe("Authorization: Basic YW5vdGhlciB1c2VyOmFub3RoZXIgcGFzc3dvcmQ=")
+	expect(context.basicAuth("another user", "another password"))
+		.toBe("Basic YW5vdGhlciB1c2VyOmFub3RoZXIgcGFzc3dvcmQ=")
 })
 
 test("event system in contexts", () => {
