@@ -43,7 +43,7 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 			],
 		},
 		[
-			rows.length === 0 ? "Let's drop a file in this here bucket!" : m(
+			rows.length === 0 ? m(EmptyBucket) : m(
 				Table,
 				{
 					thead: m("tr", [
@@ -96,4 +96,28 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 		m.redraw()
 	}
 
+}
+
+const EmptyBucket = {
+	view() {
+		return m(".f4.ph3", [
+			m(
+				"p",
+				"You don't have any files in the bucket. Let's drop a file from your computer in this bucket, and " +
+					"then you'll be able to upload it using the `fileFromBucket` context function like:",
+			),
+			m(
+				"pre",
+				"POST https://httpbun.com/post\n\n" +
+					"= this.multipart({\n  myFile: await this.fileFromBucket('data.txt')\n})",
+			),
+			m("p", [
+				"Where ",
+				m("code", "data.txt"),
+				" is the file name. ",
+				m("a", { href: "/docs/guides/file-bucket/" }, "Learn more"),
+				".",
+			]),
+		])
+	},
 }
