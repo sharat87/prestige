@@ -67,12 +67,10 @@ def proxy(request) -> JsonResponse:
 		# The content-type will be set with an appropriate boundary value by the `request` method below.
 		del headers["content-type"]
 		data = None
-		files = json.loads(body) if body else None
+		files = json.loads(body) if body else {}
 		for key, value in files.items():
 			if isinstance(value, dict):
 				files[key] = value["name"], base64.b64decode(value["body"]), value["type"]
-			else:
-				files[key] = base64.b64decode(value)
 	else:
 		data = None if body is None else body.encode("utf-8")
 		files = None
