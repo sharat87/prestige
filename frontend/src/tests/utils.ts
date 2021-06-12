@@ -7,7 +7,7 @@ export function makeMockContext(): Context {
 		on: jest.fn(),
 		off: jest.fn(),
 		emit: jest.fn(),
-		authHeader: jest.fn(),
+		basicAuth: jest.fn(),
 		multipart: jest.fn(),
 		fileFromBucket: jest.fn(),
 		getProxyUrl: null,
