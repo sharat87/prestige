@@ -163,6 +163,7 @@ def prestige_frontend(ready_event: Optional[threading.Event] = None):
 
 def httpbun(ready_event: Optional[threading.Event] = None):
 	# 3. A local httpbun server process.
+	# TODO: This container is not getting stopped when the tests finish.
 	def on_output(line):
 		if not ready_event.is_set() and line and "Serving on" in line:
 			log.info("Httpbun Ready")
@@ -173,10 +174,10 @@ def httpbun(ready_event: Optional[threading.Event] = None):
 			"docker",
 			"run",
 			"--rm",
-			"-e",
-			"HOST=0.0.0.0",
+			"--pull",
+			"always",
 			"-p",
-            httpbun_port + ":80",
+			str(httpbun_port) + ":80",
 			"ghcr.io/sharat87/httpbun",
 		],
 		on_output=ready_event and on_output,

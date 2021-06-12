@@ -55,23 +55,40 @@ class BaseTestCase(unittest.TestCase):
 		os.makedirs(os.path.dirname(path), exist_ok=True)
 		self.driver.save_screenshot(path)
 
-	def editor_send_keys(self, content: str):
-		self.wait.until(presence_of_element_located((By.TAG_NAME, "textarea")))
-		self.driver.find_element_by_css_selector(".CodeMirror .CodeMirror-line").click()
-		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.COMMAND, "a")
-		self.driver.find_element_by_css_selector("textarea").send_keys(content)
+	def set_editor_content(self, content):
+		textarea = self.wait_for("textarea")
+		self.query_selector(".CodeMirror .CodeMirror-line").click()
+		textarea.send_keys(Keys.COMMAND, "a")
+		textarea.send_keys(Keys.BACKSPACE)
+		textarea.send_keys(content)
+
+	def editor_run(self):
+		textarea = self.query_selector("textarea")
+		textarea.send_keys(Keys.CONTROL, Keys.HOME)
+		textarea.send_keys(Keys.COMMAND, Keys.HOME)
+		textarea.send_keys(Keys.CONTROL, Keys.ENTER)
+
+	def query_selector(self, css: str):
+		return self.driver.find_element_by_css_selector(css)
+
+	def wait_for(self, css: str):
+		"""
+		Wait for the presence of an element by the given CSS selector, and return the element.
+		"""
+		self.wait.until(presence_of_element_located((By.CSS_SELECTOR, css)))
+		return self.query_selector(css)
 
 
 class SearchText(BaseTestCase):
-	def test_search_by_text(self):
+
+	def test_get_200(self):
 		self.wait.until(presence_of_element_located((By.CSS_SELECTOR, "header h1")))
 		print(self.driver.find_element_by_css_selector("header h1 + div").text)
-		self.editor_send_keys("GET " + self.httpbun_base + "/get\n\n###\n\n")
-		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.HOME)
-		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.COMMAND, Keys.HOME)
-		self.driver.find_element_by_css_selector("textarea").send_keys(Keys.CONTROL, Keys.ENTER)
-		self.wait.until(presence_of_element_located((By.CSS_SELECTOR, ".result-pane .body")))
+		self.set_editor_content("GET " + self.httpbun_base + "/get\n\n###\n\n")
+		self.editor_run()
+		status_el = self.wait_for(".result-pane .status")
 		self.shot()
+		assert status_el.text == "200 Ok"
 
 
 if __name__ == '__main__':
