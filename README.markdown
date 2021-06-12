@@ -3,7 +3,7 @@
 **Just an HTTP client, by [@sharat87](https://sharats.me). Available at [prestigemad.com](https://prestigemad.com)
 ([Why that domain?](#why-the-domain)).**
 
-> Under the abstractions, it's all just stardust interacting with text.
+> Under all the abstractions, it's just stardust interacting with text.
 
 This is a *powerful*, *text-based*, *in-browser*, HTTP client app that I wanted for myself and wished someone would
 build it one day. Well, had to do it myself in the end.
@@ -13,6 +13,8 @@ toolset.
 
 **Why is Prestige labeled as Alpha Software?**: Two reasons. One, the primary experiences and documented features are
 not yet very stable. Two, the syntax and API are not final yet.
+
+[Discuss on Hacker News](https://news.ycombinator.com/item?id=27412445).
 
 ## Under the Hood
 
@@ -62,7 +64,8 @@ More: <https://github.com/marmelab/awesome-rest>.
 
 ## Some public APIs to play with
 
-1. [httpbun.com](https://httpbun.com) &mdash; Great for meta-testing and JSON/form-data related experiments.
+1. [httpbun.com](https://httpbun.com) &mdash; Great for meta-testing and JSON/form-data related experiments. Another
+   project by [@sharat87](https://sharats.me).
 1. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
 1. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
 1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL, but requires a personal auth token.

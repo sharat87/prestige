@@ -207,6 +207,29 @@ a:hover code, a:focus code {
 	color: #157AB5;
 }
 
+table {
+	border-collapse: collapse;
+}
+
+thead {
+	background-color: #0001;
+}
+
+th, td {
+	border: 1px solid #eee;
+	padding: 6px;
+	vertical-align: top;
+}
+
+dt {
+	font-weight: bold;
+	margin-top: 1em;
+}
+
+dt + dt {
+	margin-top: 0;
+}
+
 footer {
 	margin: 3rem 0 1rem;
 	padding: 1rem 0;

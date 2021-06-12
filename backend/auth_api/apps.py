@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class AuthApiConfig(AppConfig):
-    name = 'auth_api'
+	default_auto_field = "django.db.models.AutoField"
+	name = "auth_api"

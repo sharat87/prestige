@@ -21,6 +21,7 @@ markdown_extensions:
   - "attr_list"
   - "admonition"
   - "smarty"
+  - "def_list"
   # - "codehilite":
   #     linenums: true
   #     guess_lang: false

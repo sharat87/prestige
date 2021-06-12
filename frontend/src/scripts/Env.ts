@@ -1,7 +1,8 @@
 declare const process: {
 	env: {
-		PRESTIGE_BACKEND: string
 		NODE_ENV: string
+		PRESTIGE_BACKEND: string
+		PRESTIGE_ALLOWED_HOSTS: string
 	}
 }
 
@@ -21,4 +22,9 @@ export function authUrl(): string {
 
 export function storageUrl(): string {
 	return PRESTIGE_BACKEND + "storage/"
+}
+
+export function allowedToStart(): boolean {
+	return process.env.PRESTIGE_ALLOWED_HOSTS == null ||
+		process.env.PRESTIGE_ALLOWED_HOSTS.split(",").includes(location.host)
 }

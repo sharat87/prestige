@@ -516,8 +516,17 @@ export default class Workspace {
 			throw new Error("URL cannot be empty!")
 		}
 
-		const proxy = context != null && context.getProxyUrl != null
-			? context.getProxyUrl(request) : this.getProxyUrl(request)
+		let proxy
+		if (context != null && context.getProxyUrl != null) {
+			proxy = context.getProxyUrl(request)
+			if (proxy === "@super") {
+				proxy = this.getProxyUrl(request)
+			} else if (proxy === "@default") {
+				proxy = this.defaultProxy
+			}
+		} else {
+			proxy = this.getProxyUrl(request)
+		}
 		console.log("Using proxy", proxy)
 
 		// TODO: Let the timeout be set by the user.

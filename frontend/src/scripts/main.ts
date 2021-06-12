@@ -6,7 +6,7 @@ import * as AuthService from "./AuthService"
 import { DocumentBrowser } from "./DocumentBrowser"
 import Modal from "./Modal"
 import Button from "./Button"
-import { ExternalLink } from "./Icons"
+import * as Icons from "./Icons"
 import CookiesModal from "./CookiesModal"
 import LoginFormModal from "./LoginFormModal"
 import FileBucketModal from "./FileBucketModal"
@@ -17,6 +17,7 @@ import { isDev } from "./Env"
 import Toaster from "./Toaster"
 import * as Exporter from "./ExportRequests"
 import CodeBlock from "./CodeBlock"
+import ExternalLink from "./ExternalLink"
 
 window.addEventListener("load", () => {
 	const root = document.createElement("main")
@@ -78,13 +79,14 @@ function WorkspaceView(): m.Component {
 	let redrawCount = 0
 
 	const enum VisiblePopup {
-		None,
-		DocumentBrowserPopup,
-		Options,
-		Cookies,
-		LoginForm,
-		FileBucketPopup,
+		AboutPane,
 		ColorPalette,
+		Cookies,
+		DocumentBrowserPopup,
+		FileBucketPopup,
+		LoginForm,
+		None,
+		Options,
 	}
 
 	let popup: VisiblePopup = VisiblePopup.None
@@ -124,7 +126,11 @@ function WorkspaceView(): m.Component {
 			m("header", [
 				m(".flex.items-end", [
 					m("h1.f3.mh2.mv0", "Prestige"),
-					m(".f6.i.ml3", "Just an HTTP client by Shrikant."),
+					m(".f6.i.ml3", [
+						"Just an HTTP client by ",
+						m("a", { href: "https://sharats.me", target: "_blank" }, "Shrikant"),
+						".",
+					]),
 				]),
 				m(".flex.items-stretch", [
 					!workspace.isChangesSaved && m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
@@ -146,7 +152,7 @@ function WorkspaceView(): m.Component {
 					m(
 						NavLink,
 						{ onclick: onCookiesToggle, isActive: popup === VisiblePopup.Cookies },
-						`🍪 Cookies (${ workspace.cookieJar?.size ?? 0 }) `,
+						`🍪 Cookies (${ workspace.cookieJar?.size ?? 0 })`,
 					),
 					m(
 						NavLink,
@@ -156,7 +162,12 @@ function WorkspaceView(): m.Component {
 					m(
 						NavLink,
 						{ onclick: onOptionsToggle, isActive: popup === VisiblePopup.Options },
-						"⚙️ Options ",
+						"⚙️ Options",
+					),
+					m(
+						NavLink,
+						{ onclick: onAboutPaneToggle, isActive: popup === VisiblePopup.AboutPane },
+						"🎒 About",
 					),
 					isDev() && [
 						authState === AuthService.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
@@ -171,8 +182,8 @@ function WorkspaceView(): m.Component {
 							[AuthService.email(), ": Log out"],
 						),
 					],
-					m(NavLink, { href: "/docs/" }, ["Docs", m(ExternalLink)]),
-					m(NavLink, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(ExternalLink)]),
+					m(NavLink, { href: "/docs/" }, ["Docs", m(Icons.ExternalLink)]),
+					m(NavLink, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(Icons.ExternalLink)]),
 				]),
 			]),
 			m(".er-pair.flex.items-stretch.justify-stretch", [
@@ -181,10 +192,73 @@ function WorkspaceView(): m.Component {
 				m("style", "body { --monospace-font: '" + editorFontOption() + "'; }"),
 				m("style", "body { --monospace-font-size: " + editorFontSizeOption() + "px; }"),
 			]),
+			popup === VisiblePopup.AboutPane && m(
+				Modal,
+				{
+					title: "About",
+					footer: [
+						m("div"),
+						m(
+							"div",
+							m(Button, { style: "primary", type: "button", onclick: onAboutPaneToggle }, "Close"),
+						),
+					],
+				},
+				m(
+					"div.f3.ph4",
+					[
+						m("h3", "Hello there! 👋"),
+						m(
+							"p",
+							"My name is Shrikant. I built Prestige because I needed an app like this when working" +
+								" with APIs and playing with external APIs.",
+						),
+						m(
+							"p",
+							[
+								"Check out my blog at ",
+								m("a", { href: "https://sharats.me", target: "_blank" }, "sharats.me"),
+								". You can also find me on ",
+								m(ExternalLink, { href: "https://github.com/sharat87" }, "GitHub"),
+								" or ",
+								m(ExternalLink, { href: "https://twitter.com/sharat87" }, "Twitter"),
+								" or ",
+								m(ExternalLink, { href: "https://www.linkedin.com/in/sharat87" }, "LinkedIn"),
+								", althought I'm not quite active on those platforms.",
+							],
+						),
+						m(
+							"p",
+							[
+								"If you like Prestige, please consider ",
+								m(
+									ExternalLink,
+									{ href: "https://github.com/sharat87/prestige" },
+									"starring the project on GitHub",
+								),
+								". It'll help improve the project's visibility and works as indication that this " +
+									"project is indeed a useful tool. Thank you! 🙏",
+							],
+						),
+						m(
+							"p",
+							[
+								"If you found a bug or have a feature request, please ",
+								m(
+									ExternalLink,
+									{ href: "https://github.com/sharat87/prestige/issues" },
+									"open an issue",
+								),
+								" on the GitHub project page.",
+							],
+						),
+					],
+				),
+			),
 			popup === VisiblePopup.DocumentBrowserPopup && m(
 				Modal,
 				{
-					title: "Documents (work in progress)",
+					title: "Documents",
 					footer: [
 						m("div"),
 						m(
@@ -239,6 +313,10 @@ function WorkspaceView(): m.Component {
 				]),
 			],
 		]
+	}
+
+	function onAboutPaneToggle() {
+		popup = popup === VisiblePopup.AboutPane ? VisiblePopup.None : VisiblePopup.AboutPane
 	}
 
 	function onDocumentBrowserToggle() {

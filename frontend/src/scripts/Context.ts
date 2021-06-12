@@ -14,7 +14,7 @@ export interface Context {
 	on: (event: string, callback: ((e: CustomEvent) => void)) => void
 	off: (event: string, callback: ((e: CustomEvent) => void)) => void
 	emit: (eventName: string, detail: unknown) => Promise<unknown>
-	authHeader: (username: string, password: string) => string
+	basicAuth: (username: string, password: string) => string
 	multipart: (data: Record<string, string | MultiPartFormValue>) => MultiPartForm
 	fileFromBucket: (fileName: string) => Promise<MultiPartFormValue>
 	getProxyUrl: null | ((request: RequestDetails) => null | string)
@@ -23,7 +23,7 @@ export interface Context {
 export function makeContext(workspace: Workspace, cookieJar: CookieJar | null, fileBucket: FileBucket): Context {
 	const handlers: Map<string, Set<(e: CustomEvent) => unknown>> = new Map()
 
-	return { data: {}, on, off, emit, run, authHeader, multipart, fileFromBucket, getProxyUrl: null }
+	return { data: {}, on, off, emit, run, basicAuth, multipart, fileFromBucket, getProxyUrl: null }
 
 	function run(lines: string[], runLineNum = 0): Promise<AnyResult> {
 		return workspace.runTop(lines, runLineNum, true)
@@ -66,6 +66,6 @@ export function makeContext(workspace: Workspace, cookieJar: CookieJar | null, f
 
 }
 
-function authHeader(username: string, password: string): string {
-	return "Authorization: Basic " + btoa(username + ":" + password)
+function basicAuth(username: string, password: string): string {
+	return "Basic " + btoa(username + ":" + password)
 }

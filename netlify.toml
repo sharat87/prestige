@@ -4,7 +4,7 @@
   base = "frontend/"
   publish = "dist/"
   command = "make -C .. netlify"
-  environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "/api/", PYTHON_VERSION = "3.7" }
+  environment = { NODE_VERSION = "12", PRESTIGE_BACKEND = "/api/", PRESTIGE_ALLOWED_HOSTS = "prestigemad.com", PYTHON_VERSION = "3.7" }
 
 [[redirects]]
   from = "/api/*"

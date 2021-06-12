@@ -1,11 +1,12 @@
 {%- if nav_item.children %}
-<details {% if nav_item.active %}open{% endif %}>
-	<summary class="{% if nav_item.active %}active{% endif %}">{{ nav_item.title }}</summary>
-	<div class="pl4">
-		{%- for nav_item in nav_item.children %}
-		{% include "nav-sub.html" %}
-		{%- endfor %}
-	</div>
+{#<details {% if nav_item.active %}open{% endif %}>#}
+<details open>
+<summary class="{% if nav_item.active %}active{% endif %}">{{ nav_item.title }}</summary>
+<div class="pl4">
+{%- for nav_item in nav_item.children %}
+{%- include "nav-sub.html" %}
+{%- endfor %}
+</div>
 </details>
 {%- else %}
 <a href="{{ nav_item.url|url }}" class="{% if nav_item.active %}active{% endif %}">{{ nav_item.title }}</a>

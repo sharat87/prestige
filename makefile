@@ -19,6 +19,13 @@ serve-backend: venv
 		&& source env.sh \
 		&& PYTHONUTF8=1 python manage.py runserver 127.0.0.1:3041
 
+changepassword: venv
+	@source venv/bin/activate \
+		&& cd backend \
+		&& set -o allexport \
+		&& source env.sh \
+		&& PYTHONUTF8=1 python manage.py changepassword "$$(read -e -r -p 'Email: '; echo $$REPLY)"
+
 lint-backend: venv/bin/flake8
 	@source venv/bin/activate \
 		&& cd backend \

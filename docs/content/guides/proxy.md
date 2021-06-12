@@ -31,9 +31,42 @@ internet (at least not as `localhost`). So, the proxy server up on `prestigemad.
 However, you might've noticed that requests to `localhost` *do partially* work in Prestige. It's not magic though.
 Prestige intelligently *doesn't use a proxy* when making requests to `localhost`.
 
-TODO: How to disable the proxy?
+## Customizing the Proxy
 
-TODO: How to change the proxy to point to somewhere else?
+The function `getProxyUrl` from the current execution context should return the URL which will be used as the proxy. So,
+to disable the use of proxy for any and all requests, we could just add a Javascript block at the top of the sheet with
+the following:
+
+```prestige
+### javascript
+this.getProxyUrl = () => null;
+```
+
+The request being executed will be passed as an argument to the `getProxyUrl` function, so we could decide to use a
+proxy for some URLs and not for others.
+
+```prestige
+### javascript
+this.getProxyUrl = (request) => {
+	if (request.url.includes("httpbun.com")) {
+		// Don't use a proxy for these requests.
+		return null;
+	} else {
+		// Use the default behavior otherwise.
+		return "@super";
+	}
+}
+```
+
+Notice here that we are returning the string `"@super"` which tells Proxy to use the default behavior, essentially like
+calling the original `getProxyUrl` method. Here's how the return value of this function is interpreted by Prestige:
+
+| Returns | Implication |
+| ------- | ----------- |
+| `null` | Don't use a proxy. Execute the request directly. This will fail if the server denies CORS. |
+| `"@super"` | Behave as if `this.getProxyUrl` hasn't been customized at all. That is, don't use proxy for `localhost` URLs, use proxy otherwise. |
+| `"@default"` | Use the default Prestige proxy for executing this request. |
+| Any other string | Treated as the proxy URL to use. |
 
 ## Conclusion
 
