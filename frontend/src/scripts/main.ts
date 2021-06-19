@@ -15,11 +15,12 @@ import { NavLink } from "./NavLink"
 import ResultPane from "./ResultPane"
 import { isDev } from "./Env"
 import Toaster from "./Toaster"
-import * as Exporter from "./ExportRequests"
-import CodeBlock from "./CodeBlock"
 import ExternalLink from "./ExternalLink"
+import ExportPane from "./ExportPane"
 
-window.addEventListener("load", () => {
+window.addEventListener("load", main)
+
+function main() {
 	const root = document.createElement("main")
 	root.setAttribute("id", "app")
 	root.classList.add("h-100")
@@ -34,7 +35,7 @@ window.addEventListener("load", () => {
 	})
 
 	AuthService.check()
-})
+}
 
 const Layout: m.Component = {
 	view(vnode: m.VnodeDOM): m.Children {
@@ -297,19 +298,16 @@ function WorkspaceView(): m.Component {
 					},
 				),
 				m(".modal2", [
-					m(CodeBlock, { text: Exporter.exportToCurl(workspace.exportingRequest), spec: "shell" }),
-					m("p", [
-						m(Button, { class: "ml3" }, "Copy as one-line (WIP)"),
-						m(Button, {
-							class: "ml3",
+					m(ExportPane, { request: workspace.exportingRequest }),
+					m(
+						"button.absolute.top-1.right-1.danger-light.ph2.pv0.br-100.f3",
+						{
 							onclick() {
-								if (workspace.exportingRequest != null) {
-									Exporter.copyCurl(workspace.exportingRequest, { singleLine: false })
-								}
+								workspace.exportingRequest = null
 							},
-						}, "Copy"),
-						m(Button, { class: "ml3" }, "Download (WIP)"),
-					]),
+						},
+						m.trust("&times;"),
+					),
 				]),
 			],
 		]

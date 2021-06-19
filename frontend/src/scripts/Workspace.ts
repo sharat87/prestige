@@ -140,7 +140,6 @@ export default class Workspace {
 			autofocus: true,
 			autoCloseBrackets: true,
 			styleActiveLine: true,
-			scrollPastEnd: true,
 			gutters: ["prestige", "CodeMirror-lint-markers"],
 			lint: true,
 			value: this.getContent(),
@@ -152,6 +151,10 @@ export default class Workspace {
 				"Shift-Tab": "indentLess",
 			},
 		})
+
+		// Buffer space after the last line in the editor. We are using a constant value here, instead of the
+		// `scrollpastend` addon of CodeMirror, because that addon doesn't work right with Prestige on Safari.
+		;(this.codeMirror as any).display.lineSpace.parentNode.style.paddingBottom = "96px"
 
 		this.updateEditorDisplay()
 

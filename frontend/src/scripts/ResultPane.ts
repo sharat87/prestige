@@ -263,7 +263,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 				spec === "image/svg+xml" && toggleTab("Text", Tabs.text),
 			]),
 			// Panes.
-			visibleTab === Tabs.text && m(CodeBlock, { text, spec: spec ?? "" }),
+			visibleTab === Tabs.text && m(CodeBlock, { text, spec: spec ?? "", class: "mt0" }),
 			visibleTab === Tabs.iFrame && m("iframe.bn.pa0.w-100", {
 				src: "data:text/html;base64," + btoa(text),
 				sandbox: "",  // Disable scripts and whole lot of scary stuff in the iframe's document.

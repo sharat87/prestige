@@ -96,9 +96,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'prestige.wsgi.application'
 
+
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-
 DATABASES = {
 	# This will parse the values of the DATABASE_URL environment variable and convert it to Django's DB config format.
 	# For SQLite, set `DATABASE_URL=sqlite:///path/to/folder/db.sqlite3`
@@ -115,7 +115,11 @@ AUTH_PASSWORD_VALIDATORS = [
 	{
 		"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
 	},
+	{
+		"NAME": "prestige.password_validation.MinimumLengthValidator",
+	},
 ]
+
 
 # Logging
 # https://docs.djangoproject.com/en/3.1/topics/logging/

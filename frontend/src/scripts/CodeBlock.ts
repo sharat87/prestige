@@ -1,43 +1,51 @@
 import m from "mithril"
 import CodeMirror from "./codemirror"
 import NothingMessage from "./NothingMessage"
+import { repeat } from "./utils"
 
 interface Attrs {
-	text: string
+	text?: string
 	spec?: string
+	elements?: m.Children
+	class?: string
 }
 
 /**
  * This is just a glorified `pre` element. This is component optimized and only-used for read-only code snippet display.
  */
-export default function CodeBlock(): m.Component<Attrs> {
-	const tabSize = 4
+export default { view }
 
-	return { view }
+const tabSize = 4
 
-	function view(vnode: m.VnodeDOM<Attrs>) {
-		let { spec } = vnode.attrs
+function view(vnode: m.VnodeDOM<Attrs>): m.Children {
+	const { elements } = vnode.attrs
+	let { spec } = vnode.attrs
 
-		if (spec == null) {
-			spec = "text"
-		}
+	if (spec == null) {
+		spec = "text"
+	}
 
-		const mode = CodeMirror.getMode(CodeMirror.defaults, spec)
+	const mode = CodeMirror.getMode(CodeMirror.defaults, spec)
 
-		// Code taken from the official runMode addon of CodeMirror.
-		const fullText: string = asString(vnode.attrs.text, vnode.attrs.spec)
+	// Code taken from the official runMode addon of CodeMirror.
+	const fullText: string = asString(vnode.attrs.text, spec)
 
-		if (fullText === "") {
-			return m(NothingMessage)
-		}
+	if (fullText === "" && elements == null) {
+		return m(NothingMessage)
+	}
 
-		const isTruncated = fullText.length > 500 * 1000
-		const truncatedText = isTruncated ? fullText.substr(0, 500 * 1000) : fullText
+	const isTruncated = fullText.length > 500 * 1000
+	const truncatedText = isTruncated ? fullText.substr(0, 500 * 1000) : fullText
 
-		const lineNumEls: m.Children = [m("div", 1)]
-		const rows: m.Children = []
+	const lineNumEls: m.Children = []
+	const rows: m.ChildArray = []
+
+	if (elements != null) {
+		rows.push(elements)
+
+	} else {
+		lineNumEls.push(m("div", 1))
 		let col = 0
-
 		runMode(truncatedText, mode, (text: string, style: string | null) => {
 			if (text === "\n") {
 				rows.push(m("span", text))
@@ -58,9 +66,7 @@ export default function CodeBlock(): m.Component<Attrs> {
 					content += text.slice(pos, idx)
 					const size = tabSize - col % tabSize
 					col += size
-					for (let i = 0; i < size; ++i) {
-						content += " "
-					}
+					content += repeat(" ", size)
 					pos = idx + 1
 				}
 			}
@@ -72,27 +78,34 @@ export default function CodeBlock(): m.Component<Attrs> {
 			}
 		})
 
-		return [
-			isTruncated && m("p", [
-				"Content too large to show here. You may ",
-				m("a", {
-					href: "#",
-					onclick(event: MouseEvent) {
-						event.preventDefault()
-						// TODO: This window closes immediately after opening. Looks like an ad-blocker issue.
-						// Inform users about this, if they are using an ad-blocker.
-						window.open("data:text/plain;base64," + btoa(fullText), "_blank")
-					},
-				},
-				"view full response in a new tab"),
-				".",
-			]),
-			m("pre.overflow-x-auto.mt0.cm-s-default.flex", [
-				m(".o-60.br.b--silver.tr.ph1.mr2", lineNumEls),
-				m("div", rows),
-			]),
-		]
 	}
+
+	return [
+		isTruncated && m("p", [
+			"Content too large to show here. You may ",
+			m("a", {
+				href: "#",
+				onclick(event: MouseEvent) {
+					event.preventDefault()
+					// TODO: This window closes immediately after opening. Looks like an ad-blocker issue.
+					// Inform users about this, if they are using an ad-blocker.
+					window.open("data:text/plain;base64," + btoa(fullText), "_blank")
+				},
+			},
+			"view full response in a new tab"),
+			".",
+		]),
+		m(
+			"pre.overflow-x-auto.cm-s-default.flex",
+			{
+				class: vnode.attrs.class,
+			},
+			[
+				lineNumEls.length > 0 && m(".o-60.br.b--silver.tr.ph1.mr2", lineNumEls),
+				m("div", rows),
+			],
+		),
+	]
 }
 
 function asString(text: any, spec?: string): string {

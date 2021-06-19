@@ -111,6 +111,12 @@ main {
 
 tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
 	font-family: var(--monospace-font), monospace;
+	line-height: 1.3;
+}
+
+pre {
+	tab-size: 4;
+	-moz-tab-size: 4;
 }
 
 .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like {
@@ -366,21 +372,23 @@ tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.Code
 	right: 0;
 	bottom: 0;
 	z-index: 100;
-	background-color: #555C;
+	opacity: .8;
 }
 
 .modal2 {
 	position: absolute;
-	background-color: var(--white);
 	border-radius: .3rem;
 	width: 50%;
 	left: 50%;
 	transform: translateX(-50%);
+	min-height: 50vh;
 	max-height: 90vh;
 	top: 5vh;
 	z-index: 110;
 	overflow: hidden;
-	box-shadow: 6px 6px 36px #0009;
+	box-shadow: 0px 9px 72px #0009;
+	display: flex;
+	flex-direction: column;
 }
 
 form.grid {
@@ -550,6 +558,14 @@ form.grid {
 		background-color: var(--blue-9);
 		color: var(--blue-1);
 	}
+
+	.modal2-mask {
+		background-color: var(--page-bg2);
+	}
+
+	.modal2 {
+		background-color: var(--page-bg);
+	}
 }
 
 .dark-theme() {
@@ -656,6 +672,14 @@ form.grid {
 	p.info {
 		background-color: var(--blue-3);
 		color: var(--blue-9);
+	}
+
+	.modal2-mask {
+		background-color: var(--page-bg);
+	}
+
+	.modal2 {
+		background-color: var(--page-bg2);
 	}
 }
 

@@ -1,3 +1,4 @@
+import m from "mithril"
 import type { RequestDetails } from "./Parser"
 
 export interface CurlFormatOptions {
@@ -5,39 +6,57 @@ export interface CurlFormatOptions {
 	singleLine: boolean
 }
 
-export function exportToCurl(request: RequestDetails, options: Partial<CurlFormatOptions> = {}): string {
-	const { useLongFlags, singleLine } = fillOptionsPartial(options)
+type Token = [token: string, style: string]
 
-	const lines: string[] = ["curl"]
+class ExportedRequest {
+	tokens: Token[]
 
-	lines[0] += " " + (useLongFlags ? "--request" : "-X") + " " + request.method
+	constructor(tokens: Token[]) {
+		this.tokens = tokens
+	}
+
+	toPlainString(): string {
+		const parts: string[] = []
+		for (const token of this.tokens) {
+			parts.push(token[0])
+		}
+		return parts.join("")
+	}
+
+	toComponentChildren(): m.Children {
+		const children: m.Children = []
+		for (const token of this.tokens) {
+			children.push(m("span", { class: token[1].replace(/\b(\w)/g, "cm-$1") }, token[0]))
+		}
+		return children
+	}
+}
+
+export function exportToCurl(request: RequestDetails, options: Partial<CurlFormatOptions> = {}): ExportedRequest {
+	const { singleLine, useLongFlags } = fillOptionsPartial(options)
+
+	const newLineToken: Token = [singleLine ? " " : " \\\n\t", ""]
+	const spaceToken: Token = [" ", ""]
+
+	const tokens: Token[] = [["curl", "keyword"]]
+
+	tokens.push(spaceToken, [useLongFlags ? "--request" : "-X", "variable"])
+	tokens.push(spaceToken, [request.method, "string"])
 
 	for (const [name, value] of request.headers) {
-		lines.push((useLongFlags ? "--header" : "-H") + ` '${name}: ${value}'`)
+		tokens.push(newLineToken, [useLongFlags ? "--header" : "-H", "variable"])
+		tokens.push(spaceToken, [`'${name.replace(/\b\w/g, (c) => c.toUpperCase())}: ${value}'`, "string"])
 	}
 
 	if (request.body !== "" && request.body != null) {
-		lines.push("--data-raw '" + request.body + "'")
+		tokens.push(newLineToken, ["--data", "variable"])
+		tokens.push(spaceToken, ["'" + request.body.replace(/'/g, "'\"'\"'") + "'", "string"])
 	}
 
-	const url = request.url
-	lines.push("'" + url.replace(/'/g, "'\"'\"'") + "'")
+	// TODO: For bash, if the body has newlines, it should be prefixed with a `$`. Not needed for zsh.
+	tokens.push(newLineToken, ["'" + request.url.replace(/'/g, "'\"'\"'") + "'", "string"])
 
-	return lines.join(singleLine ? " " : " \\\n\t")
-}
-
-export function copyCurl(request: RequestDetails, options: Partial<CurlFormatOptions> = {}): void {
-	const text = exportToCurl(request, options)
-	const el = document.createElement("textarea")
-	el.style.opacity = "0"
-	el.style.position = "fixed"
-	el.style.top = "0"
-	el.style.pointerEvents = "none"
-	document.body.append(el)
-	el.value = text
-	el.select()
-	document.execCommand("copy")
-	el.remove()
+	return new ExportedRequest(tokens)
 }
 
 function fillOptionsPartial(options: Partial<CurlFormatOptions>): CurlFormatOptions {
