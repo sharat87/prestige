@@ -4,35 +4,60 @@ import CodeBlock from "./CodeBlock"
 import type { RequestDetails } from "./Parser"
 import Button from "./Button"
 import { copyToClipboard, downloadText } from "./utils"
+import type CookieJar from "./CookieJar"
 
 export default { view }
 
 interface Attrs {
-	request: null | RequestDetails,
+	request: null | RequestDetails
+	cookieJar: null | CookieJar
 }
 
-function view(vnode: m.VnodeDOM<Attrs>): m.Children {
-	const { request } = vnode.attrs
+interface State {
+	useLongFlags: boolean
+	includeCookies: boolean
+}
+
+function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
+	const { request, cookieJar } = vnode.attrs
+	const { includeCookies, useLongFlags } = vnode.state
 
 	if (request == null) {
 		return m("p", "No request to export")
 	}
 
+	const exporter = new Exporter.Exporter(request, cookieJar)
+
 	return [
-		m(
-			CodeBlock,
-			{
-				class: "ma3",
-				elements: Exporter.exportToCurl(request, { singleLine: false }).toComponentChildren(),
-			},
-		),
-		m("p.ma2", "This is known to work with standard configuration dash, bash and zsh shells."),
-		m("p", [
+		m("p.ma2", [
+			m("label.mh2", [
+				m("input", {
+					type: "checkbox",
+					checked: useLongFlags,
+					onchange(event: Event) {
+						vnode.state.useLongFlags = (event.target as HTMLInputElement).checked
+					},
+				}),
+				m("span.ml1", "Use long options"),
+			]),
+			m("label.mh2", [
+				m("input", {
+					type: "checkbox",
+					checked: includeCookies,
+					onchange(event: Event) {
+						vnode.state.includeCookies = (event.target as HTMLInputElement).checked
+					},
+				}),
+				m("span.ml1", "Include Cookies"),
+			]),
+		]),
+		request != null && m("p.ma2", [
 			m(Button, {
-				class: "ml3",
 				onclick() {
 					if (request != null) {
-						copyToClipboard(Exporter.exportToCurl(request, { singleLine: true }).toPlainString())
+						copyToClipboard(
+							exporter.toCurl({ singleLine: true, includeCookies, useLongFlags }).toPlainString(),
+						)
 					}
 				},
 			}, "Copy as one-line"),
@@ -40,7 +65,9 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 				class: "ml3",
 				onclick() {
 					if (request != null) {
-						copyToClipboard(Exporter.exportToCurl(request, { singleLine: false }).toPlainString())
+						copyToClipboard(
+							exporter.toCurl({ includeCookies, useLongFlags }).toPlainString(),
+						)
 					}
 				},
 			}, "Copy as multiline"),
@@ -48,10 +75,19 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 				class: "ml3",
 				onclick() {
 					if (request != null) {
-						downloadText(Exporter.exportToCurl(request, { singleLine: false }).toPlainString())
+						downloadText(
+							exporter.toCurl({ includeCookies, useLongFlags }).toPlainString(),
+						)
 					}
 				},
 			}, "Download"),
 		]),
+		m(
+			CodeBlock,
+			{
+				class: "ma3",
+				elements: exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren(),
+			},
+		),
 	]
 }

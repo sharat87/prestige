@@ -110,6 +110,7 @@ export default class CookieJar {
 		}
 	}
 
+	// TODO: Change signature for set cookie, to take domain, path and name as separate arguments.
 	set(key: string, morsel: Morsel): void {
 		const [domain, path, name] = key.split("\t")
 		if (this.store[domain] == null) {

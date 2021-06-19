@@ -298,7 +298,7 @@ function WorkspaceView(): m.Component {
 					},
 				),
 				m(".modal2", [
-					m(ExportPane, { request: workspace.exportingRequest }),
+					m(ExportPane, { request: workspace.exportingRequest, cookieJar: workspace.cookieJar }),
 					m(
 						"button.absolute.top-1.right-1.danger-light.ph2.pv0.br-100.f3",
 						{
