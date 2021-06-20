@@ -1,5 +1,5 @@
 # backend server
-Django==3.2
+Django==3.2.4
 dj-database-url
 Requests
 django-cors-headers
