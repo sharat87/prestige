@@ -117,6 +117,14 @@ function WorkspaceView(): m.Component {
 
 	function onKeyDown(event: KeyboardEvent) {
 		if (event.key === "Escape") {
+			if (workspace.exportingRequest != null) {
+				workspace.exportingRequest = null
+				m.redraw()
+			}
+			if (popup !== VisiblePopup.None) {
+				popup = VisiblePopup.None
+				m.redraw()
+			}
 			workspace.codeMirror?.focus()
 		}
 	}
