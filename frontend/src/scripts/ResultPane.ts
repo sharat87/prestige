@@ -9,6 +9,7 @@ import { NavLink } from "./NavLink"
 import NothingMessage from "./NothingMessage"
 import CodeBlock from "./CodeBlock"
 import humanSizeDisplay from "./humanSizeDisplay"
+import { downloadText } from "./utils"
 
 interface Attrs {
 	class?: string;
@@ -253,8 +254,13 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 		return text === "" ? m("p.i.pl2", "No body.") : [
 			m("h3.pl2", [
 				"Body",
-				spec != null && m("small.pl1", `(${ spec })`),
-				m("small.pl1", `(${ humanSizeDisplay(text.length) })`),
+				spec != null && m("small.ml1", `(${ spec })`),
+				m("small.ml1", `(${ humanSizeDisplay(text.length) })`),
+				m("button.ml2.f6", {
+					onclick() {
+						downloadText(text)
+					},
+				}, "Download"),
 			]),
 			// Tabs.
 			m(".tab-bar", [

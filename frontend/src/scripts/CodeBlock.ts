@@ -1,7 +1,7 @@
 import m from "mithril"
 import CodeMirror from "./codemirror"
 import NothingMessage from "./NothingMessage"
-import { repeat } from "./utils"
+import { downloadText, repeat } from "./utils"
 
 interface Attrs {
 	text?: string
@@ -16,6 +16,9 @@ interface Attrs {
 export default { view }
 
 const tabSize = 4
+
+// Number of bytes, if response body is larger than this, syntax highlighting is turned off.
+const tooLargeThreshold = 400 * 1000
 
 function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 	const { elements } = vnode.attrs
@@ -34,8 +37,7 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 		return m(NothingMessage)
 	}
 
-	const isTruncated = fullText.length > 500 * 1000
-	const truncatedText = isTruncated ? fullText.substr(0, 500 * 1000) : fullText
+	const isTooLarge = fullText.length > tooLargeThreshold
 
 	const lineNumEls: m.Children = []
 	const rows: m.ChildArray = []
@@ -43,10 +45,10 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 	if (elements != null) {
 		rows.push(elements)
 
-	} else {
+	} else if (!isTooLarge) {
 		lineNumEls.push(m("div", 1))
 		let col = 0
-		runMode(truncatedText, mode, (text: string, style: string | null) => {
+		runMode(fullText, mode, (text: string, style: string | null) => {
 			if (text === "\n") {
 				rows.push(m("span", text))
 				lineNumEls.push(m("div", lineNumEls.length + 1))
@@ -81,21 +83,7 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 	}
 
 	return [
-		isTruncated && m("p", [
-			"Content too large to show here. You may ",
-			m("a", {
-				href: "#",
-				onclick(event: MouseEvent) {
-					event.preventDefault()
-					// TODO: This window closes immediately after opening. Looks like an ad-blocker issue.
-					// Inform users about this, if they are using an ad-blocker.
-					window.open("data:text/plain;base64," + btoa(fullText), "_blank")
-				},
-			},
-			"view full response in a new tab"),
-			".",
-		]),
-		m(
+		!isTooLarge && m(
 			"pre.overflow-x-auto.cm-s-default.flex",
 			{
 				class: vnode.attrs.class,
@@ -105,6 +93,16 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 				m("div", rows),
 			],
 		),
+		isTooLarge && [
+			m("p", "Response content too large. Syntax highlighting turned off."),
+			m(
+				"pre.overflow-x-auto.flex",
+				{
+					class: vnode.attrs.class,
+				},
+				fullText,
+			),
+		],
 	]
 }
 
