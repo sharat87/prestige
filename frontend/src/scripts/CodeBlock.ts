@@ -1,7 +1,7 @@
 import m from "mithril"
 import CodeMirror from "./codemirror"
 import NothingMessage from "./NothingMessage"
-import { downloadText, repeat } from "./utils"
+import { repeat } from "./utils"
 
 interface Attrs {
 	text?: string
