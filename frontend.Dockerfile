@@ -1,4 +1,4 @@
-FROM node:14.17.1-slim as build
+FROM node:12.22.1-slim as build
 
 RUN apt-get update && apt-get install -y make
 
