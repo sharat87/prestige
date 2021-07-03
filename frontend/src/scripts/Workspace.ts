@@ -12,6 +12,7 @@ import FileBucket from "./FileBucket"
 import type { RequestDetails } from "./Parser"
 import { extractRequest } from "./Parser"
 import { Context, makeContext } from "./Context"
+import { ping } from "./pings"
 
 const DEFAULT_EDITOR_CONTENT = `# Welcome to Prestige! Your newest developer tool!
 # Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
@@ -315,6 +316,7 @@ export default class Workspace {
 	}
 
 	onNewClicked(event: MouseEvent): void {
+		ping("new", "New request button clicked")
 		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
 		this.codeMirror?.replaceRange(
 			"###\n\nGET http://httpbun.com/get?name=sherlock\n\n",
@@ -325,6 +327,7 @@ export default class Workspace {
 	}
 
 	onDuplicateClicked(event: MouseEvent): void {
+		ping("duplicate", "Duplicate request clicked")
 		const lineNum: number = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
 		const newLines: string[] = [this.lines[lineNum]]
 		for (const line of this.lines.slice(lineNum + 1)) {
@@ -343,6 +346,7 @@ export default class Workspace {
 	}
 
 	async onExportClicked(event: MouseEvent): Promise<void> {
+		ping("export", "Export request clicked")
 		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
 		const context = makeContext(this, this.cookieJar, this.fileBucket)
 		this.exportingRequest = await this.buildRequestAtLine(lineNum + 1, context)
@@ -415,6 +419,7 @@ export default class Workspace {
 			return
 		}
 
+		ping("execute", "Execute request")
 		const lines = this.lines
 		const cursorLine = this.codeMirror.getCursor().line
 
