@@ -40,10 +40,19 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			return null
 		}
 
+		const toolbar = m(Toolbar, {
+			left: m(".flex", [
+				m(NavLink, { onclick: workspace.runAgain }, "Run Again"),
+				m(NavLink, { onclick: () => {
+					alert("Work in progress")
+				} }, "Find in Editor"),
+			]),
+		})
+
 		if (!result.ok) {
 			const error = result.error ?? {}
 			return m(".result-pane.error", { class: vnode.attrs.class }, [
-				m(Toolbar),
+				toolbar,
 				m(".body", [
 					m("h2.pl2", "Error executing request"),
 					error.title != null && m("h3", error.title),
@@ -96,14 +105,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 		}
 
 		return m(".result-pane", { class: vnode.attrs.class }, [
-			m(Toolbar, {
-				left: m(".flex", [
-					m(NavLink, { onclick: workspace.runAgain }, "Run Again"),
-					m(NavLink, { onclick: () => {
-						alert("Work in progress")
-					} }, "Find in Editor"),
-				]),
-			}),
+			toolbar,
 			m(".body", [
 				m("ul.messages", [
 					history.length > 0 && m("li",
