@@ -1,29 +1,25 @@
-# Prestige <sup>&alpha;</sup> <img align=right src="https://img.shields.io/badge/Made_With-Boring_Tech-F09?style=for-the-badge">
+# Prestige <sup>&beta;</sup>
 
 **Just an HTTP client, by [@sharat87](https://sharats.me). Available at [prestigemad.com](https://prestigemad.com)
 ([Why that domain?](#why-the-domain)).**
 
 > Under all the abstractions, it's just stardust interacting with text.
 
-This is a *powerful*, *text-based*, *in-browser*, HTTP client app that I wanted for myself and wished someone would
-build it one day. Well, had to do it myself in the end.
+This is a *powerful*, *text-based*, *in-browser*, HTTP client app that I wanted for myself.
 
 Check out the [User Guide](https://prestigemad.com/docs) to learn how Prestige can be a powerful addition to your
 toolset.
 
-**Why is Prestige labeled as Alpha Software?**: Two reasons. One, the primary experiences and documented features are
-not yet very stable. Two, the syntax and API are not final yet.
+**Why is Prestige labeled as Beta Software?**: Gaps in documentation, insufficient test coverage, and potential for
+backwards-incompatible changes to the syntax.
 
 [Discuss on Hacker News](https://news.ycombinator.com/item?id=27412445).
 
 ## Under the Hood
 
-Note that today, this is a hobby side-project, with a ton of inefficient code and features just rich enough for my daily
-work to get by. It is particularly lacking in test cases, but a test framework and a test running infrastructure is
-there (so that's a good place to contribute if you want to get started). However, I use Prestige all day, every day at
-my job, and it's fairly stable in that. When I find something lacking/breaking, I tend to either immediately fix it (if
-it's a small thing) or defer it to a weekend. All this said, Prestige should be considered alpha software. I'll change
-the status to beta once there's better test coverage and documentation.
+While Prestige is currently beta, and it does break occasionally, I use Prestige all day, every day at my job, and its
+fairly stable in that. When I find something lacking/breaking, I tend to either immediately fix it (if it's a small
+thing) or defer it to a weekend.
 
 Prestige exists thanks to the work of the following open source projects (not exhaustive, thanks to all those who
 weren't listed here, but still were just as helpful):
@@ -42,7 +38,7 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 ## Developing
 
-Please ensure you have Node >= v12 (with yarn) and Python >= v3.7 (with pip) before trying the following commands.
+Please ensure you have Node >= v14 (with yarn) and Python >= v3.8 (with pip) before trying the following commands.
 
 The project contains a powerful makefile that makes getting started with development quite easy. Here's a quick summary
 of some of the targets:
@@ -75,11 +71,11 @@ More: <https://github.com/marmelab/awesome-rest>.
 
 - UI Tests?
 - User Guide and User API Reference.
-- A desktop app with <https://github.com/webview/webview> or something similar.
+- A desktop app with NeutralinoJS.
 - A browser extension that, when installed, would make it so that we don't need the proxy anymore.
 - Dockerfiles and ability to start client and server with a single `docker-compose` command.
 - Response handler scripts.
-- Ability to open/edit documents from GitHub, Google Drive and Dropbox.
+- Ability to open/edit documents from GitHub (and Gist), Google Drive and Dropbox.
 - Rich editor features like auto-complete, JSON editing help, hotkeys to start new GET/POST/etc. request etc.
 
 ## Why the domain?
