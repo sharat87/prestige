@@ -8,7 +8,7 @@
 
 [[redirects]]
   from = "/api/*"
-  to = "http://api.prestigemad.com/:splat"
+  to = "https://api.prestigemad.com/:splat"
   status = 200
   force = true
   headers = { X-From = "Netlify" }
@@ -16,7 +16,7 @@
 
 [[redirects]]
   from = "/a/*"
-  to = "http://api.prestigemad.com/a/:splat"
+  to = "https://api.prestigemad.com/a/:splat"
   status = 200
   force = true
   headers = { X-From = "Netlify" }
