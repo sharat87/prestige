@@ -128,7 +128,12 @@ export default function ResultPane(): m.Component<Attrs, State> {
 						],
 					),
 					m("li", proxy != null
-						? ["Run with proxy at ", m("a", { href: proxy, target: "_blank" }, proxy), "."]
+						? [
+							"Run with proxy at ",
+							m("a", { href: proxy, target: "_blank" }, proxy),
+							". ",
+							m("a", { href: "/docs/guides/proxy/", target: "_blank" }, "Learn More"),
+						]
 						: "Direct CORS request, no proxy used. Only limited information available."),
 				]),
 				renderResponse(response),
