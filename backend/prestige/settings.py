@@ -128,8 +128,9 @@ LOGGING = {
 	"disable_existing_loggers": False,
 	"formatters": {
 		"verbose": {
-			"format": "{levelname} {asctime} {name} {message}",
+			"format": "{asctime} {levelname} {name} {message}",
 			"style": "{",
+			"datefmt": "%Y.%m.%d.%H.%M.%S.%j",
 		},
 	},
 	"handlers": {
@@ -156,6 +157,11 @@ LOGGING = {
 		"urllib3": {
 			"handlers": ["console"],
 			"level": "WARNING",
+			"propagate": True,
+		},
+		"gunicorn.error": {
+			"handlers": ["console"],
+			"level": "INFO",
 			"propagate": True,
 		},
 	},
