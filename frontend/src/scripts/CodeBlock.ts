@@ -2,6 +2,7 @@ import m from "mithril"
 import CodeMirror from "./codemirror"
 import NothingMessage from "./NothingMessage"
 import { repeat } from "./utils"
+import padStart from "lodash/padStart"
 
 interface Attrs {
 	text?: string
@@ -28,8 +29,6 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 		spec = "text"
 	}
 
-	const mode = CodeMirror.getMode(CodeMirror.defaults, spec)
-
 	// Code taken from the official runMode addon of CodeMirror.
 	const fullText: string = asString(vnode.attrs.text, spec)
 
@@ -39,23 +38,88 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 
 	const isTooLarge = fullText.length > tooLargeThreshold
 
-	const lineNumEls: m.Children = []
-	const rows: m.ChildArray = []
+	return [
+		!isTooLarge && m(
+			"pre.overflow-x-auto.cm-s-default.flex",
+			{
+				class: vnode.attrs.class,
+			},
+			elements != null ? elements : renderTokens(fullText, CodeMirror.getMode(CodeMirror.defaults, spec)),
+		),
+		isTooLarge && [
+			m("p", "Response content too large. Syntax highlighting turned off."),
+			m(
+				"pre.overflow-x-auto.flex",
+				{
+					class: vnode.attrs.class,
+				},
+				fullText,
+			),
+		],
+	]
+}
 
-	if (elements != null) {
-		rows.push(elements)
+function renderTokens(fullText: string, mode: CodeMirror.Mode<unknown>): m.Children {
+	const lineNumEls: m.Vnode[] = []
+	const rows: m.Children = []
 
-	} else if (!isTooLarge) {
-		lineNumEls.push(m("div", 1))
-		let col = 0
-		runMode(fullText, mode, (text: string, style: string | null) => {
-			if (text === "\n") {
-				rows.push(m("span", text))
-				lineNumEls.push(m("div", lineNumEls.length + 1))
-				col = 0
-				return
+	lineNumEls.push(m("span.line-nums", 1))
+	rows.push(lineNumEls[0])
+
+	interface NestingInfo {
+		commentEl: m.Vnode
+		count: number
+		openIndex: number
+		summaryEndIndex: number
+		isClosed: boolean
+	}
+
+	const nestingStack: NestingInfo[] = []
+
+	let col = 0
+	let prevTokenText: null | string = null
+	let prevNewLineIndex = 0
+
+	runMode(fullText, mode, (text: string, style: null | string) => {
+		if (text === "\n") {
+			const tokenSpan = m("span", text)
+
+			if (nestingStack.length > 0 && nestingStack[nestingStack.length - 1].isClosed) {
+				const stackItem = nestingStack.pop()
+				if (stackItem != null) {
+					console.log("stackItem", stackItem)
+					rows.splice(
+						stackItem.openIndex,
+						rows.length - stackItem.openIndex,
+						m("details.fold", { open: true }, [
+							m("summary", rows.slice(stackItem.openIndex, stackItem.summaryEndIndex)),
+							rows.slice(stackItem.summaryEndIndex + 1),
+						]),
+					)
+				}
 			}
+
+			if (prevTokenText === "{" || prevTokenText === "[") {
+				const commentEl = m("span.i.cm-comment.no-select", "n/a")
+				rows.push(commentEl)
+				nestingStack.push({
+					commentEl,
+					count: 1,
+					openIndex: prevNewLineIndex + 1,
+					summaryEndIndex: rows.length,
+					isClosed: false,
+				})
+			}
+			prevNewLineIndex = rows.push(tokenSpan) - 1
+			col = 0
+
+			const lineNumEl = m("span.line-nums", lineNumEls.length + 1)
+			lineNumEls.push(lineNumEl)
+			rows.push(lineNumEl)
+
+		} else {
 			let content = ""
+
 			// Replace tabs
 			for (let pos = 0;;) {
 				const idx = text.indexOf("\t", pos)
@@ -72,57 +136,53 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 					pos = idx + 1
 				}
 			}
-			// Create a node with token style and append it to the callback DOM element.
-			if (style != null) {
-				rows.push(m("span", { class: "cm-" + style.replace(/ +/g, " cm-") }, content))
-			} else {
-				rows.push(m("span", content))
-			}
-		})
 
+			const tokenSpan = style == null ?
+				m("span", content) :
+				m("span", { class: "cm-" + style.replace(/ +/g, " cm-") }, content)
+
+			rows.push(tokenSpan)
+
+			if (nestingStack.length > 0) {
+				if ((text === "}" && prevTokenText !== "{") || (text === "]" && prevTokenText !== "[")) {
+					const stackItem = nestingStack[nestingStack.length - 1]
+					if (stackItem != null) {
+						stackItem.isClosed = true
+						stackItem.commentEl.text = stackItem.count > 2 ? `${stackItem.count} items` : ""
+					}
+				} else if (text === ",") {
+					++nestingStack[nestingStack.length - 1].count
+				}
+			}
+
+		}
+
+		prevTokenText = text
+
+	})
+
+	let i = 1
+	const gutterWidth = lineNumEls.length.toString().length
+	for (const lineNumEl of lineNumEls) {
+		lineNumEl.text = padStart(i.toString(), gutterWidth, " ")
+		++i
 	}
 
-	return [
-		!isTooLarge && m(
-			"pre.overflow-x-auto.cm-s-default.flex",
-			{
-				class: vnode.attrs.class,
-			},
-			[
-				lineNumEls.length > 0 && m(".o-60.br.b--silver.tr.ph1.mr2", lineNumEls),
-				m("div", rows),
-			],
-		),
-		isTooLarge && [
-			m("p", "Response content too large. Syntax highlighting turned off."),
-			m(
-				"pre.overflow-x-auto.flex",
-				{
-					class: vnode.attrs.class,
-				},
-				fullText,
-			),
-		],
-	]
+	return m("div", rows)
+
 }
 
-function asString(text: any, spec?: string): string {
-	if (text != null && typeof text !== "string") {
-		text = JSON.stringify(text)
-	}
-
+function asString(text: unknown, spec?: string): string {
 	if (text == null) {
 		return ""
+	} else if (typeof text !== "string") {
+		return JSON.stringify(text, null, 2)
+	} else {
+		return spec == null ? text : prettify(text, spec)
 	}
-
-	if (spec == null) {
-		return text
-	}
-
-	return prettify(text, spec)
 }
 
-function prettify(text: string, spec: null | string) {
+function prettify(text: string, spec?: string) {
 	const language = spec == null ? null : spec.split("/", 2)[1]
 
 	if (language === "json") {
@@ -143,7 +203,11 @@ function prettifyJson(json: string) {
 }
 
 // Code taken from the official runMode addon of CodeMirror.
-function runMode(inputText: string, mode: any, callback: ((text: string, style: string | null) => void)): void {
+function runMode(
+	inputText: string,
+	mode: CodeMirror.Mode<unknown>,
+	callback: ((text: string, style: string | null) => void),
+): void {
 	const lines = CodeMirror.splitLines(inputText)
 	const state = CodeMirror.startState(mode)
 	for (let i = 0, e = lines.length; i < e; ++i) {

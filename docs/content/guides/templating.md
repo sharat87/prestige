@@ -1,3 +1,8 @@
+---
+description: >
+  Requests can be constructed succintly using templating in the Prestige HTTP Client.
+---
+
 # Templating
 
 Templating, in Prestige, refers to the feature of being able to write bits of Javascript in HTTP requests, and have

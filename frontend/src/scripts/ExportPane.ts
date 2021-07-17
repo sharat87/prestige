@@ -3,7 +3,7 @@ import * as Exporter from "./ExportRequests"
 import CodeBlock from "./CodeBlock"
 import type { RequestDetails } from "./Parser"
 import Button from "./Button"
-import { copyToClipboard, downloadText } from "./utils"
+import { copyToClipboard, downloadText, showCopyGhost } from "./utils"
 import type CookieJar from "./CookieJar"
 
 export default { view }
@@ -53,31 +53,34 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 		]),
 		request != null && m("p.ma2", [
 			m(Button, {
-				onclick() {
+				onclick(event) {
 					if (request != null) {
 						copyToClipboard(
 							exporter.toCurl({ singleLine: true, includeCookies, useLongFlags }).toPlainString(),
 						)
+						showCopyGhost(event.target as HTMLButtonElement)
 					}
 				},
 			}, "Copy as one-line"),
 			m(Button, {
 				class: "ml3",
-				onclick() {
+				onclick(event) {
 					if (request != null) {
 						copyToClipboard(
 							exporter.toCurl({ includeCookies, useLongFlags }).toPlainString(),
 						)
+						showCopyGhost(event.target as HTMLButtonElement)
 					}
 				},
 			}, "Copy as multiline"),
 			m(Button, {
 				class: "ml3",
-				onclick() {
+				onclick(event) {
 					if (request != null) {
 						downloadText(
 							exporter.toCurl({ includeCookies, useLongFlags }).toPlainString(),
 						)
+						showCopyGhost(event.target as HTMLButtonElement)
 					}
 				},
 			}, "Download"),

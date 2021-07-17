@@ -1,3 +1,8 @@
+---
+description: >
+  The response pane is where the results of a request execution show up in the Prestige HTTP Client.
+---
+
 # The Response Pane
 
 The Response pane shows up the first time we execute a request. It shows the following details of the latest executed

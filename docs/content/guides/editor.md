@@ -1,3 +1,8 @@
+---
+description: >
+  Guide to the editor UI in the Prestige HTTP Client.
+---
+
 # The Editor
 
 The Editor is the main piece of the whole Prestige interface where we can define HTTP requests and add Javascript

@@ -1,3 +1,8 @@
+---
+description: >
+  Uploading files as part of requests being executed from the Prestige HTTP Client.
+---
+
 # File Bucket
 
 The file bucket is primarily used for creating requests that can upload files to the endpoint.

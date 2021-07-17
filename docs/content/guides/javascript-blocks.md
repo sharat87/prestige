@@ -1,3 +1,8 @@
+---
+description: >
+  Javascript blocks enable rich templating and intelligence in the requests you execute with the Prestige HTTP Client.
+---
+
 # Javascript Blocks
 
 Javascript blocks begin with the line `### javascript`. That is, when the page-break marker (line starts with `###`) has

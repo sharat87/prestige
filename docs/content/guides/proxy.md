@@ -1,3 +1,8 @@
+---
+description: >
+  In order to execute requests blocked by CORS, Prestige runs them through a small proxy server, which can be disabled or made to point to a different endpoint.
+---
+
 # Proxy
 
 Prestige uses a small proxy server to execute the actual HTTP requests. The reason for this is to avoid CORS

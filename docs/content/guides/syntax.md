@@ -1,3 +1,8 @@
+---
+description: >
+  Syntax guide for writing and executing powerful requests in the Prestige HTTP Client.
+---
+
 # Syntax
 
 This document describes the syntax structure that Prestige understands to execute requests.

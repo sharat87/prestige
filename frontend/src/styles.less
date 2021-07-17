@@ -18,6 +18,10 @@ body, sans-serif {
 	font-family: "Source Sans Pro", sans-serif;
 }
 
+.no-select {
+	user-select: none;
+}
+
 a {
 	color: var(--link-color);
 }
@@ -236,6 +240,10 @@ pre {
 			.nav-link {
 				border-radius: .25rem .25rem 0 0;
 			}
+
+			+ * {
+				border-bottom: 1px solid var(--active-tab-bg);
+			}
 		}
 
 		img, svg {
@@ -247,6 +255,13 @@ pre {
 		iframe {
 			height: 200px;
 		}
+	}
+
+	.line-nums {
+		margin-right: .5ch;
+		padding: 0 .5ch 0 calc(3px + 1ch);  // Space for fold markers.
+		border-right: 1px solid var(--border-color);
+		user-select: none;
 	}
 
 	.CodeMirror {
@@ -410,6 +425,14 @@ form.grid {
 	> * {
 		margin: 6px;
 	}
+
+	select {
+		max-width: 400px;
+	}
+
+	input[type=number] {
+		max-width: 9ch;
+	}
 }
 
 .toasts {
@@ -424,6 +447,40 @@ form.grid {
 		&.close {
 			animation: toast-close .1s;
 		}
+	}
+}
+
+details.fold {
+	display: inline-block;
+	position: relative;
+
+	summary {
+		display: block;
+
+		.cm-comment {
+			// Item count of nested object or array.
+			cursor: pointer;
+			margin-left: 1ch;
+			opacity: .7;
+
+			&:hover {
+				text-decoration: underline;
+				opacity: 1;
+			}
+		}
+	}
+
+	summary:before {
+		content: "▶";
+		display: block;
+		cursor: pointer;
+		font-size: .8em;
+		position: absolute;
+		left: 3px;
+	}
+
+	&[open] > summary:before {
+		content: "▼ ";
 	}
 }
 
@@ -446,6 +503,18 @@ form.grid {
 	to {
 		opacity: 0;
 		transform: translateY(-2rem);
+	}
+}
+
+// Animation for "Copied!" message when clicking on copy buttons.
+@keyframes ghost {
+	from {
+		opacity: 1;
+		transform: none;
+	}
+	to {
+		opacity: 0;
+		transform: translateY(-5rem);
 	}
 }
 
@@ -715,13 +784,13 @@ body[data-palette=tomorrow] {
 	--gray-9: #ffffff;
 
 	--primary-1: hsl(184, 80%, 13%);
-	--primary-1: hsl(184, 70%, 20%);
+	--primary-2: hsl(184, 70%, 20%);
 	--primary-3: hsl(184, 50%, 30%);
 	--primary-4: hsl(184, 47%, 35%);
 	--primary-5: hsl(184, 44%, 43%);
 	--primary-6: hsl(184, 55%, 50%);
 	--primary-7: hsl(184, 60%, 60%);
-	--primary-9: hsl(184, 70%, 84%);
+	--primary-8: hsl(184, 70%, 84%);
 	--primary-9: hsl(184, 90%, 96%);
 
 	--blue-1: hsl(214, 60%, 20%);
@@ -735,21 +804,33 @@ body[data-palette=tomorrow] {
 	--blue-9: hsl(214, 60%, 93%);
 
 	--green-1: hsl(72, 100%, 12%);
+	--green-2: hsl(72, 100%, 16%);
 	--green-3: hsl(72, 100%, 20%);
+	--green-4: hsl(72, 100%, 23%);
 	--green-5: hsl(72, 100%, 27%);
-	--green-7: hsl(72, 60%, 70%);
+	--green-6: hsl(72, 90%, 32%);
+	--green-7: hsl(72, 70%, 70%);
+	--green-8: hsl(72, 70%, 84%);
 	--green-9: hsl(72, 70%, 94%);
 
 	--yellow-1: hsl(47, 100%, 11%);
+	--yellow-2: hsl(47, 100%, 11%);
 	--yellow-3: hsl(43, 100%, 30%);
+	--yellow-4: hsl(43, 100%, 40%);
 	--yellow-5: hsl(47, 100%, 46%);
-	--yellow-7: hsl(47, 70%, 80%);
-	--yellow-9: hsl(47, 80%, 97%);
+	--yellow-6: hsl(47, 90%, 60%);
+	--yellow-7: hsl(47, 90%, 80%);
+	--yellow-8: hsl(47, 90%, 90%);
+	--yellow-9: hsl(47, 80%, 96%);
 
 	--red-1: hsl(0, 67%, 15%);
+	--red-2: hsl(0, 67%, 23%);
 	--red-3: hsl(0, 67%, 30%);
-	--red-5: hsl(0, 67%, 47%);
+	--red-4: hsl(0, 67%, 39%);
+	--red-5: hsl(0, 53%, 50%);
+	--red-6: hsl(0, 67%, 70%);
 	--red-7: hsl(0, 67%, 80%);
+	--red-8: hsl(0, 67%, 90%);
 	--red-9: hsl(0, 67%, 95%);
 
 	--extra-1: #f5871f;
@@ -782,34 +863,51 @@ body[data-palette=base16] {
 	--primary-1: hsl(312, 24%, 20%);
 	--primary-2: hsl(312, 24%, 30%);
 	--primary-3: hsl(312, 24%, 40%);
+	--primary-4: hsl(312, 24%, 49%);
 	--primary-5: hsl(312, 24%, 56%);
-	--primary-7: hsl(312, 44%, 76%);
-	--primary-9: hsl(312, 24%, 96%);
+	--primary-6: hsl(312, 24%, 67%);
+	--primary-7: hsl(312, 44%, 80%);
+	--primary-8: hsl(312, 44%, 90%);
+	--primary-9: hsl(312, 44%, 96%);
 
 	--blue-1: hsl(197, 50%, 18%);
 	--blue-2: hsl(197, 50%, 25%);
 	--blue-3: hsl(197, 50%, 35%);
+	--blue-4: hsl(197, 34%, 49%);
 	--blue-5: hsl(197, 34%, 56%);
+	--blue-6: hsl(197, 34%, 68%);
 	--blue-7: hsl(197, 34%, 80%);
 	--blue-8: hsl(197, 34%, 90%);
 	--blue-9: hsl(197, 34%, 95%);
 
 	--green-1: hsl(79, 32%, 15%);
+	--green-2: hsl(79, 32%, 21%);
 	--green-3: hsl(79, 32%, 28%);
+	--green-4: hsl(79, 32%, 41%);
 	--green-5: hsl(79, 32%, 51%);
+	--green-6: hsl(79, 32%, 65%);
 	--green-7: hsl(79, 32%, 80%);
+	--green-8: hsl(79, 32%, 90%);
 	--green-9: hsl(79, 32%, 95%);
 
 	--yellow-1: hsl(45, 60%, 10%);
+	--yellow-2: hsl(45, 60%, 18%);
 	--yellow-3: hsl(45, 90%, 25%);
 	--yellow-4: hsl(45, 100%, 32%);
-	--yellow-5: hsl(45, 100%, 40%);
-	--yellow-7: hsl(35, 100%, 75%);
-	--yellow-9: hsl(35, 70%, 97%);
+	--yellow-5: hsl(47, 100%, 40%);
+	--yellow-6: hsl(49, 100%, 50%);
+	--yellow-7: hsl(50, 100%, 75%);
+	--yellow-8: hsl(50, 100%, 90%);
+	--yellow-9: hsl(50, 70%, 95%);
 
 	--red-1: hsl(0, 45%, 27%);
+	--red-2: hsl(0, 45%, 35%);
 	--red-3: hsl(0, 45%, 46%);
+	--red-4: hsl(0, 48%, 50%);
 	--red-5: hsl(0, 50%, 56%);
+	--red-6: hsl(0, 50%, 60%);
+	--red-7: hsl(0, 50%, 80%);
+	--red-8: hsl(0, 50%, 90%);
 	--red-9: hsl(0, 50%, 96%);
 }
 

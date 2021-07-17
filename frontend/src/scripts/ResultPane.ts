@@ -9,7 +9,7 @@ import { NavLink } from "./NavLink"
 import NothingMessage from "./NothingMessage"
 import CodeBlock from "./CodeBlock"
 import humanSizeDisplay from "./humanSizeDisplay"
-import { downloadText } from "./utils"
+import { copyToClipboard, downloadText, showCopyGhost } from "./utils"
 
 interface Attrs {
 	class?: string;
@@ -268,6 +268,12 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 						downloadText(text)
 					},
 				}, "Download"),
+				m("button.ml2.f6", {
+					onclick(event: Event) {
+						copyToClipboard(text)
+						showCopyGhost(event.target as HTMLButtonElement)
+					},
+				}, "Copy Full"),
 			]),
 			// Tabs.
 			m(".tab-bar", [

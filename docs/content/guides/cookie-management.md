@@ -1,3 +1,8 @@
+---
+description: >
+  Guide to adding, editing, deleting cookies to be used for executing requests in Prestige HTTP Client.
+---
+
 # Cookie Management
 
 Prestige keeps its Cookie management features fairly simple. You can view the cookies currently being available from the
