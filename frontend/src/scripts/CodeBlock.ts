@@ -87,14 +87,24 @@ function renderTokens(fullText: string, mode: CodeMirror.Mode<unknown>): m.Child
 			if (nestingStack.length > 0 && nestingStack[nestingStack.length - 1].isClosed) {
 				const stackItem = nestingStack.pop()
 				if (stackItem != null) {
-					console.log("stackItem", stackItem)
 					rows.splice(
 						stackItem.openIndex,
 						rows.length - stackItem.openIndex,
-						m("details.fold", { open: true }, [
-							m("summary", rows.slice(stackItem.openIndex, stackItem.summaryEndIndex)),
-							rows.slice(stackItem.summaryEndIndex + 1),
-						]),
+						m(
+							"details.fold",
+							{
+								open: true,
+								onclick(event: Event) {
+									if (!(event.target as Element).matches(".line-nums")) {
+										event.preventDefault()
+									}
+								},
+							},
+							[
+								m("summary", rows.slice(stackItem.openIndex, stackItem.summaryEndIndex)),
+								rows.slice(stackItem.summaryEndIndex + 1),
+							],
+						),
 					)
 				}
 			}

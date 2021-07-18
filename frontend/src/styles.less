@@ -453,6 +453,7 @@ form.grid {
 details.fold {
 	display: inline-block;
 	position: relative;
+	width: 100%;
 
 	summary {
 		display: block;
@@ -468,15 +469,19 @@ details.fold {
 				opacity: 1;
 			}
 		}
+
+		.line-nums {
+			cursor: pointer;
+		}
 	}
 
 	summary:before {
 		content: "▶";
 		display: block;
-		cursor: pointer;
 		font-size: .8em;
 		position: absolute;
 		left: 3px;
+		pointer-events: none;
 	}
 
 	&[open] > summary:before {
