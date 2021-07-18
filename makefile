@@ -118,7 +118,7 @@ e2e-tests/drivers/chromedriver:
 ###
 
 serve-proxy:
-	@python3 proxy.py
+	caddy run --watch
 
 venv: venv/make_sentinel
 

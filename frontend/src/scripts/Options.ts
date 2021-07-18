@@ -8,8 +8,10 @@ const PREFIX = "option:"
 type DisplayMode = "auto" | "light" | "dark"
 
 const displayModeOption: Stream<DisplayMode> = Stream()
+const isPrefersDark: Stream<boolean> = Stream()
+
 displayModeOption.map((value: DisplayMode) => {
-	document.body.dataset.theme = value
+	updateIsDark()
 	// Following meta property changes color of native UI controls in Chrome. No Firefox support yet.
 	const colorSchemeMeta = document.head.querySelector("meta[name=color-scheme]")
 	if (colorSchemeMeta instanceof HTMLMetaElement) {  // Also does a null-check.
@@ -17,6 +19,18 @@ displayModeOption.map((value: DisplayMode) => {
 	}
 })
 initOption(displayModeOption, "displayMode", "auto")
+
+window.matchMedia("(prefers-color-scheme: dark)").addListener(event => {
+	isPrefersDark(event.matches)
+})
+isPrefersDark.map(updateIsDark)
+
+function updateIsDark() {
+	const modeValue = displayModeOption()
+	const isPrefersDarkValue = isPrefersDark()
+	const isDark = modeValue === "auto" ? isPrefersDarkValue : (modeValue === "dark")
+	document.body.classList[isDark ? "add" : "remove"]("dark")
+}
 
 const paletteOption: Stream<string> = Stream()
 paletteOption.map((value: string) => {

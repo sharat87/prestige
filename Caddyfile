@@ -1,0 +1,22 @@
+{
+	admin off
+	auto_https off
+}
+
+:3045 {
+	route /docs/* {
+		uri strip_prefix /docs
+		reverse_proxy localhost:3042
+	}
+
+	route /livereload.js {
+		reverse_proxy localhost:3042
+	}
+
+	route /api/* {
+		uri strip_prefix /api
+		reverse_proxy localhost:3041
+	}
+
+	reverse_proxy localhost:3040
+}
