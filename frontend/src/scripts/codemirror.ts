@@ -17,11 +17,17 @@ import * as acorn from "acorn/dist/acorn"
 interface PrestigeState {
 	context: null | string
 	bodyJustStarted: boolean
-	jsState: any
-	bodyState: any
+	jsState: unknown
+	bodyMode: null | CodeMirror.Mode<unknown>
+	bodyState: unknown
 }
 
-CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<PrestigeState> => {
+CodeMirror.defineMode("prestige", prestigeMode)
+
+function prestigeMode(
+	config: CodeMirror.EditorConfiguration,
+	// Unused modeOptions: Record<string, any>,
+): CodeMirror.Mode<PrestigeState> {
 	const jsMode = CodeMirror.getMode(config, "javascript")
 	const jsonMode = CodeMirror.getMode(
 		config,
@@ -42,6 +48,7 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 			context: null,
 			bodyJustStarted: false,
 			jsState: null,
+			bodyMode: null,
 			bodyState: null,
 		}
 	}
@@ -51,6 +58,7 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 			context: state.context,
 			bodyJustStarted: state.bodyJustStarted,
 			jsState: state.jsState === null ? null : (CodeMirror as any).copyState(jsMode, state.jsState),
+			bodyMode: state.bodyMode,
 			bodyState: state.bodyState === null ? null : (CodeMirror as any).copyState(jsMode, state.bodyState),
 		}
 	}
@@ -77,16 +85,16 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 			return "tag header"
 		}
 
-		if (stream.eat("#")) {
-			stream.skipToEnd()
-			return "comment"
-		}
-
 		if (state.context === "javascript") {
 			if (state.jsState === null) {
 				console.log("incorrect state", stream.current())
 			}
 			return jsMode.token ? jsMode.token(stream, state.jsState) : "error"
+		}
+
+		if (stream.eat("#")) {
+			stream.skipToEnd()
+			return "comment"
 		}
 
 		if (state.context === null) {
@@ -98,14 +106,17 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 		if (state.context === "request-body") {
 			if (bodyJustStarted) {
 				if (stream.peek() === "{") {
-					state.bodyState = CodeMirror.startState(jsonMode)
+					state.bodyMode = jsonMode
 				} else if (stream.peek() === "=") {
-					state.bodyState = CodeMirror.startState(jsMode)
+					state.bodyMode = jsMode
 					stream.eat("=")
 				}
 			}
-			if (state.bodyState) {
-				return jsonMode.token ? jsonMode.token(stream, state.bodyState) : "error"
+			if (state.bodyMode != null) {
+				if (state.bodyState == null) {
+					state.bodyState = CodeMirror.startState(state.bodyMode)
+				}
+				return state.bodyMode.token ? state.bodyMode.token(stream, state.bodyState) : "error"
 			} else {
 				stream.skipToEnd()
 				return "string"
@@ -122,11 +133,22 @@ CodeMirror.defineMode("prestige", (config/*, modeOptions*/): CodeMirror.Mode<Pre
 			state.bodyJustStarted = true
 		}
 	}
-})
+}
 
-CodeMirror.registerHelper("lint", "prestige", (text: string/*, options: any*/): any[] => {
+interface LintItem {
+	message: string
+	severity: "error"
+	from: CodeMirror.Position
+	to: CodeMirror.Position
+}
+
+interface AcornSyntaxError extends SyntaxError {
+	loc: acorn.Position
+}
+
+CodeMirror.registerHelper("lint", "prestige", (text: string/*, options: any*/): LintItem[] => {
 	console.log("linting prestige", text)
-	const flags: any[] = []
+	const flags: LintItem[] = []
 	const lines: string[] = text.split("\n")
 
 	let inJs = false
@@ -142,7 +164,7 @@ CodeMirror.registerHelper("lint", "prestige", (text: string/*, options: any*/): 
 				acorn.parse(jsCode, { ecmaVersion: 2019 })
 			} catch (error: unknown) {
 				if (error instanceof SyntaxError) {
-					const loc: { line: number, column: number } = (error as any).loc
+					const loc = (error as AcornSyntaxError).loc
 					// Extra 1 below for the function definition line.
 					const actualLineNum: number = currentJsBeginLineNum + loc.line - 1
 					flags.push({
