@@ -21,7 +21,6 @@ handler400 = "prestige.error_handlers.handler400"
 handler500 = "prestige.error_handlers.handler500"
 
 urlpatterns = [
-    path('', include("proxy.urls")),  # Deprecated.
     path('proxy/', include("proxy.urls")),
     path('storage/', include("storage.urls")),
     path('auth/', include("auth_api.urls")),
