@@ -460,12 +460,10 @@ details.fold {
 
 		.cm-comment {
 			// Item count of nested object or array.
-			cursor: pointer;
 			margin-left: 1ch;
 			opacity: .7;
 
 			&:hover {
-				text-decoration: underline;
 				opacity: 1;
 			}
 		}
@@ -1054,7 +1052,7 @@ body[data-palette=mono] {
 .cm-s-default span.cm-def { color: var(--cm-def); }
 .cm-s-default span.cm-bracket { color: var(--cm-bracket); }
 .cm-s-default span.cm-tag { color: var(--cm-tag); }
-.cm-s-default span.cm-link { color: var(--cm-link); }
+.cm-s-default span.cm-link { color: var(--cm-link); cursor: pointer; }
 .cm-s-default span.cm-error { background: var(--cm-error-bg); color: var(--cm-error-fg); }
 
 .cm-s-default .CodeMirror-activeline-background { background: var(--cursor-line-bg); }

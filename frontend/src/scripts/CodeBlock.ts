@@ -1,7 +1,7 @@
 import m from "mithril"
-import CodeMirror from "./codemirror"
-import NothingMessage from "./NothingMessage"
-import { repeat } from "./utils"
+import CodeMirror from "_/codemirror"
+import NothingMessage from "_/NothingMessage"
+import { repeat } from "_/utils"
 import padStart from "lodash/padStart"
 
 interface Attrs {

@@ -1,26 +1,23 @@
 import CodeMirror from "codemirror"
+import "codemirror/addon/runmode/runmode"
 
 // Following line is required so that Prestige mode's definition is loaded.
-import "../scripts/codemirror"
+import "_/codemirror"
 
 const prestigeMode = CodeMirror.getMode(CodeMirror.defaults, "prestige")
+const javascriptCustomMode = CodeMirror.getMode(CodeMirror.defaults, "javascript-custom")
 
-interface Token {
-	text: string
-	style: null | string
-}
+type TokenTuple = [style: null | string, text: string]
 
 // Code taken from the official runMode addon of CodeMirror.
-function runMode(
-	lines: string[],
-	mode: CodeMirror.Mode<unknown>,
-): Token[] {
-	const tokens: Token[] = []
+function runMode(lines: string[], mode: CodeMirror.Mode<unknown>): TokenTuple[] {
+	lines = CodeMirror.splitLines(lines.join("\n"))
+	const tokens: TokenTuple[] = []
 	const state = CodeMirror.startState(mode)
 
 	for (let i = 0, e = lines.length; i < e; ++i) {
 		if (i) {
-			tokens.push({ text: "\n", style: null })
+			tokens.push([null, "\n"])
 		}
 		const stream = new (CodeMirror as any).StringStream(lines[i], null, {
 			lookAhead(n: number) {
@@ -30,12 +27,12 @@ function runMode(
 				return null
 			},
 		})
-		if (!stream.inputText && mode.blankLine) {
+		if (!stream.string && mode.blankLine) {
 			mode.blankLine(state)
 		}
 		while (!stream.eol()) {
 			const style = mode.token(stream, state)
-			tokens.push({ text: stream.current(), style: style == null ? null : style })
+			tokens.push([style ?? null, stream.current()])
 			stream.start = stream.pos
 		}
 	}
@@ -43,16 +40,48 @@ function runMode(
 	return tokens
 }
 
-function runModePrestige(lines: string[]): Token[] {
+function runModePrestige(lines: string[]): TokenTuple[] {
 	return runMode(lines, prestigeMode)
 }
 
 test("simple sheet", async () => {
 	const tokens = runModePrestige([
-		"GET",
+		"GET https://httpbun.com/get",
 	])
 	expect(tokens).toEqual([
-		{ text: "GET", style: null },
+		["def", "GET "],
+		["string", "https://httpbun.com/get"],
+	])
+})
+
+test("comment with a link", async () => {
+	const tokens = runModePrestige([
+		"# Go to https://httpbun.com to find out!",
+	])
+	expect(tokens).toEqual([
+		["comment", "# Go to "],
+		["link", "https://httpbun.com"],
+		["comment", " to find out!"],
+	])
+})
+
+test("request with headers", async () => {
+	const tokens = runModePrestige([
+		"GET https://httpbun.com/headers",
+		"Content-Type: application/json",
+		"X-More-Stuff: more stuff value here",
+	])
+	expect(tokens).toEqual([
+		["def", "GET "],
+		["string", "https://httpbun.com/headers"],
+		[null, "\n"],
+		["keyword", "Content-Type"],
+		[null, ": "],
+		["attribute", "application/json"],
+		[null, "\n"],
+		["keyword", "X-More-Stuff"],
+		[null, ": "],
+		["attribute", "more stuff value here"],
 	])
 })
 
@@ -63,16 +92,72 @@ test("request with javascript with template string in body", async () => {
 		"= `abc ${1+2} def`",
 	])
 	expect(tokens).toEqual([
-		{ text: "POST https://httpbun.com/post", style: null },
-		{ text: "\n",                            style: null },
-		{ text: "\n",                            style: null },
-		{ text: "= ",                            style: null },
-		{ text: "`abc ${",                       style: "string-2" },
-		{ text: "1",                             style: "number" },
-		{ text: "+",                             style: "operator" },
-		{ text: "2",                             style: "number" },
-		{ text: "}",                             style: "string-2" },
-		{ text: " ",                             style: null },
-		{ text: "def`",                          style: "string-2" },
+		["def", "POST "],
+		["string", "https://httpbun.com/post"],
+		[null, "\n"],
+		[null, "\n"],
+		[null, "= "],
+		["string-2", "`abc ${"],
+		["number", "1"],
+		["operator", "+"],
+		["number", "2"],
+		["string-2", "}"],
+		[null, " "],
+		["string-2", "def`"],
 	])
+})
+
+test("request with JSON body", async () => {
+	const tokens = runModePrestige([
+		"PATCH https://httpbun.com/patch",
+		"Content-Type: application/json",
+		"",
+		'{ "one": 1, "two": "another" }',
+	])
+	expect(tokens).toEqual([
+		["def", "PATCH "],
+		["string", "https://httpbun.com/patch"],
+		[null, "\n"],
+		["keyword", "Content-Type"],
+		[null, ": "],
+		["attribute", "application/json"],
+		[null, "\n"],
+		[null, "\n"],
+		[null, "{"],
+		[null, " "],
+		["string property", '"one"'],
+		[null, ":"],
+		[null, " "],
+		["number", "1"],
+		[null, ","],
+		[null, " "],
+		["string property", '"two"'],
+		[null, ":"],
+		[null, " "],
+		["string", '"another"'],
+		[null, " "],
+		[null, "}"],
+	])
+})
+
+test("javascript custom", async () => {
+	expect(runMode(["// comment with https://httpbun.com link"], javascriptCustomMode))
+		.toEqual([
+			["comment", "// comment with "],
+			["link", "https://httpbun.com"],
+			["comment", " link"],
+		])
+	expect(runMode(["// comment with https://httpbun.com", "1"], javascriptCustomMode))
+		.toEqual([
+			["comment", "// comment with "],
+			["link", "https://httpbun.com"],
+			[null, "\n"],
+			["number", "1"],
+		])
+	expect(runMode(["//https://httpbun.com link"], javascriptCustomMode))
+		.toEqual([
+			["comment", "//"],
+			["link", "https://httpbun.com"],
+			["comment", " link"],
+		])
 })

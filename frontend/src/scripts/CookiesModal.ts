@@ -1,27 +1,32 @@
 import m, { Vnode, VnodeDOM } from "mithril"
-import Modal from "./Modal"
-import Button from "./Button"
-import Table from "./Table"
-import CookieJar from "./CookieJar"
-import type Workspace from "./Workspace"
+import ModalManager from "_/ModalManager"
+import Button from "_/Button"
+import Table from "_/Table"
+import CookieJar from "_/CookieJar"
+import type Workspace from "_/Workspace"
 
 export default { view }
 
-function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, workspace: Workspace, onClose: any }>): m.Children {
+interface Attrs {
+	cookieJar: null | CookieJar
+	workspace: Workspace
+}
+
+function view(vnode: VnodeDOM<Attrs>): m.Children {
 	const cookieJar = vnode.attrs.cookieJar
 	const rows: Vnode[] = []
 	let i = 0
 
 	for (const [domain, byPath] of cookieJar == null ? [] : Object.entries(cookieJar.store)) {
-		for (const [path, byName] of Object.entries(byPath as any)) {
-			for (const [name, morsel] of Object.entries(byName as any)) {
+		for (const [path, byName] of Object.entries(byPath)) {
+			for (const [name, morsel] of Object.entries(byName)) {
 				rows.push(m("tr", [
 					m("td", ++i),
 					m("td", domain),
 					m("td", path),
 					m("td", name),
-					m("td", (morsel as any).value),
-					m("td", (morsel as any).expires),
+					m("td", morsel.value),
+					m("td", morsel.expires),
 					m("td", [
 						m(
 							Button,
@@ -40,17 +45,14 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, workspace: Workspac
 	}
 
 	return m(
-		Modal,
+		ModalManager.DrawerLayout,
 		{
 			title: "Cookies",
-			footer: [
-				cookieJar != null && cookieJar.size > 0 ? m(
-					Button,
-					{ class: "danger-light", onclick: () => cookieJar.clear() },
-					"Clear all cookies",
-				) : m("div"),
-				m(Button, { style: "primary", onclick: vnode.attrs.onClose }, "Close"),
-			],
+			footerLeft: cookieJar != null && cookieJar.size > 0 && m(
+				Button,
+				{ class: "danger-light", onclick: () => cookieJar.clear() },
+				"Clear all cookies",
+			),
 		},
 		[
 			rows.length === 0 ? "No cookies in your jar!" : m(
@@ -66,19 +68,19 @@ function view(vnode: VnodeDOM<{ cookieJar: CookieJar | null, workspace: Workspac
 						m("th", "Actions"),
 					]),
 					/* TODO: UI in table footer to manually add a new cookie.
-					tfoot: m("tr", [
-						m("td", "+"),
-						m("td", m("input")),
-						m("td", m("input")),
-						m("td", m("input")),
-						m("td", m("input")),
-						m("td", m("input")),
-						m("td", m(
-							Button,
-							{ class: "bg-washed-green dark-green hover-bg-dark-green hover-washed-green" },
-							"Add",
-						)),
-					]), */
+					   tfoot: m("tr", [
+					   m("td", "+"),
+					   m("td", m("input")),
+					   m("td", m("input")),
+					   m("td", m("input")),
+					   m("td", m("input")),
+					   m("td", m("input")),
+					   m("td", m(
+					   Button,
+					   { class: "bg-washed-green dark-green hover-bg-dark-green hover-washed-green" },
+					   "Add",
+					   )),
+					   ]), */
 				},
 				rows,
 			),

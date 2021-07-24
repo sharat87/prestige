@@ -1,12 +1,12 @@
 import m from "mithril"
-import type Workspace from "./Workspace"
-import { AnyResult } from "./HttpSession"
-import { isPromise } from "./utils"
-import type FileBucket from "./FileBucket"
-import type CookieJar from "./CookieJar"
-import { MultiPartForm } from "./BodyTypes"
-import type { MultiPartFormValue } from "./BodyTypes"
-import type { RequestDetails } from "./Parser"
+import type Workspace from "_/Workspace"
+import { AnyResult } from "_/HttpSession"
+import { isPromise } from "_/utils"
+import type FileBucket from "_/FileBucket"
+import type CookieJar from "_/CookieJar"
+import { MultiPartForm } from "_/BodyTypes"
+import type { MultiPartFormValue } from "_/BodyTypes"
+import type { RequestDetails } from "_/Parser"
 
 export interface Context {
 	data: Record<string, unknown>

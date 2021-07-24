@@ -1,8 +1,8 @@
 import type { VnodeDOM } from "mithril"
 import m from "mithril"
-import Modal from "./Modal"
-import Button from "./Button"
-import * as AuthService from "./AuthService"
+import ModalManager from "_/ModalManager"
+import Button from "_/Button"
+import * as AuthService from "_/AuthService"
 
 interface InputAttrs {
 	id: string;
@@ -17,55 +17,54 @@ const Input = {
 	},
 }
 
-export default function (initialVnode: VnodeDOM<{ onClose: (event?: Event) => void }>): m.Component {
-	const { onClose } = initialVnode.attrs
+export default { view, oncreate }
 
-	return { view, oncreate }
+interface Attrs {
+	onClose: (event?: Event) => void
+}
 
-	function view() {
-		return m(
-			Modal,
-			{
-				title: "LogIn / SignUp",
-				footer: [
-					m("div"),
-					m(Button, { onclick: onClose }, "Close"),
-				],
-			},
-			[
-				m("h2.tc", "Log In"),
-				m("form.grid.w-60", { onsubmit: onLoginSubmit }, [
-					m("label", { for: "loginEmail" }, "Email"),
-					m(Input, { id: "loginEmail", type: "email", required: true }),
-					m("label", { for: "loginPassword" }, "Password"),
-					m(Input, { id: "loginPassword", type: "password", required: true, minlength: 6 }),
-					m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
-						m(Button, { style: "primary", type: "submit" }, "Log in!"),
-					]),
+interface LoginForm extends HTMLFormElement {
+	loginUsername: HTMLInputElement
+	loginPassword: HTMLInputElement
+}
+
+function view(vnode: m.VnodeDOM<Attrs>): m.Children {
+	const { onClose } = vnode.attrs
+
+	return m(
+		ModalManager.DrawerLayout,
+		{
+			title: "LogIn / SignUp",
+		},
+		[
+			m("h2.tc", "Log In"),
+			m("form.grid.w-60", { onsubmit: onLoginSubmit }, [
+				m("label", { for: "loginEmail" }, "Email"),
+				m(Input, { id: "loginEmail", type: "email", required: true }),
+				m("label", { for: "loginPassword" }, "Password"),
+				m(Input, { id: "loginPassword", type: "password", required: true, minlength: 6 }),
+				m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
+					m(Button, { style: "primary", type: "submit" }, "Log in!"),
 				]),
-				m("h2.tc.mt4", "Sign Up"),
-				m("form.grid.w-60", { onsubmit: onSignupSubmit }, [
-					m("label", { for: "signupEmail" }, "Email"),
-					m(Input, { id: "signupEmail", type: "email", required: true }),
-					m("label", { for: "signupPassword" }, "Password"),
-					m(Input, { id: "signupPassword", type: "password", required: true, minlength: 6 }),
-					m("label", { for: "signupPasswordRepeat" }, "Password (Repeat)"),
-					m(Input, { id: "signupPasswordRepeat", type: "password", required: true, minlength: 6 }),
-					m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
-						m(Button, { style: "primary", type: "submit" }, "Sign up!"),
-					]),
+			]),
+			m("h2.tc.mt4", "Sign Up"),
+			m("form.grid.w-60", { onsubmit: onSignupSubmit }, [
+				m("label", { for: "signupEmail" }, "Email"),
+				m(Input, { id: "signupEmail", type: "email", required: true }),
+				m("label", { for: "signupPassword" }, "Password"),
+				m(Input, { id: "signupPassword", type: "password", required: true, minlength: 6 }),
+				m("label", { for: "signupPasswordRepeat" }, "Password (Repeat)"),
+				m(Input, { id: "signupPasswordRepeat", type: "password", required: true, minlength: 6 }),
+				m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
+					m(Button, { style: "primary", type: "submit" }, "Sign up!"),
 				]),
-			],
-		)
-	}
-
-	function oncreate(vnode: VnodeDOM) {
-		(vnode.dom?.querySelector("input[type=email]") as HTMLInputElement)?.focus()
-	}
+			]),
+		],
+	)
 
 	function onLoginSubmit(event: Event) {
 		event.preventDefault()
-		AuthService.login((event.target as any).loginEmail.value, (event.target as any).loginPassword.value)
+		AuthService.login((event.target as LoginForm).loginEmail.value, (event.target as LoginForm).loginPassword.value)
 			.then(() => onClose())
 			.catch(error => {
 				console.error("Error logging in", error)
@@ -76,14 +75,14 @@ export default function (initialVnode: VnodeDOM<{ onClose: (event?: Event) => vo
 	function onSignupSubmit(event: Event) {
 		event.preventDefault()
 
-		const password = (event.target as any).signupPassword.value
+		const password = (event.target as LoginForm).signupPassword.value
 
-		if (password !== (event.target as any).signupPasswordRepeat.value) {
+		if (password !== (event.target as LoginForm).signupPasswordRepeat.value) {
 			alert("The passwords don't match. Please repeat the same password and then click Sign Up.")
 			return
 		}
 
-		AuthService.signup((event.target as any).signupEmail.value, password)
+		AuthService.signup((event.target as LoginForm).signupEmail.value, password)
 			.then(user => {
 				console.log("User signed up", user)
 				onClose()
@@ -93,5 +92,8 @@ export default function (initialVnode: VnodeDOM<{ onClose: (event?: Event) => vo
 				alert("Error signing up: [" + error.code + "] " + error.message)
 			})
 	}
+}
 
+function oncreate(vnode: VnodeDOM<Attrs>): void {
+	(vnode.dom?.querySelector("input[type=email]") as HTMLInputElement)?.focus()
 }

@@ -1,14 +1,13 @@
 import m from "mithril"
 import Stream from "mithril/stream"
-import Modal from "./Modal"
-import Button from "./Button"
+import ModalManager from "_/ModalManager"
 
 const PREFIX = "option:"
 
 type DisplayMode = "auto" | "light" | "dark"
 
 const displayModeOption: Stream<DisplayMode> = Stream()
-const isPrefersDark: Stream<boolean> = Stream()
+const isPrefersDark: Stream<boolean> = Stream(window.matchMedia("(prefers-color-scheme: dark)").matches)
 
 displayModeOption.map((value: DisplayMode) => {
 	updateIsDark()
@@ -83,15 +82,11 @@ function initOption<T>(stream: Stream<T>, name: string, defaultValue: T): void {
 export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 	return { view }
 
-	function view(vnode: m.VnodeDOM<{ doClose: () => void}>) {
+	function view() {
 		return m(
-			Modal,
+			ModalManager.DrawerLayout,
 			{
-				title: "Options",
-				footer: [
-					m("div"),
-					m(Button, { style: "primary", onclick: vnode.attrs.doClose }, "Close"),
-				],
+				title: "Cookies",
 			},
 			m("form.grid", [
 				m(".b", "Dark Mode"),

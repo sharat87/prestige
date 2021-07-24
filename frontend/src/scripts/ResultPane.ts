@@ -1,15 +1,17 @@
 import m, { VnodeDOM } from "mithril"
-import Workspace from "./Workspace"
+import Workspace from "_/Workspace"
 import CodeMirror from "codemirror"
-import { LoadingLabel } from "./LoadingLabel"
-import Toolbar from "./Toolbar"
-import Table from "./Table"
-import PageEnd from "./PageEnd"
-import { NavLink } from "./NavLink"
-import NothingMessage from "./NothingMessage"
-import CodeBlock from "./CodeBlock"
-import humanSizeDisplay from "./humanSizeDisplay"
-import { copyToClipboard, downloadText, showCopyGhost } from "./utils"
+import { LoadingLabel } from "_/LoadingLabel"
+import Toolbar from "_/Toolbar"
+import Table from "_/Table"
+import PageEnd from "_/PageEnd"
+import { NavLink } from "_/NavLink"
+import NothingMessage from "_/NothingMessage"
+import CodeBlock from "_/CodeBlock"
+import humanSizeDisplay from "_/humanSizeDisplay"
+import { copyToClipboard, downloadText, showCopyGhost } from "_/utils"
+import type { Response } from "_/HttpSession"
+import ModalManager from "_/ModalManager"
 
 interface Attrs {
 	class?: string;
@@ -143,7 +145,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 		])
 	}
 
-	function renderResponse(response: any, proxy: null | string = null) {
+	function renderResponse(response: Response, proxy: null | string = null) {
 		const responseContentType = getContentTypeFromHeaders(response && response.headers)
 		const requestContentType = getContentTypeFromHeaders(response && response.request.headers)
 		const nothingMessageAttrs = {
@@ -155,14 +157,14 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			3: "is-3xx",
 			4: "is-4xx",
 			5: "is-5xx",
-		} as Record<number, string>)[response.status.toString()[0]] ?? ""
+		})[response.status.toString()[0]] ?? ""
 
 		return response && m(".response", [
 			m(
 				".status.f2.pa2",
 				{ class: skin },
 				response.status + " " +
-					response.statusText.toLowerCase().replace(/\b[a-z]/g, (x: string[]) => x[0].toUpperCase()),
+					response.statusText.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase()),
 			),
 			m("pre.pa2.pb3.overflow-x-auto.overflow-y-hidden", response.request.method + " " + response.url),
 			response.request.method === "GET"
@@ -188,7 +190,7 @@ function HeadersTable(): m.Component<{ headers: Headers | [name: string, value: 
 		const { headers } = vnode.attrs
 
 		if (headers == null) {
-			return vnode.children
+			return m(".pl2", vnode.children)
 		}
 
 		let headersArray: [name: string, value: string][] =
@@ -208,7 +210,7 @@ function HeadersTable(): m.Component<{ headers: Headers | [name: string, value: 
 		}
 
 		return rows.length > 0 ? [
-			m("label.ph2", [
+			headersArray.length > 1 && m("label.ph2", [
 				m("input", {
 					type: "checkbox",
 					onchange(event: Event) {
@@ -290,8 +292,19 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 			visibleTab === Tabs.image && m(
 				"img",
 				{
-					src: "data:" + spec + ";charset=utf-8;base64," +
-						(spec?.endsWith("/svg+xml") ? btoa(text) : text),
+					src: "data:" + spec + ";charset=utf-8;base64," + (spec?.endsWith("/svg+xml") ? btoa(text) : text),
+					style: {
+						cursor: "zoom-in",
+					},
+					onclick() {
+						ModalManager.show(m(
+							"img",
+							{
+								src: "data:" + spec + ";charset=utf-8;base64," +
+									(spec?.endsWith("/svg+xml") ? btoa(text) : text),
+							},
+						))
+					},
 				},
 			),
 		]

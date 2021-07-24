@@ -1,8 +1,8 @@
 import m from "mithril"
-import * as AuthService from "./AuthService"
 import Stream from "mithril/stream"
-import { storageUrl } from "./Env"
-import CookieJar from "./CookieJar"
+import * as AuthService from "_/AuthService"
+import { storageUrl } from "_/Env"
+import CookieJar from "_/CookieJar"
 
 const STORAGE_URL_BASE = storageUrl()
 
@@ -233,7 +233,7 @@ function createProviderForSource(key: string, source: Source): Provider<Source> 
 		return new CloudProvider(key, source)
 	}
 
-	throw new Error(`Unrecognized persistence source type: '${ (source as any).type }'.`)
+	throw new Error(`Unrecognized persistence source type: '${ source != null && (source as BaseSource).type }'.`)
 }
 
 // TODO: Data in `currentProviders` and `providerRegistry` is the same, in different shapes. Remove one.

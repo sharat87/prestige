@@ -1,18 +1,20 @@
-import HttpSession from "./HttpSession"
-import type { AnyResult } from "./HttpSession"
+import HttpSession from "_/HttpSession"
+import type { AnyResult } from "_/HttpSession"
 import m from "mithril"
-import CodeMirror from "./codemirror"
-import { BlockType, parse } from "./Parser"
-import CookieJar from "./CookieJar"
-import { proxyUrl } from "./Env"
-import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, Sheet, Source } from "./Persistence"
+import CodeMirror from "_/codemirror"
+import { BlockType, parse } from "_/Parser"
+import CookieJar from "_/CookieJar"
+import { proxyUrl } from "_/Env"
+import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, Sheet, Source } from "_/Persistence"
 import Stream from "mithril/stream"
 import throttle from "lodash/throttle"
-import FileBucket from "./FileBucket"
-import type { RequestDetails } from "./Parser"
-import { extractRequest } from "./Parser"
-import { Context, makeContext } from "./Context"
-import { ping } from "./pings"
+import FileBucket from "_/FileBucket"
+import type { RequestDetails } from "_/Parser"
+import { extractRequest } from "_/Parser"
+import { Context, makeContext } from "_/Context"
+import { ping } from "_/pings"
+import ExportPane from "_/ExportPane"
+import ModalManager from "_/ModalManager"
 
 const DEFAULT_EDITOR_CONTENT = `# Welcome to Prestige! Your newest developer tool!
 # Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
@@ -65,13 +67,12 @@ export default class Workspace {
 	session: HttpSession
 	defaultProxy: null | string
 	fileBucket: FileBucket
-	private flashQueue: any[]
+	private flashQueue: { start: number, end: number }[]
 	private widgetMarks: CodeMirror.TextMarker[]
 	currentSheet: null | Sheet
 	currentSheetQualifiedPath: Stream<string>
 	private _disableAutoSave: boolean
 	isChangesSaved: boolean
-	exportingRequest: null | RequestDetails
 
 	constructor() {
 		this.codeMirror = null
@@ -87,7 +88,6 @@ export default class Workspace {
 		this.currentSheetQualifiedPath = Stream()
 		this._disableAutoSave = false
 		this.isChangesSaved = true
-		this.exportingRequest = null
 
 		Stream.lift<[string, Provider<Source>[]], void>((qualifiedPath: string) => {
 			this.loadSheet(qualifiedPath)
@@ -349,7 +349,8 @@ export default class Workspace {
 		ping("export", "Export request clicked")
 		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
 		const context = makeContext(this, this.cookieJar, this.fileBucket)
-		this.exportingRequest = await this.buildRequestAtLine(lineNum + 1, context)
+		const exportingRequest = await this.buildRequestAtLine(lineNum + 1, context)
+		ModalManager.show(m(ExportPane, { request: exportingRequest, cookieJar: this.cookieJar }))
 		m.redraw()
 	}
 
@@ -566,8 +567,9 @@ export default class Workspace {
 
 		const doc = this.codeMirror.getDoc() as any
 
-		while (this.flashQueue.length > 0) {
-			const { start, end } = this.flashQueue.shift()
+		let item
+		while ((item = this.flashQueue.shift()) != null) {
+			const { start, end } = item
 
 			for (let i = start; i < end; ++i) {
 				doc.addLineClass(i, "line", "flash")

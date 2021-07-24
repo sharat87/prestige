@@ -15,20 +15,39 @@ import "codemirror/mode/htmlmixed/htmlmixed"
 import * as acorn from "acorn/dist/acorn"
 
 interface PrestigeState {
-	context: null | string
+	context: string
 	bodyJustStarted: boolean
 	jsState: unknown
 	bodyMode: null | CodeMirror.Mode<unknown>
 	bodyState: unknown
 }
 
+/* Parser state contexts
+
+### javascript |
+| javascript
+console.log(42); | javascript
+ | javascript
+### |
+ | request-space-1
+POST https://httpbun.com/post | request-url
+Content-Type: application/json | request-headers*
+X-Custom-Header: more| request-headers
+ | request-space-2
+payload body here| request-body
+| request-body
+###|
+
+*/
+
 CodeMirror.defineMode("prestige", prestigeMode)
+CodeMirror.defineMode("javascript-custom", javascriptCustomMode)
 
 function prestigeMode(
 	config: CodeMirror.EditorConfiguration,
 	// Unused modeOptions: Record<string, any>,
 ): CodeMirror.Mode<PrestigeState> {
-	const jsMode = CodeMirror.getMode(config, "javascript")
+	const jsMode = CodeMirror.getMode(config, "javascript-custom")
 	const jsonMode = CodeMirror.getMode(
 		config,
 		{ name: "javascript", json: true } as CodeMirror.ModeSpec<{json: boolean}>,
@@ -45,7 +64,7 @@ function prestigeMode(
 
 	function startState(): PrestigeState {
 		return {
-			context: null,
+			context: "request-space-1",
 			bodyJustStarted: false,
 			jsState: null,
 			bodyMode: null,
@@ -55,19 +74,17 @@ function prestigeMode(
 
 	function copyState(state: PrestigeState): PrestigeState {
 		return {
-			context: state.context,
-			bodyJustStarted: state.bodyJustStarted,
-			jsState: state.jsState === null ? null : (CodeMirror as any).copyState(jsMode, state.jsState),
-			bodyMode: state.bodyMode,
-			bodyState: state.bodyState === null ? null : (CodeMirror as any).copyState(jsMode, state.bodyState),
+			...state,
+			jsState: state.jsState == null ? null : (CodeMirror as any).copyState(jsMode, state.jsState),
+			bodyState: state.bodyState == null ? null : (CodeMirror as any).copyState(state.bodyMode, state.bodyState),
 		}
 	}
 
-	function token(stream: any, state: PrestigeState): string | null {
+	function token(stream: CodeMirror.StringStream, state: PrestigeState): string | null {
 		const { bodyJustStarted } = state
 		state.bodyJustStarted = false
 
-		if (stream.match("###")) {
+		if (stream.sol() && stream.match("###")) {
 			if (state.jsState !== null) {
 				state.jsState = null
 			}
@@ -76,7 +93,7 @@ function prestigeMode(
 			}
 
 			stream.eatSpace()
-			state.context = stream.match("javascript") ? "javascript" : null
+			state.context = stream.match("javascript") ? "javascript" : "request-space-1"
 			if (state.context === "javascript") {
 				state.jsState = CodeMirror.startState(jsMode)
 			}
@@ -87,20 +104,73 @@ function prestigeMode(
 
 		if (state.context === "javascript") {
 			if (state.jsState === null) {
-				console.log("incorrect state", stream.current())
+				console.error("incorrect state", stream.current())
 			}
 			return jsMode.token ? jsMode.token(stream, state.jsState) : "error"
 		}
 
-		if (stream.eat("#")) {
-			stream.skipToEnd()
+		if (
+			(state.context === "request-space-1" && stream.eat("#"))
+				|| state.context === "request-comment-after-link"
+		) {
+			if (stream.skipTo("https://") || stream.skipTo("http://")) {
+				state.context = "request-comment-before-link"
+			} else {
+				stream.skipToEnd()
+				state.context = "request-space-1"
+			}
 			return "comment"
 		}
 
-		if (state.context === null) {
-			state.context = "request-preamble"
+		if (state.context === "request-comment-before-link") {
+			stream.eatWhile(/[-0-9a-zA-Z:.?&=#/]/)
+			const url = stream.current()
+			if (url.endsWith(".") && !url.endsWith("..")) {
+				stream.backUp(1)
+			}
+			state.context = "request-comment-after-link"
+			return "link"
+		}
+
+		if (state.context === "request-space-1") {
+			if (stream.skipTo(" ")) {
+				stream.eatSpace()
+				state.context = "request-url"
+			} else {
+				stream.skipToEnd()
+				state.context = "request-headers"
+			}
+			return "def"
+		}
+
+		if (state.context === "request-url") {
 			stream.skipToEnd()
+			state.context = "request-headers"
+			return "string"
+		}
+
+		if (state.context === "request-headers") {
+			if (stream.skipTo(":")) {
+				state.context = "request-headers-after-name"
+				return "keyword"
+			} else {
+				console.error("incorrect state", state)
+				stream.skipToEnd()
+				return null
+			}
+		}
+
+		if (state.context === "request-headers-after-name") {
+			stream.eat(":")
+			stream.eatSpace()
+			state.context = "request-headers-before-value"
 			return null
+		}
+
+		if (state.context === "request-headers-before-value") {
+			stream.skipToEnd()
+			state.context = "request-headers"
+			return "attribute"
 		}
 
 		if (state.context === "request-body") {
@@ -128,10 +198,77 @@ function prestigeMode(
 	}
 
 	function blankLine(state: PrestigeState) {
-		if (state.context === "request-preamble") {
+		if (state.context.startsWith("request-headers")) {
 			state.context = "request-body"
 			state.bodyJustStarted = true
 		}
+	}
+}
+
+interface JavascriptCustomModeState {
+	jsState: unknown
+	context: null | string
+}
+
+/**
+ * Wraps CodeMirror's default Javascript mode to provide some additional magic.
+ */
+function javascriptCustomMode(
+	config: CodeMirror.EditorConfiguration,
+	// Unused modeOptions: Record<string, any>,
+): CodeMirror.Mode<JavascriptCustomModeState> {
+	const jsMode = CodeMirror.getMode(config, "javascript")
+
+	return {
+		name: "javascript-custom",
+		lineComment: "//",
+		token,
+		startState,
+		blankLine,
+		copyState,
+	}
+
+	function startState(): JavascriptCustomModeState {
+		return {
+			jsState: CodeMirror.startState(jsMode),
+			context: null,
+		}
+	}
+
+	function blankLine(state: JavascriptCustomModeState) {
+		return jsMode.blankLine && jsMode.blankLine(state.jsState)
+	}
+
+	function copyState(state: JavascriptCustomModeState): JavascriptCustomModeState {
+		return {
+			...state,
+			jsState: jsMode.copyState ? jsMode.copyState(state.jsState) : state.jsState,
+		}
+	}
+
+	function token(stream: CodeMirror.StringStream, state: JavascriptCustomModeState): string | null {
+		if (state.context === "comment-after-link" || stream.match("//")) {
+			// TODO: Duplicate code for identifying links in comments.
+			if (stream.skipTo("https://") || stream.skipTo("http://")) {
+				state.context = "comment-before-link"
+			} else {
+				stream.skipToEnd()
+				state.context = null
+			}
+			return "comment"
+		}
+
+		if (state.context === "comment-before-link") {
+			stream.eatWhile(/[-0-9a-zA-Z:.?&=#/]/)
+			const url = stream.current()
+			if (url.endsWith(".") && !url.endsWith("..")) {
+				stream.backUp(1)
+			}
+			state.context = stream.eol() ? null : "comment-after-link"
+			return "link"
+		}
+
+		return jsMode.token(stream, state.jsState)
 	}
 }
 
@@ -147,7 +284,6 @@ interface AcornSyntaxError extends SyntaxError {
 }
 
 CodeMirror.registerHelper("lint", "prestige", (text: string/*, options: any*/): LintItem[] => {
-	console.log("linting prestige", text)
 	const flags: LintItem[] = []
 	const lines: string[] = text.split("\n")
 

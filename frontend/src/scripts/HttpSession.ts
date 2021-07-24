@@ -1,41 +1,50 @@
 import m from "mithril"
-import type CookieJar from "./CookieJar"
-import type { RequestDetails } from "./Parser"
+import type CookieJar from "_/CookieJar"
+import type { RequestDetails } from "_/Parser"
 
 interface SuccessResult {
-	ok: true,
-	response: any,
-	history: any[],
-	proxy: null | string,
-	cookies: null | CookieJar,
+	ok: true
+	response: Response
+	history: Response[]
+	proxy: null | string
+	cookies: null | CookieJar
 	cookieChanges?: {
-		added: number,
-		modified: number,
-		removed: number,
-		any: boolean,
-	},
-	request: any,
-	timeTaken?: number,
+		added: number
+		modified: number
+		removed: number
+		any: boolean
+	}
+	request: RequestDetails
+	timeTaken?: number
 }
 
 interface FailureResult {
-	ok: false,
+	ok: false
 	error?: {
-		title?: string,
-		message?: string,
-		stack?: string,
-	},
-	request: any,
-	timeTaken?: number,
+		title?: string
+		message?: string
+		stack?: string
+	}
+	request: null | RequestDetails
+	timeTaken?: number
 }
 
 export type AnyResult = SuccessResult | FailureResult
 
+export interface Response {
+	status: number
+	statusText: string
+	url: string
+	headers: [name: string, value: string][]
+	body: string
+	request: RequestDetails
+}
+
 interface ExecuteResponse {
-	status: number,
-	statusText: string,
-	headers: string[][],
-	body: string,
+	status: number
+	statusText: string
+	headers: string[][]
+	body: string
 }
 
 // TODO: Investigate if this class can just be merged in with Workspace.
@@ -69,17 +78,6 @@ export default class HttpSession {
 		const startTime = Date.now()
 		const { method, url, headers, body } = request
 
-		const options: RequestInit = {
-			cache: "no-store",
-			credentials: "same-origin",
-			method: request.method,
-			headers: request.headers,
-		}
-
-		if (body !== "") {
-			options.body = body
-		}
-
 		const headersObject: Record<string, string> = {}
 		for (const [name, value] of headers) {
 			headersObject[name] = value
@@ -91,7 +89,7 @@ export default class HttpSession {
 			headers: headersObject,
 			body,
 			withCredentials: true,
-			serialize(data: any): any {
+			serialize<T>(data: T): T {
 				return data
 			},
 			extract(xhr: XMLHttpRequest/*, options1: m.RequestOptions<ExecuteResponse>*/): ExecuteResponse {
@@ -138,12 +136,14 @@ export default class HttpSession {
 				status: response.status,
 				statusText: response.statusText,
 				url,
-				headers: response.headers,
+				headers: response.headers as [name: string, value: string][],
 				body: response.body,
 				request: {
+					method,
 					url,
-					body: null,
-					...options,
+					headers,
+					body,
+					bodyType: "",
 				},
 			},
 			history: [],

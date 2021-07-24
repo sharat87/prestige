@@ -1,6 +1,6 @@
 import m from "mithril"
-import type { RequestDetails } from "./Parser"
-import type CookieJar from "./CookieJar"
+import type { RequestDetails } from "_/Parser"
+import type CookieJar from "_/CookieJar"
 
 export interface CurlFormatOptions {
 	includeCookies: boolean

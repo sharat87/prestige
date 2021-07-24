@@ -1,5 +1,5 @@
-export function isPromise(object: any): boolean {
-	return object != null && typeof object.then === "function"
+export function isPromise(object: unknown): object is Promise<unknown> {
+	return object != null && typeof (object as Promise<unknown>).then === "function"
 }
 
 export function copyToClipboard(text: string): void {
@@ -47,6 +47,7 @@ export function showCopyGhost(el: Element): void {
 	ghost.style.display = "flex"
 	ghost.style.justifyContent = ghost.style.alignItems = "center"
 	ghost.style.cursor = "default"
+	ghost.style.pointerEvents = "none"
 	ghost.style.animation = "ghost 2s ease-out"
 	ghost.addEventListener("animationend", ghost.remove.bind(ghost))
 	document.body.appendChild(ghost)

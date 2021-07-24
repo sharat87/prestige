@@ -1,6 +1,6 @@
 import m from "mithril"
 import Stream from "mithril/stream"
-import { authUrl } from "./Env"
+import { authUrl } from "_/Env"
 
 export enum AuthState {
 	PENDING,

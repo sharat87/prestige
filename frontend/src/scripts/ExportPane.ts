@@ -1,10 +1,10 @@
 import m from "mithril"
-import * as Exporter from "./ExportRequests"
-import CodeBlock from "./CodeBlock"
-import type { RequestDetails } from "./Parser"
-import Button from "./Button"
-import { copyToClipboard, downloadText, showCopyGhost } from "./utils"
-import type CookieJar from "./CookieJar"
+import * as Exporter from "_/ExportRequests"
+import CodeBlock from "_/CodeBlock"
+import type { RequestDetails } from "_/Parser"
+import Button from "_/Button"
+import { copyToClipboard, downloadText, showCopyGhost } from "_/utils"
+import type CookieJar from "_/CookieJar"
 
 export default { view }
 

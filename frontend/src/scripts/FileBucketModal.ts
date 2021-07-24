@@ -1,15 +1,13 @@
 import m from "mithril"
-import Modal from "./Modal"
-import Button from "./Button"
-import humanSizeDisplay from "./humanSizeDisplay"
-import FileBucket from "./FileBucket"
-import Table from "./Table"
+import ModalManager from "_/ModalManager"
+import humanSizeDisplay from "_/humanSizeDisplay"
+import FileBucket from "_/FileBucket"
+import Table from "_/Table"
 
 export default { oninit, view }
 
 interface Attrs {
 	fileBucket: FileBucket
-	onClose: (event: MouseEvent) => void
 }
 
 interface State {
@@ -34,13 +32,9 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 	}
 
 	return m("div", { ondragover, ondragleave, ondrop }, m(
-		Modal,
+		ModalManager.DrawerLayout,
 		{
 			title: "FileBucket",
-			footer: [
-				m("div"),
-				m(Button, { style: "primary", onclick: vnode.attrs.onClose }, "Close"),
-			],
 		},
 		[
 			rows.length === 0 ? m(EmptyBucket) : m(

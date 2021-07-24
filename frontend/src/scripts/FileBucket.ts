@@ -1,4 +1,4 @@
-import type { MultiPartFormValue } from "./BodyTypes"
+import type { MultiPartFormValue } from "_/BodyTypes"
 
 export default class FileBucket {
 	private files: Map<string, File>

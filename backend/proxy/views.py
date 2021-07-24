@@ -52,6 +52,9 @@ def proxy(request) -> JsonResponse:
 			},
 		})
 
+	# Logging part of URLs here to help prevent abuse.
+	log.info("ProxyingTo %r %r", method, url and url.split("?")[0])
+
 	headers: Dict[str, str] = {name: value for name, value in job["headers"]} if job.get("headers") else {}
 	body: Optional[str] = job.get("body")
 	body_type: Optional[str] = job.get("bodyType")
@@ -102,8 +105,11 @@ def proxy(request) -> JsonResponse:
 
 	return JsonResponse(status=HTTPStatus.OK, data={
 		"id": job.get("id"),
-		"response": response_to_dict(response, body),
-		"history": [response_to_dict(r) for r in response.history],
+		"response": response_to_dict(response, None if response.history else body),
+		"history": [
+			response_to_dict(r, None if i > 0 else body)
+			for i, r in enumerate(response.history)
+		],
 		"cookies": cookie_jar_to_plain(session.cookies),
 	})
 

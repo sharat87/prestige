@@ -1,11 +1,11 @@
 import m from "mithril"
-import Modal from "./Modal"
+import ModalManager from "_/ModalManager"
 
 export default { view }
 
 function view(): m.Children {
 	return m(
-		Modal,
+		ModalManager.DrawerLayout,
 		{
 			title: "Color Palette",
 		},

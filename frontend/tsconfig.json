@@ -20,10 +20,15 @@
 		"types": [
 			"jest"
 		],
+		"baseUrl": ".",
+		"paths": {
+			"_/*": ["./src/scripts/*"]
+		},
 		"sourceMap": true
 	},
 	"include": [
 		"src/scripts/*",
+		"src/tests/*",
 		"src/custom.d.ts"
 	]
 }

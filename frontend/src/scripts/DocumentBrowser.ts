@@ -1,7 +1,8 @@
 import m from "mithril"
-import { currentProviders, Provider, Source } from "./Persistence"
-import Table from "./Table"
-import Button from "./Button"
+import { currentProviders, Provider, Source } from "_/Persistence"
+import Table from "_/Table"
+import Button from "_/Button"
+import ModalManager from "_/ModalManager"
 
 export function DocumentBrowser(): m.Component {
 	return { view }
@@ -10,10 +11,16 @@ export function DocumentBrowser(): m.Component {
 		const providers: Provider<Source>[] = currentProviders()
 		console.log("All providers", providers)
 
-		return [
-			providers.length === 0 ? "None yet" : providers.map(renderProvider),
-			m("p", "Integrations with more storage providers like GitHub and Dropbox coming soon."),
-		]
+		return m(
+			ModalManager.DrawerLayout,
+			{
+				title: "Documents",
+			},
+			[
+				providers.length === 0 ? "None yet" : providers.map(renderProvider),
+				m("p", "Integrations with more storage providers like GitHub and Dropbox coming soon."),
+			],
+		)
 	}
 }
 
