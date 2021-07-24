@@ -6,7 +6,8 @@ from typing import Dict, Union, Any, Optional
 
 import requests
 from django.conf import settings
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseNotAllowed
+from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from requests.cookies import RequestsCookieJar
@@ -22,9 +23,13 @@ TEXT_CONTENT_TYPES = {
 PlainCookieJarType = Dict[str, Dict[str, Dict[str, Dict[str, Union[str, int, bool]]]]]
 
 
-@require_POST
 @csrf_exempt
 def proxy(request) -> JsonResponse:
+	if request.method == "GET":
+		return redirect("https://prestigemad.com/docs/guides/proxy/")
+	elif request.method != "POST":
+		return HttpResponseNotAllowed(["GET", "POST"], "<h1>405 Method Not Allowed</h1>")
+
 	job: Dict[str, Any] = request.parsed_body
 
 	method: str = job.get("method", "GET")
