@@ -150,6 +150,11 @@ function WorkspaceView(): m.Component {
 					),
 					m(
 						NavLink,
+						{ href: "https://github.com/sharat87/prestige/issues/new" },
+						["Report a problem", m(Icons.ExternalLink)],
+					),
+					m(
+						NavLink,
 						{
 							onclick: onDocumentBrowserToggle,
 							isActive: ModalManager.isShowing(VisiblePopup.DocumentBrowserPopup),
