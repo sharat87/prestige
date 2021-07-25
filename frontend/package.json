@@ -49,14 +49,11 @@
 		"overrides": [
 			{
 				"files": [
-					"src/scripts/*.ts",
 					"src/tests/*.ts"
 				],
-				"excludedFiles": [
-					"node_modules",
-					"dist",
-					"coverage"
-				]
+				"rules": {
+					"@typescript-eslint/no-non-null-assertion": "off"
+				}
 			}
 		],
 		"parser": "@typescript-eslint/parser",
@@ -152,19 +149,19 @@
 		"_": "./src/scripts"
 	},
 	"devDependencies": {
-		"@babel/core": "^7.14.6",
+		"@babel/core": "^7.14.8",
 		"@babel/preset-typescript": "^7.14.5",
 		"@parcel/transformer-less": "2.0.0-beta.2",
 		"@types/codemirror": "5.60.2",
 		"@types/jest": "^26.0.24",
 		"@types/lodash": "^4.14.171",
 		"@types/mithril": "^2.0.8",
-		"@typescript-eslint/eslint-plugin": "^4.28.3",
-		"@typescript-eslint/parser": "^4.27.0",
+		"@typescript-eslint/eslint-plugin": "^4.28.4",
+		"@typescript-eslint/parser": "^4.28.4",
 		"acorn": "^8.4.1",
 		"babel-plugin-const-enum": "^1.1.0",
 		"babel-preset-env": "^1.7.0",
-		"codemirror": "^5.62.0",
+		"codemirror": "^5.62.2",
 		"eslint": "^7.31.0",
 		"jest": "^27.0.6",
 		"less": "^4.1.1",
@@ -172,7 +169,7 @@
 		"mithril": "^2.0.4",
 		"parcel": "^2.0.0-beta.2",
 		"tachyons": "^4.12.0",
-		"ts-jest": "^27.0.3",
+		"ts-jest": "^27.0.4",
 		"ts-node": "^10.1.0",
 		"typescript": "^4.3.5"
 	},

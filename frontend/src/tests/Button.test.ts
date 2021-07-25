@@ -1,13 +1,6 @@
 import m from "mithril"
+import { render } from "./utils"
 import Button from "../scripts/Button"
-
-// Currently serving as a PoC for testing Mithril components.
-
-function render(component: m.ComponentTypes, attrs: Record<string, unknown> = {}, children: m.Children = ""): Element {
-	const root = document.createElement("div")
-	m.mount(root, { view: () => m(component, attrs, children) })
-	return root
-}
 
 test("button default", async () => {
 	const root = render(Button)

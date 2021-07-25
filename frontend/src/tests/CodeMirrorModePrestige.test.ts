@@ -107,6 +107,42 @@ test("request with javascript with template string in body", async () => {
 	])
 })
 
+test("two GET requests", async () => {
+	const tokens = runModePrestige([
+		"GET https://httpbun.com/get",
+		"",
+		"###",
+		"",
+		"GET https://httpbun.com/anything",
+	])
+	expect(tokens).toEqual([
+		["def", "GET "],
+		["string", "https://httpbun.com/get"],
+		[null, "\n"],
+		[null, "\n"],
+		["tag header", "###"],
+		[null, "\n"],
+		[null, "\n"],
+		["def", "GET "],
+		["string", "https://httpbun.com/anything"],
+	])
+})
+
+test("request with initial header", async () => {
+	const tokens = runModePrestige([
+		"###",
+		"",
+		"GET https://httpbun.com/anything",
+	])
+	expect(tokens).toEqual([
+		["tag header", "###"],
+		[null, "\n"],
+		[null, "\n"],
+		["def", "GET "],
+		["string", "https://httpbun.com/anything"],
+	])
+})
+
 test("request with JSON body", async () => {
 	const tokens = runModePrestige([
 		"PATCH https://httpbun.com/patch",
