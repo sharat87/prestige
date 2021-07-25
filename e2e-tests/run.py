@@ -11,7 +11,7 @@ from typing import IO, Any, Dict, List, Optional
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s\t%(name)s %(message)s")
 log = logging.getLogger(__name__)
 
-frontend_port: int = 3045
+frontend_port: int = 3050
 backend_port: int = frontend_port + 1
 httpbun_port: int = frontend_port + 2
 

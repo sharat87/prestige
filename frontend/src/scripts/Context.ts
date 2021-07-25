@@ -52,18 +52,18 @@ export function makeContext(workspace: Workspace, cookieJar: CookieJar | null, f
 		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises)).finally(m.redraw)
 	}
 
-	function multipart(data: Record<string, string | MultiPartFormValue>): MultiPartForm {
-		const formData = new MultiPartForm()
-		for (const [key, value] of Object.entries(data)) {
-			formData.set(key, value)
-		}
-		return formData
-	}
-
 	function fileFromBucket(fileName: string): Promise<MultiPartFormValue> {
 		return fileBucket.load(fileName)
 	}
 
+}
+
+function multipart(data: Record<string, string | MultiPartFormValue>): MultiPartForm {
+	const formData = new MultiPartForm()
+	for (const [key, value] of Object.entries(data)) {
+		formData.set(key, value)
+	}
+	return formData
 }
 
 function basicAuth(username: string, password: string): string {

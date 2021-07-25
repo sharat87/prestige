@@ -1,8 +1,8 @@
-import { makeContext } from "../scripts/Context"
-import Workspace from "../scripts/Workspace"
-import HttpSession from "../scripts/HttpSession"
-import CookieJar from "../scripts/CookieJar"
-import FileBucket from "../scripts/FileBucket"
+import { makeContext } from "_/Context"
+import Workspace from "_/Workspace"
+import HttpSession from "_/HttpSession"
+import CookieJar from "_/CookieJar"
+import FileBucket from "_/FileBucket"
 
 console.log = jest.fn()
 
@@ -48,4 +48,20 @@ test("event system in contexts", () => {
 	expect(fn1).toBeCalledTimes(1)
 	expect(fn2).toBeCalledTimes(2)
 	expect(fn3).toBeCalledTimes(2)
+})
+
+test("multipart form", () => {
+	const cookieJar = new CookieJar()
+	const fileBucket = new FileBucket()
+	const context = makeContext(new Workspace(), cookieJar, fileBucket)
+
+	const multipartForm = context.multipart({
+		one: "value one",
+		two: "value two",
+	})
+
+	expect(Array.from(multipartForm.entries())).toStrictEqual([
+		["one", "value one"],
+		["two", "value two"],
+	])
 })
