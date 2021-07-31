@@ -104,7 +104,7 @@ function prestigeMode(
 
 		if (state.context === "javascript") {
 			if (state.jsState === null) {
-				console.error("incorrect state", stream.current())
+				console.error("incorrect state in javascript", stream.current())
 			}
 			return jsMode.token ? jsMode.token(stream, state.jsState) : "error"
 		}
@@ -154,7 +154,7 @@ function prestigeMode(
 				state.context = "request-headers-after-name"
 				return "keyword"
 			} else {
-				console.error("incorrect state", state)
+				// If the header is written like `${myHeader}`, then a `:` won't be found.
 				stream.skipToEnd()
 				return null
 			}
@@ -185,6 +185,7 @@ function prestigeMode(
 			if (state.bodyMode != null) {
 				if (state.bodyState == null) {
 					state.bodyState = CodeMirror.startState(state.bodyMode)
+					// Not helping here: state.bodyMode.token(new CodeMirror.StringStream("("), state.bodyState)
 				}
 				return state.bodyMode.token ? state.bodyMode.token(stream, state.bodyState) : "error"
 			} else {

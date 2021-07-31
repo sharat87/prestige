@@ -475,8 +475,10 @@ export default class Workspace {
 
 			result = await this.execute(request, context)
 
+			await context.emit("finish", { request, response: result })
+
 			if (result != null && result.ok && result.cookies) {
-				result.cookieChanges = this.cookieJar?.overwrite(result.cookies as any)
+				result.cookieChanges = this.cookieJar?.overwrite(result.cookies)
 			}
 
 		} catch (error: unknown) {

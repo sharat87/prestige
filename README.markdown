@@ -38,16 +38,16 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 ## Developing
 
-Please ensure you have Node >= v14 (with yarn) and Python >= v3.8 (with pip) before trying the following commands.
+Please ensure you have Node >= v14 (with yarn) and Python >= v3.8 (with pip) before trying the following commands. I recommend using `asdf-vm` for this, and the project includes a `.tool-versions` file. So, if you have `asdf` already setup, you can just do `asdf install` in this repo and you'll have the correct versions of Node and Python.
 
-The project contains a powerful makefile that makes getting started with development quite easy. Here's a quick summary
-of some of the targets:
+The project contains a `makefile` and a `supervisor.conf` file that make getting started with development quite easy. Here's a quick summary:
 
-1. `make serve-frontend` &mdash; Starts a server for the frontend at port 3040.
-	Note: Please go to <http://localhost:3040/index.html>, since <http://localhost:3040/> doesn't work for some reason.
-1. `make serve-backend` &mdash; Starts a server for the backend at port 3041.
-1. `make serve-docs` &mdash; Starts a server for the documentation site at 3042.
+1. `make start` &mdash; Starts a supervisor daemon, with all servers needed for Prestige to be running.
+	All servers are started in dev mode, with auto-reload on, along with a small web UI from supervisor, to monitor the running processes and view their logs.
+	See output of `make start` for details.
+1. `make stop` &mdash; Stops and shuts down supervisor daemon, along with all the dev processes.
 1. `make test-*` &mdash; Test frontend/backend/e2e (depending on what's in place of `*`).
+1. `make build-*` &mdash; Build frontend/backend/docs (depending on what's in place of `*`).
 
 ## Inspirations
 

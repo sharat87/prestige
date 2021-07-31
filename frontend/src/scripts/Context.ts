@@ -7,6 +7,7 @@ import type CookieJar from "_/CookieJar"
 import { MultiPartForm } from "_/BodyTypes"
 import type { MultiPartFormValue } from "_/BodyTypes"
 import type { RequestDetails } from "_/Parser"
+import Toaster from "_/Toaster"
 
 export interface Context {
 	data: Record<string, unknown>
@@ -18,12 +19,24 @@ export interface Context {
 	multipart: (data: Record<string, string | MultiPartFormValue>) => MultiPartForm
 	fileFromBucket: (fileName: string) => Promise<MultiPartFormValue>
 	getProxyUrl: null | ((request: RequestDetails) => null | string)
+	toast: typeof toastPush
 }
 
 export function makeContext(workspace: Workspace, cookieJar: CookieJar | null, fileBucket: FileBucket): Context {
 	const handlers: Map<string, Set<(e: CustomEvent) => unknown>> = new Map()
 
-	return { data: {}, on, off, emit, run, basicAuth, multipart, fileFromBucket, getProxyUrl: null }
+	return {
+		data: {},
+		on,
+		off,
+		emit,
+		run,
+		basicAuth,
+		multipart,
+		fileFromBucket,
+		getProxyUrl: null,
+		toast: toastPush,
+	}
 
 	function run(lines: string[], runLineNum = 0): Promise<AnyResult> {
 		return workspace.runTop(lines, runLineNum, true)
@@ -68,4 +81,21 @@ function multipart(data: Record<string, string | MultiPartFormValue>): MultiPart
 
 function basicAuth(username: string, password: string): string {
 	return "Basic " + btoa(username + ":" + password)
+}
+
+function toastPush(type: unknown, message?: unknown): void {
+	if (arguments.length < 2) {
+		message = type
+		type = "success"
+	}
+	if (type !== "success" && type !== "danger") {
+		type = "danger"
+	}
+	if (typeof message !== "string") {
+		message = JSON.stringify(message, null, 2)
+	}
+	Toaster.push({
+		type: type as "success"|"danger",
+		message: message as string,
+	})
 }

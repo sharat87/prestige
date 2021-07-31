@@ -176,7 +176,7 @@ test("request with JSON body", async () => {
 	])
 })
 
-test("javascript custom", async () => {
+test("links in javascript comments", async () => {
 	expect(runMode(["// comment with https://httpbun.com link"], javascriptCustomMode))
 		.toEqual([
 			["comment", "// comment with "],

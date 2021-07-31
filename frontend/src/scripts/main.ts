@@ -39,36 +39,8 @@ const Layout: m.Component = {
 	view(vnode: m.VnodeDOM): m.Children {
 		return [
 			vnode.children,
-			m(".toasts.pa4.fixed.right-0.top-0", Toaster.map(toast => m(
-				".f5.pa3.mb2.br2.shadow-2",
-				{
-					class: {
-						success: "bg-washed-green dark-green",
-						danger: "bg-washed-red dark-red",
-					}[toast.type],
-					key: toast.id,
-					onbeforeremove({ dom }: m.VnodeDOM): Promise<Event> {
-						dom.classList.add("close")
-						return new Promise(resolve => {
-							dom.addEventListener("animationend", resolve)
-						})
-					},
-				},
-				[
-					m("button.bn.br-pill.fr.pointer", {
-						type: "button",
-						class: {
-							success: "bg-light-green dark-green",
-							danger: "bg-light-red dark-red",
-						}[toast.type],
-						onclick(event: Event) {
-							(event.target as HTMLButtonElement).style.display = "none"
-							Toaster.remove(toast.id)
-						},
-					}, m.trust("&times;")),
-					toast.id + ": " + toast.message,
-				],
-			))),
+			ModalManager.render(),
+			Toaster.render(),
 		]
 	},
 }
@@ -204,7 +176,6 @@ function WorkspaceView(): m.Component {
 				m("style", "body { --monospace-font: '" + editorFontOption() + "'; }"),
 				m("style", "body { --monospace-font-size: " + editorFontSizeOption() + "px; }"),
 			]),
-			ModalManager.render(),
 		]
 	}
 

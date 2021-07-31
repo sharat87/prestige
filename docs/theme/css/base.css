@@ -365,3 +365,11 @@ p.img img {
 #mkdocs-search-results > * {
 	padding: 0 1rem;
 }
+
+#mkdocs-search-results h3 {
+	margin: 1em 0 0;
+}
+
+#mkdocs-search-results h3 + p {
+	margin-top: 0;
+}

@@ -23,8 +23,7 @@ After executing this, the Cookies button at the top right should read *Cookies (
 cookie.
 
 !!! note
-    Additionally, you should see a small message at the top of the result pane saying something like `1 new cookie
-    added`, indicating that this request resulted in a new cookie being added.
+    Additionally, you should see a small message at the top of the result pane saying something like `1 new cookie added`, indicating that this request resulted in a new cookie being added.
 
 Now let's run run the following request:
 

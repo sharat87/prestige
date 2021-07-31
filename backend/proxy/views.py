@@ -67,6 +67,7 @@ def proxy(request) -> JsonResponse:
 	timeout: int = job.get("timeout", 10)
 
 	session = requests.session()
+	session.headers["User-Agent"] = "proxy at prestigemad.com"
 
 	if cookies:
 		update_cookie_jar(session.cookies, cookies)

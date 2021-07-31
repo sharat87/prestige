@@ -12,13 +12,6 @@ build-backend: venv
 		&& pushd backend \
 		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= DATABASE_URL='sqlite://:memory:' python manage.py collectstatic
 
-serve-backend: venv
-	@source venv/bin/activate \
-		&& cd backend \
-		&& set -o allexport \
-		&& source env.sh \
-		&& PYTHONUTF8=1 python manage.py runserver 127.0.0.1:3041
-
 changepassword: venv
 	@source venv/bin/activate \
 		&& cd backend \
@@ -55,10 +48,6 @@ build-frontend: frontend/node_modules
 	@cd frontend && NODE_ENV=production PRESTIGE_BACKEND=$${PRESTIGE_BACKEND:-/api} \
 		npx parcel build src/index.html --dist-dir dist --no-autoinstall --no-source-maps --no-cache
 
-serve-frontend: frontend/node_modules
-	@cd frontend && NODE_ENV=development PRESTIGE_BACKEND=$${PRESTIGE_BACKEND:-/api} \
-		npx parcel serve src/index.html --dist-dir dist-serve --port 3040
-
 lint-frontend: frontend/node_modules
 	@cd frontend && npx tsc --noEmit --project . && npx eslint --report-unused-disable-directives src
 
@@ -82,11 +71,6 @@ update-browserslist:
 ###
 # Documentation
 ###
-
-serve-docs: venv
-	@source venv/bin/activate \
-		&& cd docs \
-		&& PYTHONPATH=. mkdocs serve --dev-addr 127.0.0.1:3042
 
 build-docs: venv
 	@source venv/bin/activate \
@@ -117,9 +101,6 @@ e2e-tests/drivers/chromedriver:
 # Miscellaneous / Project-wide targets
 ###
 
-serve-proxy:
-	caddy run --watch
-
 venv: venv/make_sentinel
 
 venv/make_sentinel: requirements.txt
@@ -132,12 +113,17 @@ test-all: lint-frontend test-frontend test-backend test-e2e
 outdated:
 	cd frontend && yarn outdated
 
-tmux-session:
-	tmux new-session -d -c $$PWD -s prestige -n backend make serve-backend
-	tmux new-window -c $$PWD -t prestige: -n frontend make serve-frontend
-	tmux new-window -c $$PWD -t prestige: -n docs make serve-docs
-	tmux new-window -c $$PWD -t prestige: -n proxy make serve-proxy
-	tmux set-option remain-on-exit on
+# The processes aren't being killed when supervisord is killed with a `Ctrl+c`.
+start: venv venv/bin/supervisord
+	@if [[ -e .supervisor.sock ]]; then echo 'Already running.'; else venv/bin/supervisord; echo 'Just started.'; fi
+	@echo 'Access at <http://localhost:3045>. Monitor at <http://localhost:3044>.'
+
+stop: venv venv/bin/supervisord
+	@if [[ -e .supervisor.sock ]]; then kill $$(venv/bin/supervisorctl pid); echo 'Just stopped.'; sleep 2s; else echo 'Already stopped.'; fi
+
+venv/bin/supervisord:
+	@source venv/bin/activate \
+		&& pip install supervisor
 
 netlify: build-frontend
 	# Copy favicon to hashless filename for docs to show the favicon.
@@ -151,4 +137,4 @@ netlify: build-frontend
 	mv docs/site frontend/dist/docs
 	du -sh frontend/dist || true
 
-.PHONY: help serve-backend lint-backend test-backend build-frontend serve-frontend lint-frontend test-frontend test-e2e test-all venv
+.PHONY: help lint-backend test-backend build-frontend lint-frontend test-frontend test-e2e test-all venv start stop

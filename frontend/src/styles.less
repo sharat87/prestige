@@ -316,13 +316,6 @@ pre {
 		font-size: 1.2em;
 	}
 
-	.cm-tab {
-		background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24"><path d="M 3 9 l 3 3 l -3 3" stroke="currentColor" stroke-width="2" fill="none"/></svg>');
-		// background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADAAAAAMCAYAAAAkuj5RAAAAAXNSR0IArs4c6QAAAGFJREFUSMft1LsRQFAQheHPowAKoACx3IgEKtaEHujDjORSgWTH/ZOdnZOcM/sgk/kFFWY0qV8foQwS4MKBCS3qR6ixBJvElOobYAtivseIE120FaowJPN75GMu8j/LfMwNjh4HUpwg4LUAAAAASUVORK5CYII=);
-		// background-position: right;
-		background-repeat: no-repeat;
-	}
-
 	.CodeMirror-activeline-background {
 		background-color: var(--cursor-line-bg);
 	}
@@ -436,17 +429,37 @@ form.grid {
 }
 
 .toasts {
-	width: 360px;
+	width: 20vw;
+	max-width: 420px;
 	z-index: 99;
 	pointer-events: none;
 
 	> * {
+		position: relative;
 		pointer-events: auto;
 		animation: toast .1s;
 
 		&.close {
 			animation: toast-close .1s;
 		}
+
+		&:hover .close-btn {
+			display: block;
+		}
+	}
+
+	.close-btn {
+		cursor: pointer;
+		position: absolute;
+		left: 0;
+		top: 0;
+		transform: translate(-50%, -50%);
+		border-radius: 50%;
+		width: 1.6em;
+		height: 1.6em;
+		padding: 0;
+		overflow: hidden;
+		display: none;
 	}
 }
 
@@ -585,6 +598,11 @@ details.fold {
 		color: var(--nav-link-hover-fg);
 	}
 
+	.cm-tab {
+		background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24"><path d="M 3 9 l 3 3 l -3 3" stroke="black" stroke-width="2" fill="none"/></svg>');
+		background-repeat: no-repeat;
+	}
+
 	button {
 		&.primary {
 			background-color: var(--primary-3);
@@ -698,6 +716,11 @@ details.fold {
 	.nav-link:hover:not(.active) {
 		background-color: var(--nav-link-hover-bg);
 		color: var(--nav-link-hover-fg);
+	}
+
+	.cm-tab {
+		background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24"><path d="M 3 9 l 3 3 l -3 3" stroke="white" stroke-width="2" fill="none"/></svg>');
+		background-repeat: no-repeat;
 	}
 
 	button {

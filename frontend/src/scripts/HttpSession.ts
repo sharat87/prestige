@@ -1,13 +1,18 @@
 import m from "mithril"
 import type CookieJar from "_/CookieJar"
+import type { StoreType } from "_/CookieJar"
 import type { RequestDetails } from "_/Parser"
 
-interface SuccessResult {
+interface ResultBase {
+	timeTaken?: number
+}
+
+interface SuccessResult extends ResultBase {
 	ok: true
 	response: Response
 	history: Response[]
 	proxy: null | string
-	cookies: null | CookieJar
+	cookies: null | StoreType
 	cookieChanges?: {
 		added: number
 		modified: number
@@ -15,10 +20,9 @@ interface SuccessResult {
 		any: boolean
 	}
 	request: RequestDetails
-	timeTaken?: number
 }
 
-interface FailureResult {
+interface FailureResult extends ResultBase {
 	ok: false
 	error?: {
 		title?: string
@@ -26,7 +30,6 @@ interface FailureResult {
 		stack?: string
 	}
 	request: null | RequestDetails
-	timeTaken?: number
 }
 
 export type AnyResult = SuccessResult | FailureResult

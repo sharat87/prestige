@@ -22,5 +22,6 @@ export function makeMockContext(): Context {
 		multipart: jest.fn(),
 		fileFromBucket: jest.fn(),
 		getProxyUrl: null,
+		toast: jest.fn(),
 	}
 }

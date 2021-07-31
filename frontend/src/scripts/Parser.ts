@@ -99,6 +99,7 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 		if (bodyLines[0].startsWith("=")) {
 			// Replace that `=` with `return` and we assume what followed that `=` is a single JS expression.
 			const code = "return " + bodyLines.join("\n").substr(1)
+			console.log("body code", code)
 			const body = await (new AsyncFunction(code).call(context))
 			if (typeof body === "string") {
 				details.body = body
@@ -125,6 +126,18 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 		details.body = details.body.trim()
 	}
 
+	if (requestBlock.eventHandlers != null) {
+		const eventHandlerLines = lines.slice(requestBlock.eventHandlers.start, requestBlock.eventHandlers.end + 1)
+		if (eventHandlerLines[0].startsWith("@onFinish")) {
+			const code = "return {async " + eventHandlerLines.join("\n").substr(1) + "\n}"
+			console.log("event handler code", code)
+			const onFinishHandler: unknown = new Function(code).call(context).onFinish
+			if (typeof onFinishHandler === "function") {
+				context.on("finish", onFinishHandler.bind(context))
+			}
+		}
+	}
+
 	return details
 }
 
@@ -137,26 +150,30 @@ export const enum BlockType {
 interface BlockBase {
 	// TODO: The start and end are both inclusive currently, and mark the start and end of *content*, not blank lines
 	//   If any. Change this to have `end` be exclusive, and both figures include whitespace around the block content.
-	type: BlockType;
-	start: number;
-	end: number;
+	type: BlockType
+	start: number
+	end: number
 }
 
 export interface PageBreakBlock extends BlockBase {
-	type: BlockType.PAGE_BREAK;
-	tail: string;
+	type: BlockType.PAGE_BREAK
+	tail: string
 }
 
 export interface HttpRequestBlock extends BlockBase {
-	type: BlockType.HTTP_REQUEST;
+	type: BlockType.HTTP_REQUEST
 	header: {
-		start: number;
-		end: number;
-	};
+		start: number
+		end: number
+	}
 	payload: null | {
-		start: number;
-		end: number;
-	};
+		start: number
+		end: number
+	}
+	eventHandlers?: null | {
+		start: number
+		end: number
+	}
 }
 
 export interface JavascriptBlock extends BlockBase {
@@ -182,10 +199,12 @@ export function parse(input: string[] | string): Block[] {
 			if (currentBlock) {
 				currentBlock.end = index - 1
 				if (currentBlock.type === BlockType.HTTP_REQUEST) {
-					if (currentBlock.payload == null) {
-						currentBlock.header.end = lastNonBlank
-					} else {
+					if (currentBlock.eventHandlers != null) {
+						currentBlock.eventHandlers.end = lastNonBlank
+					} else if (currentBlock.payload != null) {
 						currentBlock.payload.end = lastNonBlank
+					} else {
+						currentBlock.header.end = lastNonBlank
 					}
 				}
 			}
@@ -240,25 +259,51 @@ export function parse(input: string[] | string): Block[] {
 					payload: null,
 				}
 				blocks.push(currentBlock)
+
 			} else if (state === "http-before-headers") {
 				state = "http-headers"
 				if (currentBlock && currentBlock.type === BlockType.HTTP_REQUEST) {
 					currentBlock.start = lastNonBlank + 1
 					currentBlock.header.start = index
 				}
+
 			} else if (state === "http-before-payload") {
 				state = "http-payload"
 				if (currentBlock && currentBlock.type === BlockType.HTTP_REQUEST) {
-					currentBlock.payload = {
+					if (line.startsWith("@")) {
+						state = "event-handlers"
+						currentBlock.eventHandlers ||= {
+							start: index,
+							end: index,
+						}
+					} else {
+						currentBlock.payload = {
+							start: index,
+							end: index,
+						}
+					}
+				}
+
+			} else if (state === "http-payload") {
+				if (currentBlock?.type === BlockType.HTTP_REQUEST && line.startsWith("@")) {
+					state = "event-handlers"
+					currentBlock.eventHandlers ||= {
 						start: index,
 						end: index,
 					}
+				} else if (currentBlock) {
+					currentBlock.end = index
+					if (currentBlock.type === BlockType.HTTP_REQUEST && currentBlock.payload) {
+						currentBlock.payload.end = index
+					}
 				}
+
 			} else if (state === "javascript-before-content") {
 				state = "javascript-content"
 				if (currentBlock && currentBlock.type === BlockType.JAVASCRIPT) {
 					currentBlock.start = index
 				}
+
 			}
 
 		}
@@ -271,10 +316,12 @@ export function parse(input: string[] | string): Block[] {
 	if (currentBlock) {
 		currentBlock.end = lines.length - 1
 		if (currentBlock.type === BlockType.HTTP_REQUEST) {
-			if (currentBlock.payload == null) {
-				currentBlock.header.end = lastNonBlank
-			} else {
+			if (currentBlock.eventHandlers != null) {
+				currentBlock.eventHandlers.end = lastNonBlank
+			} else if (currentBlock.payload != null) {
 				currentBlock.payload.end = lastNonBlank
+			} else {
+				currentBlock.header.end = lastNonBlank
 			}
 		}
 	}

@@ -1,3 +1,7 @@
+supervisord.pid
+supervisord.log
+.supervisord.sock
+
 /.task
 private-env.txt
 venv

@@ -313,3 +313,66 @@ test("multipart with await from bucket in multiple lines", async () => {
 		},
 	])
 })
+
+test("post request with body and a load handler", async () => {
+	const structure = parse([
+		"POST http://httpbun.com/post",
+		"",
+		"some body content",
+		"some more body content",
+		"still more body content",
+		"",
+		"@onLoad(response) {",
+		"\tconsole.log('got response', response)",
+		"}",
+	])
+
+	expect(structure).toBeDefined()
+	expect(structure).toStrictEqual([
+		{
+			type: BlockType.HTTP_REQUEST,
+			start: 0,
+			end: 8,
+			header: {
+				start: 0,
+				end: 0,
+			},
+			payload: {
+				start: 2,
+				end: 4,
+			},
+			eventHandlers: {
+				start: 6,
+				end: 8,
+			},
+		},
+	])
+})
+
+test("get request with a load handler", async () => {
+	const structure = parse([
+		"GET http://httpbun.com/get",
+		"",
+		"@onLoad(response) {",
+		"\tconsole.log('got response', response)",
+		"}",
+	])
+
+	expect(structure).toBeDefined()
+	expect(structure).toStrictEqual([
+		{
+			type: BlockType.HTTP_REQUEST,
+			start: 0,
+			end: 4,
+			header: {
+				start: 0,
+				end: 0,
+			},
+			payload: null,
+			eventHandlers: {
+				start: 2,
+				end: 4,
+			},
+		},
+	])
+})

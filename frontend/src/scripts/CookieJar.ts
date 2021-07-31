@@ -6,7 +6,7 @@ interface Morsel {
 type Host = string
 type Path = string
 type Name = string
-type StoreType = Record<Host, Record<Path, Record<Name, Morsel>>>
+export type StoreType = Record<Host, Record<Path, Record<Name, Morsel>>>
 
 export default class CookieJar {
 	store: StoreType
