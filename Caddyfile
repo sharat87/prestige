@@ -4,6 +4,11 @@
 }
 
 :3045 {
+	route /favicon.ico {
+		root frontend/src/assets
+		file_server
+	}
+
 	route /docs/* {
 		uri strip_prefix /docs
 		reverse_proxy localhost:3042
