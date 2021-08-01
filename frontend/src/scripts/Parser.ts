@@ -99,7 +99,6 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 		if (bodyLines[0].startsWith("=")) {
 			// Replace that `=` with `return` and we assume what followed that `=` is a single JS expression.
 			const code = "return " + bodyLines.join("\n").substr(1)
-			console.log("body code", code)
 			const body = await (new AsyncFunction(code).call(context))
 			if (typeof body === "string") {
 				details.body = body
@@ -130,7 +129,6 @@ export async function extractRequest(lines: string[], runLineNum: number, contex
 		const eventHandlerLines = lines.slice(requestBlock.eventHandlers.start, requestBlock.eventHandlers.end + 1)
 		if (eventHandlerLines[0].startsWith("@onFinish")) {
 			const code = "return {async " + eventHandlerLines.join("\n").substr(1) + "\n}"
-			console.log("event handler code", code)
 			const onFinishHandler: unknown = new Function(code).call(context).onFinish
 			if (typeof onFinishHandler === "function") {
 				context.on("finish", onFinishHandler.bind(context))

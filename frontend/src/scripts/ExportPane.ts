@@ -28,6 +28,8 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 
 	const exporter = new Exporter.Exporter(request, cookieJar)
 
+	console.log(exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren())
+
 	return [
 		m("p.ma2", [
 			m("label.mh2", [
@@ -89,7 +91,8 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 			CodeBlock,
 			{
 				class: "ma3",
-				elements: exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren(),
+				// elements: exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren(),
+				elements: [m("span", "a"), m("span", "\n"), m("span", "b")],
 			},
 		),
 	]

@@ -22,6 +22,7 @@ markdown_extensions:
   - "admonition"
   - "smarty"
   - "def_list"
+  # TODO: We need to use CodeMirror's runmode with Prestige's mode to highlight code snippets in docs.
   # - "codehilite":
   #     linenums: true
   #     guess_lang: false
@@ -38,6 +39,7 @@ nav:
     - "guides/sheet-browser.md"
     - "guides/proxy.md"
     - "guides/editor.md"
+    - "guides/event-handling.md"
   - "api-reference.md"
   - "tips.md"
   - "about.md"

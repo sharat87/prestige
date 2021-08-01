@@ -13,7 +13,6 @@ flask
 
 # docs
 mkdocs
-pygments
 
 # linting
 flake8
