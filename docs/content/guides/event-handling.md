@@ -9,8 +9,8 @@ In a Javascript block, the `this.on` context method can be used to add event han
 
 ```
 ### javascript
-this.on("finish", response => {
-  console.log("Request execution finished", response)
+this.on("finish", result => {
+  console.log("Request execution finished", result)
 })
 ```
 
@@ -28,8 +28,8 @@ Content-Type: application/json
 
 { "name": "Indra" }
 
-@onFinish(response) {
-  console.log("Request execution finished", response)
+@onFinish(result) {
+  console.log("Request execution finished", result)
 }
 ```
 

@@ -9,9 +9,11 @@ import type { MultiPartFormValue } from "_/BodyTypes"
 import type { RequestDetails } from "_/Parser"
 import Toaster from "_/Toaster"
 
+type EventCallback = (..._: unknown[]) => unknown
+
 export default class Context {
 	private data: Record<string, unknown>
-	private handlers: Map<string, Set<(e: CustomEvent) => unknown>>
+	private handlers: Map<string, Set<EventCallback>>
 	private workspace: null | Workspace
 	private cookieJar: null | CookieJar
 	private fileBucket: null | FileBucket
@@ -34,20 +36,19 @@ export default class Context {
 			: this.workspace.runTop(lines, runLineNum, true)
 	}
 
-	off(eventName: string, callback: (e: CustomEvent) => void): void {
+	off(eventName: string, callback: EventCallback): void {
 		this.handlers.get(eventName)?.delete(callback)
 	}
 
-	on(eventName: string, callback: (e: CustomEvent) => void): void {
+	on(eventName: string, callback: EventCallback): void {
 		(this.handlers.get(eventName) ?? this.handlers.set(eventName, new Set()).get(eventName))?.add(callback)
 	}
 
-	emit<T>(eventName: string, detail: T | null = null): Promise<unknown> {
-		const event = new CustomEvent(eventName, { detail })
+	emit(eventName: string, data?: unknown): Promise<unknown> {
 		const promises: Promise<unknown>[] = []
 
 		for (const fn of this.handlers.get(eventName) ?? []) {
-			const value = fn(event)
+			const value = fn(data)
 			if (isPromise(value)) {
 				promises.push(value as Promise<unknown>)
 			}
@@ -89,6 +90,15 @@ export default class Context {
 			type: type as "success"|"danger",
 			message: message as string,
 		})
+	}
+
+	storeItem(key: string, data: unknown): void {
+		localStorage.setItem("pstore:" + key, JSON.stringify(data))
+	}
+
+	loadItem(key: string): unknown {
+		const content = localStorage.getItem("pstore:" + key)
+		return content == null || content === "" ? null : JSON.parse(content)
 	}
 
 }

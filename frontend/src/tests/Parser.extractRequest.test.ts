@@ -1,6 +1,5 @@
 import { extractRequest } from "../scripts/Parser"
 import Context from "_/Context"
-import Workspace from "_/Workspace"
 
 jest.mock("_/Context")
 jest.mock("_/Workspace")

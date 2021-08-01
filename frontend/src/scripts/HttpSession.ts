@@ -38,7 +38,7 @@ export interface Response {
 	status: number
 	statusText: string
 	url: string
-	headers: [name: string, value: string][]
+	headers: Headers
 	body: string
 	request: RequestDetails
 }
@@ -139,7 +139,7 @@ export default class HttpSession {
 				status: response.status,
 				statusText: response.statusText,
 				url,
-				headers: response.headers as [name: string, value: string][],
+				headers: new Headers(response.headers as [name: string, value: string][]),
 				body: response.body,
 				request: {
 					method,
@@ -217,6 +217,12 @@ export default class HttpSession {
 		}
 
 		data.proxy = proxy
+		if (data.response != null) {
+			data.response.headers = new Headers(data.response.headers)
+		}
+		for (const res of data.history) {
+			res.headers = new Headers(res.headers)
+		}
 
 		if (typeof data.ok === "undefined") {
 			console.error("Unexpected protocol response from proxy", data)

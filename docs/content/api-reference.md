@@ -29,3 +29,9 @@ A `Context` object contains the following:
         })
 
     This request will make a POST call to `https://httpbun.com/post`, with `Content-Type` as `multipart/form-data`, with the two files `file1` and `file2`. You can use files from the File Bucket with the `.fileFromBucket()` method.
+
+`.storeItem(key: string, data: any): void`
+:   Takes a key-value pair and stores it in the browser's `localStorage`. While it is possible to use the `localStorage` object directly form inside Javascript blocks, its not recommended, and may indeed not be allowed at all in the future.
+
+`.loadItem(key: string): any`
+:   Takes a key, and returns the value, if any, that was previously stored by calling the `.storeItem` method. While it is possible to use the `localStorage` object directly form inside Javascript blocks, its not recommended, and may indeed not be allowed at all in the future.

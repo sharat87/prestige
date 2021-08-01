@@ -57,6 +57,17 @@ POST https://httpbun.com/dollar{postUrl}
 Content-Type: application/x-www-form-urlencoded
 
 username=sherlock&password=elementary
+
+###
+
+# We can define a Javascript function to be called when this request finishes execution.
+POST https://httpbun.com/post
+
+one=1&two=2
+
+@onFinish(response) {
+	alert("Request finished!")
+}
 `.replace(/\bdollar\{/g, "${")
 
 export default class Workspace {
@@ -475,7 +486,7 @@ export default class Workspace {
 
 			result = await this.execute(request, context)
 
-			await context.emit("finish", { request, response: result })
+			await context.emit("finish", result)
 
 			if (result != null && result.ok && result.cookies) {
 				result.cookieChanges = this.cookieJar?.overwrite(result.cookies)
