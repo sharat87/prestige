@@ -9,53 +9,44 @@ import type { MultiPartFormValue } from "_/BodyTypes"
 import type { RequestDetails } from "_/Parser"
 import Toaster from "_/Toaster"
 
-export interface Context {
-	data: Record<string, unknown>
-	run: (lines: string[], runLineNum: number) => Promise<AnyResult>
-	on: (event: string, callback: ((e: CustomEvent) => void)) => void
-	off: (event: string, callback: ((e: CustomEvent) => void)) => void
-	emit: (eventName: string, detail: unknown) => Promise<unknown>
-	basicAuth: (username: string, password: string) => string
-	multipart: (data: Record<string, string | MultiPartFormValue>) => MultiPartForm
-	fileFromBucket: (fileName: string) => Promise<MultiPartFormValue>
+export default class Context {
+	private data: Record<string, unknown>
+	private handlers: Map<string, Set<(e: CustomEvent) => unknown>>
+	private workspace: null | Workspace
+	private cookieJar: null | CookieJar
+	private fileBucket: null | FileBucket
 	getProxyUrl: null | ((request: RequestDetails) => null | string)
-	toast: typeof toastPush
-}
 
-export function makeContext(workspace: Workspace, cookieJar: CookieJar | null, fileBucket: FileBucket): Context {
-	const handlers: Map<string, Set<(e: CustomEvent) => unknown>> = new Map()
+	constructor(workspace: null | Workspace, cookieJar: null | CookieJar, fileBucket: null | FileBucket) {
+		this.data = {}
+		this.handlers = new Map()
 
-	return {
-		data: {},
-		on,
-		off,
-		emit,
-		run,
-		basicAuth,
-		multipart,
-		fileFromBucket,
-		getProxyUrl: null,
-		toast: toastPush,
+		this.workspace = workspace
+		this.cookieJar = cookieJar
+		this.fileBucket = fileBucket
+
+		this.getProxyUrl = null
 	}
 
-	function run(lines: string[], runLineNum = 0): Promise<AnyResult> {
-		return workspace.runTop(lines, runLineNum, true)
+	run(lines: string[], runLineNum = 0): Promise<AnyResult> {
+		return this.workspace == null
+			? Promise.reject(new Error("Workspace not available in this context"))
+			: this.workspace.runTop(lines, runLineNum, true)
 	}
 
-	function off(eventName: string, callback: (e: CustomEvent) => void): void {
-		handlers.get(eventName)?.delete(callback)
+	off(eventName: string, callback: (e: CustomEvent) => void): void {
+		this.handlers.get(eventName)?.delete(callback)
 	}
 
-	function on(eventName: string, callback: (e: CustomEvent) => void): void {
-		(handlers.get(eventName) ?? handlers.set(eventName, new Set()).get(eventName))
-			?.add(callback)
+	on(eventName: string, callback: (e: CustomEvent) => void): void {
+		(this.handlers.get(eventName) ?? this.handlers.set(eventName, new Set()).get(eventName))?.add(callback)
 	}
 
-	function emit<T>(eventName: string, detail: T | null = null) {
+	emit<T>(eventName: string, detail: T | null = null): Promise<unknown> {
 		const event = new CustomEvent(eventName, { detail })
 		const promises: Promise<unknown>[] = []
 
-		for (const fn of handlers.get(eventName) ?? []) {
+		for (const fn of this.handlers.get(eventName) ?? []) {
 			const value = fn(event)
 			if (isPromise(value)) {
 				promises.push(value as Promise<unknown>)
@@ -65,37 +56,39 @@ export function makeContext(workspace: Workspace, cookieJar: CookieJar | null, f
 		return (promises.length === 0 ? Promise.resolve() : Promise.all(promises)).finally(m.redraw)
 	}
 
-	function fileFromBucket(fileName: string): Promise<MultiPartFormValue> {
-		return fileBucket.load(fileName)
+	fileFromBucket(fileName: string): Promise<MultiPartFormValue> {
+		return this.fileBucket == null
+			? Promise.reject(new Error("File bucket not available in this context"))
+			: this.fileBucket.load(fileName)
 	}
 
-}
+	multipart(data: Record<string, string | MultiPartFormValue>): MultiPartForm {
+		const formData = new MultiPartForm()
+		for (const [key, value] of Object.entries(data)) {
+			formData.set(key, value)
+		}
+		return formData
+	}
 
-function multipart(data: Record<string, string | MultiPartFormValue>): MultiPartForm {
-	const formData = new MultiPartForm()
-	for (const [key, value] of Object.entries(data)) {
-		formData.set(key, value)
+	basicAuth(username: string, password: string): string {
+		return "Basic " + btoa(username + ":" + password)
 	}
-	return formData
-}
 
-function basicAuth(username: string, password: string): string {
-	return "Basic " + btoa(username + ":" + password)
-}
+	toast(type: unknown, message?: unknown): void {
+		if (arguments.length < 2) {
+			message = type
+			type = "success"
+		}
+		if (type !== "success" && type !== "danger") {
+			type = "danger"
+		}
+		if (typeof message !== "string") {
+			message = JSON.stringify(message, null, 2)
+		}
+		Toaster.push({
+			type: type as "success"|"danger",
+			message: message as string,
+		})
+	}
 
-function toastPush(type: unknown, message?: unknown): void {
-	if (arguments.length < 2) {
-		message = type
-		type = "success"
-	}
-	if (type !== "success" && type !== "danger") {
-		type = "danger"
-	}
-	if (typeof message !== "string") {
-		message = JSON.stringify(message, null, 2)
-	}
-	Toaster.push({
-		type: type as "success"|"danger",
-		message: message as string,
-	})
 }

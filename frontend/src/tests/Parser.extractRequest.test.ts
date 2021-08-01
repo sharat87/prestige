@@ -1,7 +1,15 @@
 import { extractRequest } from "../scripts/Parser"
-import { makeMockContext } from "./utils"
+import Context from "_/Context"
+import Workspace from "_/Workspace"
+
+jest.mock("_/Context")
+jest.mock("_/Workspace")
 
 console.log = jest.fn()
+
+function makeMockContext() {
+	return new Context(null, null, null)
+}
 
 test("single line input with one request", async () => {
 	const context = makeMockContext()

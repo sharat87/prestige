@@ -1,6 +1,6 @@
 import { buildQueryString } from "mithril"
 import interpolate from "_/interpolate"
-import type { Context } from "_/Context"
+import type Context from "_/Context"
 import { MultiPartForm } from "_/BodyTypes"
 
 export interface RequestDetails {

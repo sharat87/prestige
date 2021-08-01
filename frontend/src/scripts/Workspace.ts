@@ -11,7 +11,7 @@ import throttle from "lodash/throttle"
 import FileBucket from "_/FileBucket"
 import type { RequestDetails } from "_/Parser"
 import { extractRequest } from "_/Parser"
-import { Context, makeContext } from "_/Context"
+import Context from "_/Context"
 import { ping } from "_/pings"
 import ExportPane from "_/ExportPane"
 import ModalManager from "_/ModalManager"
@@ -348,7 +348,7 @@ export default class Workspace {
 	async onExportClicked(event: MouseEvent): Promise<void> {
 		ping("export", "Export request clicked")
 		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
-		const context = makeContext(this, this.cookieJar, this.fileBucket)
+		const context = new Context(this, this.cookieJar, this.fileBucket)
 		const exportingRequest = await this.buildRequestAtLine(lineNum + 1, context)
 		ModalManager.show(m(ExportPane, { request: exportingRequest, cookieJar: this.cookieJar }))
 		m.redraw()
@@ -464,7 +464,7 @@ export default class Workspace {
 		this.session.pushLoading()
 		let request: null | RequestDetails = null
 
-		const context = makeContext(this, this.cookieJar, this.fileBucket)
+		const context = new Context(this, this.cookieJar, this.fileBucket)
 		let result: null | AnyResult = null
 
 		try {

@@ -1,4 +1,4 @@
-import { makeContext } from "_/Context"
+import Context from "_/Context"
 import Workspace from "_/Workspace"
 import HttpSession from "_/HttpSession"
 import CookieJar from "_/CookieJar"
@@ -15,7 +15,7 @@ beforeEach(() => {
 test("basic auth header generation", () => {
 	const cookieJar = new CookieJar()
 	const fileBucket = new FileBucket()
-	const context = makeContext(new Workspace(), cookieJar, fileBucket)
+	const context = new Context(new Workspace(), cookieJar, fileBucket)
 
 	expect(context.basicAuth("user", "pass"))
 		.toBe("Basic dXNlcjpwYXNz")
@@ -27,7 +27,7 @@ test("basic auth header generation", () => {
 test("event system in contexts", () => {
 	const cookieJar = new CookieJar()
 	const fileBucket = new FileBucket()
-	const context = makeContext(new Workspace(), cookieJar, fileBucket)
+	const context = new Context(new Workspace(), cookieJar, fileBucket)
 
 	const fn1 = jest.fn()
 	const fn2 = jest.fn()
@@ -53,7 +53,7 @@ test("event system in contexts", () => {
 test("multipart form", () => {
 	const cookieJar = new CookieJar()
 	const fileBucket = new FileBucket()
-	const context = makeContext(new Workspace(), cookieJar, fileBucket)
+	const context = new Context(new Workspace(), cookieJar, fileBucket)
 
 	const multipartForm = context.multipart({
 		one: "value one",

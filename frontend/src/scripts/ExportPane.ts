@@ -91,8 +91,7 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 			CodeBlock,
 			{
 				class: "ma3",
-				// elements: exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren(),
-				elements: [m("span", "a"), m("span", "\n"), m("span", "b")],
+				elements: exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren(),
 			},
 		),
 	]
