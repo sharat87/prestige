@@ -167,7 +167,11 @@ function WorkspaceView(): m.Component {
 						),
 					],
 					m(NavLink, { href: "/docs/" }, ["Docs", m(Icons.ExternalLink)]),
-					m(NavLink, { href: "https://github.com/sharat87/prestige" }, ["GitHub", m(Icons.ExternalLink)]),
+					m(
+						NavLink,
+						{ href: "https://github.com/sharat87/prestige" },
+						["Star on GitHub", m(Icons.ExternalLink)],
+					),
 				]),
 			]),
 			m(".er-pair.flex.items-stretch.justify-stretch", [

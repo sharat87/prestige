@@ -3,10 +3,11 @@ import Workspace from "_/Workspace"
 import HttpSession from "_/HttpSession"
 import CookieJar from "_/CookieJar"
 import FileBucket from "_/FileBucket"
+import Toaster from "_/Toaster"
 
 console.log = jest.fn()
 
-jest.mock("../scripts/HttpSession")
+jest.mock("_/HttpSession")
 
 beforeEach(() => {
 	(HttpSession as jest.Mock).mockClear()
@@ -63,5 +64,30 @@ test("multipart form", () => {
 	expect(Array.from(multipartForm.entries())).toStrictEqual([
 		["one", "value one"],
 		["two", "value two"],
+	])
+})
+
+test("add a toast", () => {
+	const cookieJar = new CookieJar()
+	const fileBucket = new FileBucket()
+	const context = new Context(new Workspace(), cookieJar, fileBucket)
+
+	context.toast("some random message")
+	context.toast("error", "some error message")
+	context.toast("danger", "some danger message")
+
+	expect(Toaster.toasts.map(t => ({ type: t.type, message: t.message }))).toStrictEqual([
+		{
+			type: "success",
+			message: "some random message",
+		},
+		{
+			type: "danger",
+			message: "some error message",
+		},
+		{
+			type: "danger",
+			message: "some danger message",
+		},
 	])
 })

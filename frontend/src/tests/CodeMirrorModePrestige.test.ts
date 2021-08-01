@@ -23,9 +23,6 @@ function runMode(lines: string[], mode: CodeMirror.Mode<unknown>): TokenTuple[] 
 			lookAhead(n: number) {
 				return lines[i + n]
 			},
-			baseToken() {
-				return null
-			},
 		})
 		if (!stream.string && mode.blankLine) {
 			mode.blankLine(state)

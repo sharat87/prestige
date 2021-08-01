@@ -15,7 +15,7 @@ export interface Message {
 let nextId = 1
 
 class Toaster {
-	private toasts: Toast[]
+	toasts: Toast[]
 
 	constructor() {
 		this.toasts = []

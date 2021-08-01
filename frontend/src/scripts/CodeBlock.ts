@@ -40,7 +40,7 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 
 	return [
 		!isTooLarge && m(
-			"pre.overflow-x-auto.cm-s-default.flex",
+			"pre.overflow-x-auto.cm-s-default",
 			{
 				class: vnode.attrs.class,
 			},

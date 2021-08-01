@@ -113,6 +113,10 @@ test-all: lint-frontend test-frontend test-backend test-e2e
 outdated:
 	cd frontend && yarn outdated
 
+upgrade-deps:
+	@cd frontend && yarn upgrade --latest
+	@# TODO: Upgrade dependencies for backend as well.
+
 # The processes aren't being killed when supervisord is killed with a `Ctrl+c`.
 start: venv venv/bin/supervisord
 	@if [[ -e .supervisor.sock ]]; then echo 'Already running.'; else venv/bin/supervisord; echo 'Just started.'; fi
