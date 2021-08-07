@@ -40,8 +40,6 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 Please ensure you have Node >= v14 (with yarn) and Python >= v3.8 (with pip) before trying the following commands. I recommend using `asdf-vm` for this, and the project includes a `.tool-versions` file. So, if you have `asdf` already setup, you can just do `asdf install` in this repo and you'll have the correct versions of Node and Python.
 
-Another dependency is [Caddy](https://caddyserver.com/), which is used as reverse proxy during development. On macOS, it can be installed with `brew install caddy`, if you're using Homebrew.
-
 The project contains a `makefile` and a `supervisor.conf` file that make getting started with development quite easy. Here's a quick summary:
 
 1. `make start` &mdash; Starts a supervisor daemon, with all servers needed for Prestige to be running.

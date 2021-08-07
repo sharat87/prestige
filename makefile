@@ -120,7 +120,7 @@ upgrade-deps:
 # The processes aren't being killed when supervisord is killed with a `Ctrl+c`.
 start: venv venv/bin/supervisord
 	@if [[ -e .supervisor.sock ]]; then echo 'Already running.'; else venv/bin/supervisord; echo 'Just started.'; fi
-	@echo 'Access at <http://localhost:3045>. Monitor at <http://localhost:3044>.'
+	@echo 'App at <http://localhost:3045>. Process monitor at <http://localhost:3044>. Request monitor at <http://localhost:3046>.'
 
 stop: venv venv/bin/supervisord
 	@if [[ -e .supervisor.sock ]]; then kill $$(venv/bin/supervisorctl pid); echo 'Just stopped.'; sleep 2s; else echo 'Already stopped.'; fi

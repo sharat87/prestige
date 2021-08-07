@@ -6,6 +6,7 @@ django-cors-headers
 django-allauth
 psycopg2-binary
 gunicorn
+mitmproxy
 
 # e2e tests
 selenium
