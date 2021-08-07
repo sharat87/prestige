@@ -361,7 +361,7 @@ export default class Workspace {
 		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
 		const context = new Context(this, this.cookieJar, this.fileBucket)
 		const exportingRequest = await this.buildRequestAtLine(lineNum + 1, context)
-		ModalManager.show(m(ExportPane, { request: exportingRequest, cookieJar: this.cookieJar }))
+		ModalManager.show(() => m(ExportPane, { request: exportingRequest, cookieJar: this.cookieJar }))
 		m.redraw()
 	}
 

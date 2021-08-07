@@ -119,10 +119,9 @@ def logout_view(request):
 
 
 @require_GET
-@login_required_json
 def profile_view(request):
 	return JsonResponse({
-		"user": user_plain(request.user),
+		"user": user_plain(request.user) if request.user.is_authenticated else None,
 	})
 
 

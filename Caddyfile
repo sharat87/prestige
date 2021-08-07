@@ -3,19 +3,32 @@
 	auto_https off
 }
 
-:3045 {
+:{$PORT} {
 	route /favicon.ico {
 		root frontend/src/assets
 		file_server
 	}
 
-	route /docs/* {
-		uri strip_prefix /docs
+	@docs {
+		path /docs/*
+		path /livereload.js
+	}
+
+	route @docs {
 		reverse_proxy localhost:3042
 	}
 
-	route /livereload.js {
-		reverse_proxy localhost:3042
+	@backend {
+		path /admin
+		path /admin/*
+		path /accounts
+		path /accounts/*
+		path /oauth-callback/*
+		path /static/*
+	}
+
+	route @backend {
+		reverse_proxy localhost:3041
 	}
 
 	route /api/* {

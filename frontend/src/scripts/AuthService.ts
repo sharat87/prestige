@@ -2,7 +2,7 @@ import m from "mithril"
 import Stream from "mithril/stream"
 import { authUrl } from "_/Env"
 
-export enum AuthState {
+export const enum AuthState {
 	PENDING,
 	LOGGED_IN,
 	ANONYMOUS,
@@ -12,89 +12,104 @@ export interface User {
 	email: string
 }
 
-let authState: AuthState = AuthState.PENDING
-// TODO: Use a non-null sentinel value for indicating anonymous user.
-export const currentUser: Stream<null | User> = Stream()
-
 const AUTH_URL_BASE = authUrl()
 
-export function check(): void {
-	m.request<{ user: User }>({
-		method: "GET",
-		url: AUTH_URL_BASE + "profile",
-		withCredentials: true,
-	})
-		.then(response => {
-			authState = AuthState.LOGGED_IN
-			currentUser({
-				email: response.user.email,
+class AuthServiceImpl {
+	authState: AuthState
+	currentUser: Stream<null | User>
+	email: Stream<string>
+
+	constructor() {
+		this.authState = AuthState.PENDING
+		// TODO: Use a non-null sentinel value for indicating anonymous user.
+		this.currentUser = Stream(null)
+		this.email = Stream("")
+
+		this.currentUser.map(async (user): Promise<void> => {
+			this.email(user ? user.email : "anonymous")
+			m.redraw()
+		})
+	}
+
+	check(): void {
+		m.request<{ user: null | User }>({
+			method: "GET",
+			url: AUTH_URL_BASE + "profile",
+			withCredentials: true,
+		})
+			.then(response => {
+				if (response.user == null) {
+					this.authState = AuthState.ANONYMOUS
+					this.currentUser(null)
+				} else {
+					this.authState = AuthState.LOGGED_IN
+					this.currentUser({
+						email: response.user.email,
+					})
+				}
 			})
-		})
-		.catch(() => {
-			authState = AuthState.ANONYMOUS
-			currentUser(null)
-		})
-		.finally(m.redraw)
-}
+			.catch(() => {
+				this.authState = AuthState.ANONYMOUS
+				this.currentUser(null)
+			})
+			.finally(m.redraw)
+	}
 
-export function getAuthState(): AuthState {
-	return authState
-}
+	getAuthState(): AuthState {
+		return this.authState
+	}
 
-export function signup(email: string, password: string): Promise<void> {
-	return authAction("signup", email, password)
-}
+	signup(email: string, password: string): Promise<void> {
+		return this.authAction("signup", email, password)
+	}
 
-export function login(email: string, password: string): Promise<void> {
-	return authAction("login", email, password)
-}
+	login(email: string, password: string): Promise<void> {
+		return this.authAction("login", email, password)
+	}
 
-function authAction(urlPath: string, email: string, password: string): Promise<void> {
-	const prevState = authState
-	authState = AuthState.PENDING
+	authAction(urlPath: string, email: string, password: string): Promise<void> {
+		const prevState = this.authState
+		this.authState = AuthState.PENDING
 
-	return m.request<void>({
-		method: "POST",
-		url: AUTH_URL_BASE + urlPath,
-		withCredentials: true,
-		body: {
-			email,
-			password,
-		},
-	})
-		.then(() => {
-			authState = AuthState.LOGGED_IN
-			currentUser({
+		return m.request<void>({
+			method: "POST",
+			url: AUTH_URL_BASE + urlPath,
+			withCredentials: true,
+			body: {
 				email,
+				password,
+			},
+		})
+			.then(() => {
+				this.authState = AuthState.LOGGED_IN
+				this.currentUser({
+					email,
+				})
 			})
+			.catch(error => {
+				this.authState = prevState
+				return Promise.reject(error)
+			})
+	}
+
+	logout(): Promise<void> {
+		const prevState = this.authState
+		this.authState = AuthState.PENDING
+
+		return m.request<void>({
+			method: "POST",
+			url: AUTH_URL_BASE + "logout",
+			withCredentials: true,
 		})
-		.catch(error => {
-			authState = prevState
-			return Promise.reject(error)
-		})
+			.then(() => {
+				this.authState = AuthState.ANONYMOUS
+				this.currentUser(null)
+			})
+			.catch(() => {
+				this.authState = prevState
+			})
+	}
+
 }
 
-export function logout(): Promise<void> {
-	const prevState = authState
-	authState = AuthState.PENDING
-
-	return m.request<void>({
-		method: "POST",
-		url: AUTH_URL_BASE + "logout",
-		withCredentials: true,
-	})
-		.then(() => {
-			authState = AuthState.ANONYMOUS
-			currentUser(null)
-		})
-		.catch(() => {
-			authState = prevState
-		})
-		.finally(m.redraw)
-}
-
-export const email: Stream<string> = Stream()
-currentUser.map(async function(user): Promise<void> {
-	email(user ? user.email : "anonymous")
-	m.redraw()
-})
+export default new AuthServiceImpl

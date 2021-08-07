@@ -217,11 +217,13 @@ export default class HttpSession {
 		}
 
 		data.proxy = proxy
-		if (data.response != null) {
+		if (data.response != null && data.response.headers != null) {
 			data.response.headers = new Headers(data.response.headers)
 		}
 		for (const res of data.history) {
-			res.headers = new Headers(res.headers)
+			if (res.headers != null) {
+				res.headers = new Headers(res.headers)
+			}
 		}
 
 		if (typeof data.ok === "undefined") {

@@ -15,7 +15,7 @@
   # TODO: Add a secret to use signed proxy. See <https://docs.netlify.com/routing/redirects/rewrites-proxies/#signed-proxy-redirects>
 
 [[redirects]]
-  from = "/a/*"
+  from = "/admin/*"
   to = "https://api.prestigemad.com/a/:splat"
   status = 200
   force = true

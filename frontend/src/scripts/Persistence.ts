@@ -1,6 +1,7 @@
 import m from "mithril"
 import Stream from "mithril/stream"
-import * as AuthService from "_/AuthService"
+import AuthService from "_/AuthService"
+import type { User } from "_/AuthService"
 import { storageUrl } from "_/Env"
 import CookieJar from "_/CookieJar"
 
@@ -205,7 +206,7 @@ const availableSources: Stream<Source[]> = Stream()
 AuthService.currentUser.map(recomputeAvailableSources)
 recomputeAvailableSources(null)
 
-async function recomputeAvailableSources(user: null | AuthService.User): Promise<void> {
+async function recomputeAvailableSources(user: null | User): Promise<void> {
 	const sources: Source[] = [
 		{
 			type: "browser",

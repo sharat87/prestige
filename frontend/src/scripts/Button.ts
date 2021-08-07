@@ -5,6 +5,7 @@ interface Attrs {
 	class?: string
 	type?: "button" | "submit"
 	onclick?: (event: Event) => void
+	disabled?: boolean
 }
 
 export default {
@@ -24,6 +25,7 @@ function view(vnode: VnodeDOM<Attrs>): m.Children {
 			class: vnode.attrs.class || "",
 			type: vnode.attrs.type || "button",
 			onclick: vnode.attrs.onclick,
+			disabled: vnode.attrs.disabled ?? false,
 		},
 		vnode.children,
 	)

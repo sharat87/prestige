@@ -297,7 +297,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 						cursor: "zoom-in",
 					},
 					onclick() {
-						ModalManager.show(m(
+						ModalManager.show(() => m(
 							"img",
 							{
 								src: "data:" + spec + ";charset=utf-8;base64," +

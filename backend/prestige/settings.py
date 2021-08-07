@@ -15,7 +15,7 @@ from pathlib import Path
 
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+# Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 UNIVERSE = os.environ.get("PRESTIGE_UNIVERSE", "").lower()
@@ -25,7 +25,7 @@ UNIVERSE = os.environ.get("PRESTIGE_UNIVERSE", "").lower()
 
 if UNIVERSE != "test":
 	_missing_env_vars = {
-		"DATABASE_URL",
+		"PRESTIGE_DATABASE_URL",
 		"PRESTIGE_SECRET_KEY",
 		"PRESTIGE_CORS_ORIGINS",
 	} - os.environ.keys()
@@ -55,11 +55,15 @@ INSTALLED_APPS = [
 	"django.contrib.sessions",
 	"django.contrib.messages",
 	"django.contrib.staticfiles",
+	"django.contrib.sites",
 	"corsheaders",
-	"oauth2_provider",
 	"proxy",
 	"auth_api",
 	"storage",
+	"allauth",
+	"allauth.account",
+	"allauth.socialaccount",
+	"allauth.socialaccount.providers.github",
 ]
 
 MIDDLEWARE = [
@@ -89,23 +93,41 @@ TEMPLATES = [
 				"django.template.context_processors.request",
 				"django.contrib.auth.context_processors.auth",
 				"django.contrib.messages.context_processors.messages",
+				"django.template.context_processors.request",  # Added for django-allauth.
 			],
 		},
 	},
 ]
 
-WSGI_APPLICATION = 'prestige.wsgi.application'
+SITE_ID = 1
+
+ACCOUNT_EMAIL_REQUIRED = True
+
+SOCIALACCOUNT_PROVIDERS = {
+	"APP": {
+		"client_id": os.environ.get("PRESTIGE_OAUTH_GITHUB_CLIENT_ID"),
+		"secret": os.environ.get("PRESTIGE_OAUTH_GITHUB_CLIENT_SECRET"),
+	} if "PRESTIGE_OAUTH_GITHUB_CLIENT_ID" in os.environ else {},
+	"SCOPE": [
+		"read:user",
+		"user:email",
+		"repo",
+		"gist",
+	],
+}
+
+WSGI_APPLICATION = "prestige.wsgi.application"
 
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 DATABASES = {
-	# This will parse the values of the DATABASE_URL environment variable and convert it to Django's DB config format.
-	# For SQLite, set `DATABASE_URL=sqlite:///path/to/folder/db.sqlite3`
+	# This will parse the values of the PRESTIGE_DATABASE_URL environment variable into Django's DB config format.
+	# For SQLite, set `PRESTIGE_DATABASE_URL=sqlite:///path/to/folder/db.sqlite3`
 	"default": {
 		"ENGINE": "django.db.backends.sqlite3",
 		"NAME": ":memory:",
-	} if UNIVERSE == "test" else dj_database_url.config(conn_max_age=600),
+	} if UNIVERSE == "test" else dj_database_url.config(env="PRESTIGE_DATABASE_URL", conn_max_age=600),
 }
 
 
@@ -174,9 +196,9 @@ LOGGING = {
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "UTC"
 
 USE_I18N = True
 

@@ -2,7 +2,8 @@ import type { Vnode, VnodeDOM } from "mithril"
 import m from "mithril"
 import OptionsModal, { editorFontOption, editorFontSizeOption } from "_/Options"
 import Workspace from "_/Workspace"
-import * as AuthService from "_/AuthService"
+import AuthService from "_/AuthService"
+import { AuthState } from "_/AuthService"
 import { DocumentBrowser } from "_/DocumentBrowser"
 import * as Icons from "_/Icons"
 import CookiesModal from "_/CookiesModal"
@@ -32,7 +33,9 @@ function main() {
 		// TODO: "/:404...": errorPageComponent,
 	})
 
-	// AuthService.check()  // TODO: Enable when auth is enabled in prod.
+	if (isDev()) {
+		AuthService.check()
+	}
 }
 
 const Layout: m.Component = {
@@ -148,24 +151,23 @@ function WorkspaceView(): m.Component {
 						{ onclick: onOptionsToggle, isActive: ModalManager.isShowing(VisiblePopup.Options) },
 						"⚙️ Options",
 					),
+					isDev() && [
+						authState === AuthState.PENDING
+							? m.trust("&middot; &middot; &middot;")
+							: m(
+								NavLink,
+								{
+									onclick: onLoginFormToggle,
+									isActive: ModalManager.isShowing(VisiblePopup.LoginForm),
+								},
+								authState === AuthState.LOGGED_IN ? "🦸 Profile" : "🕵️ LogIn/SignUp",
+							),
+					],
 					m(
 						NavLink,
 						{ onclick: onAboutPaneToggle, isActive: ModalManager.isShowing(VisiblePopup.AboutPane) },
 						"🎒 About",
 					),
-					isDev() && [
-						authState === AuthService.AuthState.PENDING && m.trust("&middot; &middot; &middot;"),
-						authState === AuthService.AuthState.ANONYMOUS && m(
-							NavLink,
-							{ onclick: onLoginFormToggle, isActive: ModalManager.isShowing(VisiblePopup.LoginForm) },
-							"🕵️‍♀️ LogIn/SignUp",
-						),
-						authState === AuthService.AuthState.LOGGED_IN && m(
-							NavLink,
-							{ onclick: AuthService.logout },
-							[AuthService.email(), ": Log out"],
-						),
-					],
 					m(NavLink, { href: "/docs/" }, ["Docs", m(Icons.ExternalLink)]),
 					m(
 						NavLink,
@@ -185,39 +187,39 @@ function WorkspaceView(): m.Component {
 
 	function onAboutPaneToggle() {
 		ModalManager.toggleDrawer(
-			m(ModalManager.DrawerLayout, { title: "About" }, m(AboutModal)),
+			() => m(ModalManager.DrawerLayout, { title: "About" }, m(AboutModal)),
 			VisiblePopup.AboutPane,
 		)
 	}
 
 	function onDocumentBrowserToggle() {
-		ModalManager.toggleDrawer(m(DocumentBrowser), VisiblePopup.DocumentBrowserPopup)
+		ModalManager.toggleDrawer(() => m(DocumentBrowser), VisiblePopup.DocumentBrowserPopup)
 	}
 
 	function onCookiesToggle() {
 		ModalManager.toggleDrawer(
-			m(CookiesModal, { cookieJar: workspace.cookieJar, workspace }),
+			() => m(CookiesModal, { cookieJar: workspace.cookieJar, workspace }),
 			VisiblePopup.Cookies,
 		)
 	}
 
 	function onFileBucketToggle() {
 		ModalManager.toggleDrawer(
-			m(FileBucketModal, { fileBucket: workspace.fileBucket }),
+			() => m(FileBucketModal, { fileBucket: workspace.fileBucket }),
 			VisiblePopup.FileBucketPopup,
 		)
 	}
 
 	function onLoginFormToggle() {
-		ModalManager.toggleDrawer(m(LoginFormModal), VisiblePopup.LoginForm)
+		ModalManager.toggleDrawer(() => m(LoginFormModal), VisiblePopup.LoginForm)
 	}
 
 	function onOptionsToggle() {
-		ModalManager.toggleDrawer(m(OptionsModal), VisiblePopup.Options)
+		ModalManager.toggleDrawer(() => m(OptionsModal), VisiblePopup.Options)
 	}
 
 	function onColorPaletteToggle() {
-		ModalManager.toggleDrawer(m(ColorPaletteModal), VisiblePopup.ColorPalette)
+		ModalManager.toggleDrawer(() => m(ColorPaletteModal), VisiblePopup.ColorPalette)
 	}
 }
 

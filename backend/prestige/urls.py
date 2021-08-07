@@ -21,9 +21,9 @@ handler400 = "prestige.error_handlers.handler400"
 handler500 = "prestige.error_handlers.handler500"
 
 urlpatterns = [
-    path('proxy/', include("proxy.urls")),
-    path('storage/', include("storage.urls")),
-    path('auth/', include("auth_api.urls")),
-    path('oauth/', include("oauth2_provider.urls", namespace='oauth2_provider')),
-    path('a/', admin.site.urls),
+	path("proxy/", include("proxy.urls")),
+	path("storage/", include("storage.urls")),
+	path("auth/", include("auth_api.urls")),
+	path("accounts/", include("allauth.urls")),
+	path("admin/", admin.site.urls),
 ]

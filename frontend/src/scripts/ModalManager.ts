@@ -2,7 +2,8 @@ import m from "mithril"
 import Modal from "_/Modal"
 import Button from "_/Button"
 
-let currentComponent: null | m.Vnode<unknown, unknown> = null
+type ViewFn = () => m.Children
+let currentViewFn: null | ViewFn = null
 
 type KeyType = unknown
 let currentKey: KeyType = null
@@ -12,16 +13,16 @@ interface DrawerOptions {
 	footerLeft?: m.Children
 }
 
-function show(component: m.Vnode<unknown, unknown>): void {
-	currentComponent = m(ModalLayout, component)
+function show(viewFn: ViewFn): void {
+	currentViewFn = () => m(ModalLayout, viewFn())
 	m.redraw()
 }
 
-function toggleDrawer(component: m.Vnode<unknown, unknown>, key: KeyType): void {
+function toggleDrawer(viewFn: ViewFn, key: KeyType): void {
 	if (isShowing(key)) {
 		close()
 	} else {
-		currentComponent = component
+		currentViewFn = viewFn
 		currentKey = key
 	}
 	m.redraw()
@@ -32,26 +33,31 @@ function isShowing(key: KeyType): boolean {
 }
 
 function close(): void {
-	currentComponent = currentKey = null
+	currentViewFn = currentKey = null
 	m.redraw()
 }
 
 function render(): m.Children {
-	return currentComponent != null && currentComponent
+	return currentViewFn != null && currentViewFn()
 }
 
 const ModalLayout = {
 	view(vnode: m.Vnode<unknown, unknown>): m.Children {
 		return [
 			m(".modal2-mask", { onclick: close }),
-			m(".modal2", [
-				vnode.children,
-				m(
-					"button.absolute.top-1.right-1.danger-light.ph2.pv0.br-100.f3",
-					{ onclick: close },
-					m.trust("&times;"),
-				),
-			]),
+			m(
+				".modal2",
+				{
+				},
+				[
+					vnode.children,
+					m(
+						"button.absolute.top-1.right-1.danger-light.ph2.pv0.br-100.f3",
+						{ onclick: close },
+						m.trust("&times;"),
+					),
+				],
+			),
 		]
 	},
 }
