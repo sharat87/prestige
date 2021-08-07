@@ -134,7 +134,7 @@ netlify: build-frontend
 	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
 	python3 -m pip install -r requirements.txt
 	cd backend \
-		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= DATABASE_URL='sqlite://:memory:' \
+		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= PRESTIGE_DATABASE_URL='sqlite://:memory:' \
 		python manage.py collectstatic
 	mv backend/static frontend/dist/
 	cd docs && PYTHONPATH=. mkdocs build
