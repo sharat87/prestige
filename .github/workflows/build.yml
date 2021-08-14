@@ -27,6 +27,18 @@ jobs:
         run: |
           make build-all
 
+      - name: "Upload package to _main_ server"
+        env:
+          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          SSH_CONFIG: ${{ secrets.SSH_CONFIG }}
+          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+        run: |
+          echo "$PRIVATE_KEY" > ~/.ssh/private_key
+          echo "$SSH_CONFIG" > ~/.ssh/config
+          echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/*
+          scp package.tar.gz main:prestige-packages/package-"$(date +%Y-%m-%d-%H-%M-%S)".tar.gz
+
       - name: "Upload package artifact"
         uses: "actions/upload-artifact@v2"
         with:
