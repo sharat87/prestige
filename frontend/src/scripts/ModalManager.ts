@@ -9,7 +9,8 @@ type KeyType = unknown
 let currentKey: KeyType = null
 
 interface DrawerOptions {
-	title: string
+	title?: string
+	vcenter?: boolean
 	footerLeft?: m.Children
 }
 
@@ -68,6 +69,7 @@ const DrawerLayout = {
 			Modal,
 			{
 				title: vnode.attrs.title,
+				vcenter: vnode.attrs.vcenter,
 				footer: [
 					vnode.attrs.footerLeft ?? m("div"),
 					m(

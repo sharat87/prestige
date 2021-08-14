@@ -48,11 +48,11 @@ function view(vnode: VnodeDOM<Attrs>): m.Children {
 		ModalManager.DrawerLayout,
 		{
 			title: "Cookies",
-			footerLeft: cookieJar != null && cookieJar.size > 0 && m(
+			footerLeft: cookieJar != null && cookieJar.size > 0 ? m(
 				Button,
 				{ class: "danger-light", onclick: () => cookieJar.clear() },
 				"Clear all cookies",
-			),
+			) : m("div"),
 		},
 		[
 			rows.length === 0 ? "No cookies in your jar!" : m(

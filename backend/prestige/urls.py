@@ -20,10 +20,13 @@ from django.urls import include, path
 handler400 = "prestige.error_handlers.handler400"
 handler500 = "prestige.error_handlers.handler500"
 
+admin.site.site_header = "Prestige Admin"
+admin.site.site_title = "Prestige Admin"
+admin.site.index_title = "Prestige Admin"
+
 urlpatterns = [
 	path("proxy/", include("proxy.urls")),
 	path("storage/", include("storage.urls")),
 	path("auth/", include("auth_api.urls")),
-	path("accounts/", include("allauth.urls")),
 	path("admin/", admin.site.urls),
 ]

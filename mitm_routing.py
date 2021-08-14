@@ -1,25 +1,31 @@
 import os
-from glob import iglob as glob
+from glob import iglob
 
 
 def requestheaders(flow):
-	flow.request.headers["x-original-url"] = flow.request.url
+	req = flow.request
+	req.headers["x-original-url"] = req.url
 
-	path = flow.request.path
+	if req.path == "/favicon.ico":
+		req.host = "localhost"
+		req.port = 3040
+		req.path = "/" + os.path.basename(next(iglob("frontend/dist-serve/favicon.*.ico")))
 
-	if path == "/favicon.ico":
-		flow.request.path = "/" + os.path.basename(next(glob("frontend/dist*/favicon.*.ico")))
+	elif req.path == "/" or req.path.startswith(("/index.", "/favicon")):
+		req.host = "localhost"
+		req.port = 3040
 
-	if path.startswith(("/docs/", "/livereload/")) or path == "/livereload.js":
-		flow.request.host = "localhost"
-		flow.request.port = 3042
+	elif req.path.startswith(("/docs/", "/livereload/")) or req.path == "/livereload.js":
+		req.host = "localhost"
+		req.port = 3042
 
-	if path.startswith(("/api/", "/admin", "/accounts", "/static", "/oauth-callback")):
-		flow.request.host = "localhost"
-		flow.request.port = 3041
-		if path.startswith("/api/"):
-			flow.request.path = flow.request.path[4:]
+	elif req.path.startswith(("/api/", "/auth", "/admin", "/accounts", "/static", "/oauth", "/oauth-callback", "/health")):
+		req.host = "localhost"
+		req.port = 3041
+		if req.path.startswith("/api/"):
+			req.path = req.path[4:]
 
-	if path == "/" or path.startswith(("/index.", "/favicon")):
-		flow.request.host = "localhost"
-		flow.request.port = 3040
+	# Fix host header to include port, if non-standard.
+	# Need the right Host header, so that correct redirect_uri is generated for OAuth flows.
+	# req.headers["Host"] = req.host + ((":" + str(req.port)) if req.port != 80 else "")
+	req.headers["Host"] = "localhost:3045"

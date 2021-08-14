@@ -1,15 +1,25 @@
 import m from "mithril"
 import Stream from "mithril/stream"
 import { authUrl } from "_/Env"
+import Toaster from "_/Toaster"
 
 export const enum AuthState {
 	PENDING,
 	LOGGED_IN,
 	ANONYMOUS,
+	OAUTH_WAITING,
 }
 
 export interface User {
 	email: string
+	isGitHubConnected: boolean
+}
+
+interface AuthMessage {
+	type: "oauth"
+	provider: "github"
+	isApproved: boolean
+	error?: string
 }
 
 const AUTH_URL_BASE = authUrl()
@@ -18,12 +28,14 @@ class AuthServiceImpl {
 	authState: AuthState
 	currentUser: Stream<null | User>
 	email: Stream<string>
+	oAuthWindow: null | Window
 
 	constructor() {
 		this.authState = AuthState.PENDING
 		// TODO: Use a non-null sentinel value for indicating anonymous user.
 		this.currentUser = Stream(null)
 		this.email = Stream("")
+		this.oAuthWindow = null
 
 		this.currentUser.map(async (user): Promise<void> => {
 			this.email(user ? user.email : "anonymous")
@@ -43,9 +55,7 @@ class AuthServiceImpl {
 					this.currentUser(null)
 				} else {
 					this.authState = AuthState.LOGGED_IN
-					this.currentUser({
-						email: response.user.email,
-					})
+					this.currentUser(response.user)
 				}
 			})
 			.catch(() => {
@@ -71,7 +81,7 @@ class AuthServiceImpl {
 		const prevState = this.authState
 		this.authState = AuthState.PENDING
 
-		return m.request<void>({
+		return m.request<{ user: null | User }>({
 			method: "POST",
 			url: AUTH_URL_BASE + urlPath,
 			withCredentials: true,
@@ -80,11 +90,9 @@ class AuthServiceImpl {
 				password,
 			},
 		})
-			.then(() => {
+			.then((response) => {
 				this.authState = AuthState.LOGGED_IN
-				this.currentUser({
-					email,
-				})
+				this.currentUser(response.user)
 			})
 			.catch(error => {
 				this.authState = prevState
@@ -110,6 +118,78 @@ class AuthServiceImpl {
 			})
 	}
 
+	startOAuth(): void {
+		const prevState = this.authState
+		this.authState = AuthState.OAUTH_WAITING
+
+		if (this.oAuthWindow != null) {
+			if (!this.oAuthWindow.closed) {
+				this.oAuthWindow.close()
+			}
+			this.oAuthWindow = null
+		}
+
+		this.oAuthWindow = window.open(
+			"/auth/github",
+			"github-oauth",
+			"menubar=no,status=no,width=600,height=500",
+		)
+
+		if (this.oAuthWindow == null) {
+			alert("Unable to open OAuth popup!")
+			this.authState = prevState
+			return
+		}
+
+		const intervalId = setInterval(() => {
+			if (this.oAuthWindow == null || this.oAuthWindow.closed) {
+				this.check()
+				clearInterval(intervalId)
+				this.oAuthWindow = null
+				m.redraw()
+			}
+		}, 300)
+
+		window.addEventListener("message", messageHandler, false)
+
+		function messageHandler(event: MessageEvent): void {
+			if (event.origin !== window.location.origin) {
+				console.warn("Nasty stuff alert, from '" + event.origin + "'.", event)
+				return
+			}
+			if (!isAuthMessage(event.data)) {
+				console.warn("Invalid message data, from '" + event.origin + "'.", event)
+				return
+			}
+			const message = event.data as AuthMessage
+			if (message.isApproved) {
+				Toaster.push("success", "OAuth with GitHub successful.")
+			} else if (message.error === "access_denied") {
+				Toaster.push("danger", "OAuth with GitHub rejected. Perhaps, some other time!")
+			} else {
+				Toaster.push("danger", "OAuth with GitHub failed. Sorry about this.")
+			}
+			window.removeEventListener("message", messageHandler)
+			m.redraw()
+		}
+	}
+
+	focusOAuthWindow(): void {
+		this.oAuthWindow?.focus()
+	}
+
+}
+
+function isAuthMessage(object: unknown): object is AuthMessage {
+	if (object == null) {
+		return false
+	}
+
+	const am = object as AuthMessage
+	return am.type === "oauth"
+		&& am.provider === "github"
+		&& typeof am.isApproved === "boolean"
+		&& (am.error == null || typeof am.error === "string")
 }
 
 export default new AuthServiceImpl

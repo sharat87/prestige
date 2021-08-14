@@ -214,4 +214,4 @@ def is_url_allowed(url: str):
 	host_port = parts[2]
 	host = (host_port.split(":")[0] if ":" in host_port else host_port).lower()
 
-	return host not in settings.PROXY_DISALLOW_HOSTS
+	return not settings.PROXY_DISALLOW_HOSTS or host not in settings.PROXY_DISALLOW_HOSTS

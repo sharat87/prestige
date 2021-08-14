@@ -10,7 +10,7 @@ html, body {
 }
 
 body {
-	font-size: 16px;
+	font-size: 14px;
 	--header-height: 30px;
 }
 
@@ -403,6 +403,20 @@ pre {
 
 label {
 	cursor: pointer;
+}
+
+.auth-pane {
+	display: flex;
+
+	.auth-options {
+		display: flex;
+		flex-direction: column;
+
+		button {
+			margin: 6px 0;
+			font-size: 1.1em;
+		}
+	}
 }
 
 form.grid {

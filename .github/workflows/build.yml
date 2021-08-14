@@ -1,0 +1,41 @@
+name: "Build"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - uses: "actions/checkout@v2"
+
+      - name: "Setup Python"
+        uses: "actions/setup-python@v2"
+        with:
+          python-version: 3.9
+
+      - name: "Setup Node"
+        uses: "actions/setup-node@v2"
+        with:
+          node-version: 14
+
+      - name: "Build"
+        run: "make netlify"
+
+      - name: "Create Archive"
+        run: |
+          mkdir package
+          mv frontend/dist package/webroot
+          mv backend package/
+          find package/backend -type d -name __pycache__ -print -exec rm -rf '{}' ';'
+          tar -caf package.tar.gz package
+
+      - name: "Upload package artifact"
+        uses: "actions/upload-artifact@v2"
+        with:
+          name: package
+          path: package.tar.gz

@@ -40,6 +40,7 @@ class LoginTests(TestCase):
 			"user": {
 				"username": "u1",
 				"email": self.u1_email,
+				"isGitHubConnected": False,
 			},
 		})
 

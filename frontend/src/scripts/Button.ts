@@ -1,7 +1,7 @@
 import m, { VnodeDOM } from "mithril"
 
 interface Attrs {
-	style?: "primary"
+	style?: null | "primary"
 	class?: string
 	type?: "button" | "submit"
 	onclick?: (event: Event) => void

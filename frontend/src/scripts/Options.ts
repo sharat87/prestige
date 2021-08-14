@@ -43,7 +43,7 @@ initOption(editorFontOption, "editorFont", "Source Code Pro")
 
 const editorFontSizeOption: Stream<string> = Stream()
 editorFontSizeOption.map(m.redraw)
-initOption(editorFontSizeOption, "editorFontSize", "16")
+initOption(editorFontSizeOption, "editorFontSize", "14")
 
 export {
 	editorFontOption,

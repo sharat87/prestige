@@ -8,16 +8,10 @@ help:
 ###
 
 build-backend: venv
-	@source venv/bin/activate \
+	source venv/bin/activate \
 		&& pushd backend \
-		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= DATABASE_URL='sqlite://:memory:' python manage.py collectstatic
-
-changepassword: venv
-	@source venv/bin/activate \
-		&& cd backend \
-		&& set -o allexport \
-		&& source env.sh \
-		&& PYTHONUTF8=1 python manage.py changepassword "$$(read -e -r -p 'Email: '; echo $$REPLY)"
+		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_DATABASE_URL='sqlite://:memory:' python manage.py collectstatic --clear --no-input \
+		&& python -m compileall -f .
 
 lint-backend: venv/bin/flake8
 	@source venv/bin/activate \
@@ -27,15 +21,26 @@ lint-backend: venv/bin/flake8
 test-backend: venv
 	@source venv/bin/activate \
 		&& cd backend \
-		&& PRESTIGE_UNIVERSE=test \
+		&& PRESTIGE_ENV=test \
 			python manage.py test
+
+changepassword: venv
+	@source venv/bin/activate \
+		&& cd backend \
+		&& PRESTIGE_ENV=development PYTHONUTF8=1 python manage.py $@ "$$(read -e -r -p 'Email: '; echo $$REPLY)"
 
 makemigrations migrate: venv
 	@source venv/bin/activate \
 		&& cd backend \
-		&& set -o allexport \
-		&& source env.sh \
-		&& python manage.py $@
+		&& PRESTIGE_ENV=development PYTHONUTF8=1 python manage.py $@
+
+resetdb: venv
+	@rm -fv backend/db.sqlite3
+	@make migrate
+	@echo '*** Creating super user ***'
+	@source venv/bin/activate \
+		&& cd backend \
+		&& PRESTIGE_ENV=development PYTHONUTF8=1 python manage.py createsuperuser
 
 venv/bin/flake8: | venv
 	@source venv/bin/activate && pip install flake8
@@ -129,12 +134,27 @@ venv/bin/supervisord:
 	@source venv/bin/activate \
 		&& pip install supervisor
 
+build-all: build-frontend build-backend build-docs
+	test ! -d package
+	mkdir -p package
+	# Copy favicon to hashless filename for docs to show the favicon.
+	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
+	mv backend/static frontend/dist/
+	mv docs/site frontend/dist/docs
+	mv frontend/dist package/webroot
+	cp -r backend package/
+	find package/backend -type d -name __pycache__ -print -exec rm -rf '{}' ';' -prune
+	rm -rf package/backend/.mypy_cache
+	tar -caf package.tar.gz package
+	du -sh package package.tar.gz || true
+	rm -rf package
+
 netlify: build-frontend
 	# Copy favicon to hashless filename for docs to show the favicon.
 	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
 	python3 -m pip install -r requirements.txt
 	cd backend \
-		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_CORS_ORIGINS= PRESTIGE_DATABASE_URL='sqlite://:memory:' \
+		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_DATABASE_URL='sqlite://:memory:' \
 		python manage.py collectstatic
 	mv backend/static frontend/dist/
 	cd docs && PYTHONPATH=. mkdocs build

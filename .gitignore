@@ -8,6 +8,7 @@ venv
 
 backend/db.sqlite3
 backend/e2e-db.sqlite3
+backend/data
 backend/static
 __pycache__
 
@@ -21,6 +22,8 @@ __snapshots__
 e2e-tests/drivers
 e2e-tests/shots
 geckodriver.log
+
+/package.tar.gz
 
 .cache
 yarn-error.log

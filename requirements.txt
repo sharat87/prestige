@@ -2,20 +2,16 @@
 Django==3.2.5
 dj-database-url
 Requests
-django-cors-headers
-django-allauth
 psycopg2-binary
-gunicorn
-mitmproxy
+mitmproxy  # noprod
 
 # e2e tests
-selenium
-flask
+selenium  # noprod
 
 # docs
-mkdocs
+mkdocs  # noprod
 
 # linting
-flake8
-flake8-tabs
-mypy
+flake8  # noprod
+flake8-tabs  # noprod
+mypy  # noprod

@@ -2,7 +2,7 @@ import m from "mithril"
 import ModalManager from "_/ModalManager"
 import Button from "_/Button"
 import AuthService from "_/AuthService"
-import { AuthState } from "_/AuthService"
+import { AuthState, User } from "_/AuthService"
 
 interface InputAttrs {
 	id: string;
@@ -25,51 +25,96 @@ interface LoginForm extends HTMLFormElement {
 }
 
 function view(): m.Children {
-	console.log("login form view")
 	const authState = AuthService.getAuthState()
-	if (authState === AuthState.LOGGED_IN) {
-		return m(ProfileView)
+	const user = AuthService.currentUser()
+
+	if (authState === AuthState.OAUTH_WAITING) {
+		return m(ModalManager.DrawerLayout, { vcenter: true }, [
+			m("h1.tc", m.trust("Waiting for OAuth window to close&hellip;")),
+			m("p.tc", m(
+				Button,
+				{ style: "primary", onclick: AuthService.focusOAuthWindow.bind(AuthService) },
+				"Go to that window",
+			)),
+		])
+
+	} else if (authState === AuthState.LOGGED_IN && user != null) {
+		return m(ModalManager.DrawerLayout, { title: "Profile" }, m(ProfileView, { user }))
+
 	} else if (authState === AuthState.ANONYMOUS) {
-		return m(LoginFormView)
+		return m(ModalManager.DrawerLayout, { title: "Login / Signup" }, m(LoginFormView))
+
 	}
+
 }
 
 function oncreate(vnode: m.VnodeDOM): void {
 	(vnode.dom?.querySelector("input[type=email]") as HTMLInputElement)?.focus()
 }
 
-class LoginFormView implements m.Component {
+class LoginFormView implements m.ClassComponent<never> {
+	isLogin: boolean
+
+	constructor() {
+		this.isLogin = true
+	}
+
 	view(): m.Children {
-		return m(
-			ModalManager.DrawerLayout,
-			{
-				title: "LogIn / SignUp",
-			},
-			[
-				m("h2.tc", "Log In"),
-				m("form.grid.w-60", { onsubmit: onLoginSubmit }, [
-					m("label", { for: "loginEmail" }, "Email"),
-					m(Input, { id: "loginEmail", type: "email", required: true }),
-					m("label", { for: "loginPassword" }, "Password"),
-					m(Input, { id: "loginPassword", type: "password", required: true, minlength: 6 }),
-					m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
-						m(Button, { style: "primary", type: "submit" }, "Log in!"),
+		return m(".auth-pane", [
+			m(".auth-options", [
+				m(
+					Button,
+					{
+						style: this.isLogin ? "primary" : null,
+						onclick: () => {
+							this.isLogin = true
+						},
+					},
+					"Login with email",
+				),
+				m(
+					Button,
+					{
+						style: !this.isLogin ? "primary" : null,
+						onclick: () => {
+							this.isLogin = false
+						},
+					},
+					"Signup with email",
+				),
+				m(
+					GitHubAuthButton,
+					"Login with GitHub",
+				),
+			]),
+			this.isLogin
+				? m("div", [ // Login form
+					m("h2.tc", "Log In"),
+					m("form.grid.w-60", { onsubmit: onLoginSubmit }, [
+						m("label", { for: "loginEmail" }, "Email"),
+						m(Input, { id: "loginEmail", type: "email", required: true }),
+						m("label", { for: "loginPassword" }, "Password"),
+						m(Input, { id: "loginPassword", type: "password", required: true, minlength: 6 }),
+						m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
+							m(Button, { style: "primary", type: "submit" }, "Log in!"),
+						]),
+					]),
+				])
+				: m("div", [ // Signup form
+					m("h2.tc.mt4", "Sign Up"),
+					m("form.grid.w-60", { onsubmit: onSignupSubmit }, [
+						m("label", { for: "signupEmail" }, "Email"),
+						m(Input, { id: "signupEmail", type: "email", required: true }),
+						m("label", { for: "signupPassword" }, "Password"),
+						m(Input, { id: "signupPassword", type: "password", required: true, minlength: 6 }),
+						m("label", { for: "signupPasswordRepeat" }, "Password (Repeat)"),
+						m(Input, { id: "signupPasswordRepeat", type: "password", required: true, minlength: 6 }),
+						m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
+							m(Button, { style: "primary", type: "submit" }, "Sign up!"),
+						]),
 					]),
 				]),
-				m("h2.tc.mt4", "Sign Up"),
-				m("form.grid.w-60", { onsubmit: onSignupSubmit }, [
-					m("label", { for: "signupEmail" }, "Email"),
-					m(Input, { id: "signupEmail", type: "email", required: true }),
-					m("label", { for: "signupPassword" }, "Password"),
-					m(Input, { id: "signupPassword", type: "password", required: true, minlength: 6 }),
-					m("label", { for: "signupPasswordRepeat" }, "Password (Repeat)"),
-					m(Input, { id: "signupPasswordRepeat", type: "password", required: true, minlength: 6 }),
-					m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
-						m(Button, { style: "primary", type: "submit" }, "Sign up!"),
-					]),
-				]),
-			],
-		)
+		])
 
 		function onLoginSubmit(event: Event) {
 			event.preventDefault()
@@ -106,57 +151,37 @@ class LoginFormView implements m.Component {
 	}
 }
 
-class ProfileView implements m.Component {
-	isGithubOauthWindowOpen: boolean
-
-	constructor() {
-		this.isGithubOauthWindowOpen = false
+class ProfileView implements m.Component<{ user: User }> {
+	view(vnode: m.Vnode<{ user: User }>): m.Children {
+		const { user } = vnode.attrs
+		return [
+			m("p", [m("strong", "Email"), ": ", user.email]),
+			m("p", m(
+				Button,
+				{
+					onclick() {
+						AuthService.logout()
+						// ModalManager.close()
+					},
+				},
+				"Log out",
+			)),
+			m("h2", "Social Connections"),
+			user.isGitHubConnected ? m("p", "GitHub already connected") : m(GitHubAuthButton),
+		]
 	}
+}
 
-	view() {
+const GitHubAuthButton: m.Component = {
+	view(vnode: m.Vnode) {
 		return m(
-			ModalManager.DrawerLayout,
+			Button,
 			{
-				title: "User Profile",
+				onclick() {
+					AuthService.startOAuth()
+				},
 			},
-			[
-				m("p", [m("strong", "Email"), ": ", AuthService.email()]),
-				m("p", m(
-					Button,
-					{
-						onclick() {
-							AuthService.logout()
-							// ModalManager.close()
-						},
-					},
-					"Log out",
-				)),
-				m("h2", "Social Connections"),
-				m(
-					Button,
-					{
-						disabled: this.isGithubOauthWindowOpen,
-						onclick() {
-							const oauthWindow = window.open(
-								"/accounts/github/login/?process=connect",
-								"github-oauth",
-								"menubar=no,status=no,width=600,height=500",
-							)
-							if (oauthWindow != null) {
-								this.isGithubOauthWindowOpen = true
-								const intervalId = setInterval(() => {
-									if (oauthWindow.closed) {
-										clearInterval(intervalId)
-										this.isGithubOauthWindowOpen = false
-										m.redraw()
-									}
-								}, 300)
-							}
-						},
-					},
-					"GitHub",
-				),
-			],
+			vnode.children ?? "GitHub",
 		)
-	}
+	},
 }

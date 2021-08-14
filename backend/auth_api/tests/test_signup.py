@@ -104,7 +104,13 @@ class SignupTests(TestCase):
 		)
 
 		self.assertEqual(response.status_code, HTTPStatus.CREATED)
-		self.assertEqual(response.json(), {})
+		self.assertEqual(response.json(), {
+			'user': {
+				'email': 'new3@host.com',
+				'username': 'new3@host.com',
+				'isGitHubConnected': False,
+			},
+		})
 		self.assertEqual(get_user_model().objects.filter(email="new3@host.com").count(), 1)
 
 	def test_empty_username(self):

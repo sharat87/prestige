@@ -16,7 +16,7 @@
 
 [[redirects]]
   from = "/admin/*"
-  to = "https://api.prestigemad.com/a/:splat"
+  to = "https://api.prestigemad.com/admin/:splat"
   status = 200
   force = true
   headers = { X-From = "Netlify" }
