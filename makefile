@@ -148,7 +148,7 @@ build-all: build-frontend build-backend build-docs
 	cp -r backend package/
 	find package/backend -type d -name __pycache__ -print -exec rm -rf '{}' ';' -prune
 	rm -rf package/backend/.mypy_cache
-	tar -caf package.tar.gz --directory package package/*
+	cd package && tar -caf ../package.tar.gz *
 	du -sh package package.tar.gz || true
 	rm -rf package
 
