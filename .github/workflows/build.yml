@@ -27,6 +27,13 @@ jobs:
         run: |
           make build-all
 
+      - name: "Upload to GCP"
+        uses: google-github-actions/upload-cloud-storage@main
+        with:
+          credentials: ${{ secrets.GCP_CREDENTIALS }}
+          path: package.tar.gz
+          destination: ${{ secrets.GCP_BUCKET }}/package.tar.gz
+
       - name: "Upload package to _main_ server"
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
