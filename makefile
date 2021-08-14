@@ -152,6 +152,9 @@ build-all: build-frontend build-backend build-docs
 	du -sh package package.tar.gz || true
 	rm -rf package
 
+upload-package:
+	aws s3 cp package.tar.gz s3://sskhold/prestige-package.tar.gz
+
 netlify: build-frontend
 	# Copy favicon to hashless filename for docs to show the favicon.
 	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico

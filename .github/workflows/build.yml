@@ -27,29 +27,9 @@ jobs:
         run: |
           make build-all
 
-      - name: "Upload to GCP"
-        uses: google-github-actions/upload-cloud-storage@main
-        with:
-          credentials: ${{ secrets.GCP_CREDENTIALS }}
-          path: package.tar.gz
-          destination: ${{ secrets.GCP_BUCKET }}/package.tar.gz
-
-      - name: "Upload package to _main_ server"
+      - name: "Upload to S3"
         env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          SSH_CONFIG: ${{ secrets.SSH_CONFIG }}
-          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
+          AWS_CREDS: ${{ secrets.AWS_CREDS }}
         run: |
-          mkdir ~/.ssh
-          echo "$PRIVATE_KEY" > ~/.ssh/private_key
-          echo "$SSH_CONFIG" > ~/.ssh/config
-          echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-          chmod 600 ~/.ssh/*
-          scp package.tar.gz main:prestige-packages/package-"$(date +%Y-%m-%d-%H-%M-%S)".tar.gz
-          rm -rf ~/.ssh
-
-      - name: "Upload package artifact"
-        uses: "actions/upload-artifact@v2"
-        with:
-          name: package
-          path: package.tar.gz
+          echo "$AWS_CREDS" > ~/.aws/credentials
+          make upload-package
