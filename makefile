@@ -146,6 +146,7 @@ build-all: build-frontend build-backend build-docs
 	mv docs/site frontend/dist/docs
 	mv frontend/dist package/webroot
 	cp -r backend package/
+	cp requirements.txt package/
 	find package/backend -type d -name __pycache__ -print -exec rm -rf '{}' ';' -prune
 	rm -rf package/backend/.mypy_cache
 	cd package && tar -caf ../package.tar.gz *
