@@ -207,3 +207,7 @@ if IS_PROD:
 	SECURE_REFERRER_POLICY = ["same-origin", "origin-when-cross-origin", "strict-origin-when-cross-origin"]
 
 	SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = True
+
+
+GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", None)
+GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", None)

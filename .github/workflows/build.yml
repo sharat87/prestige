@@ -23,16 +23,9 @@ jobs:
         with:
           node-version: 14
 
-      - name: "Build"
-        run: "make netlify"
-
       - name: "Create Archive"
         run: |
-          mkdir package
-          mv frontend/dist package/webroot
-          mv backend package/
-          find package/backend -type d -name __pycache__ -print -exec rm -rf '{}' ';'
-          tar -caf package.tar.gz package
+          make build-all
 
       - name: "Upload package artifact"
         uses: "actions/upload-artifact@v2"

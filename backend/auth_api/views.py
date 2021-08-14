@@ -3,6 +3,7 @@ from http import HTTPStatus
 import json
 
 import requests
+from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
@@ -17,9 +18,6 @@ from .models import GitHubIdentity
 
 
 log = logging.getLogger(__name__)
-
-GITHUB_CLIENT_ID = "f988f8fe8834aa9af583"
-GITHUB_CLIENT_SECRET = "69a0a42c83722b3d4d61ec0db25c7cee8ba5d67a"
 
 
 @require_POST
@@ -146,7 +144,7 @@ def user_plain(user: AbstractUser):
 def github_auth_view(request):
 	# TODO: Include state verification.
 	return redirect(
-		"https://github.com/login/oauth/authorize?client_id=" + GITHUB_CLIENT_ID +
+		"https://github.com/login/oauth/authorize?client_id=" + settings.GITHUB_CLIENT_ID +
 		"&scope=read:user user:email repo gist"
 	)
 
@@ -170,8 +168,8 @@ def github_auth_callback_view(request):
 	response = requests.post(
 		"https://github.com/login/oauth/access_token",
 		params={
-			"client_id": GITHUB_CLIENT_ID,
-			"client_secret": GITHUB_CLIENT_SECRET,
+			"client_id": settings.GITHUB_CLIENT_ID,
+			"client_secret": settings.GITHUB_CLIENT_SECRET,
 			"code": code,
 		},
 		headers={
