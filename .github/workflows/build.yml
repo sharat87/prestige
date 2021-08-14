@@ -31,5 +31,6 @@ jobs:
         env:
           AWS_CREDS: ${{ secrets.AWS_CREDS }}
         run: |
+          mkdir -p ~/.aws
           echo "$AWS_CREDS" > ~/.aws/credentials
           make upload-package
