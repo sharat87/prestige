@@ -29,8 +29,7 @@ jobs:
 
       - name: "Upload to S3"
         env:
-          AWS_CREDS: ${{ secrets.AWS_CREDS }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          mkdir -p ~/.aws
-          echo "$AWS_CREDS" > ~/.aws/credentials
           make upload-package
