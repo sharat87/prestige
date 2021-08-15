@@ -1,5 +1,0 @@
-# Type definitions for Django.
-django-stubs
-
-flake8
-flake8-tabs
