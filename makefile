@@ -50,7 +50,7 @@ venv/bin/flake8: | venv
 ###
 
 build-frontend: frontend/node_modules
-	@cd frontend && NODE_ENV=production PRESTIGE_BACKEND=$${PRESTIGE_BACKEND:-/api} \
+	@cd frontend && NODE_ENV=production PRESTIGE_BACKEND=$${PRESTIGE_BACKEND:-} \
 		npx parcel build src/index.html --dist-dir dist --no-autoinstall --no-source-maps --no-cache
 
 lint-frontend: frontend/node_modules
@@ -154,7 +154,7 @@ build-all: build-frontend build-backend build-docs
 	rm -rf package
 
 upload-package:
-	aws s3 cp package.tar.gz s3://sskhold/prestige-package.tar.gz
+	aws s3 cp package.tar.gz s3://ssk-artifacts/prestige-package.tar.gz
 
 netlify: build-frontend
 	# Copy favicon to hashless filename for docs to show the favicon.
