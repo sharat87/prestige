@@ -188,10 +188,6 @@ STATIC_ROOT = BASE_DIR / "static"
 STATIC_URL = "/static/"
 
 
-# The default for this is `True`. Its behaviour is too much magic for me.
-APPEND_SLASH = False
-
-
 PROXY_DISALLOW_HOSTS = {
 	s.strip()
 	for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "localhost, 127.0.0.1").split(",")

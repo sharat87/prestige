@@ -1,31 +1,22 @@
 import m from "mithril"
 import { currentProviders, Provider, Source } from "_/Persistence"
-import Table from "_/Table"
 import Button from "_/Button"
-import ModalManager from "_/ModalManager"
 
-export function DocumentBrowser(): m.Component {
-	return { view }
+export default { view }
 
-	function view() {
-		const providers: Provider<Source>[] = currentProviders()
-		console.log("All providers", providers)
+function view(): m.Children {
+	const providers: Provider<Source>[] = currentProviders()
+	console.log("All providers", providers)
 
-		return m(
-			ModalManager.DrawerLayout,
-			{
-				title: "Documents",
-			},
-			[
-				providers.length === 0 ? "None yet" : providers.map(renderProvider),
-				m("p", "Integrations with more storage providers like GitHub and Dropbox coming soon."),
-			],
-		)
-	}
+	return [
+		m("h2.ma2", "Documents"),
+		providers.length === 0 ? "None yet" : providers.map(renderProvider),
+		m("p.ma2", "Integrations with more storage providers like GitHub and Dropbox coming soon."),
+	]
 }
 
 function renderProvider(provider: Provider<Source>) {
-	return m("details.mv2.pv1", { open: true }, [
+	return m("details.ma2", { open: true }, [
 		m("summary.pointer", provider.source.title),
 		m(
 			"a.pv1.ph2.db",
@@ -33,21 +24,21 @@ function renderProvider(provider: Provider<Source>) {
 				onclick,
 				href: "#",
 			},
-			"+ New Sheet",
+			"+ Create new",
 		),
-		m(Table, [
+		m("ul", [
 			provider.entries.map(entry => m(
-				"tr",
+				"li",
 				[
-					m("td", m(
+					m(
 						m.route.Link,
 						{
 							class: "pv1 ph2 dib",
 							href: `/doc/${ provider.key }/${ entry.path }`,
 						},
 						entry.name,
-					)),
-					m("td", m(
+					),
+					m(
 						Button,
 						{
 							class: "compact danger-light",
@@ -58,7 +49,7 @@ function renderProvider(provider: Provider<Source>) {
 							},
 						},
 						"Del",
-					)),
+					),
 				],
 			)),
 		]),

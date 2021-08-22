@@ -4,7 +4,7 @@ import OptionsModal, { editorFontOption, editorFontSizeOption } from "_/Options"
 import Workspace from "_/Workspace"
 import AuthService from "_/AuthService"
 import { AuthState } from "_/AuthService"
-import { DocumentBrowser } from "_/DocumentBrowser"
+import DocumentBrowser from "_/DocumentBrowser"
 import * as Icons from "_/Icons"
 import CookiesModal from "_/CookiesModal"
 import LoginFormModal from "_/LoginFormModal"
@@ -22,7 +22,6 @@ window.addEventListener("load", main)
 function main() {
 	const root = document.createElement("main")
 	root.setAttribute("id", "app")
-	root.classList.add("h-100")
 	document.body.insertAdjacentElement("afterbegin", root)
 	document.getElementById("loadingBox")?.remove()
 
@@ -56,7 +55,6 @@ function WorkspaceView(): m.Component {
 		AboutPane,
 		ColorPalette,
 		Cookies,
-		DocumentBrowserPopup,
 		FileBucketPopup,
 		LoginForm,
 		None,
@@ -101,7 +99,7 @@ function WorkspaceView(): m.Component {
 
 	function view() {
 		const authState = AuthService.getAuthState()
-		return [
+		return m("section.top-layout", [
 			m("header", [
 				m(".flex.items-end", [
 					m("h1.f3.mh2.mv0", "Prestige"),
@@ -124,17 +122,8 @@ function WorkspaceView(): m.Component {
 						"Palette",
 					),
 					m(
-						NavLink,
-						{ href: "https://github.com/sharat87/prestige/issues/new" },
-						["Report a problem", m(Icons.ExternalLink)],
-					),
-					m(
-						NavLink,
-						{
-							onclick: onDocumentBrowserToggle,
-							isActive: ModalManager.isShowing(VisiblePopup.DocumentBrowserPopup),
-						},
-						["📃 Sheet: ", workspace.currentSheetQualifiedPath()],
+						".flex.items-center.ph1",
+						["📃 ", workspace.currentSheetQualifiedPath()],
 					),
 					m(
 						NavLink,
@@ -171,18 +160,26 @@ function WorkspaceView(): m.Component {
 					m(NavLink, { href: "/docs/" }, ["Docs", m(Icons.ExternalLink)]),
 					m(
 						NavLink,
+						{ href: "https://github.com/sharat87/prestige/issues/new" },
+						["Report a problem", m(Icons.ExternalLink)],
+					),
+					m(
+						NavLink,
 						{ href: "https://github.com/sharat87/prestige" },
 						["Star on GitHub", m(Icons.ExternalLink)],
 					),
 				]),
 			]),
-			m(".er-pair.flex.items-stretch.justify-stretch", [
-				m(EditorPane, { workspace }),
-				m(ResultPane, { workspace }),
-				m("style", "body { --monospace-font: '" + editorFontOption() + "'; }"),
-				m("style", "body { --monospace-font-size: " + editorFontSizeOption() + "px; }"),
-			]),
-		]
+			m(Sidebar, { workspace }),
+			// The order of the below is a bit unintuitive, but is needed.
+			// Firstly, the parent element of these two, is a grid container. So layout can be different from order.
+			// Secondly, we need editor's layout to change, depending on result-pane's existence. So, we need these two
+			// ... to be next to each other in this order, so that a `+` selector works for layout change.
+			m(ResultPane, { workspace }),
+			m(EditorPane, { workspace }),
+			m("style", "body { --monospace-font: '" + editorFontOption() + "'; --monospace-font-size: " +
+				editorFontSizeOption() + "px; }"),
+		])
 	}
 
 	function onAboutPaneToggle() {
@@ -190,10 +187,6 @@ function WorkspaceView(): m.Component {
 			() => m(ModalManager.DrawerLayout, { title: "About" }, m(AboutModal)),
 			VisiblePopup.AboutPane,
 		)
-	}
-
-	function onDocumentBrowserToggle() {
-		ModalManager.toggleDrawer(() => m(DocumentBrowser), VisiblePopup.DocumentBrowserPopup)
 	}
 
 	function onCookiesToggle() {
@@ -220,6 +213,29 @@ function WorkspaceView(): m.Component {
 
 	function onColorPaletteToggle() {
 		ModalManager.toggleDrawer(() => m(ColorPaletteModal), VisiblePopup.ColorPalette)
+	}
+}
+
+class Sidebar implements m.ClassComponent {
+	isOpen: boolean
+
+	constructor() {
+		this.isOpen = true
+	}
+
+	view() {
+		return m("aside.sidebar.flex", [
+			m(".tab-bar", [
+				m(NavLink, { isActive: this.isOpen, onclick: this.toggleOpen.bind(this) }, "📝"),
+			]),
+			this.isOpen && m(".content", [
+				m(DocumentBrowser),
+			]),
+		])
+	}
+
+	toggleOpen() {
+		this.isOpen = !this.isOpen
 	}
 }
 
