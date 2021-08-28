@@ -8,7 +8,7 @@ from django.contrib import auth
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser
 from django.db import IntegrityError
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import redirect
@@ -142,6 +142,9 @@ def user_plain(user: AbstractUser):
 
 
 def github_auth_view(request):
+	if not settings.GITHUB_CLIENT_ID:
+		return HttpResponseNotFound("Sorry, GitHub Integration not configured on this server")
+
 	# TODO: Include state verification.
 	return redirect(
 		"https://github.com/login/oauth/authorize?client_id=" + settings.GITHUB_CLIENT_ID +
@@ -150,6 +153,9 @@ def github_auth_view(request):
 
 
 def github_auth_callback_view(request):
+	if not settings.GITHUB_CLIENT_ID:
+		return HttpResponseNotFound("Sorry, GitHub Integration not configured on this server")
+
 	error = request.GET.get("error")
 
 	if error == "access_denied":
@@ -221,6 +227,7 @@ def github_auth_callback_view(request):
 		if not email_is_verified:
 			return JsonResponse(status=HTTPStatus.UNAUTHORIZED, data={
 				"error": {
+					"code": "github-email-not-verified",
 					"message": "Primary email not verified on GitHub.",
 				},
 			})

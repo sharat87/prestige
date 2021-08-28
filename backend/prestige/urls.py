@@ -27,6 +27,7 @@ admin.site.index_title = "Prestige Admin"
 urlpatterns = [
 	path("proxy/", include("proxy.urls")),
 	path("storage/", include("storage.urls")),
+	path("gist/", include("gist.urls")),
 	path("auth/", include("auth_api.urls")),
 	path("admin/", admin.site.urls),
 ]

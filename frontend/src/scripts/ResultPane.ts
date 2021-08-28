@@ -46,6 +46,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			left: m(".flex", [
 				m(NavLink, { onclick: workspace.runAgain }, "Run Again"),
 				m(NavLink, { onclick: () => {
+					// TODO: Implement the "Find in Editor" button.
 					alert("Work in progress")
 				} }, "Find in Editor"),
 			]),

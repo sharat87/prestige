@@ -52,6 +52,7 @@ INSTALLED_APPS = [
 	"proxy",
 	"auth_api",
 	"storage",
+	"gist",
 ]
 
 MIDDLEWARE = [

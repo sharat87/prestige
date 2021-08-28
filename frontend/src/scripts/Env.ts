@@ -8,6 +8,8 @@ declare const process: {
 
 const PRESTIGE_BACKEND = (process.env.PRESTIGE_BACKEND || "/")?.replace(/\/*$/, "/")
 
+export const GIST_API_PREFIX = PRESTIGE_BACKEND + "gist/"
+
 export function isDev(): boolean {
 	return process.env.NODE_ENV === "development"
 }
@@ -21,7 +23,8 @@ export function authUrl(): string {
 }
 
 export function storageUrl(): string {
-	return PRESTIGE_BACKEND + "storage/"
+	// Commented out since support for storage backend is deprioritized/almost-deprecated.
+	return ""  // PRESTIGE_BACKEND + "storage/"
 }
 
 export function allowedToStart(): boolean {

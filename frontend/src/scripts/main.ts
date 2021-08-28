@@ -16,6 +16,7 @@ import { isDev } from "_/Env"
 import Toaster from "_/Toaster"
 import ExternalLink from "_/ExternalLink"
 import ModalManager from "_/ModalManager"
+import Toolbar from "_/Toolbar"
 
 window.addEventListener("load", main)
 
@@ -256,13 +257,28 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 		const { workspace } = vnode.attrs
 		workspace.doFlashes()
 		workspace.codeMirror?.refresh()
-		return m(".editor-pane", m(".body", {
-			onclick(event: Event) {
-				if ((event.target as HTMLElement).matches("span.cm-link")) {
-					window.open((event.target as HTMLElement).innerText, "_blank", "noopener")
-				}
-			},
-		}))
+		return m(".editor-pane", [
+			m(Toolbar, {
+				left: m(".flex", [
+					m(
+						NavLink,
+						{
+							onclick: () => {
+								alert("Work in progress")
+							},
+						},
+						"Create a Gist",
+					),
+				]),
+			}),
+			m(".body", {
+				onclick(event: Event) {
+					if ((event.target as HTMLElement).matches("span.cm-link")) {
+						window.open((event.target as HTMLElement).innerText, "_blank", "noopener")
+					}
+				},
+			}),
+		])
 	}
 }
 

@@ -26,15 +26,14 @@ function view(vnode: VnodeDOM<Attrs>): m.Children {
 					m("td", path),
 					m("td", name),
 					m("td", morsel.value),
-					m("td", morsel.expires),
+					m("td", m(TimeView, { time: morsel.expires })),
 					m("td", [
 						m(
 							Button,
 							{
 								class: "compact danger-light",
 								// TODO: Cookie jar is not saved after deletion here.
-								onclick: () => vnode.attrs.workspace.deleteCookie(domain, path, name)
-								,
+								onclick: () => vnode.attrs.workspace.deleteCookie(domain, path, name),
 							},
 							"Del",
 						),
@@ -89,4 +88,15 @@ function view(vnode: VnodeDOM<Attrs>): m.Children {
 				" console. This is a browser-level security restriction."),
 		],
 	)
+}
+
+const TimeView: m.Component<{ time: string | number }> = {
+	view(vnode) {
+		const time = vnode.attrs.time
+		if (typeof time === "string") {
+			return time
+		} else {
+			return new Date((time.toString().length < 12 ? 1000 : 1) * time).toString()
+		}
+	},
 }

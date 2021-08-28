@@ -198,11 +198,11 @@ export default class Workspace {
 		saveSheet(this.currentSheetQualifiedPath(), this.currentSheet)
 			.then(() => {
 				this.isChangesSaved = true
-				m.redraw()
 			})
 			.catch(error => {
 				console.error("Error saving", error)
 			})
+			.finally(m.redraw)
 	}
 
 	getContent(): string {

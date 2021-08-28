@@ -119,7 +119,11 @@ outdated:
 	cd frontend && yarn outdated
 
 upgrade-deps:
-	@cd frontend && yarn upgrade --latest
+	# TODO: Don't attempt stop/start frontend, if isn't already running.
+	@cd frontend \
+		&& ../venv/bin/supervisorctl stop prestige:frontend \
+		&& yarn upgrade --latest \
+		&& ../venv/bin/supervisorctl start prestige:frontend
 	@# TODO: Upgrade dependencies for backend as well.
 
 # The processes aren't being killed when supervisord is killed with a `Ctrl+c`.

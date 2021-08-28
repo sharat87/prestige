@@ -19,11 +19,9 @@ def requestheaders(flow):
 		req.host = "localhost"
 		req.port = 3042
 
-	elif req.path.startswith(("/proxy", "/auth", "/admin", "/static", "/health")):
+	elif req.path.startswith(("/proxy", "/auth", "/storage", "/admin", "/gist", "/static", "/health")):
 		req.host = "localhost"
 		req.port = 3041
-		if req.path.startswith("/api/"):
-			req.path = req.path[4:]
 
 	# Fix host header to include port, if non-standard.
 	# Need the right Host header, so that correct redirect_uri is generated for OAuth flows.
