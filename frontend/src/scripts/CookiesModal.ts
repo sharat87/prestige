@@ -90,10 +90,12 @@ function view(vnode: VnodeDOM<Attrs>): m.Children {
 	)
 }
 
-const TimeView: m.Component<{ time: string | number }> = {
+const TimeView: m.Component<{ time: null | string | number }> = {
 	view(vnode) {
 		const time = vnode.attrs.time
-		if (typeof time === "string") {
+		if (time == null) {
+			return m("em", "n/a")
+		} else if (typeof time === "string") {
 			return time
 		} else {
 			return new Date((time.toString().length < 12 ? 1000 : 1) * time).toString()

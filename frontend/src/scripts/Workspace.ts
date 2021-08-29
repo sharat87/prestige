@@ -84,6 +84,7 @@ export default class Workspace {
 	currentSheetQualifiedPath: Stream<string>
 	private _disableAutoSave: boolean
 	isChangesSaved: boolean
+	cookieJar: null | CookieJar
 
 	constructor() {
 		this.codeMirror = null
@@ -114,10 +115,10 @@ export default class Workspace {
 		this.onExportClicked = this.onExportClicked.bind(this)
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this)
 		this.saveChanges = throttle(this.saveChanges.bind(this), 3000, { trailing: true })
+		this.cookieJar = null
 
 		currentSheet.map((value) => {
 			this.currentSheet = value
-			console.log("should now have this.cookieJar", this.cookieJar)
 
 			if (this.currentSheet != null) {
 				if (!this.currentSheet.body) {
@@ -125,6 +126,21 @@ export default class Workspace {
 				}
 
 				this.setContent(this.currentSheet.body)
+
+				const serializedCookies = localStorage.getItem("cookies:" + this.currentSheetQualifiedPath())
+				if (serializedCookies != null && serializedCookies !== "") {
+					try {
+						this.cookieJar = CookieJar.fromPlain(
+							JSON.parse(serializedCookies),
+						)
+					} catch (error) {
+						console.error("Unable to load cookies for path", this.currentSheetQualifiedPath(), error)
+						this.cookieJar = new CookieJar()
+					}
+				} else {
+					this.cookieJar = new CookieJar()
+				}
+
 			}
 
 			m.redraw()
@@ -382,8 +398,18 @@ export default class Workspace {
 		)
 	}
 
-	get cookieJar(): CookieJar | null {
-		return this.currentSheet?.cookieJar ?? null
+	saveCookieJar(): void {
+		if (this.currentSheet == null) {
+			console.error("Cannot save cookies, when there's no current sheet. Something's wrong")
+			return
+		}
+
+		if (this.cookieJar == null) {
+			console.error("Cannot save null cookies. Something's wrong")
+			return
+		}
+
+		localStorage.setItem("cookies:" + this.currentSheetQualifiedPath(), JSON.stringify(this.cookieJar.toJSON()))
 	}
 
 	buildRequestAtLine(lineNum: number, context: Context): Promise<RequestDetails> {
@@ -452,13 +478,8 @@ export default class Workspace {
 
 		this.runTop(lines, cursorLine)
 			.finally(() => {
-				console.debug("Saving since cookies might've changed after a request execution.")
 				m.redraw()
-				if (this.currentSheet == null) {
-					console.error("Can't save missing sheet. Something's wrong.")
-					return
-				}
-				return this.saveCurrentSheet()
+				this.saveCookieJar()
 			})
 	}
 
@@ -615,7 +636,7 @@ export default class Workspace {
 	async deleteCookie(domain: string, path: string, name: string): Promise<void> {
 		if (this.cookieJar != null) {
 			this.cookieJar.delete(domain, path, name)
-			return this.saveCurrentSheet()
+			return this.saveCookieJar()
 		} else {
 			return Promise.resolve()
 		}

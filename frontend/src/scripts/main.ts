@@ -27,6 +27,8 @@ function main() {
 	document.body.insertAdjacentElement("afterbegin", root)
 	document.getElementById("loadingBox")?.remove()
 
+	applyCookieStorageMigration()
+
 	m.route(root, "/doc/browser/master", {
 		"/doc/:path...": {
 			render: (vnode: Vnode) => m(Layout, m(WorkspaceView, vnode.attrs)),
@@ -342,4 +344,14 @@ const AboutModal: m.Component = {
 			],
 		)
 	},
+}
+
+function applyCookieStorageMigration() {
+	for (const [key, value] of Object.entries(localStorage)) {
+		const match = key.match(/^instance:(.+?):cookieJar$/)
+		if (match != null) {
+			localStorage.setItem("cookies:browser/" + match[1], value)
+			localStorage.removeItem(key)
+		}
+	}
 }

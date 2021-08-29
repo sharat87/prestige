@@ -3,10 +3,11 @@ import Modal from "_/Modal"
 import Button from "_/Button"
 
 type ViewFn = (control: ModalControl) => m.Children
-let currentViewFn: null | ViewFn = null
+let currentViewFn: null | (() => m.Children) = null
 
 type KeyType = unknown
 let currentKey: KeyType = null
+let currentControl: null | ModalControl = null
 
 interface DrawerOptions {
 	title?: string
@@ -22,7 +23,7 @@ class ModalControl {
 	}
 
 	close() {
-		if (currentKey === this.key) {
+		if (currentControl === this) {
 			close()
 		}
 	}
@@ -31,6 +32,7 @@ class ModalControl {
 function show(viewFn: ViewFn): void {
 	const control = new ModalControl()
 	currentViewFn = () => m(ModalLayout, viewFn(control))
+	currentControl = control
 	currentKey = control.key
 	m.redraw()
 }
@@ -39,7 +41,9 @@ function toggleDrawer(viewFn: ViewFn, key: KeyType): void {
 	if (isShowing(key)) {
 		close()
 	} else {
-		currentViewFn = viewFn
+		const control = new ModalControl()
+		currentViewFn = () => viewFn(control)
+		currentControl = control
 		currentKey = key
 	}
 	m.redraw()

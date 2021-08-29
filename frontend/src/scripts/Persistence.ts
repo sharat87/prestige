@@ -3,7 +3,6 @@ import Stream from "mithril/stream"
 import AuthService from "_/AuthService"
 import type { User } from "_/AuthService"
 import { GIST_API_PREFIX, storageUrl } from "_/Env"
-import CookieJar from "_/CookieJar"
 import ModalManager from "_/ModalManager"
 import Button from "_/Button"
 
@@ -40,13 +39,11 @@ export class Sheet {
 	path: SheetPath
 	name: string
 	body: string
-	cookieJar: CookieJar | null
 
-	constructor(path: SheetPath, body: string, cookieJar: CookieJar | null = null) {
+	constructor(path: SheetPath, body: string) {
 		this.path = path
 		this.name = path
 		this.body = body
-		this.cookieJar = cookieJar
 	}
 }
 
@@ -95,23 +92,13 @@ class BrowserProvider extends Provider<LocalSource> {
 
 	async load(sheetPath: SheetPath): Promise<Sheet> {
 		const pathPrefix = this.prefix + sheetPath
-
 		const body = localStorage.getItem(pathPrefix + ":body") ?? ""
-
-		const cookieJarString = localStorage.getItem(pathPrefix + ":cookieJar")
-		let cookieJar = null
-		if (cookieJarString != null) {
-			cookieJar = JSON.parse(cookieJarString)
-		}
-
-		return new Sheet(sheetPath, body, CookieJar.fromPlain(cookieJar))
+		return new Sheet(sheetPath, body)
 	}
 
-	async autoSave({ path, name, body, cookieJar }: Sheet): Promise<void> {
+	async autoSave({ path, name, body }: Sheet): Promise<void> {
 		localStorage.setItem(this.prefix + path + ":name", name)
 		localStorage.setItem(this.prefix + path + ":body", body)
-		console.log("saving cookieJar", cookieJar)
-		localStorage.setItem(this.prefix + path + ":cookieJar", JSON.stringify(cookieJar))
 	}
 
 	async create(): Promise<void> {
@@ -340,62 +327,51 @@ class GistProvider extends Provider<GistSource> {
 	}
 
 	async create(): Promise<void> {
-		interface GistInfo {
-			title: string
-			description: string
-			isPublic: boolean
-		}
+		let title = ""
+		let description = ""
 
-		const body: GistInfo = await new Promise<GistInfo>((resolve) => {
-			let title = ""
-			let description = ""
-
-			ModalManager.show((control) => {
-				return m("div.pa2", [
-					m("h3", "Create a Gist"),
-					m("p", m("label", [
-						m("span", "Title:"),
-						m("input.ml2", {
-							value: title,
-							oninput(event: InputEvent) {
-								title = (event.target as HTMLInputElement).value
-							},
-						}),
-					])),
-					m("p", m("label", [
-						m("span", "Description:"),
-						m("input.ml2", {
-							value: description,
-							oninput(event: InputEvent) {
-								description = (event.target as HTMLInputElement).value
-							},
-						}),
-					])),
-					m("p", [
-						m(Button, { style: "primary", onclick: submit }, "Create Secret Gist"),
-						m(Button, { class: "ml2 public", onclick: submit }, "Create Public Gist"),
-					]),
-				])
-
-				function submit(event: MouseEvent) {
-					control.close()
-					resolve({
+		ModalManager.show((control) => {
+			const submit = async (event: MouseEvent) => {
+				control.close()
+				await m.request({
+					method: "POST",
+					url: GIST_API_PREFIX,
+					withCredentials: true,
+					body: {
 						title,
 						description,
 						isPublic: (event.target as HTMLButtonElement).classList.contains("public"),
-					})
-				}
-			})
-		})
+					},
+				})
+				await this.loadRootListing()
+			}
 
-		await m.request({
-			method: "POST",
-			url: GIST_API_PREFIX,
-			withCredentials: true,
-			body,
+			return m("div.pa2", [
+				m("h3", "Create a Gist"),
+				m("p", m("label", [
+					m("span", "Title:"),
+					m("input.ml2", {
+						value: title,
+						oninput(event: InputEvent) {
+							title = (event.target as HTMLInputElement).value
+						},
+					}),
+				])),
+				m("p", m("label", [
+					m("span", "Description:"),
+					m("input.ml2", {
+						value: description,
+						oninput(event: InputEvent) {
+							description = (event.target as HTMLInputElement).value
+						},
+					}),
+				])),
+				m("p", [
+					m(Button, { style: "primary", onclick: submit }, "Create Secret Gist"),
+					m(Button, { class: "ml2 public", onclick: submit }, "Create Public Gist"),
+				]),
+			])
 		})
-
-		await this.loadRootListing()
 	}
 
 	delete(path: string): Promise<void> {
