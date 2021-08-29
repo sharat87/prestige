@@ -2,7 +2,7 @@ import m from "mithril"
 import Modal from "_/Modal"
 import Button from "_/Button"
 
-type ViewFn = () => m.Children
+type ViewFn = (control: ModalControl) => m.Children
 let currentViewFn: null | ViewFn = null
 
 type KeyType = unknown
@@ -14,8 +14,24 @@ interface DrawerOptions {
 	footerLeft?: m.Children
 }
 
+class ModalControl {
+	key: number
+
+	constructor() {
+		this.key = Date.now()
+	}
+
+	close() {
+		if (currentKey === this.key) {
+			close()
+		}
+	}
+}
+
 function show(viewFn: ViewFn): void {
-	currentViewFn = () => m(ModalLayout, viewFn())
+	const control = new ModalControl()
+	currentViewFn = () => m(ModalLayout, viewFn(control))
+	currentKey = control.key
 	m.redraw()
 }
 

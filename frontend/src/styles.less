@@ -209,11 +209,7 @@ pre {
 
 	> .body {
 		overflow-y: auto;
-		flex-grow: 1;
-	}
-
-	> .toolbar + .body {
-		height: calc(100% - 1em - 15px);
+		flex: 1;
 	}
 }
 
@@ -564,6 +560,10 @@ details.fold {
 				color: white;
 			}
 		}
+	}
+
+	li > ul {
+		margin-left: 1.3em;
 	}
 
 	+ .provider-block {

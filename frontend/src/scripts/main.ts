@@ -17,6 +17,7 @@ import Toaster from "_/Toaster"
 import ExternalLink from "_/ExternalLink"
 import ModalManager from "_/ModalManager"
 import Toolbar from "_/Toolbar"
+import PageEnd from "_/PageEnd"
 
 window.addEventListener("load", main)
 
@@ -231,6 +232,7 @@ class Sidebar implements m.ClassComponent {
 			]),
 			this.isOpen && m(".content", [
 				m(DocumentBrowser),
+				m(PageEnd),
 			]),
 		])
 	}
@@ -250,7 +252,12 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 			)
 		}
 
-		vnode.attrs.workspace.initCodeMirror(vnode.dom.firstElementChild)
+		const bodyEl = vnode.dom.querySelector(".body")
+		if (bodyEl != null) {
+			vnode.attrs.workspace.initCodeMirror(bodyEl as HTMLElement)
+		} else {
+			throw new Error("Unable to find body element in editor pane for initializing CodeMirror.")
+		}
 	}
 
 	function view(vnode: VnodeDOM<{ class?: string, workspace: Workspace }>): m.Vnode {

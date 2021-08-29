@@ -24,6 +24,8 @@ jobs:
           node-version: 14
 
       - name: "Build and create archive"
+        env:
+          PRESTIGE_FRONTEND_ROLLBAR_TOKEN: ${{ secrets.PRESTIGE_FRONTEND_ROLLBAR_TOKEN }}
         run: |
           make build-all
 

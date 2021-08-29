@@ -4,6 +4,8 @@ import AuthService from "_/AuthService"
 import type { User } from "_/AuthService"
 import { GIST_API_PREFIX, storageUrl } from "_/Env"
 import CookieJar from "_/CookieJar"
+import ModalManager from "_/ModalManager"
+import Button from "_/Button"
 
 const STORAGE_URL_BASE = storageUrl()
 
@@ -54,13 +56,11 @@ export abstract class Provider<S extends Source> {
 	key: string
 	source: S
 	entries: SheetEntry[]
-	listingUi: null | (() => m.Children)
 
 	constructor(key: string, source: S) {
 		this.key = key
 		this.source = source
 		this.entries = []
-		this.listingUi = null
 	}
 
 	abstract loadRootListing(): Promise<void>
@@ -69,9 +69,11 @@ export abstract class Provider<S extends Source> {
 
 	abstract autoSave(sheet: Sheet): Promise<void>
 
-	abstract create(path: string, name: string): Promise<void>
+	abstract create(): Promise<void>
 
 	abstract delete(path: string): Promise<void>
+
+	abstract render(): m.Children
 }
 
 class BrowserProvider extends Provider<LocalSource> {
@@ -112,13 +114,15 @@ class BrowserProvider extends Provider<LocalSource> {
 		localStorage.setItem(this.prefix + path + ":cookieJar", JSON.stringify(cookieJar))
 	}
 
-	create(path: string, name: string): Promise<void> {
-		if (path === "") {
-			path = name
+	async create(): Promise<void> {
+		const name = prompt("Sheet Name") ?? ""
+		if (name === "") {
+			return
 		}
+		const path = name
 		localStorage.setItem(this.prefix + path + ":name", name)
 		localStorage.setItem(this.prefix + path + ":body", "")
-		return this.loadRootListing()
+		await this.loadRootListing()
 	}
 
 	delete(path: string): Promise<void> {
@@ -127,6 +131,51 @@ class BrowserProvider extends Provider<LocalSource> {
 		localStorage.removeItem(this.prefix + path + ":body")
 		localStorage.removeItem(this.prefix + path + ":cookieJar")
 		return this.loadRootListing()
+	}
+
+	render(): m.Children {
+		return [
+			m(
+				"a.pv1.ph2.db",
+				{
+					onclick,
+					href: "#",
+				},
+				"+ Create new",
+			),
+			m("ul", [
+				this.entries.map(entry => {
+					const href = `/doc/${ this.key }/${ entry.path }`
+					return m(
+						"li",
+						[
+							m(
+								m.route.Link,
+								{
+									href,
+									class: window.location.hash.substr(2) === href ? "active" : "",
+								},
+								entry.name,
+							),
+							/* Deleting UI should be elsewhere.
+							m(
+								Button,
+								{
+									class: "compact danger-light",
+									onclick(event: Event) {
+										console.log("Deleting", entry)
+										provider.delete(entry.path)
+										event.preventDefault()
+									},
+								},
+								"Del",
+							),
+						   //*/
+						],
+					)
+				}),
+			]),
+		]
 	}
 }
 
@@ -186,8 +235,9 @@ class CloudProvider extends Provider<CloudSource> {
 		})
 	}
 
-	create(path: string, name: string): Promise<void> {
-		return m.request({
+	async create(): Promise<void> {
+		const path = prompt("Sheet path:")
+		await m.request({
 			method: "POST",
 			url: STORAGE_URL_BASE + path,
 			withCredentials: true,
@@ -195,7 +245,7 @@ class CloudProvider extends Provider<CloudSource> {
 				name,
 			},
 		})
-			.then(() => this.loadRootListing())
+		await this.loadRootListing()
 	}
 
 	delete(path: string): Promise<void> {
@@ -206,14 +256,32 @@ class CloudProvider extends Provider<CloudSource> {
 		})
 			.then(() => this.loadRootListing())
 	}
+
+	render(): m.Children {
+		return "Deprecated?"
+	}
+}
+
+interface Gist {
+	name: string
+	owner: string
+	description: string
+	path: string
+	readme: GistFile
+	files: GistFile[]
+}
+
+interface GistFile {
+	name: string
+	rawUrl: string
 }
 
 class GistProvider extends Provider<GistSource> {
-	private rawUrlsByPath: Record<string, string>
+	private gists: Record<string, Gist>
 
 	constructor(key: string, source: GistSource) {
 		super(key, source)
-		this.rawUrlsByPath = {}
+		this.gists = {}
 	}
 
 	verifyUser(): User {
@@ -231,23 +299,10 @@ class GistProvider extends Provider<GistSource> {
 	}
 
 	async loadRootListing(): Promise<void> {
-		this.listingUi = null
-
 		try {
 			this.verifyUser()
 		} catch (error) {
-			this.listingUi = () => m("p", "Not connected to GitHub.")
 			return
-		}
-
-		interface Gist {
-			name: string
-			owner: string
-			description: string
-			files: {
-				name: string
-				rawUrl: string
-			}[]
 		}
 
 		const response = await m.request<{ ok: boolean, gists: Gist[] }>({
@@ -257,13 +312,11 @@ class GistProvider extends Provider<GistSource> {
 		})
 
 		this.entries = []
-		this.rawUrlsByPath = {}
 		for (const gist of response.gists) {
-			const file = gist.files?.find(fl => fl.name !== "README.md")
-			if (file != null) {
-				const path = `${gist.owner}/${gist.name}/${file.name}`
-				this.entries.push({ path, name: file.name })
-				this.rawUrlsByPath[path] = file.rawUrl
+			if (gist.readme != null && gist.files?.length > 0) {
+				const path = `${ gist.owner }/${ gist.name }`
+				gist.path = path
+				this.gists[gist.name] = gist
 			}
 		}
 	}
@@ -282,39 +335,67 @@ class GistProvider extends Provider<GistSource> {
 		return new Sheet(sheetPath, response)
 	}
 
-	async autoSave(sheet: Sheet): Promise<void> {
-		// TODO: Don't auto-save?
-		const currentUser = AuthService.currentUser()
-
-		if (currentUser == null) {
-			throw new Error("Cannot load sheets on cloud, since user not logged in.")
-		}
-
-		if (!currentUser.isGitHubConnected) {
-			throw new Error("GitHub not connected for logged in user, cannot browse documents on Gist.")
-		}
-
-		// TODO: Verify if the save was successful.
-		await m.request({
-			method: "PATCH",
-			url: STORAGE_URL_BASE + sheet.path,
-			withCredentials: true,
-			body: {
-				body: sheet.body,
-			},
-		})
+	async autoSave(): Promise<void> {
+		// Do nothing. Only manual-saving is allowed for Gists.
 	}
 
-	create(path: string, name: string): Promise<void> {
-		return m.request({
-			method: "POST",
-			url: STORAGE_URL_BASE + path,
-			withCredentials: true,
-			body: {
-				name,
-			},
+	async create(): Promise<void> {
+		interface GistInfo {
+			title: string
+			description: string
+			isPublic: boolean
+		}
+
+		const body: GistInfo = await new Promise<GistInfo>((resolve) => {
+			let title = ""
+			let description = ""
+
+			ModalManager.show((control) => {
+				return m("div.pa2", [
+					m("h3", "Create a Gist"),
+					m("p", m("label", [
+						m("span", "Title:"),
+						m("input.ml2", {
+							value: title,
+							oninput(event: InputEvent) {
+								title = (event.target as HTMLInputElement).value
+							},
+						}),
+					])),
+					m("p", m("label", [
+						m("span", "Description:"),
+						m("input.ml2", {
+							value: description,
+							oninput(event: InputEvent) {
+								description = (event.target as HTMLInputElement).value
+							},
+						}),
+					])),
+					m("p", [
+						m(Button, { style: "primary", onclick: submit }, "Create Secret Gist"),
+						m(Button, { class: "ml2 public", onclick: submit }, "Create Public Gist"),
+					]),
+				])
+
+				function submit(event: MouseEvent) {
+					control.close()
+					resolve({
+						title,
+						description,
+						isPublic: (event.target as HTMLButtonElement).classList.contains("public"),
+					})
+				}
+			})
 		})
-			.then(() => this.loadRootListing())
+
+		await m.request({
+			method: "POST",
+			url: GIST_API_PREFIX,
+			withCredentials: true,
+			body,
+		})
+
+		await this.loadRootListing()
 	}
 
 	delete(path: string): Promise<void> {
@@ -324,6 +405,70 @@ class GistProvider extends Provider<GistSource> {
 			withCredentials: true,
 		})
 			.then(() => this.loadRootListing())
+	}
+
+	render(): m.Children {
+		const currentUser = AuthService.currentUser()
+
+		if (currentUser == null) {
+			return "Please login with GitHub to view your Gists."
+		}
+
+		if (!currentUser.isGitHubConnected) {
+			return "Please connect to GitHub to view your Gists."
+		}
+
+		return [
+			m(
+				"a.pv1.ph2.db",
+				{
+					onclick: this.create,
+					href: "#",
+				},
+				"+ Create new",
+			),
+			m("ul", [
+				Object.values(this.gists).map((gist: Gist) => {
+					const gistHref = `/doc/${ this.key }/${ gist.path }`
+					return m(
+						"li",
+						gist.files.length === 1 && [
+							m("li", m(
+								m.route.Link,
+								{
+									href: gistHref,
+									class: window.location.hash.substr(2) === gistHref ? "active" : "",
+								},
+								gist.readme.name.replace(/^_|(\.md$)/g, ""),
+							)),
+						],
+						gist.files.length > 1 && [
+							m(
+								m.route.Link,
+								{
+									href: gistHref,
+									class: window.location.hash.substr(2) === gistHref ? "active" : "",
+								},
+								gist.readme.name.replace(/^_|(\.md$)/g, ""),
+							),
+							m("ul", [
+								gist.files.map((file) => {
+									const fileHref = gistHref + "/" + file.name
+									return m("li", m(
+										m.route.Link,
+										{
+											href: fileHref,
+											class: window.location.hash.substr(2) === fileHref ? "active" : "",
+										},
+										file.name,
+									))
+								}),
+							]),
+						],
+					)
+				}),
+			]),
+		]
 	}
 }
 
