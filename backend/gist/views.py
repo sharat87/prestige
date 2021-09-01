@@ -3,6 +3,7 @@ from typing import List
 
 from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
 from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_safe, require_POST, require_http_methods
 import requests
 
 from auth_api.utils import login_required_json
@@ -12,7 +13,7 @@ GIST_LIST_QUERY = """
 {
   viewer {
     login
-	gists(first: 100, privacy: ALL) {
+    gists(first: 100, privacy: ALL) {
       totalCount
       nodes {
         id
@@ -53,6 +54,7 @@ def gists_index_view(request):
 		return create_gist_view(request, access_token)
 
 
+@require_safe
 def list_gists_view(request, access_token: str):
 	response = requests.post(
 		"https://api.github.com/graphql",
@@ -74,7 +76,17 @@ def list_gists_view(request, access_token: str):
 			},
 		})
 
-	github_username = response.json()["data"]["viewer"]["login"]
+	response_data = response.json()
+	if "data" not in response_data:
+		return JsonResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR, data={
+			"error": {
+				"code": "missing-data-in-gist-response",
+				"message": "Missing data key in response from Gist API.",
+				"details": response_data,
+			},
+		})
+
+	github_username = response_data["data"]["viewer"]["login"]
 	all_gists = response.json()["data"]["viewer"]["gists"]["nodes"]
 	gists_in_response = []
 
@@ -101,6 +113,7 @@ def list_gists_view(request, access_token: str):
 			continue
 
 		gists_in_response.append({
+			"id": gist["id"],
 			"name": gist["name"],
 			"owner": github_username,
 			"description": gist["description"],
@@ -114,6 +127,7 @@ def list_gists_view(request, access_token: str):
 	})
 
 
+@require_POST
 def create_gist_view(request, access_token: str):
 	title = request.parsed_body.get("title", "").strip()
 	if not title:
@@ -161,3 +175,63 @@ def create_gist_view(request, access_token: str):
 def load_gist_file_view(request, gh_username: str, gist_name: str, file_name: str = "main.prestige"):
 	raw_url = f"https://gist.githubusercontent.com/{gh_username}/{gist_name}/raw/{file_name}"
 	return HttpResponse(requests.get(raw_url).text, content_type="text/plain")
+
+
+@require_http_methods(["PATCH"])
+@csrf_exempt  # TODO: Include the csrf token when loading gists, verify it here.
+def update_gist_view(request, gist_id: str):
+	files = request.parsed_body.get("files")
+	if not files:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
+			"error": {
+				"code": "missing-files-in-update-gist",
+				"message": "Missing files key in update gist request",
+			},
+		})
+
+	readme_name = request.parsed_body.get("readmeName")
+	if not readme_name:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
+			"error": {
+				"code": "missing-readme-name-in-update-gist",
+				"message": "Missing readmeName key in update gist request",
+			},
+		})
+
+	gh_identity = request.user.github_ids.first()
+	if gh_identity is None:
+		return JsonResponse(status=HTTPStatus.UNAUTHORIZED, data={
+			"error": {
+				"code": "github-identity-unavailable-when-fetching-gists",
+				"message": "Cannot fetch gists since GitHub Identity not available for current user.",
+			},
+		})
+
+	access_token = gh_identity.access_token
+
+	files[readme_name] = {
+		"content": "This is an updated Prestige Gist!",
+	}
+
+	# Ref: <https://docs.github.com/en/rest/reference/gists#update-a-gist>.
+	response = requests.patch(
+		"https://api.github.com/gists/" + gist_id,
+		headers={
+			"Accept": "application/vnd.github.v3+json",
+			"Authorization": "Bearer " + access_token,
+		},
+		json={
+			"files": files,
+		},
+	)
+
+	if response.status_code != 200:
+		return JsonResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR, data={
+			"error": {
+				"code": "error-from-gist-patch-api",
+				"message": "Error updating Gist.",
+				"details": response.json(),
+			},
+		})
+
+	return JsonResponse(data={"ok": True})

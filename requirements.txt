@@ -1,18 +1,6 @@
-# backend server
 Django==3.2.5
 dj-database-url
 Requests
 psycopg2-binary
-
-# noprod; Entries below this line won't be available on prod.
-mitmproxy
-
-selenium  # E2E tests.
-
-mkdocs  # Building documentation.
-
-# Linting
-flake8
-flake8-tabs
-mypy
-django-stubs
+gunicorn
+whitenoise

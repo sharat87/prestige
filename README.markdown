@@ -24,15 +24,13 @@ thing) or defer it to a weekend.
 Prestige exists thanks to the work of the following open source projects (not exhaustive, thanks to all those who
 weren't listed here, but still were just as helpful):
 
-1. [Mithril](https://mithril.js.org/) &mdash; powers the code structure and provides a scaffolding for the interactivity.
+1. [TypeScript](https://www.typescriptlang.org/) & [Mithril](https://mithril.js.org/) &mdash; power the frontend UI and logic.
 1. [CodeMirror](https://codemirror.net/) &mdash; powers the code editor and syntax-highlighted code blocks.
-1. [TypeScript](https://www.typescriptlang.org/) &mdash; powers the script compilation and static checking within Parcel.
-1. [Django](https://www.djangoproject.com/) &mdash; powers the backend infrastructure including cloud storage, proxy etc.
-1. [Python](https://www.python.org/) &mdash; powers the backend and end-to-end tests.
-1. [Tachyons](http://tachyons.io/) &mdash; powers the styling and theming infrastructure.
-1. [Parcel](https://parceljs.org/) &mdash; powers the building and bundling of application assets for deployment.
-1. [Selenium](https://www.selenium.dev/) &mdash; powers the end-to-end testing workflow.
+1. [Less](https://lesscss.org/) & [Tachyons](http://tachyons.io/) &mdash; power the styling and theming systems.
+1. [Python](https://www.python.org/) & [Django](https://www.djangoproject.com/) &mdash; power the backend logic.
+1. [Python](https://www.python.org/) & [Selenium](https://www.selenium.dev/) &mdash; power the end-to-end testing workflow.
 1. [MkDocs](https://www.mkdocs.org/) &mdash; powers the documentation site.
+1. [GNU Make]() & [Parcel](https://parceljs.org/) &mdash; power the building and bundling facilities.
 
 A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
 

@@ -39,11 +39,13 @@ export class Sheet {
 	path: SheetPath
 	name: string
 	body: string
+	isSaved: boolean
 
-	constructor(path: SheetPath, body: string) {
+	constructor(path: SheetPath, body: string, isSaved: boolean) {
 		this.path = path
 		this.name = path
 		this.body = body
+		this.isSaved = isSaved
 	}
 }
 
@@ -53,11 +55,13 @@ export abstract class Provider<S extends Source> {
 	key: string
 	source: S
 	entries: SheetEntry[]
+	isManualSave: boolean
 
-	constructor(key: string, source: S) {
+	constructor(key: string, source: S, isManualSave = false) {
 		this.key = key
 		this.source = source
 		this.entries = []
+		this.isManualSave = isManualSave
 	}
 
 	abstract loadRootListing(): Promise<void>
@@ -65,6 +69,10 @@ export abstract class Provider<S extends Source> {
 	abstract load(sheetPath: SheetPath): Promise<Sheet>
 
 	abstract autoSave(sheet: Sheet): Promise<void>
+
+	manualSave(sheet: Sheet): Promise<void> {
+		return this.autoSave(sheet)
+	}
 
 	abstract create(): Promise<void>
 
@@ -93,7 +101,7 @@ class BrowserProvider extends Provider<LocalSource> {
 	async load(sheetPath: SheetPath): Promise<Sheet> {
 		const pathPrefix = this.prefix + sheetPath
 		const body = localStorage.getItem(pathPrefix + ":body") ?? ""
-		return new Sheet(sheetPath, body)
+		return new Sheet(sheetPath, body, true)
 	}
 
 	async autoSave({ path, name, body }: Sheet): Promise<void> {
@@ -201,7 +209,7 @@ class CloudProvider extends Provider<CloudSource> {
 			withCredentials: true,
 		})
 
-		return new Sheet(sheetPath, response.body)
+		return new Sheet(sheetPath, response.body, true)
 	}
 
 	async autoSave(sheet: Sheet): Promise<void> {
@@ -250,6 +258,7 @@ class CloudProvider extends Provider<CloudSource> {
 }
 
 interface Gist {
+	id: string
 	name: string
 	owner: string
 	description: string
@@ -267,7 +276,7 @@ class GistProvider extends Provider<GistSource> {
 	private gists: Record<string, Gist>
 
 	constructor(key: string, source: GistSource) {
-		super(key, source)
+		super(key, source, true)
 		this.gists = {}
 	}
 
@@ -319,11 +328,33 @@ class GistProvider extends Provider<GistSource> {
 			},
 		})
 
-		return new Sheet(sheetPath, response)
+		return new Sheet(sheetPath, response, true)
 	}
 
-	async autoSave(): Promise<void> {
-		// Do nothing. Only manual-saving is allowed for Gists.
+	autoSave(): Promise<void> {
+		return Promise.reject()
+	}
+
+	async manualSave(sheet: Sheet): Promise<void> {
+		this.verifyUser()
+
+		const gistName = sheet.path.split("/")[1]
+		const fileName = sheet.path.split("/")[2] ?? "main.prestige"
+		const gist = this.gists[gistName]
+
+		await m.request({
+			method: "PATCH",
+			url: GIST_API_PREFIX + "update/" + gistName,
+			withCredentials: true,
+			body: {
+				readmeName: gist.readme.name,
+				files: {
+					[fileName]: {
+						content: sheet.body,
+					},
+				},
+			},
+		})
 	}
 
 	async create(): Promise<void> {
@@ -540,10 +571,7 @@ Stream.lift((providers: Provider<Source>[], qualifiedName: string | null) => {
 	}
 
 	provider.load(path)
-		.then((sheet: Sheet) => {
-			console.log("Loaded sheet from provider", sheet)
-			currentSheet(sheet)
-		})
+		.then(currentSheet)
 		.finally(m.redraw)
 
 }, currentProviders, currentSheetName)
@@ -566,7 +594,7 @@ export async function openSheet(qualifiedName: string): Promise<Sheet> {
 	return await provider.load(path)
 }
 
-export async function saveSheet(qualifiedName: string, sheet: Sheet): Promise<void> {
+function getProvider(qualifiedName: string): Provider<Source> {
 	if (typeof currentProviders() === "undefined") {
 		throw new Error("Providers not initialized yet.")
 	}
@@ -580,5 +608,36 @@ export async function saveSheet(qualifiedName: string, sheet: Sheet): Promise<vo
 		throw new Error("Couldn't get provider for qualified name " + qualifiedName)
 	}
 
-	return await provider.autoSave(sheet)
+	return provider
+}
+
+export async function saveSheetAuto(qualifiedName: string, sheet: Sheet): Promise<void> {
+	console.log("Save auto")
+	const provider = getProvider(qualifiedName)
+	if (!provider.isManualSave) {
+		try {
+			await provider.autoSave(sheet)
+		} catch (error) {
+			console.error("Error saving automatically", error)
+		}
+		sheet.isSaved = true
+	}
+}
+
+export async function saveSheetManual(qualifiedName: string, sheet: Sheet): Promise<void> {
+	console.log("Save manual")
+	const provider = getProvider(qualifiedName)
+	if (provider.isManualSave) {
+		try {
+			await provider.manualSave(sheet)
+		} catch (error) {
+			console.error("Error saving manually", error)
+		}
+		sheet.isSaved = true
+	}
+}
+
+export function isManualSaveAvailable(): boolean {
+	const sheetName = currentSheetName()
+	return sheetName != null && getProvider(sheetName).isManualSave
 }

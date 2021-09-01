@@ -10,7 +10,7 @@ function view(): m.Children {
 		m("h2.ma2", "Documents"),
 		providers.length === 0 ? "None yet" :
 			providers.map((provider: Provider<Source>) => m("details.provider-block", { open: true }, [
-				m("summary.pointer", provider.source.title),
+				m("summary.pointer", [provider.source.title, provider.key === "gist" && m("sup.ml1", "Beta")]),
 				provider.render(),
 			])),
 	]

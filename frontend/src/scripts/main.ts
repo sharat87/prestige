@@ -18,6 +18,7 @@ import ExternalLink from "_/ExternalLink"
 import ModalManager from "_/ModalManager"
 import Toolbar from "_/Toolbar"
 import PageEnd from "_/PageEnd"
+import { isManualSaveAvailable } from "_/Persistence"
 
 window.addEventListener("load", main)
 
@@ -124,10 +125,6 @@ function WorkspaceView(): m.Component {
 						NavLink,
 						{ onclick: onColorPaletteToggle, isActive: ModalManager.isShowing(VisiblePopup.ColorPalette) },
 						"Palette",
-					),
-					m(
-						".flex.items-center.ph1",
-						["📃 ", workspace.currentSheetQualifiedPath()],
 					),
 					m(
 						NavLink,
@@ -269,6 +266,20 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 		return m(".editor-pane", [
 			m(Toolbar, {
 				left: m(".flex", [
+					isManualSaveAvailable()
+						? m(
+							NavLink,
+							{
+								onclick: () => {
+									workspace.saveSheetManual()
+								},
+							},
+							"💾 Save document",
+						)
+						: m("em.pa1", "Autosaved"),
+					m("span.pa1", "📃 " + workspace.currentSheetQualifiedPath()),
+				]),
+				right: m(".flex", [
 					m(
 						NavLink,
 						{

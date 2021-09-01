@@ -5,7 +5,16 @@ import CodeMirror from "_/codemirror"
 import { BlockType, parse } from "_/Parser"
 import CookieJar from "_/CookieJar"
 import { proxyUrl } from "_/Env"
-import { currentProviders, currentSheet, currentSheetName, Provider, saveSheet, Sheet, Source } from "_/Persistence"
+import {
+	currentProviders,
+	currentSheet,
+	currentSheetName,
+	Provider,
+	saveSheetAuto,
+	saveSheetManual,
+	Sheet,
+	Source,
+} from "_/Persistence"
 import Stream from "mithril/stream"
 import throttle from "lodash/throttle"
 import FileBucket from "_/FileBucket"
@@ -83,7 +92,6 @@ export default class Workspace {
 	currentSheet: null | Sheet
 	currentSheetQualifiedPath: Stream<string>
 	private _disableAutoSave: boolean
-	isChangesSaved: boolean
 	cookieJar: null | CookieJar
 
 	constructor() {
@@ -99,7 +107,6 @@ export default class Workspace {
 		this.currentSheet = null
 		this.currentSheetQualifiedPath = Stream()
 		this._disableAutoSave = false
-		this.isChangesSaved = true
 
 		Stream.lift<[string, Provider<Source>[]], void>((qualifiedPath: string) => {
 			this.loadSheet(qualifiedPath)
@@ -114,7 +121,7 @@ export default class Workspace {
 		this.onDuplicateClicked = this.onDuplicateClicked.bind(this)
 		this.onExportClicked = this.onExportClicked.bind(this)
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this)
-		this.saveChanges = throttle(this.saveChanges.bind(this), 3000, { trailing: true })
+		this.saveSheetAuto = throttle(this.saveSheetAuto.bind(this), 3000, { trailing: true })
 		this.cookieJar = null
 
 		currentSheet.map((value) => {
@@ -187,38 +194,46 @@ export default class Workspace {
 		this.updateEditorDisplay()
 
 		this.codeMirror.on("changes", () => {
-			this._lines = null
-			if (!this._disableAutoSave) {
-				this.isChangesSaved = false
+			m.redraw()  // Need this on every change, to update any unsaved/saved indicator.
+			this.updateEditorDisplay()  // TODO: This needs to be faster, or be run less often, not on every keystroke.
+			if (this._disableAutoSave) {
+				return
 			}
-			this.saveChanges()
-			m.redraw()
+			this._lines = null
+			if (this.currentSheet != null) {
+				console.log("set isSaved to false")
+				this.currentSheet.isSaved = false
+			}
+			this.saveSheetAuto()
 		})
 	}
 
-	saveChanges(): void {
-		this.updateEditorDisplay()
-
+	saveSheetAuto(): void {
 		if (this._disableAutoSave) {
 			return
 		}
 
 		if (this.currentSheet == null) {
-			console.error("Can't save missing sheet. Something's wrong.")
+			console.error("Can't auto-save missing sheet. Something's wrong.")
 			return
 		}
 
 		this.currentSheet.body = this.getContent()
+		saveSheetAuto(this.currentSheetQualifiedPath(), this.currentSheet).finally(m.redraw)
+	}
 
-		console.log("saving this.currentSheet", this.currentSheet)
-		saveSheet(this.currentSheetQualifiedPath(), this.currentSheet)
-			.then(() => {
-				this.isChangesSaved = true
-			})
-			.catch(error => {
-				console.error("Error saving", error)
-			})
-			.finally(m.redraw)
+	saveSheetManual(): void {
+		if (this.currentSheet == null) {
+			console.error("Can't manual-save missing sheet. Something's wrong.")
+			return
+		}
+
+		this.currentSheet.body = this.getContent()
+		saveSheetManual(this.currentSheetQualifiedPath(), this.currentSheet).finally(m.redraw)
+	}
+
+	get isChangesSaved(): boolean {
+		return this.currentSheet == null || this.currentSheet.isSaved
 	}
 
 	getContent(): string {
@@ -234,7 +249,7 @@ export default class Workspace {
 			this.codeMirror.setValue(content)
 			this._disableAutoSave = false
 		}
-		(this.saveChanges as any).flush()
+		(this.saveSheetAuto as any).flush()
 	}
 
 	get lines(): string[] {
@@ -481,14 +496,6 @@ export default class Workspace {
 				m.redraw()
 				this.saveCookieJar()
 			})
-	}
-
-	async saveCurrentSheet(): Promise<void> {
-		if (this.currentSheet != null) {
-			return saveSheet(this.currentSheetQualifiedPath(), this.currentSheet)
-		} else {
-			return Promise.reject()
-		}
 	}
 
 	async runTop(lines: string | string[], runLineNum: string | number, silent = false): Promise<AnyResult> {

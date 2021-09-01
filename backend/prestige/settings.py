@@ -14,7 +14,7 @@ IS_PROD = ENV == "prod"
 
 if IS_PROD:
 	_missing_env_vars = {
-		"PRESTIGE_DATABASE_URL",
+		"DATABASE_URL",
 		"PRESTIGE_SECRET_KEY",
 	} - os.environ.keys()
 
@@ -57,6 +57,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
 	"django.middleware.security.SecurityMiddleware",
+	*(["whitenoise.middleware.WhiteNoiseMiddleware"] if IS_PROD else []),  # above all, except security middleware.
 	"django.contrib.sessions.middleware.SessionMiddleware",
 	"django.middleware.common.CommonMiddleware",
 	"django.middleware.csrf.CsrfViewMiddleware",
@@ -93,9 +94,9 @@ WSGI_APPLICATION = "prestige.wsgi.application"
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 if IS_PROD:
 	DATABASES = {
-		# This will parse the values of the PRESTIGE_DATABASE_URL environment variable into Django's DB config format.
-		# For SQLite, set `PRESTIGE_DATABASE_URL=sqlite:///path/to/folder/db.sqlite3`
-		"default": dj_database_url.config(env="PRESTIGE_DATABASE_URL", conn_max_age=600),
+		# This will parse the values of the DATABASE_URL environment variable into Django's DB config format.
+		# For SQLite, set `DATABASE_URL=sqlite:///path/to/folder/db.sqlite3`
+		"default": dj_database_url.config(env="DATABASE_URL", conn_max_age=600),
 	}
 
 else:
@@ -157,7 +158,7 @@ LOGGING = {
 			"level": "WARNING",
 			"propagate": True,
 		},
-		"gunicorn.error": {
+		"gunicorn": {
 			"handlers": ["console"],
 			"level": "INFO",
 			"propagate": True,
@@ -187,6 +188,11 @@ USE_TZ = True
 
 STATIC_ROOT = BASE_DIR / "static"
 STATIC_URL = "/static/"
+
+
+# # Perma-cache for static files and compression.
+# # http://whitenoise.evans.io/en/stable/#quickstart-for-django-apps
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 PROXY_DISALLOW_HOSTS = {

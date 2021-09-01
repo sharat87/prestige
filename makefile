@@ -10,7 +10,7 @@ help:
 build-backend: venv
 	source venv/bin/activate \
 		&& pushd backend \
-		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_DATABASE_URL='sqlite://:memory:' python manage.py collectstatic --clear --no-input \
+		&& PRESTIGE_SECRET_KEY=unused DATABASE_URL='sqlite://:memory:' python manage.py collectstatic --clear --no-input \
 		&& python -m compileall -f .
 
 lint-backend: venv/bin/flake8
@@ -108,9 +108,9 @@ e2e-tests/drivers/chromedriver:
 
 venv: venv/make_sentinel
 
-venv/make_sentinel: requirements.txt
+venv/make_sentinel: requirements.txt requirements-dev.txt
 	test -d venv || python3 -m venv --prompt prestige venv
-	source venv/bin/activate && pip install -r requirements.txt
+	source venv/bin/activate && pip install -r requirements.txt && pip install -r requirements-dev.txt
 	touch $@
 
 test-all: lint-frontend test-frontend test-backend test-e2e
@@ -159,17 +159,5 @@ build-all: build-frontend build-backend build-docs
 
 upload-package:
 	aws s3 cp package.tar.gz s3://ssk-artifacts/prestige-package.tar.gz
-
-netlify: build-frontend
-	# Copy favicon to hashless filename for docs to show the favicon.
-	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
-	python3 -m pip install -r requirements.txt
-	cd backend \
-		&& PRESTIGE_SECRET_KEY=unused PRESTIGE_DATABASE_URL='sqlite://:memory:' \
-		python manage.py collectstatic
-	mv backend/static frontend/dist/
-	cd docs && PYTHONPATH=. mkdocs build
-	mv docs/site frontend/dist/docs
-	du -sh frontend/dist || true
 
 .PHONY: help lint-backend test-backend build-frontend lint-frontend test-frontend test-e2e test-all venv start stop

@@ -1,0 +1,11 @@
+mitmproxy  # Dev-time routing.
+
+selenium  # E2E tests.
+
+mkdocs  # Building documentation.
+
+# Linting
+flake8
+flake8-tabs
+mypy
+django-stubs
