@@ -1,19 +1,18 @@
 import logging
 from http import HTTPStatus
 import json
+import secrets
 
 import requests
 from django.conf import settings
 from django.contrib import auth
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import AbstractUser
 from django.db import IntegrityError
 from django.http import HttpResponse, JsonResponse, HttpResponseNotFound
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST, require_GET
 from django.shortcuts import redirect
 
-from .utils import login_required_json
 from .models import GitHubIdentity
 
 
@@ -133,7 +132,7 @@ def profile_view(request):
 	})
 
 
-def user_plain(user: AbstractUser):
+def user_plain(user):
 	return {
 		"username": user.username,
 		"email": user.email,
@@ -145,10 +144,13 @@ def github_auth_view(request):
 	if not settings.GITHUB_CLIENT_ID:
 		return HttpResponseNotFound("Sorry, GitHub Integration not configured on this server")
 
-	# TODO: Include state verification.
+	state_token = secrets.token_urlsafe(64)
+	request.session["github_auth_state_token"] = state_token
+
 	return redirect(
 		"https://github.com/login/oauth/authorize?client_id=" + settings.GITHUB_CLIENT_ID +
 		"&scope=read:user user:email repo gist"
+		"&state=" + state_token
 	)
 
 
@@ -166,6 +168,16 @@ def github_auth_callback_view(request):
 	if error is not None:
 		return JsonResponse(status=HTTPStatus.UNAUTHORIZED, reason=error, data={})
 
+	if request.GET.get("state") != request.session.get("github_auth_state_token"):
+		log.error("Mismatching state %r %r", request.GET.get("state"), request.session.get("github_auth_state_token"))
+		return JsonResponse(status=HTTPStatus.UNAUTHORIZED, reason="State mismatch", data={
+			"error": {
+				"code": "state-mismatch",
+				"message": "Mismatching state found. Rejecting authentication, for your secrurity. Please try agian.",
+			},
+		})
+
+	request.session.pop("github_auth_state_token", None)
 	code = request.GET.get("code")
 
 	if not code:
@@ -186,7 +198,7 @@ def github_auth_callback_view(request):
 
 	data = response.json()
 	# Sample: {"access_token":"gho_16C7e42F292c6912E7710c838347Ae178B4a", "scope":"repo,gist", "token_type":"bearer"}
-	log.info("response from github access token url", data)
+	log.info("response from github access token url %r", data)
 	access_token = data["access_token"]
 
 	response = requests.get(
