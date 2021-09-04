@@ -126,7 +126,7 @@ export default class Workspace {
 		this.cookieJar = null
 
 		currentSheet.map((value) => {
-			this.currentSheet = value
+			this.currentSheet = value instanceof Sheet ? value : null
 
 			if (this.currentSheet != null) {
 				if (!this.currentSheet.body) {

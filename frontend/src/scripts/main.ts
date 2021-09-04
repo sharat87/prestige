@@ -18,7 +18,7 @@ import ExternalLink from "_/ExternalLink"
 import ModalManager from "_/ModalManager"
 import Toolbar from "_/Toolbar"
 import PageEnd from "_/PageEnd"
-import { isManualSaveAvailable, SaveState } from "_/Persistence"
+import { currentSheet, isManualSaveAvailable, SaveState } from "_/Persistence"
 
 window.addEventListener("load", main)
 
@@ -315,6 +315,9 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 					}
 				},
 			}),
+			currentSheet() === "loading" && m(".mask.pa5", [
+				m(".loading", m.trust("Loading&hellip;")),
+			]),
 		])
 	}
 }

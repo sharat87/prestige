@@ -324,6 +324,10 @@ class GistProvider extends Provider<GistSource> {
 		}
 	}
 
+	async clearListing() {
+		this.gists = {}
+	}
+
 	async load(sheetPath: SheetPath): Promise<Sheet> {
 		const response = await m.request<string>({
 			method: "GET",
@@ -488,7 +492,6 @@ class GistProvider extends Provider<GistSource> {
 
 const availableSources: Stream<Source[]> = Stream()
 AuthService.currentUser.map(recomputeAvailableSources)
-recomputeAvailableSources(null)
 
 async function recomputeAvailableSources(user: null | User): Promise<void> {
 	const sources: Source[] = [
@@ -514,8 +517,10 @@ async function recomputeAvailableSources(user: null | User): Promise<void> {
 		title: "GitHub Gist",
 	})
 
-	console.log("Computed document sources", sources)
-	availableSources(sources)
+	// If available sources didn't change, after auth checking is done, don't recompute stuff below.
+	if (JSON.stringify(availableSources()) !== JSON.stringify(sources)) {
+		availableSources(sources)
+	}
 }
 
 function createProviderForSource(key: string, source: Source): Provider<Source> {
@@ -534,10 +539,9 @@ function createProviderForSource(key: string, source: Source): Provider<Source> 
 export const providerCache: Map<string, Provider<Source>> = new Map()
 export const currentProviders: Stream<Provider<Source>[]> = Stream([])
 export const currentSheetName: Stream<null | string> = Stream(null)
-export const currentSheet: Stream<null | Sheet> = Stream(null)
+export const currentSheet: Stream<null | "loading" | Sheet> = Stream(null)
 
 availableSources.map(async function(sources: Source[]): Promise<void> {
-	console.log("Computing document providers")
 	// Refresh available providers.
 	const providers: Provider<Source>[] = []
 
@@ -555,10 +559,14 @@ availableSources.map(async function(sources: Source[]): Promise<void> {
 		providers.push(provider)
 	}
 
+	console.log("load listing for", providers.map(p => p.key))
 	await Promise.all(providers.map(provider => provider.loadRootListing()))
 
 	currentProviders(providers)
 })
+
+currentProviders.map(v => console.log("lift providers", v))
+currentSheetName.map(v => console.log("lift sheet name", v))
 
 Stream.lift((providers: Provider<Source>[], qualifiedName: string | null) => {
 	if (qualifiedName == null || providers == null || providers.length === 0) {
@@ -577,11 +585,24 @@ Stream.lift((providers: Provider<Source>[], qualifiedName: string | null) => {
 		throw new Error("Couldn't get provider for qualified name " + qualifiedName)
 	}
 
+	currentSheet("loading")
 	provider.load(path)
 		.then(currentSheet)
 		.finally(m.redraw)
 
 }, currentProviders, currentSheetName)
+
+Stream.lift((providers: Provider<Source>[], user: null | User) => {
+	for (const provider of providers) {
+		if (provider.key === "gist") {
+			if (user == null) {
+				(provider as GistProvider).clearListing()
+			} else {
+				provider.loadRootListing()
+			}
+		}
+	}
+}, currentProviders, AuthService.currentUser)
 
 export async function openSheet(qualifiedName: string): Promise<Sheet> {
 	if (typeof currentProviders() === "undefined") {

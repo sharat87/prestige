@@ -146,6 +146,7 @@ pre {
 .editor-pane, .result-pane {
 	display: flex;
 	flex-direction: column;
+	position: relative;
 
 	> .toolbar {
 		position: relative;
@@ -423,6 +424,23 @@ pre {
 	box-shadow: 0px 9px 72px #0009;
 	display: flex;
 	flex-direction: column;
+}
+
+.mask {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+}
+
+.loading {
+	padding: 12px;
+	border-radius: 6px;
+	font-size: 3em;
+	background-color: var(--page-bg);
+	display: inline-block;
+	box-shadow: 0 0 72px #0004;
 }
 
 label {
