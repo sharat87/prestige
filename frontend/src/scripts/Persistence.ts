@@ -436,8 +436,15 @@ class GistProvider extends Provider<GistSource> {
 			return "Please connect to GitHub to view your Gists."
 		}
 
+		const gists = Object.values(this.gists)
+
 		return [
-			m(
+			gists.length === 0 && m("p", [
+				"No prestige gists found! Let's ",
+				m("a", { onclic: this.create, href: "#" }, "create one now"),
+				"!",
+			]),
+			gists.length > 0 && m(
 				"a.pv1.ph2.db",
 				{
 					onclick: this.create,
@@ -445,8 +452,8 @@ class GistProvider extends Provider<GistSource> {
 				},
 				"+ Create new",
 			),
-			m("ul", [
-				Object.values(this.gists).map((gist: Gist) => {
+			gists.length > 0 && m("ul", [
+				gists.map((gist: Gist) => {
 					const gistHref = `/doc/${ this.key }/${ gist.path }`
 					return m(
 						"li",
@@ -592,6 +599,7 @@ Stream.lift((providers: Provider<Source>[], qualifiedName: string | null) => {
 
 }, currentProviders, currentSheetName)
 
+// When auth status changes, reset or refresh Gist listing.
 Stream.lift((providers: Provider<Source>[], user: null | User) => {
 	for (const provider of providers) {
 		if (provider.key === "gist") {

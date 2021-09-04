@@ -1,7 +1,8 @@
 from http import HTTPStatus
+from http.client import HTTPSConnection
 from typing import List
 
-from django.http import HttpResponse, JsonResponse, HttpResponseBadRequest
+from django.http import JsonResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_safe, require_POST, require_http_methods
 import requests
@@ -173,8 +174,11 @@ def create_gist_view(request, access_token: str):
 
 
 def load_gist_file_view(request, gh_username: str, gist_name: str, file_name: str = "main.prestige"):
-	raw_url = f"https://gist.githubusercontent.com/{gh_username}/{gist_name}/raw/{file_name}"
-	return HttpResponse(requests.get(raw_url).text, content_type="text/plain")
+	# Not using requests here. This API, technically, shouldn't load the whole Gist into memory, but stream it from
+	# GitHub servers down to the client.
+	conn = HTTPSConnection("gist.githubusercontent.com")
+	conn.request("GET", f"/{gh_username}/{gist_name}/raw/{file_name}")
+	return FileResponse(conn.getresponse(), content_type="text/plain")
 
 
 @require_http_methods(["PATCH"])
