@@ -18,7 +18,7 @@ import ExternalLink from "_/ExternalLink"
 import ModalManager from "_/ModalManager"
 import Toolbar from "_/Toolbar"
 import PageEnd from "_/PageEnd"
-import { isManualSaveAvailable } from "_/Persistence"
+import { isManualSaveAvailable, SaveState } from "_/Persistence"
 
 window.addEventListener("load", main)
 
@@ -115,7 +115,10 @@ function WorkspaceView(): m.Component {
 					]),
 				]),
 				m(".flex.items-stretch", [
-					!workspace.isChangesSaved && m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
+					workspace.saveState === SaveState.unsaved
+						&& m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
+					workspace.saveState === SaveState.saving
+						&& m(".i.pv1.ph2.db.flex.items-center.silver", m.trust("Saving&hellip;")),
 					isDev() && m(
 						"code.flex.items-center.ph1",
 						{ style: { lineHeight: 1.15, color: "var(--red-3)", background: "var(--red-9)" } },
@@ -263,20 +266,34 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 		const { workspace } = vnode.attrs
 		workspace.doFlashes()
 		workspace.codeMirror?.refresh()
+
+		let saveButtonSpace: m.Children = null
+
+		if (!isManualSaveAvailable()) {
+			saveButtonSpace = m("em.pa1", "Autosaved")
+
+		} else {
+			saveButtonSpace = m(".stack-view", [
+				m(
+					NavLink,
+					{
+						onclick: () => {
+							workspace.saveSheetManual()
+						},
+					},
+					"💾 Save document",
+				),
+				workspace.saveState === SaveState.unchanged && m("div", "No changes"),
+				workspace.saveState === SaveState.saving && m("div", m.trust("✍️ Saving&hellip;")),
+				workspace.saveState === SaveState.saved && m("div", "✓ Saved!"),
+			])
+
+		}
+
 		return m(".editor-pane", [
 			m(Toolbar, {
 				left: m(".flex", [
-					isManualSaveAvailable()
-						? m(
-							NavLink,
-							{
-								onclick: () => {
-									workspace.saveSheetManual()
-								},
-							},
-							"💾 Save document",
-						)
-						: m("em.pa1", "Autosaved"),
+					saveButtonSpace,
 					m("span.pa1", "📃 " + workspace.currentSheetQualifiedPath()),
 				]),
 				right: m(".flex", [

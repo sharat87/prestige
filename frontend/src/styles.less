@@ -571,6 +571,23 @@ details.fold {
 	}
 }
 
+.stack-view {
+	position: relative;
+	overflow: hidden;
+
+	> :not(:first-child) {
+		position: absolute;
+		left: 0;
+		top: 0;
+		display: flex;
+		height: 100%;
+		align-items: center;
+		width: 100%;
+		justify-content: center;
+		background-color: var(--page-bg);
+	}
+}
+
 @keyframes toast {
 	from {
 		opacity: 0;

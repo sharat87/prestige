@@ -35,17 +35,24 @@ interface GistSource extends BaseSource {
 
 type SheetPath = string
 
+export const enum SaveState {
+	unchanged,
+	unsaved,
+	saving,
+	saved,
+}
+
 export class Sheet {
 	path: SheetPath
 	name: string
 	body: string
-	isSaved: boolean
+	saveState: SaveState
 
-	constructor(path: SheetPath, body: string, isSaved: boolean) {
+	constructor(path: SheetPath, body: string) {
 		this.path = path
 		this.name = path
 		this.body = body
-		this.isSaved = isSaved
+		this.saveState = SaveState.unchanged
 	}
 }
 
@@ -101,7 +108,7 @@ class BrowserProvider extends Provider<LocalSource> {
 	async load(sheetPath: SheetPath): Promise<Sheet> {
 		const pathPrefix = this.prefix + sheetPath
 		const body = localStorage.getItem(pathPrefix + ":body") ?? ""
-		return new Sheet(sheetPath, body, true)
+		return new Sheet(sheetPath, body)
 	}
 
 	async autoSave({ path, name, body }: Sheet): Promise<void> {
@@ -209,7 +216,7 @@ class CloudProvider extends Provider<CloudSource> {
 			withCredentials: true,
 		})
 
-		return new Sheet(sheetPath, response.body, true)
+		return new Sheet(sheetPath, response.body)
 	}
 
 	async autoSave(sheet: Sheet): Promise<void> {
@@ -328,7 +335,7 @@ class GistProvider extends Provider<GistSource> {
 			},
 		})
 
-		return new Sheet(sheetPath, response, true)
+		return new Sheet(sheetPath, response)
 	}
 
 	autoSave(): Promise<void> {
@@ -615,12 +622,15 @@ export async function saveSheetAuto(qualifiedName: string, sheet: Sheet): Promis
 	console.log("Save auto")
 	const provider = getProvider(qualifiedName)
 	if (!provider.isManualSave) {
+		const prevState = sheet.saveState
+		sheet.saveState = SaveState.saving
 		try {
 			await provider.autoSave(sheet)
+			sheet.saveState = SaveState.saved
 		} catch (error) {
 			console.error("Error saving automatically", error)
+			sheet.saveState = prevState
 		}
-		sheet.isSaved = true
 	}
 }
 
@@ -628,12 +638,15 @@ export async function saveSheetManual(qualifiedName: string, sheet: Sheet): Prom
 	console.log("Save manual")
 	const provider = getProvider(qualifiedName)
 	if (provider.isManualSave) {
+		const prevState = sheet.saveState
+		sheet.saveState = SaveState.saving
 		try {
 			await provider.manualSave(sheet)
+			sheet.saveState = SaveState.saved
 		} catch (error) {
 			console.error("Error saving manually", error)
+			sheet.saveState = prevState
 		}
-		sheet.isSaved = true
 	}
 }
 

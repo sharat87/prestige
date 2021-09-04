@@ -14,6 +14,7 @@ import {
 	saveSheetManual,
 	Sheet,
 	Source,
+	SaveState,
 } from "_/Persistence"
 import Stream from "mithril/stream"
 import throttle from "lodash/throttle"
@@ -202,7 +203,7 @@ export default class Workspace {
 			this._lines = null
 			if (this.currentSheet != null) {
 				console.log("set isSaved to false")
-				this.currentSheet.isSaved = false
+				this.currentSheet.saveState = SaveState.unsaved
 			}
 			this.saveSheetAuto()
 		})
@@ -232,8 +233,8 @@ export default class Workspace {
 		saveSheetManual(this.currentSheetQualifiedPath(), this.currentSheet).finally(m.redraw)
 	}
 
-	get isChangesSaved(): boolean {
-		return this.currentSheet == null || this.currentSheet.isSaved
+	get saveState(): SaveState {
+		return this.currentSheet?.saveState ?? SaveState.unchanged
 	}
 
 	getContent(): string {
