@@ -60,7 +60,7 @@ def list_gists_view(request, access_token: str):
 	response = requests.post(
 		"https://api.github.com/graphql",
 		headers={
-			# "Accept": "application/vnd.github.v3+json",
+			"Accept": "application/vnd.github.v3+json",
 			"Authorization": "Bearer " + access_token,
 		},
 		json={

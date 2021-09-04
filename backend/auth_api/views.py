@@ -201,17 +201,43 @@ def github_auth_callback_view(request):
 	log.info("response from github access token url %r", data)
 	access_token = data["access_token"]
 
-	response = requests.get(
-		"https://api.github.com/user",
+	response = requests.post(
+		"https://api.github.com/graphql",
 		headers={
-			"Authorization": "token " + access_token,
+			"Accept": "application/vnd.github.v3+json",
+			"Authorization": "Bearer " + access_token,
+		},
+		json={
+			"query": """
+				{
+				  viewer {
+					db_id: databaseId
+					uid: id
+					login
+					avatarUrl
+					email
+				  }
+				}
+			""",
 		},
 	)
 	response.raise_for_status()
+	gh_user_response = response.json()
+	log.info("graphql user details response %r", gh_user_response)
 
-	log.info("user details from github %r", response.json())
-	github_user_id = str(response.json()["id"])
+	if "data" not in gh_user_response:
+		return JsonResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR, data={
+			"error": {
+				"code": "missing-data-in-gist-response",
+				"message": "Missing data key in response from Gist API.",
+				"details": gh_user_response,
+			},
+		})
 
+	gh_user_response = gh_user_response["data"]["viewer"]
+	github_user_id = gh_user_response["uid"]
+
+	# The GraphQL API doesn't give any email information. So we have to do another REST query for that.
 	response = requests.get(
 		"https://api.github.com/user/emails",
 		headers={
@@ -222,37 +248,42 @@ def github_auth_callback_view(request):
 
 	log.info("email details from github %r", response.json())
 	email_details = next(item for item in response.json() if item["primary"])
-	email = email_details["email"]
 
-	user_model = get_user_model()
+	if not email_details["verified"]:
+		return JsonResponse(status=HTTPStatus.UNAUTHORIZED, data={
+			"error": {
+				"code": "github-email-not-verified",
+				"message": "Primary email not verified on GitHub.",
+			},
+		})
 
 	try:
 		# TODO: What happens where there's multiple users with this github user id?
 		user = GitHubIdentity.objects.get(uid=github_user_id).user
 	except GitHubIdentity.DoesNotExist:
 		user = None
-	log.info("user for github user id %r is %r", github_user_id, user)
+	log.info("user for github user uid %r is %r", github_user_id, user)
+
+	updates = {
+		"db_id": gh_user_response["db_id"],
+		"access_token": access_token,
+		"user_handle": gh_user_response["login"],
+		"avatar_url": gh_user_response["avatarUrl"],
+	}
 
 	if user is None:
-		email_is_verified = email_details["verified"]
-
-		if not email_is_verified:
-			return JsonResponse(status=HTTPStatus.UNAUTHORIZED, data={
-				"error": {
-					"code": "github-email-not-verified",
-					"message": "Primary email not verified on GitHub.",
-				},
-			})
+		user_model = get_user_model()
+		email = email_details["email"]
 
 		try:
 			user = user_model.objects.get(email=email)
 		except user_model.DoesNotExist:
 			user = user_model.objects.create_user(username=email, email=email, password=None)
 
-		GitHubIdentity.objects.create(user=user, uid=github_user_id, access_token=access_token)
+		GitHubIdentity.objects.create(user=user, uid=github_user_id, **updates)
 
 	else:
-		GitHubIdentity.objects.filter(user=user).update(access_token=access_token)
+		GitHubIdentity.objects.filter(user=user).update(**updates)
 
 	auth.login(request, user)
 

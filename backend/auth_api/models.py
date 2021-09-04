@@ -49,12 +49,15 @@ class User(AbstractUser):
 
 class GitHubIdentity(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="github_ids")
-	uid = models.IntegerField(help_text="The ID of the user on GitHub")
+	db_id = models.IntegerField(help_text="The numeric database ID of the user on GitHub")
+	uid = models.CharField(max_length=100, help_text="The newer string ID of the user on GitHub")
 	access_token = models.CharField(max_length=100)
+	user_handle = models.CharField(max_length=100)
+	avatar_url = models.CharField(max_length=200, null=True)
 
 	class Meta:
-		verbose_name = "Github Identity"
-		verbose_name_plural = "Github Identities"
+		verbose_name = "GitHub Identity"
+		verbose_name_plural = "GitHub Identities"
 
 	def __str__(self):
 		return f"{self.user.email} ({self.uid})"
