@@ -2,6 +2,7 @@ import m from "mithril"
 import Stream from "mithril/stream"
 import { authUrl } from "_/Env"
 import Toaster from "_/Toaster"
+import { getRecaptchaSiteKey } from "_/Env"
 
 export const enum AuthState {
 	PENDING,
@@ -23,6 +24,13 @@ interface AuthMessage {
 }
 
 const AUTH_URL_BASE = authUrl()
+
+declare const grecaptcha: {
+	enterprise: {
+		ready(callback: ((nothing: unknown) => void)): void
+		execute(siteKey: string, options: { action: string }): Promise<string>
+	}
+}
 
 class AuthServiceImpl {
 	authState: AuthState
@@ -69,15 +77,37 @@ class AuthServiceImpl {
 		return this.authState
 	}
 
-	signup(email: string, password: string): Promise<void> {
-		return this.authAction("signup", email, password)
+	async signup(email: string, password: string): Promise<void> {
+		const recaptchaSiteKey = await getRecaptchaSiteKey()
+		if (typeof grecaptcha === "undefined") {
+			await new Promise((resolve, reject) => {
+				const s = document.createElement("script")
+				s.src = "https://www.google.com/recaptcha/enterprise.js?render=" + recaptchaSiteKey
+				s.onload = resolve
+				s.onerror = reject
+				document.body.appendChild(s)
+			})
+		}
+
+		await new Promise(resolve => grecaptcha.enterprise.ready(resolve))
+
+		let token = ""
+		try {
+			token = await grecaptcha.enterprise.execute(recaptchaSiteKey, { action: "SIGNUP" })
+		} catch (error) {
+			console.error("Error getting reCAPTCHA token", error)
+			alert("Unable to do reCAPTCHA, signup failed.")
+			return
+		}
+
+		return this.authAction("signup", email, password, token)
 	}
 
 	login(email: string, password: string): Promise<void> {
 		return this.authAction("login", email, password)
 	}
 
-	authAction(urlPath: string, email: string, password: string): Promise<void> {
+	authAction(urlPath: string, email: string, password: string, recaptchaToken: null | string = null): Promise<void> {
 		const prevState = this.authState
 		this.authState = AuthState.PENDING
 
@@ -88,6 +118,7 @@ class AuthServiceImpl {
 			body: {
 				email,
 				password,
+				recaptchaToken,
 			},
 		})
 			.then((response) => {

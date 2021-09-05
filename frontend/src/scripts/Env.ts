@@ -1,3 +1,5 @@
+import m from "mithril"
+
 declare const process: {
 	env: {
 		NODE_ENV: string
@@ -9,6 +11,18 @@ declare const process: {
 const PRESTIGE_BACKEND = (process.env.PRESTIGE_BACKEND || "/")?.replace(/\/*$/, "/")
 
 export const GIST_API_PREFIX = PRESTIGE_BACKEND + "gist/"
+
+let recaptchaSiteKey: null | string = null
+export async function getRecaptchaSiteKey(): Promise<string> {
+	if (recaptchaSiteKey == null) {
+		const response = await m.request<{ recaptchaSiteKey: string }>({
+			method: "GET",
+			url: PRESTIGE_BACKEND + "env",
+		})
+		recaptchaSiteKey = response.recaptchaSiteKey
+	}
+	return recaptchaSiteKey
+}
 
 export function isDev(): boolean {
 	return process.env.NODE_ENV === "development"

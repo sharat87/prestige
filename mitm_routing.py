@@ -19,7 +19,7 @@ def requestheaders(flow):
 		req.host = "localhost"
 		req.port = 3042
 
-	elif req.path.startswith(("/proxy", "/auth", "/storage", "/admin", "/gist", "/static", "/health")):
+	elif req.path.startswith(("/proxy", "/auth", "/storage", "/admin", "/gist", "/static", "/env", "/health")):
 		req.host = "localhost"
 		req.port = 3041
 

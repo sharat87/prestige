@@ -16,6 +16,8 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import include, path
+from django.http import JsonResponse
+from django.conf import settings
 
 handler400 = "prestige.error_handlers.handler400"
 handler500 = "prestige.error_handlers.handler500"
@@ -24,10 +26,18 @@ admin.site.site_header = "Prestige Admin"
 admin.site.site_title = "Prestige Admin"
 admin.site.index_title = "Prestige Admin"
 
+
+def env_view(request):
+	return JsonResponse({
+		"recaptchaSiteKey": settings.RECAPTCHA_SITE_KEY,
+	})
+
+
 urlpatterns = [
 	path("proxy/", include("proxy.urls")),
 	path("storage/", include("storage.urls")),
 	path("gist/", include("gist.urls")),
 	path("auth/", include("auth_api.urls")),
 	path("admin/", admin.site.urls),
+	path("env", env_view),
 ]

@@ -67,6 +67,59 @@ def signup_view(request):
 			},
 		})
 
+	recaptcha_token = request.parsed_body.get("recaptchaToken")
+	if not recaptcha_token:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing recaptcha token", data={
+			"error": {
+				"code": "missing-recaptcha-token",
+				"message": "Missing reCAPTCHA token. Please try again later.",
+			},
+		})
+
+	if not isinstance(recaptcha_token, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid recaptcha token", data={
+			"error": {
+				"code": "invalid-recaptcha-token",
+				"message": "Invalid reCAPTCHA token. Must be a string.",
+			},
+		})
+
+	recaptcha_verify_response = requests.post(
+		f"https://recaptchaenterprise.googleapis.com/v1beta1/projects/{settings.RECAPTCHA_PROJECT_ID}/assessments",
+		params={
+			"key": settings.RECAPTCHA_API_KEY,
+		},
+		json={
+			"event": {
+				"token": recaptcha_token,
+				"siteKey": settings.RECAPTCHA_SITE_KEY,
+				"expectedAction": "SIGNUP",
+			},
+		},
+	)
+	recaptcha_verify_response.raise_for_status()
+
+	recaptcha_verify_response_data = recaptcha_verify_response.json()
+	log.info("recaptcha assessment response %r", recaptcha_verify_response_data)
+	if not recaptcha_verify_response_data["tokenProperties"]["valid"]:
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Recaptcha validation fail", data={
+			"error": {
+				"code": "recaptcha-validation-failed",
+				"message": "The reCAPTCHA validation failed. Something's up!",
+			},
+		})
+
+	if (
+		recaptcha_verify_response_data["tokenProperties"]["action"]
+		!= recaptcha_verify_response_data["event"]["expectedAction"]
+	):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Recaptcha validation fail", data={
+			"error": {
+				"code": "recaptcha-action-mismatch",
+				"message": "The reCAPTCHA action is unexpected. Something's definitely up!",
+			},
+		})
+
 	user_model = get_user_model()
 
 	try:
@@ -75,8 +128,11 @@ def signup_view(request):
 		message = str(error)
 		if message.startswith("UNIQUE constraint failed: "):
 			field_name = message.split(".")[-1]
+			# TODO: Instead of telling the user the there is a duplicate record, just say unknown error, and send an
+			# email alert that they already have an account, and they should login.
 			return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
 				"error": {
+					"code": f"{field_name}-duplicate",
 					"message": f"This {field_name} already has an account.",
 				},
 			})

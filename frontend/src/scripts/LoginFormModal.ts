@@ -54,12 +54,76 @@ function oncreate(vnode: m.VnodeDOM): void {
 
 class LoginFormView implements m.ClassComponent<never> {
 	isLogin: boolean
+	isSignupLoading: boolean
+	signupError: m.Children
 
 	constructor() {
 		this.isLogin = true
+		this.isSignupLoading = false
+		this.signupError = null
 	}
 
 	view(): m.Children {
+		const onLoginSubmit = (event: Event) => {
+			event.preventDefault()
+			AuthService
+				.login((event.target as LoginForm).loginEmail.value, (event.target as LoginForm).loginPassword.value)
+				.then(ModalManager.close)
+				.catch(error => {
+					console.error("Error logging in", error)
+					alert("Error logging in: [" + error.code + "] " + error.message)
+				})
+		}
+
+		const onSignupSubmit = (event: Event) => {
+			event.preventDefault()
+			this.signupError = null
+			this.isSignupLoading = true
+
+			const password = (event.target as LoginForm).signupPassword.value
+
+			if (password !== (event.target as LoginForm).signupPasswordRepeat.value) {
+				alert("The passwords don't match. Please repeat the same password and then click Sign Up.")
+				return
+			}
+
+			AuthService.signup((event.target as LoginForm).signupEmail.value, password)
+				.then(user => {
+					console.log("User signed up", user)
+					ModalManager.close()
+				})
+				.catch(error => {
+					console.dir(error)
+					console.error("Error signing up")
+					const code = error?.response?.error?.code
+
+					if (code === "email-duplicate") {
+						this.signupError = [
+							"There's an account with that email already. Please ",
+							m(
+								"a",
+								{
+									href: "#",
+									onclick: (event1: Event) => {
+										this.isLogin = true
+										event1.preventDefault()
+									},
+								},
+								"login",
+							),
+							".",
+						]
+
+					} else {
+						alert("Error signing up: [" + error?.code + "] " + error?.message)
+
+					}
+				})
+				.finally(() => {
+					this.isSignupLoading = false
+				})
+		}
+
 		return m(".auth-pane", [
 			m(".auth-options", [
 				m(
@@ -104,49 +168,24 @@ class LoginFormView implements m.ClassComponent<never> {
 					m("h2.tc.mt4", "Sign Up"),
 					m("form.grid.w-60", { onsubmit: onSignupSubmit }, [
 						m("label", { for: "signupEmail" }, "Email"),
-						m(Input, { id: "signupEmail", type: "email", required: true }),
+						m("div", [
+							m(Input, { id: "signupEmail", type: "email", required: true }),
+							m(".red", this.signupError),
+						]),
 						m("label", { for: "signupPassword" }, "Password"),
 						m(Input, { id: "signupPassword", type: "password", required: true, minlength: 6 }),
 						m("label", { for: "signupPasswordRepeat" }, "Password (Repeat)"),
 						m(Input, { id: "signupPasswordRepeat", type: "password", required: true, minlength: 6 }),
 						m("p", { style: { "grid-column-end": "span 2", textAlign: "center" } }, [
-							m(Button, { style: "primary", type: "submit" }, "Sign up!"),
+							m(
+								Button,
+								{ style: "primary", type: "submit", isLoading: this.isSignupLoading },
+								"Sign up!",
+							),
 						]),
 					]),
 				]),
 		])
-
-		function onLoginSubmit(event: Event) {
-			event.preventDefault()
-			AuthService
-				.login((event.target as LoginForm).loginEmail.value, (event.target as LoginForm).loginPassword.value)
-				.then(ModalManager.close)
-				.catch(error => {
-					console.error("Error logging in", error)
-					alert("Error logging in: [" + error.code + "] " + error.message)
-				})
-		}
-
-		function onSignupSubmit(event: Event) {
-			event.preventDefault()
-
-			const password = (event.target as LoginForm).signupPassword.value
-
-			if (password !== (event.target as LoginForm).signupPasswordRepeat.value) {
-				alert("The passwords don't match. Please repeat the same password and then click Sign Up.")
-				return
-			}
-
-			AuthService.signup((event.target as LoginForm).signupEmail.value, password)
-				.then(user => {
-					console.log("User signed up", user)
-					ModalManager.close()
-				})
-				.catch(error => {
-					console.error("Error signing up", error)
-					alert("Error signing up: [" + error.code + "] " + error.message)
-				})
-		}
 
 	}
 }
@@ -167,7 +206,9 @@ class ProfileView implements m.Component<{ user: User }> {
 				"Log out",
 			)),
 			m("h2", "Social Connections"),
-			user.isGitHubConnected ? m("p", "GitHub already connected") : m(GitHubAuthButton),
+			user.isGitHubConnected
+				? m("p", "GitHub already connected")
+				: m(GitHubAuthButton, "Connect GitHub to work with Gists"),
 		]
 	}
 }
