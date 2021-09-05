@@ -62,7 +62,8 @@ test-frontend: frontend/node_modules
 frontend/node_modules: frontend/node_modules/make_sentinel
 
 frontend/node_modules/make_sentinel: frontend/package.json frontend/yarn.lock
-	@if [[ frontend/package.json -nt frontend/yarn.lock ]]; then \
+	if ! type yarn; then npm install -g yarn; fi
+	if [[ frontend/package.json -nt frontend/yarn.lock ]]; then \
 			cd frontend && yarn install; \
 		else \
 			cd frontend && yarn install --frozen-lockfile; \
