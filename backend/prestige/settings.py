@@ -57,7 +57,6 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
 	"django.middleware.security.SecurityMiddleware",
-	*(["whitenoise.middleware.WhiteNoiseMiddleware"] if IS_PROD else []),  # above all, except security middleware.
 	"django.contrib.sessions.middleware.SessionMiddleware",
 	"django.middleware.common.CommonMiddleware",
 	"django.middleware.csrf.CsrfViewMiddleware",
@@ -188,13 +187,6 @@ USE_TZ = True
 
 STATIC_ROOT = BASE_DIR / "static"
 STATIC_URL = "/static/"
-WHITENOISE_ROOT = STATIC_ROOT
-WHITENOISE_INDEX_FILE = True
-
-
-# # Perma-cache for static files and compression.
-# # http://whitenoise.evans.io/en/stable/#quickstart-for-django-apps
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 PROXY_DISALLOW_HOSTS = {
