@@ -187,11 +187,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_ROOT = BASE_DIR / "static"
-if IS_PROD:
-	STATIC_URL = ""
-	MEDIA_URL = "user-media/"  # Only setting this because it should be different from STATIC_URL, and default is "".
-else:
-	STATIC_URL = "/static/"
+STATIC_URL = "/static/"
+WHITENOISE_ROOT = STATIC_ROOT
+WHITENOISE_INDEX_FILE = True
 
 
 # # Perma-cache for static files and compression.

@@ -160,13 +160,18 @@ build-all: build-frontend build-backend build-docs
 upload-package:
 	aws s3 cp package.tar.gz s3://ssk-artifacts/prestige-package.tar.gz
 
-heroku-release: build-frontend build-backend build-docs
+heroku-release: clean build-frontend build-backend build-docs
 	# Copy favicon to hashless filename for docs to show the favicon.
 	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
 	mv frontend/dist/* backend/static/
 	mv docs/site backend/static/docs
 	tree backend/static
-	cd backend && python manage.py migrate
+	cd backend \
+		&& DATABASE_URL=unused PRESTIGE_SECRET_KEY="=sez4lhfn@nh86)ylzgl(5k*5kkd+la(dzfsisvdk9ezj2958-" python manage.py migrate
+
+clean:
+	rm -rf frontend/dist backend/static docs/site
+	find backend -type d -name __pycache__ -print -exec rm -rf '{}' ';' -prune
 
 
 .PHONY: help lint-backend test-backend build-frontend lint-frontend test-frontend test-e2e test-all venv start stop
