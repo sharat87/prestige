@@ -37,9 +37,7 @@ function main() {
 		// TODO: "/:404...": errorPageComponent,
 	})
 
-	if (isDev()) {
-		AuthService.check()
-	}
+	AuthService.check()
 }
 
 const Layout: m.Component = {
