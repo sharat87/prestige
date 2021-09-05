@@ -9,7 +9,7 @@ help:
 
 build-backend: venv
 	source venv/bin/activate \
-		&& pushd backend \
+		&& cd backend \
 		&& PRESTIGE_SECRET_KEY=unused DATABASE_URL='sqlite://:memory:' python manage.py collectstatic --clear --no-input \
 		&& python -m compileall -f .
 
@@ -159,5 +159,14 @@ build-all: build-frontend build-backend build-docs
 
 upload-package:
 	aws s3 cp package.tar.gz s3://ssk-artifacts/prestige-package.tar.gz
+
+heroku-release: build-frontend build-backend build-docs
+	# Copy favicon to hashless filename for docs to show the favicon.
+	cp frontend/dist/favicon.*.ico frontend/dist/favicon.ico
+	mv frontend/dist/* backend/static/
+	mv docs/site backend/static/docs
+	tree backend/static
+	cd backend && python manage.py migrate
+
 
 .PHONY: help lint-backend test-backend build-frontend lint-frontend test-frontend test-e2e test-all venv start stop

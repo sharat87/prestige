@@ -23,6 +23,8 @@ e2e-tests/drivers
 e2e-tests/shots
 geckodriver.log
 
+/docs/site
+
 /dev.env
 /package.tar.gz
 

@@ -1,2 +1,2 @@
-release: cd backend && python manage.py migrate
+release: make heroku-release
 web: gunicorn --pythonpath backend prestige.wsgi
