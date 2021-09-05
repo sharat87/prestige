@@ -135,19 +135,7 @@ export default class Workspace {
 
 				this.setContent(this.currentSheet.body)
 
-				const serializedCookies = localStorage.getItem("cookies:" + this.currentSheetQualifiedPath())
-				if (serializedCookies != null && serializedCookies !== "") {
-					try {
-						this.cookieJar = CookieJar.fromPlain(
-							JSON.parse(serializedCookies),
-						)
-					} catch (error) {
-						console.error("Unable to load cookies for path", this.currentSheetQualifiedPath(), error)
-						this.cookieJar = new CookieJar()
-					}
-				} else {
-					this.cookieJar = new CookieJar()
-				}
+				this.cookieJar = CookieJar.loadOrCreate(this.currentSheetQualifiedPath())
 
 			}
 
@@ -414,20 +402,6 @@ export default class Workspace {
 		)
 	}
 
-	saveCookieJar(): void {
-		if (this.currentSheet == null) {
-			console.error("Cannot save cookies, when there's no current sheet. Something's wrong")
-			return
-		}
-
-		if (this.cookieJar == null) {
-			console.error("Cannot save null cookies. Something's wrong")
-			return
-		}
-
-		localStorage.setItem("cookies:" + this.currentSheetQualifiedPath(), JSON.stringify(this.cookieJar.toJSON()))
-	}
-
 	buildRequestAtLine(lineNum: number, context: Context): Promise<RequestDetails> {
 		if (this.codeMirror == null) {
 			return Promise.reject()
@@ -493,10 +467,8 @@ export default class Workspace {
 		this.flashQueue.push({ start: startLine, end: endLine + 1 })
 
 		this.runTop(lines, cursorLine)
-			.finally(() => {
-				m.redraw()
-				this.saveCookieJar()
-			})
+			.catch((error) => console.error("Error in runTop", error))
+			.finally(m.redraw)
 	}
 
 	async runTop(lines: string | string[], runLineNum: string | number, silent = false): Promise<AnyResult> {
@@ -644,9 +616,6 @@ export default class Workspace {
 	async deleteCookie(domain: string, path: string, name: string): Promise<void> {
 		if (this.cookieJar != null) {
 			this.cookieJar.delete(domain, path, name)
-			return this.saveCookieJar()
-		} else {
-			return Promise.resolve()
 		}
 	}
 

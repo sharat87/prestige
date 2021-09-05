@@ -96,7 +96,7 @@ test("add single domain cookies", () => {
 		},
 	})
 
-	expect(jar.toJSON()).toStrictEqual({
+	expect(jar.store).toStrictEqual({
 		host1: {
 			"/": {
 				name11: {

@@ -11,24 +11,45 @@ export type StoreType = Record<Host, Record<Path, Record<Name, Morsel>>>
 export default class CookieJar {
 	store: StoreType
 	size: number
+	sheetPath: null | string
 
-	constructor(store: StoreType = {}) {
+	constructor(store: StoreType = {}, sheetPath: null | string = null) {
 		this.store = store ?? {}
 		this.size = 0
+		this.sheetPath = sheetPath
+
 		this.recomputeSize()
 	}
 
 	clear(): void {
 		this.store = {}
 		this.size = 0
+		this.save()
 	}
 
+	// Not used directly anywhere, but needed for CookieJar objects to be JSON-serializable, which is required.
 	toJSON(): StoreType {
 		return this.store
 	}
 
-	static fromPlain(plain: StoreType): CookieJar {
-		return new CookieJar(plain)
+	save(): void {
+		if (this.sheetPath != null) {
+			localStorage.setItem("cookies:" + this.sheetPath, JSON.stringify(this))
+		}
+	}
+
+	static loadOrCreate(sheetPath: string): CookieJar {
+		const serializedCookies = localStorage.getItem("cookies:" + sheetPath)
+		if (serializedCookies != null && serializedCookies !== "") {
+			try {
+				return new CookieJar(JSON.parse(serializedCookies), sheetPath)
+			} catch (error) {
+				console.error("Unable to load cookies for path", sheetPath, error)
+				return new CookieJar({}, sheetPath)
+			}
+		} else {
+			return new CookieJar({}, sheetPath)
+		}
 	}
 
 	private recomputeSize(): void {
@@ -90,6 +111,8 @@ export default class CookieJar {
 		}
 
 		this.recomputeSize()
+		this.save()
+
 		return {
 			added,
 			modified,
@@ -123,6 +146,7 @@ export default class CookieJar {
 
 		this.store[domain][path][name] = morsel
 		this.recomputeSize()
+		this.save()
 	}
 
 	delete(domain: Host, path: Path, name: Name): void {
@@ -141,6 +165,7 @@ export default class CookieJar {
 		}
 
 		this.recomputeSize()
+		this.save()
 	}
 
 }

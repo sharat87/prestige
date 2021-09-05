@@ -9,7 +9,6 @@ from django.conf import settings
 from django.http import JsonResponse, HttpResponseNotAllowed
 from django.shortcuts import redirect
 from django.views.decorators.csrf import csrf_exempt
-from django.views.decorators.http import require_POST
 from requests.cookies import RequestsCookieJar
 
 log = logging.getLogger(__name__)
@@ -24,7 +23,7 @@ PlainCookieJarType = Dict[str, Dict[str, Dict[str, Dict[str, Union[str, int, boo
 
 
 @csrf_exempt
-def proxy(request) -> JsonResponse:
+def proxy(request):
 	if request.method == "GET":
 		return redirect("https://prestigemad.com/docs/guides/proxy/")
 	elif request.method != "POST":
@@ -214,4 +213,4 @@ def is_url_allowed(url: str):
 	host_port = parts[2]
 	host = (host_port.split(":")[0] if ":" in host_port else host_port).lower()
 
-	return not settings.PROXY_DISALLOW_HOSTS or host not in settings.PROXY_DISALLOW_HOSTS
+	return host not in settings.PROXY_DISALLOW_HOSTS

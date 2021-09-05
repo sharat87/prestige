@@ -224,7 +224,7 @@ class Sidebar implements m.ClassComponent {
 	isOpen: boolean
 
 	constructor() {
-		this.isOpen = true
+		this.isOpen = false
 	}
 
 	view() {

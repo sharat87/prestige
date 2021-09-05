@@ -33,7 +33,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = not IS_PROD
 
-if not DEBUG:
+if IS_PROD:
 	# This has a good default when DEBUG is `True`.
 	ALLOWED_HOSTS = [
 		s.strip() for s in os.getenv("PRESTIGE_ALLOWED_HOSTS", "").split(",")
@@ -189,11 +189,15 @@ STATIC_ROOT = BASE_DIR / "static"
 STATIC_URL = "/static/"
 
 
-PROXY_DISALLOW_HOSTS = {
-	s.strip()
-	for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "localhost, 127.0.0.1").split(",")
-	if not s.isspace()
-} if IS_PROD else None
+if IS_PROD:
+	PROXY_DISALLOW_HOSTS = {
+		s.strip()
+		for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "localhost, 127.0.0.1").split(",")
+		if not s.isspace()
+	}
+	PROXY_DISALLOW_HOSTS.update(ALLOWED_HOSTS)
+else:
+	PROXY_DISALLOW_HOSTS = set()
 
 
 if IS_PROD:

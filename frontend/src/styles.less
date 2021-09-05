@@ -355,6 +355,8 @@ pre {
 }
 
 .sidebar {
+	border-right: 1px solid var(--border-color);
+
 	.tab-bar {
 		background-color: var(--page-bg2);
 
@@ -572,11 +574,6 @@ details.fold {
 			&:hover {
 				background-color: var(--page-bg2);
 			}
-
-			&.active {
-				background-color: blue;
-				color: white;
-			}
 		}
 	}
 
@@ -726,6 +723,11 @@ details.fold {
 		}
 	}
 
+	.provider-block a.active {
+		background-color: var(--primary-3);
+		color: var(--primary-9);
+	}
+
 	.status {
 		&.is-2xx {
 			background-color: var(--green-3);
@@ -844,6 +846,11 @@ details.fold {
 				color: var(--red-9);
 			}
 		}
+	}
+
+	.provider-block a.active {
+		background-color: var(--primary-3);
+		color: var(--primary-9);
 	}
 
 	.status {
