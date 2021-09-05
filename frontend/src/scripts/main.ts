@@ -144,7 +144,7 @@ function WorkspaceView(): m.Component {
 						{ onclick: onOptionsToggle, isActive: ModalManager.isShowing(VisiblePopup.Options) },
 						"⚙️ Options",
 					),
-					isDev() && [
+					[
 						authState === AuthState.PENDING
 							? m.trust("&middot; &middot; &middot;")
 							: m(

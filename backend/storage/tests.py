@@ -33,7 +33,7 @@ class ListingTests(TestCase):
 	def test_ls_without_login(self):
 		response = self.client.get(reverse("crud"))
 		self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
-		self.assertEqual(response.json(), {})
+		self.assertEqual(response.json()["code"], "require-login")
 
 
 class DocumentGettingTests(TestCase):
@@ -51,7 +51,7 @@ class DocumentGettingTests(TestCase):
 	def test_get_without_login(self):
 		response = self.client.get(reverse("crud_single", kwargs={"slug": "one"}))
 		self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
-		self.assertEqual(response.json(), {})
+		self.assertEqual(response.json()["code"], "require-login")
 
 	def test_get_different_user(self):
 		self.client.login(email="u1@host.com", password="u1-password")
@@ -153,7 +153,7 @@ class PostTests(TestCase):
 		)
 
 		self.assertEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
-		self.assertEqual(response.json(), {})
+		self.assertEqual(response.json()["code"], "require-login")
 
 	def test_duplicate_name(self):
 		self.client.login(email="u1@host.com", password="u1-password")
