@@ -337,7 +337,11 @@ def github_auth_callback_view(request):
 		except user_model.DoesNotExist:
 			user = user_model.objects.create_user(username=email, email=email, password=None)
 
-		GitHubIdentity.objects.create(user=user, uid=github_user_id, **updates)
+		try:
+			GitHubIdentity.objects.create(user=user, uid=github_user_id, **updates)
+		except error:
+			log.error("Unable to create GitHubIdentity object %r %r", github_user_id, updates)
+			raise
 
 	else:
 		GitHubIdentity.objects.filter(user=user).update(**updates)
