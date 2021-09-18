@@ -37,6 +37,7 @@ class SignupTests(TestCase):
 		self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 		self.assertEqual(response.json(), {
 			"error": {
+				"code": "email-duplicate",
 				"message": "This email already has an account.",
 			},
 		})
@@ -55,6 +56,7 @@ class SignupTests(TestCase):
 		self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 		self.assertEqual(response.json(), {
 			"error": {
+				"code": "username-duplicate",
 				"message": "This username already has an account.",
 			},
 		})

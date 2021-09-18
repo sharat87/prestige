@@ -41,5 +41,5 @@ test("CodeBlock json", async () => {
 })
 
 function getCodeTags(el: HTMLPreElement): [tag: string, content: string][] {
-	return Array.from(el!.firstElementChild!.children!).map(t => [t.tagName, t.textContent!])
+	return Array.from(el!.children!).map(t => [t.tagName, t.textContent!])
 }
