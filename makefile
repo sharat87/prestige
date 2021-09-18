@@ -133,7 +133,7 @@ start: venv venv/bin/supervisord
 		if [[ -f dev.env ]]; then set -a; source dev.env; fi; \
 		venv/bin/supervisord; \
 		echo 'Just started.'; fi
-	@echo 'App at <http://localhost:3045>. Process monitor at <http://localhost:3044>. Request monitor at <http://localhost:3046>.'
+	@echo -e 'App available at <http://localhost:3045>.\nProcess monitor at <http://localhost:3044>.\nRequest monitor at <http://localhost:3046>.'
 
 stop: venv venv/bin/supervisord
 	@if [[ -e .supervisor.sock ]]; then kill $$(venv/bin/supervisorctl pid); echo 'Just stopped.'; sleep 2s; else echo 'Already stopped.'; fi

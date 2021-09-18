@@ -55,6 +55,10 @@ button {
 	}
 }
 
+:is(h1, h2, h3):first-child {
+	margin-top: 0;
+}
+
 p.info {
 	border: 1px solid currentColor;
 	padding: .2rem .5rem;
@@ -288,6 +292,12 @@ pre {
 			display: none;
 		}
 	}
+
+	pre {
+		// This is needed so the code block doesn't have a 1px scrolling behaviour, which is extremely annoying.
+		// No idea why this is happening, but this fixes it.
+		padding-bottom: 1px;
+	}
 }
 
 .editor-pane div.CodeMirror {
@@ -360,7 +370,8 @@ pre {
 		background-color: var(--page-bg2);
 
 		.nav-link {
-			padding: 6px;
+			padding: 9px;
+			font-size: 1.8em;
 		}
 	}
 
@@ -414,10 +425,9 @@ pre {
 .modal2 {
 	position: absolute;
 	border-radius: .3rem;
-	width: 50%;
+	max-width: 50vw;
 	left: 50%;
 	transform: translateX(-50%);
-	min-height: 50vh;
 	max-height: 90vh;
 	top: 5vh;
 	z-index: 110;
@@ -462,9 +472,9 @@ label {
 	}
 }
 
-form.grid {
+form.grid, form > .grid {
 	display: grid;
-	grid: auto / 160px auto;
+	grid: auto / minmax(120px, auto) minmax(300px, auto);
 	align-items: center;
 	margin: 0 auto;
 
@@ -478,6 +488,23 @@ form.grid {
 
 	select {
 		max-width: 400px;
+	}
+
+	input[type=text] {
+		padding: 6px;
+		border: 1px solid var(--border-color);
+		border-radius: 3px;
+		box-shadow: 0 0 2px inset #0002;
+
+		&:focus {
+			outline: none;
+			border-color: var(--active-tab-bg);
+			box-shadow: 0 0 2px inset var(--active-tab-bg);
+		}
+
+		&::placeholder {
+			font-style: italic;
+		}
 	}
 
 	input[type=number] {
@@ -620,7 +647,7 @@ details.fold {
 	}
 	to {
 		opacity: 0;
-		transform: translateY(-2rem);
+		transform: translateY(-2em);
 	}
 }
 
@@ -628,11 +655,11 @@ details.fold {
 @keyframes ghost {
 	from {
 		opacity: 1;
-		transform: none;
+		transform: scale(1.5);
 	}
 	to {
 		opacity: 0;
-		transform: translateY(-5rem);
+		transform: translateY(-3em) scale(2.5);
 	}
 }
 

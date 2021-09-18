@@ -5,10 +5,65 @@ from typing import List
 from django.http import JsonResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_safe, require_POST, require_http_methods
+from django.template.loader import render_to_string
 import requests
 
 from auth_api.utils import login_required_json
 
+# Duplicated in Workspace.ts
+INITIAL_SHEET_CONTENT = '''# Welcome to Prestige! Your newest developer tool!
+# Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
+# Like this one right here:
+
+GET https://httpbun.com/get?name=haha
+
+###
+
+# Lines starting with a single '#' like this are comments.
+# Learn more about the syntax at ${window.location.origin}/docs/guides/syntax/.
+# Let's make a POST request!
+
+POST https://httpbun.com/post
+Content-Type: application/x-www-form-urlencoded
+
+username=sherlock&password=elementary
+
+###
+
+# Custom headers, easy as popcorn.
+# Learn more at ${window.location.origin}/docs/guides/syntax/#header-section.
+
+GET https://httpbun.com/headers
+X-Custom1: custom header value one
+X-Custom2: custom header value two
+
+### javascript
+
+// This is a Javascript block, so comments start with '//'.
+// The following will be available for templating in requests *after* this Javascript block.
+// Learn more at ${window.location.origin}/docs/guides/javascript-blocks/.
+this.data.postUrl = "post"
+
+###
+
+# Let's use templates to make the same POST request as before!
+# Learn more at: ${window.location.origin}/docs/guides/templating/.
+POST https://httpbun.com/${postUrl}
+Content-Type: application/x-www-form-urlencoded
+
+username=sherlock&password=elementary
+
+###
+
+# We can define a Javascript function to be called when this request finishes execution.
+POST https://httpbun.com/post
+
+one=1&two=2
+
+@onFinish(response) {
+	alert("Request finished!")
+}
+'''
 
 GIST_LIST_QUERY = """
 {
@@ -47,21 +102,19 @@ def gists_index_view(request):
 			},
 		})
 
-	access_token = gh_identity.access_token
-
 	if request.method == "GET":
-		return list_gists_view(request, access_token)
+		return list_gists_view(request, gh_identity)
 	elif request.method == "POST":
-		return create_gist_view(request, access_token)
+		return create_gist_view(request, gh_identity)
 
 
 @require_safe
-def list_gists_view(request, access_token: str):
+def list_gists_view(request, gh_identity):
 	response = requests.post(
 		"https://api.github.com/graphql",
 		headers={
 			"Accept": "application/vnd.github.v3+json",
-			"Authorization": "Bearer " + access_token,
+			"Authorization": "Bearer " + gh_identity.plain_access_token(),
 		},
 		json={
 			"query": GIST_LIST_QUERY,
@@ -123,35 +176,45 @@ def list_gists_view(request, access_token: str):
 		})
 
 	return JsonResponse({
-		"ok": [gh.access_token for gh in request.user.github_ids.all()],
 		"gists": gists_in_response,
 	})
 
 
 @require_POST
-def create_gist_view(request, access_token: str):
-	title = request.parsed_body.get("title", "").strip()
-	if not title:
-		return JsonResponse(status_code=HTTPStatus.BAD_REQUEST, data={
+def create_gist_view(request, gh_identity):
+	access_token = gh_identity.plain_access_token()
+
+	title = request.parsed_body.get("title", "")
+	if not title or not isinstance(title, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
 			"error": {
 				"code": "invalid-title-in-create-gist",
 				"message": "Missing or invalid title for creating a Gist.",
 			},
 		})
 
-	description = request.parsed_body.get("description", "").strip()
-	if not description:
-		return JsonResponse(status_code=HTTPStatus.BAD_REQUEST, data={
+	description = request.parsed_body.get("description", "")
+	if description is not None and not isinstance(description, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
 			"error": {
 				"code": "invalid-description-in-create-gist",
-				"message": "Missing or invalid description for creating a Gist.",
+				"message": "Invalid description for creating a Gist.",
 			},
 		})
 
+	title = title.strip()
+	description = description.strip()
+
 	is_public = bool(request.parsed_body.get("isPublic", False))
 
+	readme_name = "_" + title + ".md"
+	files = {
+		readme_name: {"content": "# " + title},
+		"main.prestige": {"content": INITIAL_SHEET_CONTENT},
+	}
+
 	# Ref: <https://docs.github.com/en/rest/reference/gists#create-a-gist>.
-	response = requests.post(
+	creation_response = requests.post(
 		"https://api.github.com/gists",
 		headers={
 			"Accept": "application/vnd.github.v3+json",
@@ -160,15 +223,34 @@ def create_gist_view(request, access_token: str):
 		json={
 			"description": description,
 			"public": False and is_public,
-			"files": {
-				"_" + title + ".md": {"content": "This is a Prestige Gist!"},
-				"main.prestige": {"content": "Hello!"},
-			},
+			"files": files,
 		},
 	)
+	creation_response.raise_for_status()
 
-	print("request body sent", response.request.body)
-	response.raise_for_status()
+	gist_id = creation_response.json()["id"]
+
+	files[readme_name]["content"] = render_to_string("gist_readme.md", {
+		"title": title,
+		"github_handle": gh_identity.user_handle,
+		"gist_id": gist_id,
+	}, request)
+
+	# Ref: <https://docs.github.com/en/rest/reference/gists#update-a-gist>.
+	updation_response = requests.patch(
+		"https://api.github.com/gists/" + gist_id,
+		headers={
+			"Accept": "application/vnd.github.v3+json",
+			"Authorization": "Bearer " + access_token,
+		},
+		json={
+			"files": files,
+		},
+	)
+	updation_response.raise_for_status()
+
+	# The creation response includes a `git_push_url`, perhaps we can force push to clear the history of creating and
+	# updating in two steps above?
 
 	return JsonResponse(data=request.parsed_body)
 
@@ -211,10 +293,18 @@ def update_gist_view(request, gist_id: str):
 			},
 		})
 
-	access_token = gh_identity.access_token
+	title = readme_name.lstrip("_")
+	if title.startswith("_"):
+		title = title[1:]
+	if title.endswith(".md"):
+		title = title[:-3]
 
 	files[readme_name] = {
-		"content": "This is an updated Prestige Gist!",
+		"content": render_to_string("gist_readme.md", {
+			"title": title,
+			"github_handle": gh_identity.user_handle,
+			"gist_id": gist_id,
+		}, request)
 	}
 
 	# Ref: <https://docs.github.com/en/rest/reference/gists#update-a-gist>.
@@ -222,7 +312,7 @@ def update_gist_view(request, gist_id: str):
 		"https://api.github.com/gists/" + gist_id,
 		headers={
 			"Accept": "application/vnd.github.v3+json",
-			"Authorization": "Bearer " + access_token,
+			"Authorization": "Bearer " + gh_identity.plain_access_token(),
 		},
 		json={
 			"files": files,

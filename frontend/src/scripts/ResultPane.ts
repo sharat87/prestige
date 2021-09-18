@@ -9,7 +9,7 @@ import { NavLink } from "_/NavLink"
 import NothingMessage from "_/NothingMessage"
 import CodeBlock from "_/CodeBlock"
 import humanSizeDisplay from "_/humanSizeDisplay"
-import { copyToClipboard, downloadText, showCopyGhost } from "_/utils"
+import { copyToClipboard, downloadText, showGhost } from "_/utils"
 import type { Response } from "_/HttpSession"
 import ModalManager from "_/ModalManager"
 
@@ -274,7 +274,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 				m("button.ml2.f6", {
 					onclick(event: Event) {
 						copyToClipboard(text)
-						showCopyGhost(event.target as HTMLButtonElement)
+						showGhost(event.target as HTMLButtonElement)
 					},
 				}, "Copy Full"),
 			]),

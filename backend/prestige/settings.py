@@ -6,34 +6,35 @@ import dj_database_url
 # Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# SECURITY WARNING: don't run with debug turned on in production!
 ENV = os.getenv("PRESTIGE_ENV", "prod")
-IS_PROD = ENV == "prod"
+DEBUG = ENV != "prod"
+
+
+def get_prod_env(var_name: str, default: str) -> str:
+	"""
+	Return the value of the environment variable `var_name`. If that variable is missing, raise an error on prod, or
+	return `default` otherwise.
+	"""
+	value = (os.getenv(var_name, default) if DEBUG else os.environ[var_name]).strip()
+	if not value:
+		raise ValueError(f"Empty value for {var_name}. Please provide a non-empty value.")
+	return value
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
-if IS_PROD:
-	_missing_env_vars = {
-		"DATABASE_URL",
-		"PRESTIGE_SECRET_KEY",
-	} - os.environ.keys()
-
-	if _missing_env_vars:
-		raise ValueError("Missing required env vars: %r" % _missing_env_vars)
-
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-	os.getenv("PRESTIGE_SECRET_KEY")
-	if IS_PROD
-	else "=sez4lhfn@nh86)ylzgl(5k*5kkd+la(dzfsisvdk9ezj2958-"
+SECRET_KEY = get_prod_env(
+	"PRESTIGE_SECRET_KEY",
+	# This is a dev-mode secret key. Do NOT use this on production.
+	"=sez4lhfn@nh86)ylzgl(5k*5kkd+la(dzfsisvdk9ezj2958-",
 )
 if not SECRET_KEY:
 	raise ValueError("Missing secret key. Please set the env variable PRESTIGE_SECRET_KEY.")
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = not IS_PROD
-
-if IS_PROD:
+if not DEBUG:
 	# This has a good default when DEBUG is `True`.
 	ALLOWED_HOSTS = [
 		s.strip() for s in os.getenv("PRESTIGE_ALLOWED_HOSTS", "").split(",")
@@ -91,20 +92,12 @@ WSGI_APPLICATION = "prestige.wsgi.application"
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
-if IS_PROD:
-	DATABASES = {
-		# This will parse the values of the DATABASE_URL environment variable into Django's DB config format.
-		# For SQLite, set `DATABASE_URL=sqlite:///path/to/folder/db.sqlite3`
-		"default": dj_database_url.config(env="DATABASE_URL", conn_max_age=600),
-	}
-
-else:
-	DATABASES = {
-		"default": {
-			"ENGINE": "django.db.backends.sqlite3",
-			"NAME": ":memory:" if ENV == "test" else "db.sqlite3",
-		},
-	}
+DATABASES = {
+	"default": dj_database_url.parse(
+		get_prod_env("DATABASE_URL", "sqlite:///" + (":memory:" if ENV == "test" else "db.sqlite3")),
+		conn_max_age=600,
+	),
+}
 
 
 # Password validation
@@ -165,7 +158,7 @@ LOGGING = {
 	},
 	"root": {
 		"handlers": ["console", "mail_admins"],
-		"level": "ERROR" if ENV == "test" or IS_PROD else "DEBUG",
+		"level": "ERROR" if ENV == "test" or not DEBUG else "DEBUG",
 	},
 }
 
@@ -189,18 +182,18 @@ STATIC_ROOT = BASE_DIR / "static"
 STATIC_URL = "/static/"
 
 
-if IS_PROD:
+if DEBUG:
+	PROXY_DISALLOW_HOSTS = set()
+else:
 	PROXY_DISALLOW_HOSTS = {
 		s.strip()
 		for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "localhost, 127.0.0.1").split(",")
 		if not s.isspace()
 	}
 	PROXY_DISALLOW_HOSTS.update(ALLOWED_HOSTS)
-else:
-	PROXY_DISALLOW_HOSTS = set()
 
 
-if IS_PROD:
+if not DEBUG:
 	SECURE_PROXY_SSL_HEADER = "HTTP_X_FORWARDED_PROTO", "https"
 	SECURE_SSL_REDIRECT = True
 
@@ -210,10 +203,23 @@ if IS_PROD:
 	SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = True
 
 
+# Create on at <https://github.com/settings/developers>.
+# Callback URL is <http://localhost:3045/auth/github/callback>.
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", None)
 GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET", None)
 
 
+# From <https://console.cloud.google.com/iam-admin/settings>.
 RECAPTCHA_PROJECT_ID = os.getenv("RECAPTCHA_PROJECT_ID", None)
+# From <https://console.cloud.google.com/security/recaptcha>.
 RECAPTCHA_SITE_KEY = os.getenv("RECAPTCHA_SITE_KEY", None)
+# From <https://console.cloud.google.com/apis/credentials>.
 RECAPTCHA_API_KEY = os.getenv("RECAPTCHA_API_KEY", None)
+
+
+# Generate a key with `python -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())'`
+ACCESS_TOKEN_ENCRYPTION_KEY = get_prod_env(
+	"ACCESS_TOKEN_ENCRYPTION_KEY",
+	# Default to a dummy encryption key, when not in production.
+	"eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHg=",
+)

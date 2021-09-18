@@ -308,7 +308,7 @@ class GistProvider extends Provider<GistSource> {
 			return
 		}
 
-		const response = await m.request<{ ok: boolean, gists: Gist[] }>({
+		const response = await m.request<{ gists: Gist[] }>({
 			method: "GET",
 			url: GIST_API_PREFIX,
 			withCredentials: true,
@@ -373,44 +373,56 @@ class GistProvider extends Provider<GistSource> {
 		let description = ""
 
 		ModalManager.show((control) => {
-			const submit = async (event: MouseEvent) => {
+			const onsubmit = (event: SubmitEvent) => {
+				if (title === "") {
+					return
+				}
+				event.preventDefault()
+				console.log(event)
+				return
 				control.close()
-				await m.request({
+				m.request({
 					method: "POST",
 					url: GIST_API_PREFIX,
 					withCredentials: true,
 					body: {
 						title,
 						description,
-						isPublic: (event.target as HTMLButtonElement).classList.contains("public"),
+						isPublic: event.submitter?.classList.contains("public") ?? false,
 					},
-				})
-				await this.loadRootListing()
+				}).then(this.loadRootListing.bind(this))
 			}
 
-			return m("div.pa2", [
-				m("h3", "Create a Gist"),
-				m("p", m("label", [
-					m("span", "Title:"),
-					m("input.ml2", {
-						value: title,
-						oninput(event: InputEvent) {
-							title = (event.target as HTMLInputElement).value
-						},
-					}),
-				])),
-				m("p", m("label", [
-					m("span", "Description:"),
-					m("input.ml2", {
-						value: description,
-						oninput(event: InputEvent) {
-							description = (event.target as HTMLInputElement).value
-						},
-					}),
-				])),
-				m("p", [
-					m(Button, { style: "primary", onclick: submit }, "Create Secret Gist"),
-					m(Button, { class: "ml2 public", onclick: submit }, "Create Public Gist"),
+			return m(".pa2", [
+				m("h1", "Create a new Gist"),
+				m("form", { onsubmit }, [
+					m(".grid", [
+						m("label", { for: "gist-title" }, m("span", "Title*")),
+						m("input", {
+							id: "gist-title",
+							type: "text",
+							placeholder: "A title for the Gist",
+							value: title,
+							required: true,
+							oninput(event: InputEvent) {
+								title = (event.target as HTMLInputElement).value
+							},
+						}),
+						m("label", { for: "gist-description" }, m("span", "Description")),
+						m("input", {
+							id: "gist-description",
+							type: "text",
+							placeholder: "Optional, description for the Gist",
+							value: description,
+							oninput(event: InputEvent) {
+								description = (event.target as HTMLInputElement).value
+							},
+						}),
+					]),
+					m("p.tr", [
+						m(Button, { type: "submit", style: "primary" }, "Create Secret Gist"),
+						m(Button, { type: "submit", class: "ml2 public" }, "Create Public Gist"),
+					]),
 				]),
 			])
 		})

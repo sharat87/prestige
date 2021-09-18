@@ -26,6 +26,7 @@ import { ping } from "_/pings"
 import ExportPane from "_/ExportPane"
 import ModalManager from "_/ModalManager"
 
+// Duplicated in backend/gist/views.py
 const DEFAULT_EDITOR_CONTENT = `# Welcome to Prestige! Your newest developer tool!
 # Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
 # Like this one right here:
@@ -559,10 +560,59 @@ export default class Workspace {
 		if (proxy == null || proxy === "") {
 			return this.session.executeDirect(request)
 
-		} else {
+		} else if (this.isProxyApproved(proxy)) {
 			return this.session.executeWithProxy(request, { timeout, proxy }, this.cookieJar)
 
 		}
+	}
+
+	isProxyApproved(proxy: string): boolean {
+		let isApproved = false
+
+		if (proxy === this.defaultProxy) {
+			isApproved = true
+
+		} else {
+			const proxies = localStorage.getItem("approvedProxies")
+			if (proxies != null) {
+				let proxiesArray: string[]
+				try {
+					proxiesArray = JSON.parse(proxies)
+					isApproved = proxiesArray.includes(proxy)
+				} catch (err: unknown) {
+					console.warn("Couldn't parse approved proxies, when checking.", err)
+				}
+			}
+
+		}
+
+		if (!isApproved) {
+			isApproved = confirm("This request is about to be proxied to '" + proxy + "'. Do you trust this?")
+			const proxiesStr = localStorage.getItem("approvedProxies")
+			let proxies: string[]
+			if (proxiesStr == null) {
+				proxies = []
+			} else {
+				try {
+					proxies = JSON.parse(proxiesStr)
+					if (!Array.isArray(proxies)) {
+						console.warn("Unexpected type for approved proxies, resetting.")
+						proxies = []
+					}
+				} catch (err: unknown) {
+					console.warn("Couldn't parse approved proxies, when updating.", err)
+					proxies = []
+				}
+			}
+			if (isApproved) {
+				proxies.push(proxy)
+			} else if (proxies.includes(proxy)) {
+				proxies.splice(proxies.indexOf(proxy), 1)
+			}
+			localStorage.setItem("approvedProxies", JSON.stringify(proxies))
+		}
+
+		return isApproved
 	}
 
 	runAgain(): void {

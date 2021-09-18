@@ -1,7 +1,13 @@
+import base64
+
 from django.conf import settings
 from django.contrib.auth.base_user import BaseUserManager
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from cryptography.fernet import Fernet
+
+
+ACCESS_TOKEN_ENCRYPTION = Fernet(settings.ACCESS_TOKEN_ENCRYPTION_KEY)
 
 
 class CustomUserManager(BaseUserManager):
@@ -51,7 +57,7 @@ class GitHubIdentity(models.Model):
 	user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="github_ids")
 	db_id = models.IntegerField(help_text="The numeric database ID of the user on GitHub")
 	uid = models.CharField(max_length=100, help_text="The newer string ID of the user on GitHub")
-	access_token = models.CharField(max_length=100)
+	access_token = models.CharField(max_length=500)
 	user_handle = models.CharField(max_length=100)
 	avatar_url = models.CharField(max_length=200, null=True)
 
@@ -61,3 +67,10 @@ class GitHubIdentity(models.Model):
 
 	def __str__(self):
 		return f"{self.user.email} ({self.uid})"
+
+	def plain_access_token(self):
+		return ACCESS_TOKEN_ENCRYPTION.decrypt(base64.b64decode(self.access_token.encode())).decode()
+
+	@staticmethod
+	def encrypt_access_token(token: str):
+		return base64.b64encode(ACCESS_TOKEN_ENCRYPTION.encrypt(token.encode())).decode()

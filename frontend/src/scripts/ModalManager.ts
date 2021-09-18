@@ -3,7 +3,7 @@ import Modal from "_/Modal"
 import Button from "_/Button"
 
 type ViewFn = (control: ModalControl) => m.Children
-let currentViewFn: null | (() => m.Children) = null
+let currentComponent: null | m.Component = null
 
 type KeyType = unknown
 let currentKey: KeyType = null
@@ -31,7 +31,8 @@ class ModalControl {
 
 function show(viewFn: ViewFn): void {
 	const control = new ModalControl()
-	currentViewFn = () => m(ModalLayout, viewFn(control))
+	currentComponent = makeComponent(() => m(ModalLayout, viewFn(control)))
+
 	currentControl = control
 	currentKey = control.key
 	m.redraw()
@@ -42,7 +43,7 @@ function toggleDrawer(viewFn: ViewFn, key: KeyType): void {
 		close()
 	} else {
 		const control = new ModalControl()
-		currentViewFn = () => viewFn(control)
+		currentComponent = makeComponent(() => viewFn(control))
 		currentControl = control
 		currentKey = key
 	}
@@ -54,16 +55,27 @@ function isShowing(key: KeyType): boolean {
 }
 
 function close(): void {
-	currentViewFn = currentKey = null
+	currentComponent = currentKey = null
 	m.redraw()
 }
 
 function render(): m.Children {
-	return currentViewFn != null && currentViewFn()
+	return currentComponent != null && m(currentComponent)
+}
+
+function makeComponent(viewFn: (() => m.Children)): m.Component {
+	return {
+		view: viewFn,
+		oncreate(vnode: m.VnodeDOM) {
+			// The `vnode.dom` points to the mask, and I have no idea how to get the modal itself, other than this.
+			vnode.dom.nextElementSibling?.querySelector("input")?.focus()
+		},
+	}
 }
 
 const ModalLayout = {
 	view(vnode: m.Vnode<unknown, unknown>): m.Children {
+		// If this top-level markup is changed, check the `oncreate` method in `makeComponent` as well.
 		return [
 			m(".modal2-mask", { onclick: close }),
 			m(

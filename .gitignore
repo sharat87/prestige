@@ -2,15 +2,13 @@ supervisord.pid
 supervisord.log
 .supervisord.sock
 
-/.task
-private-env.txt
 venv
 
-backend/db.sqlite3
-backend/e2e-db.sqlite3
+backend/*.sqlite3
 backend/data
 backend/static
 __pycache__
+.mypy_cache
 
 frontend/node_modules
 frontend/dist

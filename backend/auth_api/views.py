@@ -297,7 +297,7 @@ def github_auth_callback_view(request):
 	response = requests.get(
 		"https://api.github.com/user/emails",
 		headers={
-			"Authorization": "token " + data["access_token"],
+			"Authorization": "token " + access_token,
 		},
 	)
 	response.raise_for_status()
@@ -322,7 +322,7 @@ def github_auth_callback_view(request):
 
 	updates = {
 		"db_id": gh_user_response["db_id"],
-		"access_token": access_token,
+		"access_token": GitHubIdentity.encrypt_access_token(access_token),
 		"user_handle": gh_user_response["login"],
 		"avatar_url": gh_user_response["avatarUrl"],
 	}

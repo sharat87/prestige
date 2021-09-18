@@ -178,7 +178,7 @@ function renderTokens(fullText: string, mode: CodeMirror.Mode<unknown>): m.Child
 		++i
 	}
 
-	return m("div", rows)
+	return rows
 
 }
 

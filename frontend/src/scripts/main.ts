@@ -97,6 +97,16 @@ function WorkspaceView(): m.Component {
 				m.redraw()
 			}
 			workspace.codeMirror?.focus()
+
+		} else if ((event.ctrlKey || event.metaKey) && event.key === "s") {
+			event.preventDefault()
+			if (isManualSaveAvailable()) {
+				workspace.saveSheetManual()
+			} else {
+				workspace.saveSheetAuto()
+			}
+			m.redraw()
+
 		}
 	}
 
@@ -295,7 +305,7 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 					m("span.pa1", "📃 " + workspace.currentSheetQualifiedPath()),
 				]),
 				right: m(".flex", [
-					m(
+					isDev() && m(
 						NavLink,
 						{
 							onclick: () => {

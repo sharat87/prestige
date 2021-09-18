@@ -3,7 +3,7 @@ import * as Exporter from "_/ExportRequests"
 import CodeBlock from "_/CodeBlock"
 import type { RequestDetails } from "_/Parser"
 import Button from "_/Button"
-import { copyToClipboard, downloadText, showCopyGhost } from "_/utils"
+import { copyToClipboard, downloadText, showGhost } from "_/utils"
 import type CookieJar from "_/CookieJar"
 
 export default { view }
@@ -30,8 +30,8 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 
 	console.log(exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren())
 
-	return [
-		m("p.ma2", [
+	return m(".ma2", { style: { width: "50vw" } }, [
+		m("p", [
 			m("label.mh2", [
 				m("input", {
 					type: "checkbox",
@@ -52,47 +52,47 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 				}),
 				m("span.ml1", "Include Cookies"),
 			]),
-		]),
-		request != null && m("p.ma2", [
-			m(Button, {
-				onclick(event) {
-					if (request != null) {
-						copyToClipboard(
-							exporter.toCurl({ singleLine: true, includeCookies, useLongFlags }).toPlainString(),
-						)
-						showCopyGhost(event.target as HTMLButtonElement)
-					}
-				},
-			}, "Copy as one-line"),
-			m(Button, {
-				class: "ml3",
-				onclick(event) {
-					if (request != null) {
-						copyToClipboard(
-							exporter.toCurl({ includeCookies, useLongFlags }).toPlainString(),
-						)
-						showCopyGhost(event.target as HTMLButtonElement)
-					}
-				},
-			}, "Copy as multiline"),
-			m(Button, {
-				class: "ml3",
-				onclick(event) {
-					if (request != null) {
-						downloadText(
-							exporter.toCurl({ includeCookies, useLongFlags }).toPlainString(),
-						)
-						showCopyGhost(event.target as HTMLButtonElement)
-					}
-				},
-			}, "Download"),
+			request != null && [
+				m(Button, {
+					onclick(event) {
+						if (request != null) {
+							copyToClipboard(
+								exporter.toCurl({ singleLine: true, includeCookies, useLongFlags }).toPlainString(),
+							)
+							showGhost(event.target as HTMLButtonElement)
+						}
+					},
+				}, "Copy as one-line"),
+				m(Button, {
+					class: "ml3",
+					onclick(event) {
+						if (request != null) {
+							copyToClipboard(
+								exporter.toCurl({ includeCookies, useLongFlags }).toPlainString(),
+							)
+							showGhost(event.target as HTMLButtonElement)
+						}
+					},
+				}, "Copy as multiline"),
+				m(Button, {
+					class: "ml3",
+					onclick(event) {
+						if (request != null) {
+							downloadText(
+								exporter.toCurl({ includeCookies, useLongFlags }).toPlainString(),
+							)
+							showGhost(event.target as HTMLButtonElement, "Download started")
+						}
+					},
+				}, "Download"),
+			],
 		]),
 		m(
 			CodeBlock,
 			{
-				class: "ma3",
+				class: "ma1",
 				elements: exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren(),
 			},
 		),
-	]
+	])
 }
