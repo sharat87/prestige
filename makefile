@@ -10,7 +10,7 @@ help:
 build-backend: venv
 	source venv/bin/activate \
 		&& cd backend \
-		&& PRESTIGE_SECRET_KEY=unused DATABASE_URL='sqlite://:memory:' python manage.py collectstatic --clear --no-input \
+		&& PRESTIGE_ENV=manage DATABASE_URL='sqlite://:memory:' python manage.py collectstatic --clear --no-input \
 		&& python -m compileall -f .
 
 lint-backend: venv/bin/flake8
