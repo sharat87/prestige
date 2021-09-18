@@ -563,7 +563,11 @@ export default class Workspace {
 		} else if (this.isProxyApproved(proxy)) {
 			return this.session.executeWithProxy(request, { timeout, proxy }, this.cookieJar)
 
+		} else {
+			throw new Error("Proxy '" + proxy + "' not approved. Request not executed.")
+
 		}
+
 	}
 
 	isProxyApproved(proxy: string): boolean {
