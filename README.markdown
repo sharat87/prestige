@@ -10,6 +10,8 @@ This is a *powerful*, *text-based*, *in-browser*, HTTP client app that I wanted 
 Check out the [User Guide](https://prestigemad.com/docs) to learn how Prestige can be a powerful addition to your
 toolset.
 
+![Prestige Screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot.png)
+
 **Why is Prestige labeled as Beta Software?**: Gaps in documentation, insufficient test coverage, and potential for
 backwards-incompatible changes to the syntax.
 
@@ -31,6 +33,7 @@ weren't listed here, but still were just as helpful):
 1. [Python](https://www.python.org/) & [Selenium](https://www.selenium.dev/) &mdash; power the end-to-end testing workflow.
 1. [MkDocs](https://www.mkdocs.org/) &mdash; powers the documentation site.
 1. [GNU Make]() & [Parcel](https://parceljs.org/) &mdash; power the building and bundling facilities.
+1. [Phosphor](https://phosphoricons.com/) &mdash; Original source for icons in the application.
 
 A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
 
