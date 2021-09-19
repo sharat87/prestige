@@ -20,6 +20,8 @@ import Toolbar from "_/Toolbar"
 import PageEnd from "_/PageEnd"
 import { currentSheet, isManualSaveAvailable, SaveState } from "_/Persistence"
 
+const REPO_URL = "https://github.com/sharat87/prestige"
+
 window.addEventListener("load", main)
 
 function main() {
@@ -38,6 +40,14 @@ function main() {
 	})
 
 	AuthService.check()
+
+	m.request<{ stargazers_count: number }>("https://api.github.com/repos/sharat87/prestige").then((response) => {
+		RepoStats.stars = response.stargazers_count
+	})
+}
+
+const RepoStats = {
+	stars: 0,
 }
 
 const Layout: m.Component = {
@@ -118,8 +128,17 @@ function WorkspaceView(): m.Component {
 					m("h1.f3.mh2.mv0", "Prestige"),
 					m(".f6.i.ml3", [
 						"Just an HTTP client by ",
-						m("a", { href: "https://sharats.me", target: "_blank" }, "Shrikant"),
+						m("a", { href: "https://sharats.me", target: "_blank" }, "Shri"),
 						".",
+					]),
+				]),
+				m(".flex.items-stretch", [
+					RepoStats.stars > 0 && m(".pv1.ph2.db.flex.items-center.silver", [
+						m(
+							NavLink,
+							{ href: REPO_URL },
+							[m(Icons.github), "Star: ", RepoStats.stars, m(Icons.externalLink)],
+						),
 					]),
 				]),
 				m(".flex.items-stretch", [
@@ -140,17 +159,26 @@ function WorkspaceView(): m.Component {
 					m(
 						NavLink,
 						{ onclick: onCookiesToggle, isActive: ModalManager.isShowing(VisiblePopup.Cookies) },
-						`🍪 Cookies (${ workspace.cookieJar?.size ?? 0 })`,
+						[
+							m(Icons.cookie),
+							`Cookies (${ workspace.cookieJar?.size ?? 0 })`,
+						],
 					),
 					m(
 						NavLink,
 						{ onclick: onFileBucketToggle, isActive: ModalManager.isShowing(VisiblePopup.FileBucketPopup) },
-						`🗃 FileBucket (${workspace.fileBucket.size})`,
+						[
+							m(Icons.folderClosed),
+							`FileBucket (${workspace.fileBucket.size})`,
+						],
 					),
 					m(
 						NavLink,
 						{ onclick: onOptionsToggle, isActive: ModalManager.isShowing(VisiblePopup.Options) },
-						"⚙️ Options",
+						[
+							m(Icons.wrench),
+							"Options",
+						],
 					),
 					[
 						authState === AuthState.PENDING
@@ -161,24 +189,25 @@ function WorkspaceView(): m.Component {
 									onclick: onLoginFormToggle,
 									isActive: ModalManager.isShowing(VisiblePopup.LoginForm),
 								},
-								authState === AuthState.LOGGED_IN ? "🦸 Profile" : "🕵️ LogIn/SignUp",
+								[
+									m(Icons.user),
+									authState === AuthState.LOGGED_IN ? "Profile" : "LogIn/SignUp",
+								],
 							),
 					],
 					m(
 						NavLink,
 						{ onclick: onAboutPaneToggle, isActive: ModalManager.isShowing(VisiblePopup.AboutPane) },
-						"🎒 About",
+						[
+							m(Icons.info),
+							"About",
+						],
 					),
-					m(NavLink, { href: "/docs/" }, ["Docs", m(Icons.ExternalLink)]),
+					m(NavLink, { href: "/docs/" }, [m(Icons.question), "Docs", m(Icons.externalLink)]),
 					m(
 						NavLink,
-						{ href: "https://github.com/sharat87/prestige/issues/new" },
-						["Report a problem", m(Icons.ExternalLink)],
-					),
-					m(
-						NavLink,
-						{ href: "https://github.com/sharat87/prestige" },
-						["Star on GitHub", m(Icons.ExternalLink)],
+						{ href: REPO_URL + "/issues/new" },
+						["Report a problem", m(Icons.externalLink)],
 					),
 				]),
 			]),
@@ -238,7 +267,7 @@ class Sidebar implements m.ClassComponent {
 	view() {
 		return m("aside.sidebar.flex", [
 			m(".tab-bar", [
-				m(NavLink, { isActive: this.isOpen, onclick: this.toggleOpen.bind(this) }, "📝"),
+				m(NavLink, { isActive: this.isOpen, onclick: this.toggleOpen.bind(this) }, m(Icons.files)),
 			]),
 			this.isOpen && m(".content", [
 				m(DocumentBrowser),
