@@ -115,7 +115,7 @@
 			"capitalized-comments": "error",
 			"eol-last": "error",
 			"no-trailing-spaces": "error",
-			"camelcase": "error",
+			"camelcase": "warn",
 			"brace-style": "off",
 			"@typescript-eslint/brace-style": [
 				"error",
