@@ -2,15 +2,26 @@ import m from "mithril"
 
 declare const process: {
 	env: {
-		NODE_ENV: string
+		NODE_ENV?: string
 		PRESTIGE_BACKEND: string
 		PRESTIGE_ALLOWED_HOSTS: string
+		PRESTIGE_FRONTEND_ROLLBAR_TOKEN?: string
 	}
 }
 
 const PRESTIGE_BACKEND = (process.env.PRESTIGE_BACKEND || "/")?.replace(/\/*$/, "/")
 
 export const GIST_API_PREFIX = PRESTIGE_BACKEND + "gist/"
+
+export const rollbarToken: null | string = (() => {
+	const token = (process.env.PRESTIGE_FRONTEND_ROLLBAR_TOKEN || "").trim()
+	return token != null && token !== "" ? token : null
+})()
+
+export const name: string = (() => {
+	const value = (process.env.NODE_ENV || "").trim()
+	return value != null && value !== "" ? value : "production"
+})()
 
 let recaptchaSiteKey: null | string = null
 export async function getRecaptchaSiteKey(): Promise<string> {
@@ -25,7 +36,7 @@ export async function getRecaptchaSiteKey(): Promise<string> {
 }
 
 export function isDev(): boolean {
-	return process.env.NODE_ENV === "development"
+	return name === "development"
 }
 
 export function proxyUrl(): string {
@@ -43,5 +54,5 @@ export function storageUrl(): string {
 
 export function allowedToStart(): boolean {
 	return process.env.PRESTIGE_ALLOWED_HOSTS == null ||
-		process.env.PRESTIGE_ALLOWED_HOSTS.split(",").includes(location.host)
+		process.env.PRESTIGE_ALLOWED_HOSTS.split(",").includes(window.location.host)
 }

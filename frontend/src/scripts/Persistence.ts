@@ -117,7 +117,7 @@ class BrowserProvider extends Provider<LocalSource> {
 	}
 
 	async create(): Promise<void> {
-		const name = prompt("Sheet Name") ?? ""
+		const name = window.prompt("Sheet Name") ?? ""
 		if (name === "") {
 			return
 		}
@@ -140,7 +140,7 @@ class BrowserProvider extends Provider<LocalSource> {
 			m(
 				"a.pv1.ph2.db",
 				{
-					onclick,
+					onclick: this.create,
 					href: "#",
 				},
 				"+ Create new",
@@ -238,10 +238,10 @@ class CloudProvider extends Provider<CloudSource> {
 	}
 
 	async create(): Promise<void> {
-		const path = prompt("Sheet path:")
+		const name = window.prompt("Sheet path:")
 		await m.request({
 			method: "POST",
-			url: STORAGE_URL_BASE + path,
+			url: STORAGE_URL_BASE + name,
 			withCredentials: true,
 			body: {
 				name,
@@ -578,14 +578,10 @@ availableSources.map(async function(sources: Source[]): Promise<void> {
 		providers.push(provider)
 	}
 
-	console.log("load listing for", providers.map(p => p.key))
 	await Promise.all(providers.map(provider => provider.loadRootListing()))
 
 	currentProviders(providers)
 })
-
-currentProviders.map(v => console.log("lift providers", v))
-currentSheetName.map(v => console.log("lift sheet name", v))
 
 Stream.lift((providers: Provider<Source>[], qualifiedName: string | null) => {
 	if (qualifiedName == null || providers == null || providers.length === 0) {

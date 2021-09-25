@@ -658,7 +658,7 @@ export default class Workspace {
 		}
 
 		const isLocalProxy = isLocalUrl(this.defaultProxy)
-			|| (isLocalUrl(location.toString()) && !this.defaultProxy.includes("://"))
+			|| (isLocalUrl(window.location.toString()) && !this.defaultProxy.includes("://"))
 
 		return isLocalProxy
 			? this.defaultProxy

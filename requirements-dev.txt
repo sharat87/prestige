@@ -1,8 +1,12 @@
 mitmproxy  # Dev-time routing.
 
-selenium  # E2E tests.
+# E2E tests.
+selenium
+types-selenium
 
 mkdocs  # Building documentation.
+
+coverage
 
 # Linting
 flake8

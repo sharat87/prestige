@@ -12,19 +12,31 @@ import FileBucketModal from "_/FileBucketModal"
 import ColorPaletteModal from "_/ColorPaletteModal"
 import { NavLink } from "_/NavLink"
 import ResultPane from "_/ResultPane"
-import { isDev } from "_/Env"
+import * as Env from "_/Env"
 import Toaster from "_/Toaster"
 import ExternalLink from "_/ExternalLink"
 import ModalManager from "_/ModalManager"
 import Toolbar from "_/Toolbar"
 import PageEnd from "_/PageEnd"
 import { currentSheet, isManualSaveAvailable, SaveState } from "_/Persistence"
+import Rollbar from "rollbar"
 
 const REPO_URL = "https://github.com/sharat87/prestige"
 
 window.addEventListener("load", main)
 
 function main() {
+	if (Env.rollbarToken != null) {
+		Rollbar.init({
+			accessToken: Env.rollbarToken,
+			captureUncaught: true,
+			captureUnhandledRejections: true,
+			payload: {
+				environment: Env.name,
+			},
+		})
+	}
+
 	const root = document.createElement("main")
 	root.setAttribute("id", "app")
 	document.body.insertAdjacentElement("afterbegin", root)
@@ -140,18 +152,16 @@ function WorkspaceView(): m.Component {
 							[m(Icons.github), "Star: ", RepoStats.stars, m(Icons.externalLink)],
 						),
 					]),
-				]),
-				m(".flex.items-stretch", [
 					workspace.saveState === SaveState.unsaved
 						&& m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
 					workspace.saveState === SaveState.saving
 						&& m(".i.pv1.ph2.db.flex.items-center.silver", m.trust("Saving&hellip;")),
-					isDev() && m(
+					Env.isDev() && m(
 						"code.flex.items-center.ph1",
 						{ style: { lineHeight: 1.15, color: "var(--red-3)", background: "var(--red-9)" } },
 						["R", ++redrawCount],
 					),
-					isDev() && m(
+					Env.isDev() && m(
 						NavLink,
 						{ onclick: onColorPaletteToggle, isActive: ModalManager.isShowing(VisiblePopup.ColorPalette) },
 						"Palette",
@@ -334,7 +344,7 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 					m("span.pa1", "📃 " + workspace.currentSheetQualifiedPath()),
 				]),
 				right: m(".flex", [
-					isDev() && m(
+					Env.isDev() && m(
 						NavLink,
 						{
 							onclick: () => {

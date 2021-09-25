@@ -7,6 +7,8 @@ import threading
 import time
 from pathlib import Path
 from typing import IO, Any, Dict, List, Optional
+import http.server
+import functools
 
 logging.basicConfig(level=logging.DEBUG, format="%(levelname)s\t%(name)s %(message)s")
 log = logging.getLogger(__name__)
@@ -144,21 +146,32 @@ def prestige_frontend(ready_event: Optional[threading.Event] = None):
 		},
 	).wait()
 
-	def on_output(line):
-		if not ready_event.is_set() and line and "Serving HTTP on" in line:
-			log.info("Frontend Ready")
-			ready_event.set()
+	# def on_output(line):
+	# 	if not ready_event.is_set() and line and "Serving HTTP on" in line:
+	# 		log.info("Frontend Ready")
+	# 		ready_event.set()
 
-	spawn_process(
-		[
-			venv_bin / "python",
-			"-m",
-			"http.server",
-			frontend_port,
-		],
-		cwd=frontend_path / "dist",
-		on_output=ready_event and on_output,
-	)
+	# spawn_process(
+	# 	[
+	# 		venv_bin / "python",
+	# 		"-m",
+	# 		"http.server",
+	# 		frontend_port,
+	# 	],
+	# 	cwd=frontend_path / "dist",
+	# 	on_output=ready_event and on_output,
+	# )
+
+	def static_server():
+		http.server.test(
+			HandlerClass=functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(frontend_path / "dist")),
+			ServerClass=http.server.ThreadingHTTPServer,
+			port=frontend_port,
+		)
+
+	threading.Thread(target=static_server, daemon=True).start()
+	if ready_event is not None:
+		ready_event.set()
 
 
 def httpbun(ready_event: Optional[threading.Event] = None):

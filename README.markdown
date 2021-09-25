@@ -10,12 +10,23 @@ This is a *powerful*, *text-based*, *in-browser*, HTTP client app that I wanted 
 Check out the [User Guide](https://prestigemad.com/docs) to learn how Prestige can be a powerful addition to your
 toolset.
 
+[Discuss on Hacker News](https://news.ycombinator.com/item?id=27412445). Join us on [Discord](https://discord.gg/6tc9fMmYRW).
+
 ![Prestige Screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot.png)
 
 **Why is Prestige labeled as Beta Software?**: Gaps in documentation, insufficient test coverage, and potential for
 backwards-incompatible changes to the syntax.
 
-[Discuss on Hacker News](https://news.ycombinator.com/item?id=27412445).
+## Features
+
+- Define requests in plain text, hit `Ctrl+Enter` (or `Cmd+Enter`) to execute and view results.
+- Write plain, familiar Javascript for templating within your requests.
+- Shows all responses in a redirect chain, if request redirects.
+- Save your Prestige documents to Gist.
+- Export requests as cURL commands (more export formats coming soon).
+- Isolated cookie management.
+- Uploading files to APIs is simple as dropping the file and calling a function.
+- Light and dark modes.
 
 ## Under the Hood
 
@@ -67,6 +78,7 @@ More: <https://github.com/marmelab/awesome-rest>.
 1. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
 1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL, but requires a personal auth token.
 1. [A Curated List of 100 Cool and Fun Public APIs to Inspire Your Next Project](https://medium.com/better-programming/a-curated-list-of-100-cool-and-fun-public-apis-to-inspire-your-next-project-7600ce3e9b3)
+1. [Postman's collection](https://www.postman.com/cs-demo/workspace/public-rest-apis/collection/8854915-454a2dc7-dcbe-41cf-9bfa-da544fcd93a2)
 
 ## Rough Roadmap
 

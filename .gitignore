@@ -9,6 +9,7 @@ backend/data
 backend/static
 __pycache__
 .mypy_cache
+backend/.coverage
 
 frontend/node_modules
 frontend/dist

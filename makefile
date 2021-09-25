@@ -21,8 +21,8 @@ lint-backend: venv/bin/flake8
 test-backend: venv
 	@source venv/bin/activate \
 		&& cd backend \
-		&& PRESTIGE_ENV=test \
-			python manage.py test
+		&& PRESTIGE_ENV=test coverage run --source=. manage.py test; \
+		coverage report
 
 changepassword: venv
 	@source venv/bin/activate \
@@ -87,21 +87,12 @@ build-docs: venv
 # End-to-end Testing
 ###
 
-test-e2e: venv e2e-tests/drivers/chromedriver
+test-e2e: venv
+	@e2e-tests/ensure-drivers.sh
 	@rm -rf e2e-tests/shots
 	@source venv/bin/activate \
 		&& cd e2e-tests \
 		&& python3 run.py
-
-e2e-tests/drivers/chromedriver:
-	@export CHROME_VERSION="$$((google-chrome --version || "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --version) | cut -f 3 -d ' ' | cut -d '.' -f 1)" \
-		&& VERSION="$$(curl --silent --location --fail --retry 3 http://chromedriver.storage.googleapis.com/LATEST_RELEASE_$$CHROME_VERSION)" \
-		&& OS="$$(if [[ $$(uname -s) = Linux ]]; then echo linux64; else echo mac64; fi)" \
-		&& wget -c -nc --retry-connrefused --tries=0 -O chromedriver.zip https://chromedriver.storage.googleapis.com/$$VERSION/chromedriver_$$OS.zip
-	@unzip -o -q chromedriver.zip
-	@mkdir -p $$(dirname $@)
-	@mv chromedriver $@
-	@rm chromedriver.zip
 
 ###
 # Miscellaneous / Project-wide targets
