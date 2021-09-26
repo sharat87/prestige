@@ -69,6 +69,7 @@ export abstract class Provider<S extends Source> {
 		this.source = source
 		this.entries = []
 		this.isManualSave = isManualSave
+		this.create = this.create.bind(this)
 	}
 
 	abstract loadRootListing(): Promise<void>
@@ -388,7 +389,12 @@ class GistProvider extends Provider<GistSource> {
 						description,
 						isPublic: event.submitter?.classList.contains("public") ?? false,
 					},
-				}).then(this.loadRootListing.bind(this))
+				}).then(() => {
+					console.log("Loading root listing after creating a gist.")
+					this.loadRootListing()
+				}).catch((error) => {
+					console.error("Error creating Gist", error)
+				})
 			}
 
 			return m(".pa2", [
