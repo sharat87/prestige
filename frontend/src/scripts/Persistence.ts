@@ -378,8 +378,6 @@ class GistProvider extends Provider<GistSource> {
 					return
 				}
 				event.preventDefault()
-				console.log(event)
-				return
 				control.close()
 				m.request({
 					method: "POST",

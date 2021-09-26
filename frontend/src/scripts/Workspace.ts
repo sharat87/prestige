@@ -124,6 +124,7 @@ export default class Workspace {
 		this.onExportClicked = this.onExportClicked.bind(this)
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this)
 		this.saveSheetAuto = throttle(this.saveSheetAuto.bind(this), 3000, { trailing: true })
+		this.updateEditorDisplay = throttle(this.updateEditorDisplay.bind(this), 3000, { trailing: true })
 		this.cookieJar = null
 
 		currentSheet.map((value) => {
@@ -185,7 +186,7 @@ export default class Workspace {
 
 		this.codeMirror.on("changes", () => {
 			m.redraw()  // Need this on every change, to update any unsaved/saved indicator.
-			this.updateEditorDisplay()  // TODO: This needs to be faster, or be run less often, not on every keystroke.
+			this.updateEditorDisplay()
 			if (this._disableAutoSave) {
 				return
 			}
@@ -255,6 +256,7 @@ export default class Workspace {
 	 * change.
 	 */
 	updateEditorDisplay(): void {
+		// TODO: This is a performance killer. Either do it in a web-worker or something, or make it faster/incremental.
 		if (this.codeMirror == null) {
 			return
 		}

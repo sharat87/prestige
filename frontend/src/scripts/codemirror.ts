@@ -12,7 +12,7 @@ import "codemirror/addon/comment/comment"
 import "codemirror/addon/lint/lint"
 import "codemirror/mode/javascript/javascript"
 import "codemirror/mode/htmlmixed/htmlmixed"
-import * as acorn from "acorn/dist/acorn"
+import * as acorn from "acorn"
 
 interface PrestigeState {
 	context: string

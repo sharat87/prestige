@@ -20,6 +20,7 @@ import Toolbar from "_/Toolbar"
 import PageEnd from "_/PageEnd"
 import { currentSheet, isManualSaveAvailable, SaveState } from "_/Persistence"
 import Rollbar from "rollbar"
+import * as pings from "_/pings"
 
 const REPO_URL = "https://github.com/sharat87/prestige"
 
@@ -56,6 +57,8 @@ function main() {
 	m.request<{ stargazers_count: number }>("https://api.github.com/repos/sharat87/prestige").then((response) => {
 		RepoStats.stars = response.stargazers_count
 	})
+
+	pings.load()
 }
 
 const RepoStats = {

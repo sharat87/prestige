@@ -10,7 +10,14 @@
 	<link rel=icon type=image/png sizes=16x16 href="assets/favicon-16x16.png">
 </head>
 <body>
-	<p id=loadingBox style="display: none; text-align: center; font: 3em sans-serif">Loading&hellip;</p>
+	<p id=loadingBox style="display: none; text-align: center; font: 3em sans-serif; margin: 0; padding: 2em">
+	Loading&hellip;
+	<style>
+	@media (prefers-color-scheme: dark) {
+		body { background: #222; color: #eee }
+	}
+	</style>
+	</p>
 	<script>document.getElementById("loadingBox").style.display = ""</script>
 
 	<noscript>
@@ -29,6 +36,5 @@
 	<link rel=stylesheet href="styles.less">
 
 	<script src="scripts/main.ts"></script>
-	<script data-goatcounter="https://prestigemad.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>

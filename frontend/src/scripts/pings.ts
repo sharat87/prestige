@@ -7,3 +7,10 @@ export function ping(name: string, title: string): void {
 		goatcounter.count({ path: name, title, event: true })
 	}
 }
+
+export function load(): void {
+	const s = document.createElement("script")
+	s.dataset.goatcounter = "https://prestigemad.goatcounter.com/count"
+	s.src = "//gc.zgo.at/count.js"
+	document.body.appendChild(s)
+}
