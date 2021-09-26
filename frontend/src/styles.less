@@ -512,18 +512,17 @@ form.grid, form > .grid {
 }
 
 .toasts {
-	width: 20vw;
-	max-width: 420px;
+	width: 400px;
 	z-index: 99;
 	pointer-events: none;
 
 	> * {
 		position: relative;
 		pointer-events: auto;
-		animation: toast .1s;
+		animation: toast .2s;
 
 		&.close {
-			animation: toast-close .1s;
+			animation: toast-close .2s;
 		}
 
 		&:hover .close-btn {

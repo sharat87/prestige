@@ -95,6 +95,7 @@ export default class Workspace {
 	currentSheetQualifiedPath: Stream<string>
 	private _disableAutoSave: boolean
 	cookieJar: null | CookieJar
+	updateEditorDisplay: ReturnType<typeof throttle>
 
 	constructor() {
 		this.codeMirror = null
@@ -124,7 +125,7 @@ export default class Workspace {
 		this.onExportClicked = this.onExportClicked.bind(this)
 		this.onPrettifyClicked = this.onPrettifyClicked.bind(this)
 		this.saveSheetAuto = throttle(this.saveSheetAuto.bind(this), 3000, { trailing: true })
-		this.updateEditorDisplay = throttle(this.updateEditorDisplay.bind(this), 3000, { trailing: true })
+		this.updateEditorDisplay = throttle(this._updateEditorDisplay.bind(this), 3000, { trailing: true })
 		this.cookieJar = null
 
 		currentSheet.map((value) => {
@@ -183,6 +184,7 @@ export default class Workspace {
 		;(this.codeMirror as any).display.lineSpace.parentNode.style.paddingBottom = "96px"
 
 		this.updateEditorDisplay()
+		this.updateEditorDisplay.flush()
 
 		this.codeMirror.on("changes", () => {
 			m.redraw()  // Need this on every change, to update any unsaved/saved indicator.
@@ -241,6 +243,7 @@ export default class Workspace {
 			this._disableAutoSave = false
 		}
 		(this.saveSheetAuto as any).flush()
+		this.updateEditorDisplay.flush()
 	}
 
 	get lines(): string[] {
@@ -255,13 +258,13 @@ export default class Workspace {
 	 * Update gutter, widgets, highlights etc. of the CodeMirror editor. Usually called when the contents of the editor
 	 * change.
 	 */
-	updateEditorDisplay(): void {
-		// TODO: This is a performance killer. Either do it in a web-worker or something, or make it faster/incremental.
+	_updateEditorDisplay(): void {
+		console.log("Updating editor display")
 		if (this.codeMirror == null) {
 			return
 		}
 
-		console.log("Updating editor display in workspace.")
+		console.log("Updating editor display in workspace.", this.lines.length)
 		this.codeMirror.clearGutter("prestige")
 
 		const lines: string[] = this.lines

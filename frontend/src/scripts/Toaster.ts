@@ -90,7 +90,7 @@ class Toaster {
 						}[toast.type],
 						"data-toast-id": toast.id,
 					}, m.trust("&times;")),
-					toast.id + ": " + toast.message,
+					m("div", toast.message),
 				],
 			)))
 	}
