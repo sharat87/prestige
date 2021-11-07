@@ -52,3 +52,10 @@ export function showGhost(el: Element, text = "Copied!"): void {
 	ghost.addEventListener("animationend", ghost.remove.bind(ghost))
 	document.body.appendChild(ghost)
 }
+
+export function encodeBase64(text: string): string {
+	// Vanilla `btoa` cannot handle unicode characters in strings.
+	// So we need this dance so unicode characters don't break the encoding process.
+	// Ref: <https://developer.mozilla.org/en-US/docs/Glossary/Base64>
+	return btoa(unescape(encodeURIComponent(text)))
+}

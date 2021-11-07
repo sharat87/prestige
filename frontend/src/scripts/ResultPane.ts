@@ -9,7 +9,7 @@ import { NavLink } from "_/NavLink"
 import NothingMessage from "_/NothingMessage"
 import CodeBlock from "_/CodeBlock"
 import humanSizeDisplay from "_/humanSizeDisplay"
-import { copyToClipboard, downloadText, showGhost } from "_/utils"
+import * as utils from "_/utils"
 import type { Response } from "_/HttpSession"
 import ModalManager from "_/ModalManager"
 
@@ -161,6 +161,8 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			5: "is-5xx",
 		})[response.status.toString()[0]] ?? ""
 
+		const htmlBaseUrl = response.url ? new URL(response.url).origin : null
+
 		return response && m(".response", [
 			m(
 				".status.f2.pa2",
@@ -172,11 +174,11 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			response.request.method === "GET"
 				&& m("a.pl2", { href: response.url, target: "_blank" }, "Open GET request URL in new tab"),
 			m("h2.pl2", "Response"),
-			m(RichDataViewer, { text: response.body, spec: responseContentType }),
+			m(RichDataViewer, { text: response.body, spec: responseContentType, htmlBaseUrl }),
 			m("h3.pl2", "Headers"),
 			m(HeadersTable, { headers: response.headers }, m(NothingMessage, nothingMessageAttrs)),
 			m("h2.pl2", "Request"),
-			m(RichDataViewer, { text: response.request.body, spec: requestContentType }),
+			m(RichDataViewer, { text: response.request.body, spec: requestContentType, htmlBaseUrl: null }),
 			m("h3.pl2", "Headers"),
 			m(HeadersTable, { headers: response.request.headers }, m(NothingMessage, nothingMessageAttrs)),
 		])
@@ -226,7 +228,13 @@ function HeadersTable(): m.Component<{ headers: Headers | [name: string, value: 
 	}
 }
 
-function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
+interface RichDataViewerAttrs {
+	text: string
+	spec: null | string
+	htmlBaseUrl: null | string
+}
+
+function RichDataViewer(): m.Component<RichDataViewerAttrs> {
 	const enum Tabs {
 		text,
 		iFrame,
@@ -237,7 +245,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 
 	return { oninit, view }
 
-	function oninit(vnode: VnodeDOM<{ text: string, spec: null | string }>): void {
+	function oninit(vnode: VnodeDOM<RichDataViewerAttrs>): void {
 		const { spec } = vnode.attrs
 		if (spec?.startsWith("image/")) {
 			visibleTab = Tabs.image
@@ -254,7 +262,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 		}, title)
 	}
 
-	function view(vnode: VnodeDOM<{ text: string, spec: null | string }>) {
+	function view(vnode: VnodeDOM<RichDataViewerAttrs>) {
 		let { text } = vnode.attrs
 		const { spec } = vnode.attrs
 
@@ -262,7 +270,6 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 			text = ""
 		}
 
-		console.log(text.slice(2000, 2200))
 		return text === "" ? m("p.i.pl2", "No body.") : [
 			m("h3.pl2", [
 				"Body",
@@ -270,13 +277,13 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 				m("small.ml1", `(${ humanSizeDisplay(text.length) })`),
 				m("button.ml2.f6", {
 					onclick() {
-						downloadText(text)
+						utils.downloadText(text)
 					},
 				}, "Download"),
 				m("button.ml2.f6", {
 					onclick(event: Event) {
-						copyToClipboard(text)
-						showGhost(event.target as HTMLButtonElement)
+						utils.copyToClipboard(text)
+						utils.showGhost(event.target as HTMLButtonElement)
 					},
 				}, "Copy Full"),
 			]),
@@ -289,7 +296,9 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 			// Panes.
 			visibleTab === Tabs.text && m(CodeBlock, { text, spec: spec ?? "", class: "mt0" }),
 			visibleTab === Tabs.iFrame && m("iframe.bn.pa0.w-100", {
-				src: "data:text/html;base64," + btoa(unescape(encodeURIComponent(text))),
+				src: "data:text/html;base64," + utils.encodeBase64(
+					text + vnode.attrs.htmlBaseUrl ? `<base href="${vnode.attrs.htmlBaseUrl}">` : "",
+				),
 				sandbox: "",  // Disable scripts and whole lot of scary stuff in the iframe's document.
 			}),
 			visibleTab === Tabs.image && m(
