@@ -297,7 +297,7 @@ function RichDataViewer(): m.Component<RichDataViewerAttrs> {
 			visibleTab === Tabs.text && m(CodeBlock, { text, spec: spec ?? "", class: "mt0" }),
 			visibleTab === Tabs.iFrame && m("iframe.bn.pa0.w-100", {
 				src: "data:text/html;base64," + utils.encodeBase64(
-					text + vnode.attrs.htmlBaseUrl ? `<base href="${vnode.attrs.htmlBaseUrl}">` : "",
+					text + (vnode.attrs.htmlBaseUrl ? `\n\n<base href="${vnode.attrs.htmlBaseUrl}">` : ""),
 				),
 				sandbox: "",  // Disable scripts and whole lot of scary stuff in the iframe's document.
 			}),
