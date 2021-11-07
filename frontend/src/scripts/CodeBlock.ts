@@ -142,7 +142,7 @@ function renderTokens(fullText: string, mode: CodeMirror.Mode<unknown>): m.Child
 					content += text.slice(pos, idx)
 					const size = tabSize - col % tabSize
 					col += size
-					content += repeat(" ", size)
+					content += repeat(" ", size).join("")
 					pos = idx + 1
 				}
 			}

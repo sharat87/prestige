@@ -60,13 +60,16 @@ def prestige_backend(ready_event: Optional[threading.Event] = None):
 	# 1. Backend server process.
 	backend_env = {
 		"DJANGO_SETTINGS_MODULE": "prestige.settings",
-		"PRESTIGE_UNIVERSE": "e2e_tests",
-		"PRESTIGE_ENV": "development",
+		"PRESTIGE_ENV": "e2e-tests",
 		"PRESTIGE_SECRET_KEY": "e2e-secret-key",
-		"PRESTIGE_CORS_ORIGINS": f"http://localhost:{frontend_port}",
 		"PRESTIGE_PROXY_DISALLOW_HOSTS": "",
-		"DATABASE_URL": "sqlite://:memory:",
+		"DATABASE_URL": "sqlite://e2e-tests.db",
 	}
+
+	try:
+		os.remove("e2e-tests.db")
+	except FileNotFoundError:
+		pass
 
 	spawn_process(
 		[

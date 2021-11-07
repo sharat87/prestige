@@ -5,12 +5,14 @@
 	<title>Prestige</title>
 	<meta name=color-scheme content="light dark">
 	<meta name=description content="An open-source, powerful, text-based HTTP client web developer tool, like Postman, that works inside the browser. Write your HTTP/REST requests as text, execute then and view response in the browser.">
+	<!-- Source: <https://infosec.mozilla.org/guidelines/web_security#content-security-policy> -->
+	<!-- <meta http-equiv="Content-Security-Policy" content="default-src https:"> -->
 	<link rel="shortcut icon" type=image/png href="assets/favicon.ico">
 	<link rel=icon type=image/png sizes=32x32 href="assets/favicon-32x32.png">
 	<link rel=icon type=image/png sizes=16x16 href="assets/favicon-16x16.png">
 </head>
 <body>
-	<p id=loadingBox style="display: none; text-align: center; font: 3em sans-serif; margin: 0; padding: 2em">
+	<p id=loadingBox style="text-align: center; font: 3em sans-serif; margin: 0; padding: 2em">
 	Loading&hellip;
 	<style>
 	@media (prefers-color-scheme: dark) {
@@ -18,11 +20,11 @@
 	}
 	</style>
 	</p>
-	<script>document.getElementById("loadingBox").style.display = ""</script>
 
 	<noscript>
 		This is a webapp written in Javascript and as such, requires Javascript to function. Please enable Javascript
 		in your browser or get a better browser like Firefox or Chromium. Thank you for checking us out.
+		<style>#loadingBox{display:none !important}</style>
 	</noscript>
 
 	<link rel=preconnect href="https://fonts.gstatic.com">

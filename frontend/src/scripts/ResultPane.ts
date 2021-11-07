@@ -262,6 +262,7 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 			text = ""
 		}
 
+		console.log(text.slice(2000, 2200))
 		return text === "" ? m("p.i.pl2", "No body.") : [
 			m("h3.pl2", [
 				"Body",
@@ -283,12 +284,12 @@ function RichDataViewer(): m.Component<{ text: string, spec: null | string }> {
 			m(".tab-bar", [
 				spec?.startsWith("image/") ? toggleTab("Image", Tabs.image) : toggleTab("Text", Tabs.text),
 				(spec === "text/html" || spec === "image/svg+xml") && toggleTab("iFrame", Tabs.iFrame),
-				spec === "image/svg+xml" && toggleTab("Text", Tabs.text),
+				spec === "image/svg+xml" && toggleTab("Text", Tabs.text - 500),
 			]),
 			// Panes.
 			visibleTab === Tabs.text && m(CodeBlock, { text, spec: spec ?? "", class: "mt0" }),
 			visibleTab === Tabs.iFrame && m("iframe.bn.pa0.w-100", {
-				src: "data:text/html;base64," + btoa(text),
+				src: "data:text/html;base64," + btoa(unescape(encodeURIComponent(text))),
 				sandbox: "",  // Disable scripts and whole lot of scary stuff in the iframe's document.
 			}),
 			visibleTab === Tabs.image && m(

@@ -54,7 +54,11 @@ function main() {
 
 	AuthService.check()
 
-	m.request<{ stargazers_count: number }>("https://api.github.com/repos/sharat87/prestige").then((response) => {
+	interface GitHubApiResponse {
+		stargazers_count: number  // eslint-disable-line camelcase
+	}
+
+	m.request<GitHubApiResponse>("https://api.github.com/repos/sharat87/prestige").then((response) => {
 		RepoStats.stars = response.stargazers_count
 	})
 
