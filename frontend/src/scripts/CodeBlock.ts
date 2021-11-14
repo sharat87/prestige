@@ -207,7 +207,7 @@ function prettifyJson(json: string) {
 		return JSON.stringify(JSON.parse(json), null, 2)
 	} catch (error) {
 		// TODO: The fact that this JSON is invalid should be communicated to the user.
-		console.error("Error parsing/prettifying JSON.")
+		console.error("Error parsing/prettifying JSON.", json)
 		return json
 	}
 }

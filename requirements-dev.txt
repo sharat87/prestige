@@ -3,6 +3,8 @@ mitmproxy  # Dev-time routing.
 # E2E tests.
 selenium
 types-selenium
+httpbin
+pytest
 
 mkdocs  # Building documentation.
 

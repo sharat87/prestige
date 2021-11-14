@@ -165,7 +165,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 
 		return response && m(".response", [
 			m(
-				".status.f2.pa2",
+				".t-response-status.status.f2.pa2",
 				{ class: skin },
 				response.status + " " +
 					response.statusText.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase()),
@@ -174,7 +174,12 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			response.request.method === "GET"
 				&& m("a.pl2", { href: response.url, target: "_blank" }, "Open GET request URL in new tab"),
 			m("h2.pl2", "Response"),
-			m(RichDataViewer, { text: response.body, spec: responseContentType, htmlBaseUrl }),
+			m(RichDataViewer, {
+				class: "t-response-body",
+				text: response.body,
+				spec: responseContentType,
+				htmlBaseUrl,
+			}),
 			m("h3.pl2", "Headers"),
 			m(HeadersTable, { headers: response.headers }, m(NothingMessage, nothingMessageAttrs)),
 			m("h2.pl2", "Request"),
@@ -229,6 +234,7 @@ function HeadersTable(): m.Component<{ headers: Headers | [name: string, value: 
 }
 
 interface RichDataViewerAttrs {
+	class?: string
 	text: string
 	spec: null | string
 	htmlBaseUrl: null | string
@@ -270,7 +276,7 @@ function RichDataViewer(): m.Component<RichDataViewerAttrs> {
 			text = ""
 		}
 
-		return text === "" ? m("p.i.pl2", "No body.") : [
+		return m("div", { class: vnode.attrs.class }, text === "" ? m("p.i.pl2", "No body.") : [
 			m("h3.pl2", [
 				"Body",
 				spec != null && m("small.ml1", `(${ spec })`),
@@ -319,7 +325,7 @@ function RichDataViewer(): m.Component<RichDataViewerAttrs> {
 					},
 				},
 			),
-		]
+		])
 	}
 }
 

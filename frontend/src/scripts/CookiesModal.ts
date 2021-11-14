@@ -49,14 +49,15 @@ function view(vnode: VnodeDOM<Attrs>): m.Children {
 			title: "Cookies",
 			footerLeft: cookieJar != null && cookieJar.size > 0 ? m(
 				Button,
-				{ class: "danger-light", onclick: () => cookieJar.clear() },
+				{ class: "danger-light t-cookies-clear-all-btn", onclick: () => cookieJar.clear() },
 				"Clear all cookies",
 			) : m("div"),
 		},
 		[
-			rows.length === 0 ? "No cookies in your jar!" : m(
+			rows.length === 0 ? m("p.t-cookies-empty", "No cookies in your jar!") : m(
 				Table,
 				{
+					tableClass: "t-cookies-table",
 					thead: m("tr", [
 						m("th", "#"),
 						m("th", "Domain"),

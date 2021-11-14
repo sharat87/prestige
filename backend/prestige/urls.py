@@ -34,6 +34,7 @@ def env_view(request):
 
 
 urlpatterns = [
+	path("health", lambda r: JsonResponse({"ok": True})),
 	path("proxy/", include("proxy.urls")),
 	path("storage/", include("storage.urls")),
 	path("gist/", include("gist.urls")),

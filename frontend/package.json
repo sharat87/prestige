@@ -59,7 +59,8 @@
 		"parser": "@typescript-eslint/parser",
 		"parserOptions": {
 			"ecmaVersion": 11,
-			"sourceType": "module"
+			"sourceType": "module",
+			"project": "tsconfig.json"
 		},
 		"plugins": [
 			"@typescript-eslint"
@@ -143,6 +144,17 @@
 			"no-lonely-if": "error",
 			"no-multiple-empty-lines": "error",
 			"@typescript-eslint/no-for-in-array": "error",
+			"func-call-spacing": "off",
+			"@typescript-eslint/func-call-spacing": ["error"],
+			"@typescript-eslint/no-base-to-string": [
+				"error"
+			],
+			"@typescript-eslint/restrict-plus-operands": [
+				"warn",
+				{
+					"checkCompoundAssignments": true
+				}
+			],
 			"no-restricted-globals": [
 				"error",
 				"error",

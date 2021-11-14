@@ -88,8 +88,7 @@ build-docs: venv
 ###
 
 test-e2e: venv
-	@e2e-tests/ensure-drivers.sh
-	@rm -rf e2e-tests/shots
+	@rm -rf e2e-tests/{shots,logs}
 	@source venv/bin/activate \
 		&& cd e2e-tests \
 		&& python3 run.py

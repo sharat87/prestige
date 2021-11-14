@@ -56,13 +56,15 @@ jobs:
 
       - name: "Run tests"
         run: "make test-e2e"
-        continue-on-error: true
 
       - name: "Upload test results"
         uses: "actions/upload-artifact@v2"
+        if: failure()
         with:
-          name: "shots"
-          path: "e2e-tests/shots"
+          name: "e2e-results-${{ github.sha }}"
+          path: |
+            e2e-tests/shots
+            e2e-tests/logs
 
   build:
     needs:
@@ -92,6 +94,8 @@ jobs:
           make build-all
 
       - name: "Upload to S3"
+        if: |
+          success() && github.event_name == "push" && github.ref == "refs/heads/master"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}

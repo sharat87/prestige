@@ -13,7 +13,7 @@ export const NavLink = {
 		return m(
 			(vnode.attrs.href ? "a.link" : "button.bn.bg-transparent") + ".nav-link.pv1.ph2",
 			{
-				class: (vnode.attrs.isActive ? "active " : "") + vnode.attrs.class || "",
+				class: (vnode.attrs.isActive ? "active " : "") + (vnode.attrs.class ?? ""),
 				...(vnode.attrs.href ? {
 					href: vnode.attrs.href,
 					target: "_blank",

@@ -1,29 +1,41 @@
+"""
+Starts required services for Prestige and then runs the UI tests.
+"""
+
+from pathlib import Path
+from typing import Any, Dict, List
+from urllib.request import urlretrieve
+from zipfile import ZipFile
 import atexit
-import inspect
 import logging
 import os
+import re
+import stat
 import subprocess
+import sys
 import threading
 import time
-from pathlib import Path
-from typing import IO, Any, Dict, List, Optional
-import http.server
-import functools
 
-logging.basicConfig(level=logging.DEBUG, format="%(levelname)s\t%(name)s %(message)s")
+import requests
+
+logging.basicConfig(level=logging.INFO, format="%(levelname)s\t%(name)s %(message)s")
 log = logging.getLogger(__name__)
+logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
 
 frontend_port: int = 3050
 backend_port: int = frontend_port + 1
-httpbun_port: int = frontend_port + 2
+proxy_port: int = frontend_port + 2
+httpbun_port: int = frontend_port + 3
 
 child_processes: List[subprocess.Popen] = []
+open_log_files: Dict[str, Any] = {}
 
 e2e_tests_path: Path = Path(".").resolve()
 root_path: Path = e2e_tests_path.parent
 backend_path: Path = root_path / "backend"
 frontend_path: Path = root_path / "frontend"
 venv_bin: Path = root_path / "venv" / "bin"
+logs_path: Path = e2e_tests_path / "logs"
 
 log.debug("e2e_tests_path: %r.", e2e_tests_path)
 log.debug("backend_path: %r.", backend_path)
@@ -31,32 +43,54 @@ log.debug("frontend_path: %r.", frontend_path)
 
 
 @atexit.register
-def kill_all():
+def kill_and_close_all():
 	for proc in child_processes:
 		if proc is not None and proc.poll() is None:
-			log.info("Killing process %r.", proc)
+			log.debug("Killing process %r.", proc)
 			proc.kill()
+
+	for name, f in open_log_files.items():
+		log.debug("Closing %r.", name)
+		f.close()
 
 
 def main():
-	backend_ready_event = threading.Event()
-	threading.Thread(target=prestige_backend, args=(backend_ready_event, )).start()
+	logs_path.mkdir(parents=True, exist_ok=True)
 
-	frontend_ready_event = threading.Event()
-	threading.Thread(target=prestige_frontend, args=(frontend_ready_event, )).start()
+	chrome_driver_thread = threading.Thread(target=ensure_chrome_driver)
+	chrome_driver_thread.start()
 
-	httpbun_ready_event = threading.Event()
-	threading.Thread(target=httpbun, args=(httpbun_ready_event, )).start()
+	backend_thread = threading.Thread(target=prestige_backend)
+	backend_thread.start()
 
-	backend_ready_event.wait(4)
-	frontend_ready_event.wait(4)
-	httpbun_ready_event.wait(4)
+	frontend_thread = threading.Thread(target=prestige_frontend)
+	frontend_thread.start()
 
-	time.sleep(5)
-	run_tests()
+	proxy_thread = threading.Thread(target=proxy)
+	proxy_thread.start()
+
+	httpbun_thread = threading.Thread(target=httpbun)
+	httpbun_thread.start()
+
+	chrome_driver_thread.join(20)
+	backend_thread.join(20)
+	frontend_thread.join(20)
+	proxy_thread.join(20)
+	httpbun_thread.join(20)
+
+	if (
+		chrome_driver_thread.is_alive()
+		or backend_thread.is_alive()
+		or frontend_thread.is_alive()
+		or proxy_thread.is_alive()
+		or httpbun_thread.is_alive()
+	):
+		log.error("Not all services started successfully. Exiting.")
+	else:
+		run_tests()
 
 
-def prestige_backend(ready_event: Optional[threading.Event] = None):
+def prestige_backend():
 	# 1. Backend server process.
 	backend_env = {
 		"DJANGO_SETTINGS_MODULE": "prestige.settings",
@@ -79,12 +113,8 @@ def prestige_backend(ready_event: Optional[threading.Event] = None):
 		],
 		cwd=backend_path,
 		env=backend_env,
+		outfile="backend.log",
 	).wait()
-
-	def on_output(line):
-		if not ready_event.is_set() and line and "Starting development server at" in line:
-			log.info("Backend Ready")
-			ready_event.set()
 
 	spawn_process(
 		[
@@ -96,11 +126,82 @@ def prestige_backend(ready_event: Optional[threading.Event] = None):
 		],
 		cwd=backend_path,
 		env=backend_env,
-		on_output=ready_event and on_output,
+		outfile="backend.log",
+		outfile_append=True,
+	)
+
+	verify_service_up("health", backend_port, "backend")
+
+
+def prestige_frontend():
+	# 2. Frontend server process.
+	spawn_process(
+		["make", "build-frontend"],
+		outfile="frontend.log",
+	).wait()
+
+	spawn_process(
+		[
+			venv_bin / "python",
+			"-m",
+			"http.server",
+			frontend_port,
+		],
+		cwd=str(frontend_path / "dist"),
+		outfile="frontend.log",
+		outfile_append=True,
+	)
+	time.sleep(1)
+
+	verify_service_up("", frontend_port, "frontend")
+
+
+def proxy():
+	spawn_process(
+		[
+			venv_bin / "mitmdump",
+			"--mode",
+			f"reverse:http://localhost:{frontend_port}",
+			"--scripts",
+			"./mitm_routing.py",
+			"--listen-port",
+			proxy_port,
+		],
+		env={
+			"PROXY_PORT": proxy_port,
+			"FRONTEND_PORT": frontend_port,
+			"BACKEND_PORT": backend_port,
+		},
+		outfile="proxy.log",
 	)
 
 
-def spawn_process(cmd, *, cwd: Path = None, env: Dict[str, str] = None, on_output=None) -> subprocess.Popen:
+def httpbun():
+	# 3. A local httpbun server process.
+	# TODO: Switch to httpbun for e2e tests, intead of httpbin.
+
+	spawn_process(
+		[
+			venv_bin / "python",
+			"-m",
+			"httpbin.core",
+			"--port",
+			httpbun_port,
+		],
+		outfile="httpbun.log",
+	)
+
+	verify_service_up("get", httpbun_port, "httpbun")
+
+
+def spawn_process(
+		cmd,
+		*,
+		cwd: Path = None,
+		env: Dict[Any, Any] = None,
+		outfile: str = None,
+		outfile_append: bool = False,
+) -> subprocess.Popen:
 	kwargs: Dict[str, Any] = {
 		"cwd": str(cwd or root_path),
 	}
@@ -108,117 +209,104 @@ def spawn_process(cmd, *, cwd: Path = None, env: Dict[str, str] = None, on_outpu
 	if env is not None:
 		kwargs["env"] = {**os.environ, **{str(k): str(v) for k, v in env.items()}}
 
-	log_target = logging.getLogger(inspect.stack()[1].function)
-	kwargs.update(stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+	if outfile:
+		outfile_f = open(str(logs_path / outfile), "a" if outfile_append else "w")
+		open_log_files[outfile] = outfile_f
+		kwargs.update(stdout=outfile_f, stderr=subprocess.STDOUT)
+	else:
+		kwargs.update(stdout=None, stderr=None)
 
-	log_target.info("Running %r.", cmd)
 	process = subprocess.Popen([str(c) for c in cmd], **kwargs)
-
-	if log_target is not None:
-		pipe_file_to_log(process.stdout, log_target, logging.INFO)
-		pipe_file_to_log(process.stderr, log_target, logging.WARNING)
-
-	if on_output is not None:
-		class Handler(logging.Handler):
-			def handle(self, record):
-				on_output(record.args[0])
-
-		log_target.addHandler(Handler())
 
 	child_processes.append(process)
 	return process
 
 
-def pipe_file_to_log(file: Optional[IO], logger: logging.Logger, level: int):
-	if file is None:
-		return
+def verify_service_up(path: str, port: int, name: str = None, *, tries: int = 9):
+	while tries:
+		if name:
+			log.debug("Checking %r.", name)
+		try:
+			response = requests.get(f"http://localhost:{port}/{path}")
+		except requests.ConnectionError:
+			pass
+		else:
+			if response.ok:
+				break
+		tries -= 1
+		time.sleep(1)
+	else:
+		log.debug("Max retries finished for %r.", name)
+		raise ValueError("Unable to verify service %r." % name)
 
-	def watcher():
-		for line in file:
-			logger.log(level, "%s", line.decode("UTF-8")[:-1])
-
-	threading.Thread(target=watcher, daemon=True).start()
-
-
-def prestige_frontend(ready_event: Optional[threading.Event] = None):
-	# 2. Frontend server process.
-	spawn_process(
-		["make", "build-frontend"],
-		env={
-			"PRESTIGE_BACKEND": f"http://localhost:{backend_port}",
-		},
-	).wait()
-
-	# def on_output(line):
-	# 	if not ready_event.is_set() and line and "Serving HTTP on" in line:
-	# 		log.info("Frontend Ready")
-	# 		ready_event.set()
-
-	# spawn_process(
-	# 	[
-	# 		venv_bin / "python",
-	# 		"-m",
-	# 		"http.server",
-	# 		frontend_port,
-	# 	],
-	# 	cwd=frontend_path / "dist",
-	# 	on_output=ready_event and on_output,
-	# )
-
-	def static_server():
-		http.server.test(
-			HandlerClass=functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(frontend_path / "dist")),
-			ServerClass=http.server.ThreadingHTTPServer,
-			port=frontend_port,
-		)
-
-	threading.Thread(target=static_server, daemon=True).start()
-	if ready_event is not None:
-		ready_event.set()
-
-
-def httpbun(ready_event: Optional[threading.Event] = None):
-	# 3. A local httpbun server process.
-	# TODO: This container is not getting stopped when the tests finish.
-	def on_output(line):
-		if not ready_event.is_set() and line and "Serving on" in line:
-			log.info("Httpbun Ready")
-			ready_event.set()
-
-	spawn_process(
-		[
-			"docker",
-			"run",
-			"--rm",
-			"--pull",
-			"always",
-			"-p",
-			str(httpbun_port) + ":80",
-			"ghcr.io/sharat87/httpbun",
-		],
-		on_output=ready_event and on_output,
-	)
+	log.debug("Readied %r.", name)
 
 
 def run_tests():
 	spawn_process(
 		[
-			venv_bin / "python",
-			"-m",
-			"unittest",
-			"discover",
-			"--start-directory",
+			venv_bin / "pytest",
+			"-vv",
 			"src",
+			"--durations=0",
+			"--log-format=%(asctime)s %(levelname)s %(name)s:%(lineno)s %(message)s",
+			# To include date in log lines: "--log-date-format=%Y-%m-%d %H:%M:%S",
 		],
 		cwd=e2e_tests_path,
 		env={
 			"PATH": str(e2e_tests_path / "drivers") + ":" + os.environ.get("PATH", ""),
-			"PYTHONPATH": str(e2e_tests_path / "src"),
-			"FRONTEND_URL": f"http://localhost:{frontend_port}",
+			"PYTHONPATH": e2e_tests_path / "src",
+			"FRONTEND_URL": f"http://localhost:{proxy_port}",
 			"HTTPBUN_URL": f"http://localhost:{httpbun_port}",
 		},
 	).wait()
 
 
-if __name__ == '__main__':
+def ensure_chrome_driver():
+	if sys.platform == "darwin":
+		chrome_exe = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+		os_in_file = "mac64"
+	elif sys.platform == "linux":
+		chrome_exe = "google-chrome"
+		os_in_file = "linux64"
+	else:
+		raise ValueError("Unhandled platform %r." % sys.platform)
+
+	chrome_version = re.search(
+		r"\d+",
+		subprocess.check_output([chrome_exe, "--version"]).decode(),
+	).group()
+	log.debug("Chrome version: %r.", chrome_version)
+
+	driver_version = 0
+	if os.path.exists("drivers/chromedriver"):
+		driver_version = re.search(
+			r"\d+",
+			subprocess.check_output(["drivers/chromedriver", "--version"]).decode(),
+		).group()
+		log.debug("Driver version: %r.", driver_version)
+
+	if chrome_version == driver_version:
+		log.debug("Already have a matching chrome driver.")
+		return
+
+	response = requests.get("http://chromedriver.storage.googleapis.com/LATEST_RELEASE_" + chrome_version)
+	response.raise_for_status()
+	latest_version = response.text
+
+	urlretrieve(
+		f"https://chromedriver.storage.googleapis.com/{latest_version}/chromedriver_{os_in_file}.zip",
+		"chromedriver.zip",
+	)
+
+	with ZipFile("chromedriver.zip") as z:
+		os.makedirs("drivers", exist_ok=True)
+		z.extract(z.namelist()[0], "drivers")
+
+	os.remove("chromedriver.zip")
+	st = os.stat("drivers/chromedriver")
+	os.chmod("drivers/chromedriver", st.st_mode | stat.S_IEXEC)
+
+
+if __name__ == "__main__":
 	main()

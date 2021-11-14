@@ -1,7 +1,7 @@
 supervisord.pid
-supervisord.log
 .supervisord.sock
 
+*.log
 venv
 
 backend/*.sqlite3
@@ -20,7 +20,6 @@ __snapshots__
 
 e2e-tests/drivers
 e2e-tests/shots
-geckodriver.log
 
 /docs/site
 
@@ -28,7 +27,6 @@ geckodriver.log
 /package.tar.gz
 
 .cache
-yarn-error.log
 
 .DS_Store
 

@@ -175,7 +175,11 @@ function WorkspaceView(): m.Component {
 					),
 					m(
 						NavLink,
-						{ onclick: onCookiesToggle, isActive: ModalManager.isShowing(VisiblePopup.Cookies) },
+						{
+							onclick: onCookiesToggle,
+							isActive: ModalManager.isShowing(VisiblePopup.Cookies),
+							class: "t-cookies-toggle-btn",
+						},
 						[
 							m(Icons.cookie),
 							`Cookies (${ workspace.cookieJar?.size ?? 0 })`,
