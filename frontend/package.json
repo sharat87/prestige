@@ -14,20 +14,6 @@
 		"last 2 Edge versions",
 		"last 2 Safari versions"
 	],
-	"babel": {
-		"presets": [
-			[
-				"@parcel/babel-preset-env",
-				{
-					"ignoreBrowserslistConfig": false
-				}
-			],
-			"@babel/preset-typescript"
-		],
-		"plugins": [
-			"babel-plugin-const-enum"
-		]
-	},
 	"jest": {
 		"preset": "ts-jest",
 		"testEnvironment": "jsdom",
@@ -196,8 +182,6 @@
 		"lodash": "^4.17.21",
 		"mithril": "^2.0.4",
 		"parcel": "^2.0.0",
-		"posthtml-doctype": "^1.1.1",
-		"posthtml-expressions": "^1.9.0",
 		"rollbar": "^2.24.0",
 		"tachyons": "^4.12.0",
 		"ts-jest": "^27.0.7",

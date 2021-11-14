@@ -3917,11 +3917,6 @@ fb-watchman@^2.0.0:
   dependencies:
     bser "2.1.1"
 
-fclone@^1.0.11:
-  version "1.0.11"
-  resolved "https://registry.yarnpkg.com/fclone/-/fclone-1.0.11.tgz#10e85da38bfea7fc599341c296ee1d77266ee640"
-  integrity sha1-EOhdo4v+p/xZk0HClu4ddyZu5kA=
-
 file-entry-cache@^6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/file-entry-cache/-/file-entry-cache-6.0.1.tgz#211b2dd9659cb0394b073e7323ac3c933d522027"
@@ -6433,26 +6428,6 @@ postcss@^8.3.0, postcss@^8.3.6:
     nanoid "^3.1.30"
     picocolors "^1.0.0"
     source-map-js "^0.6.2"
-
-posthtml-doctype@^1.1.1:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/posthtml-doctype/-/posthtml-doctype-1.1.1.tgz#d3e4204b6551c9ce5e1d45365b46564785ba3b9b"
-  integrity sha1-0+QgS2VRyc5eHUU2W0ZWR4W6O5s=
-
-posthtml-expressions@^1.9.0:
-  version "1.9.0"
-  resolved "https://registry.yarnpkg.com/posthtml-expressions/-/posthtml-expressions-1.9.0.tgz#0b00e0e557392f66eb6b88d89cd090789eadd78c"
-  integrity sha512-jf4BsY2Pw6AoBFQTklOkf+dDhq+kO+R80Dj/plPY/IpZ6sXondzp1O55wJiQK2vIUL4XSAqKdG97wE/j8EH2og==
-  dependencies:
-    fclone "^1.0.11"
-    posthtml-match-helper "^1.0.1"
-    posthtml-parser "^0.10.0"
-    posthtml-render "^3.0.0"
-
-posthtml-match-helper@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/posthtml-match-helper/-/posthtml-match-helper-1.0.1.tgz#451253de8e5844a348e963ad5edd7769eb129513"
-  integrity sha1-RRJT3o5YRKNI6WOtXt13aesSlRM=
 
 posthtml-parser@^0.10.0:
   version "0.10.0"
