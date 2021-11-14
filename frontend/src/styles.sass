@@ -1,0 +1,1077 @@
+*
+	scrollbar-color: var(--scrollbar-fg) var(--scrollbar-bg)
+	scrollbar-width: thin
+
+html, body
+	height: 100%
+	color: var(--page-fg)
+	background-color: var(--page-bg)
+
+body
+	font-size: 14px
+	--header-height: 30px
+
+body, sans-serif
+	font-family: "Source Sans Pro", sans-serif
+
+.no-select
+	user-select: none
+
+a
+	color: var(--link-color)
+
+input
+	background: transparent
+	color: inherit
+	border: 1px solid currentColor
+	padding: .1rem .2rem
+	border-radius: 1px
+
+button
+	background-color: #0001
+	color: inherit
+	cursor: pointer
+	opacity: .9
+	border: none
+	border-radius: .25rem
+	padding-top: var(--spacing-small)
+	padding-bottom: var(--spacing-small)
+	padding-left: var(--spacing-medium)
+	padding-right: var(--spacing-medium)
+
+	&:hover
+		opacity: 1
+
+	&.compact
+		padding: 3px 9px
+
+:is(h1, h2, h3):first-child
+	margin-top: 0
+
+p.info
+	border: 1px solid currentColor
+	padding: .2rem .5rem
+	border-radius: .2rem
+
+svg.icon
+	display: inline-block
+	vertical-align: middle
+	width: 2ch
+	height: 2ch
+	margin: 3px
+
+th, td
+	padding: var(--spacing-small)
+	border: 1px solid var(--border-color)
+	vertical-align: top
+
+main
+	.top-layout
+		display: grid
+		grid-template-columns: [c1] auto [c2] minmax(0, 1fr) [c3] minmax(0, 1fr) [c4]
+		grid-template-rows: [r1] auto [r2] minmax(0, 1fr) [r3]
+		width: 100vw
+		height: 100vh
+
+		> header
+			grid-column: c1 / -1
+
+		.editor-pane
+			grid-area: r2 / c2 / span 1 / span 2
+
+		.result-pane + .editor-pane
+			grid-column-end: span 1
+
+		> header
+			z-index: 20
+			background-color: var(--page-bg2)
+			display: flex
+			justify-content: space-between
+			align-items: stretch
+			position: relative
+			border-bottom: 1px solid var(--border-color)
+			height: var(--header-height)
+
+.nav-link
+	color: var(--page-fg)
+	border-radius: 0
+	cursor: pointer
+	display: flex
+	align-items: center
+
+	&.active
+		background-color: var(--active-tab-bg)
+		color: var(--active-tab-fg)
+
+:root
+	--monospace-font: "Source Code Pro"
+	--monospace-font-size: 16px
+
+tt, code, pre, kbd, .mono, .CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like
+	font-family: var(--monospace-font), monospace
+	line-height: 1.3
+
+pre
+	tab-size: 4
+	-moz-tab-size: 4
+
+.CodeMirror pre.CodeMirror-line, .CodeMirror pre.CodeMirror-line-like
+	font-size: var(--monospace-font-size)
+	line-height: calc(var(--monospace-font-size) * 1.3)
+
+.editor-pane, .result-pane
+	display: flex
+	flex-direction: column
+	position: relative
+
+	> .toolbar
+		position: relative
+
+		> .bar
+			border-bottom: 1px solid var(--border-color)
+			display: flex
+			align-items: center
+			justify-content: space-between
+
+			> *
+				margin: 0 6px
+
+		> .peripherals
+			position: absolute
+			top: 100%
+			width: 100%
+
+			> *
+				position: absolute
+				height: 70vh
+				width: 500px
+				background-color: white
+				border-bottom-left-radius: 6px
+				box-shadow: -2px 2px 6px rgba(0, 0, 0, .3)
+				display: flex
+				flex-direction: column
+				z-index: 15
+
+				&.right
+					right: 0
+
+				> *
+					padding: 6px
+
+				> header
+					border-bottom: 1px solid var(--border-color)
+
+				> header h2
+					margin: 9px 3px
+
+				> section
+					flex-grow: 1
+					overflow-y: auto
+
+				> footer
+					border-top: 1px solid var(--border-color)
+					display: flex
+					justify-content: space-between
+
+	> .body
+		overflow-y: auto
+		flex: 1
+
+.result-pane
+	border-left: 1px solid var(--border-color)
+
+	&.error
+		.message
+			font-size: 1.1em
+
+		th, td
+			border-color: #ffdecf
+
+		> *
+			padding-left: 6px
+			padding-right: 6px
+
+	.messages li + li
+		margin-top: 6px
+
+	.response
+		+ .response
+			border-top: 2px dashed #ACF
+			margin-top: 1em
+
+		.tab-bar
+			display: flex
+			border-bottom: 1px solid var(--active-tab-bg)
+
+			.nav-link
+				border-radius: .25rem .25rem 0 0
+
+			+ *
+				border-bottom: 1px solid var(--active-tab-bg)
+
+		img, svg
+			max-height: 200px
+			max-width: 100%
+			margin: .3rem
+
+		iframe
+			height: 200px
+
+	.line-nums
+		margin-right: .5ch
+		padding: 0 .5ch 0 calc(3px + 1ch)  // Space for fold markers.
+		border-right: 1px solid var(--border-color)
+		user-select: none
+
+	.CodeMirror
+		background: rgba(0, 0, 0, .03)
+		height: auto
+
+		.CodeMirror-lines
+			cursor: default
+
+			span:not(.CodeMirror-foldmarker)
+				cursor: text
+
+		.CodeMirror-cursor
+			display: none
+
+	pre
+		// This is needed so the code block doesn't have a 1px scrolling behaviour, which is extremely annoying.
+		// No idea why this is happening, but this fixes it.
+		padding-bottom: 1px
+
+.editor-pane div.CodeMirror
+	height: 100%
+	background: var(--page-bg)
+	color: var(--page-fg)
+	text-shadow: 1px 1px 2px rgba(0, 0, 0, .03)
+	z-index: 0
+
+	.CodeMirror-code > div
+		transition: background-color 300ms ease-out 0ms
+
+	.flash
+		background-color: #DDD
+
+	.line-javascript
+		background-color: var(--js-background)
+
+	&.CodeMirror-focused
+		background: transparent
+		opacity: 1
+
+	.CodeMirror-cursor
+		border-left-color: currentColor
+
+	.CodeMirror-dialog
+		background-color: var(--page-bg)
+		border-color: var(--page-bg2)
+		font-size: 1.2em
+
+	.CodeMirror-activeline-background
+		background-color: var(--cursor-line-bg)
+
+	.CodeMirror-activeline-gutter
+		font-weight: bold
+
+	.CodeMirror-gutter-wrapper .icon
+		background-color: var(--primary-2)
+		color: var(--primary-9)
+		cursor: pointer
+
+	span.CodeMirror-matchingbracket
+		background-color: var(--washed-green)
+		color: var(--dark-green)
+
+	span.CodeMirror-nonmatchingbracket
+		background-color: var(--dark-red)
+		color: var(--washed-red)
+
+	.CodeMirror-cursor
+		border-left-width: 2px
+
+.sidebar
+	border-right: 1px solid var(--border-color)
+
+	.tab-bar
+		background-color: var(--page-bg2)
+
+		.nav-link
+			padding: 9px
+			font-size: 2em
+
+	.content
+		width: 240px
+		max-width: 20vw
+		overflow: hidden auto
+
+.CodeMirror-selected, ::selection
+	background: var(--selection-bg) !important
+	color: var(--selection-fg) !important
+	text-shadow: none
+
+.modal
+	top: var(--header-height)
+	background-color: var(--page-bg2)
+	border-bottom-left-radius: 6px
+	border-width: 0 0 1px 1px
+	border-color: var(--border-color)
+	border-style: solid
+	box-shadow: 0 0 72px #0006
+	overflow: hidden
+	z-index: 15
+
+	> header
+		border-bottom: 1px solid var(--border-color)
+
+	> section
+		flex-grow: 1
+
+	> footer
+		border-top: 1px solid var(--border-color)
+
+.modal2-mask
+	position: absolute
+	top: 0
+	left: 0
+	right: 0
+	bottom: 0
+	z-index: 100
+	opacity: .8
+
+.modal2
+	position: absolute
+	border-radius: .3rem
+	max-width: 50vw
+	left: 50%
+	transform: translateX(-50%)
+	max-height: 90vh
+	top: 5vh
+	z-index: 110
+	overflow: hidden
+	box-shadow: 0px 9px 72px #0009
+	display: flex
+	flex-direction: column
+
+.mask
+	position: absolute
+	top: 0
+	left: 0
+	width: 100%
+	height: 100%
+
+.loading
+	padding: 12px
+	border-radius: 6px
+	font-size: 3em
+	background-color: var(--page-bg)
+	display: inline-block
+	box-shadow: 0 0 72px #0004
+
+label
+	cursor: pointer
+
+.auth-pane
+	display: flex
+
+	.auth-options
+		display: flex
+		flex-direction: column
+
+		button
+			margin: 6px 0
+			font-size: 1.1em
+
+form.grid, form > .grid
+	display: grid
+	grid: auto / minmax(120px, auto) minmax(300px, auto)
+	align-items: center
+	margin: 0 auto
+
+	label
+		text-align: right
+
+	> *
+		margin: 6px
+
+	select
+		max-width: 400px
+
+	input[type=text]
+		padding: 6px
+		border: 1px solid var(--border-color)
+		border-radius: 3px
+		box-shadow: 0 0 2px inset #0002
+
+		&:focus
+			outline: none
+			border-color: var(--active-tab-bg)
+			box-shadow: 0 0 2px inset var(--active-tab-bg)
+
+		&::placeholder
+			font-style: italic
+
+	input[type=number]
+		max-width: 9ch
+
+.toasts
+	width: 400px
+	z-index: 99
+	pointer-events: none
+
+	> *
+		position: relative
+		pointer-events: auto
+		animation: toast .2s
+
+		&.close
+			animation: toast-close .2s
+
+		&:hover .close-btn
+			display: block
+
+	.close-btn
+		cursor: pointer
+		position: absolute
+		left: 0
+		top: 0
+		transform: translate(-50%, -50%)
+		border-radius: 50%
+		width: 1.6em
+		height: 1.6em
+		padding: 0
+		overflow: hidden
+		display: none
+
+details.fold
+	display: inline-block
+	position: relative
+	width: 100%
+
+	summary
+		display: block
+
+		.cm-comment
+			// Item count of nested object or array.
+			margin-left: 1ch
+			opacity: .7
+
+			&:hover
+				opacity: 1
+
+		.line-nums
+			cursor: pointer
+
+	summary:before
+		content: "▶"
+		display: block
+		font-size: .8em
+		position: absolute
+		left: 3px
+		pointer-events: none
+
+	&[open] > summary:before
+		content: "▼ "
+
+.provider-block
+	// A single provider inside the document browser.
+	ul
+		list-style: none
+		padding: 0
+		margin: 0
+
+		a
+			display: block
+			padding: 3px 6px
+			text-decoration: none
+			color: inherit
+
+			&:hover
+				background-color: var(--page-bg2)
+
+	li > ul
+		margin-left: 1.3em
+
+	+ .provider-block
+		margin-top: 2em
+
+.stack-view
+	position: relative
+	overflow: hidden
+
+	> :not(:first-child)
+		position: absolute
+		left: 0
+		top: 0
+		display: flex
+		height: 100%
+		align-items: center
+		width: 100%
+		justify-content: center
+		background-color: var(--page-bg)
+
+@keyframes toast
+	from
+		opacity: 0
+		transform: translateY(2rem)
+	to
+		opacity: 1
+		transform: none
+
+@keyframes toast-close
+	from
+		opacity: 1
+		transform: none
+	to
+		opacity: 0
+		transform: translateY(-2em)
+
+// Animation for "Copied!" message when clicking on copy buttons.
+@keyframes ghost
+	from
+		opacity: 1
+		transform: scale(1.5)
+	to
+		opacity: 0
+		transform: translateY(-3em) scale(2.5)
+
+
+// Theming
+
+/* Color naming rules:
+	1. Numbered colors should be 1-9 (inclusive) only.
+	2. Shade at 1 should be close to black.
+	3. Shade at 9 should be close to white.
+	*/
+
+@mixin light-theme
+	--page-bg: var(--gray-9)
+	// Used for headers and modals.
+	--page-bg2: var(--gray-8)
+	--page-fg: var(--gray-2)
+	--scrollbar-bg: var(--page-bg)
+	--scrollbar-fg: var(--gray-5)
+	--border-color: var(--gray-6)
+
+	--link-color: var(--blue-5)
+
+	--selection-bg: var(--blue-8)
+	--selection-fg: var(--blue-1)
+
+	--gutter-bg: var(--gray-8)
+	--gutter-fg: var(--gray-6)
+	--gutter-marker-fg: var(--red-3)
+	--gutter-marker-subtle-fg: var(--gray-6)
+	--cursor-color: var(--gray-4)
+
+	--cm-comment: var(--primary-3)
+	--cm-atom: var(--primary-3)
+	--cm-number: var(--primary-3)
+
+	--cm-property: var(--green-5)
+	--cm-attribute: var(--green-5)
+	--cm-keyword: var(--red-3)
+	--cm-string: var(--yellow-4)
+	--cm-string-2: var(--yellow-4)
+
+	--cm-variable: var(--green-5)
+	--cm-variable-2: var(--blue-5)
+	--cm-def: var(--blue-5)
+	--cm-bracket: var(--gray-2)
+	--cm-tag: var(--red-3)
+	--cm-link: var(--primary-5)
+	--cm-error-bg: var(--red-3)
+	--cm-error-fg: var(--gray-4)
+
+	--cursor-line-bg: var(--blue-9)
+	--match-bracket-fg: var(--gray-8)
+	--match-bracket-bg: var(--blue-5)
+
+	--js-background: var(--yellow-9)
+
+	--active-tab-fg: var(--primary-9)
+	--active-tab-bg: var(--primary-3)
+
+	--nav-link-hover-bg: var(--primary-9)
+	--nav-link-hover-fg: var(--primary-1)
+
+	.nav-link:hover:not(.active)
+		background-color: var(--nav-link-hover-bg)
+		color: var(--nav-link-hover-fg)
+
+	.cm-tab
+		background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24"><path d="M 3 9 l 3 3 l -3 3" stroke="black" stroke-width="2" fill="none"/></svg>')
+		background-repeat: no-repeat
+
+	button
+		&.primary
+			background-color: var(--primary-3)
+			color: var(--primary-9)
+
+		&.danger-light
+			background-color: var(--red-9)
+			color: var(--red-3)
+
+			&:hover
+				background-color: var(--red-3)
+				color: var(--red-9)
+
+	.provider-block a.active
+		background-color: var(--primary-3)
+		color: var(--primary-9)
+
+	.status
+		&.is-2xx
+			background-color: var(--green-3)
+			color: var(--green-9)
+		&.is-3xx
+			background-color: var(--blue-3)
+			color: var(--blue-9)
+		&.is-4xx, &.is-5xx
+			background-color: var(--red-3)
+			color: var(--red-9)
+
+	.flash
+		background-color: var(--primary-7)
+
+	.response
+		tr:hover
+			background-color: var(--gray-8)
+
+	.result-pane.error
+		background-color: var(--red-9)
+		color: var(--red-1)
+
+	p.info
+		background-color: var(--blue-9)
+		color: var(--blue-1)
+
+	.modal2-mask
+		background-color: var(--page-bg2)
+
+	.modal2
+		background-color: var(--page-bg)
+
+@mixin dark-theme
+	--page-bg: var(--gray-2)
+	// Used for headers and modals.
+	--page-bg2: var(--gray-1)
+	--page-fg: var(--gray-7)
+	--scrollbar-bg: var(--page-bg)
+	--scrollbar-fg: var(--gray-6)
+	--border-color: var(--gray-3)
+
+	--link-color: var(--blue-5)
+
+	--selection-bg: var(--blue-2)
+	--selection-fg: var(--blue-9)
+
+	--gutter-bg: var(--gray-1)
+	--gutter-fg: var(--gray-5)
+	--gutter-marker-fg: var(--red-3)
+	--gutter-marker-subtle-fg: var(--gray-4)
+	--cursor-color: var(--gray-6)
+
+	--cm-comment: var(--primary-7)
+	--cm-atom: var(--primary-5)
+	--cm-number: var(--primary-5)
+
+	--cm-property: var(--green-5)
+	--cm-attribute: var(--green-5)
+	--cm-keyword: var(--red-5)
+	--cm-string: var(--yellow-7)
+
+	--cm-variable: var(--green-5)
+	--cm-variable-2: var(--blue-5)
+	--cm-def: var(--blue-5)
+	--cm-bracket: var(--gray-7)
+	--cm-tag: var(--red-6)
+	--cm-link: var(--primary-5)
+	--cm-error-bg: var(--red-3)
+	--cm-error-fg: var(--gray-6)
+
+	--cursor-line-bg: var(--gray-3)
+	--match-bracket-fg: var(--gray-9)
+	--match-bracket-bg: transparent
+
+	--js-background: var(--yellow-1)
+
+	--active-tab-fg: var(--primary-9)
+	--active-tab-bg: var(--primary-2)
+
+	--nav-link-hover-bg: var(--primary-1)
+	--nav-link-hover-fg: var(--primary-9)
+
+	.nav-link:hover:not(.active)
+		background-color: var(--nav-link-hover-bg)
+		color: var(--nav-link-hover-fg)
+
+	.cm-tab
+		background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" viewBox="0 0 24 24"><path d="M 3 9 l 3 3 l -3 3" stroke="white" stroke-width="2" fill="none"/></svg>')
+		background-repeat: no-repeat
+
+	button
+		&.primary
+			background-color: var(--primary-3)
+			color: var(--primary-9)
+
+		&.danger-light
+			background-color: var(--red-1)
+			color: var(--red-9)
+
+			&:hover
+				background-color: var(--red-3)
+				color: var(--red-9)
+
+	.provider-block a.active
+		background-color: var(--primary-3)
+		color: var(--primary-9)
+
+	.status
+		&.is-2xx
+			background-color: var(--green-3)
+			color: var(--green-9)
+		&.is-3xx
+			background-color: var(--blue-3)
+			color: var(--blue-9)
+		&.is-4xx, &.is-5xx
+			background-color: var(--red-3)
+			color: var(--red-9)
+
+	.flash
+		background-color: var(--primary-7)
+
+	.response
+		tr:hover
+			background-color: var(--gray-3)
+
+	.result-pane.error
+		background-color: var(--red-1)
+		color: var(--red-9)
+
+	p.info
+		background-color: var(--blue-3)
+		color: var(--blue-9)
+
+	.modal2-mask
+		background-color: var(--page-bg)
+
+	.modal2
+		background-color: var(--page-bg2)
+
+body
+	@include light-theme
+
+	&.dark
+		@include dark-theme
+
+body[data-palette=tomorrow]
+	--gray-1: #1d1f21
+	--gray-2: #282a2e
+	--gray-3: #4d4d4c
+	--gray-4: #969896
+	--gray-5: #8e908c
+	--gray-6: #d6d6d6
+	--gray-7: #e0e0e0
+	--gray-8: #f7f7f7
+	--gray-9: #ffffff
+
+	--primary-1: hsl(184, 80%, 13%)
+	--primary-2: hsl(184, 70%, 20%)
+	--primary-3: hsl(184, 50%, 30%)
+	--primary-4: hsl(184, 47%, 35%)
+	--primary-5: hsl(184, 44%, 43%)
+	--primary-6: hsl(184, 55%, 50%)
+	--primary-7: hsl(184, 60%, 60%)
+	--primary-8: hsl(184, 70%, 84%)
+	--primary-9: hsl(184, 90%, 96%)
+
+	--blue-1: hsl(214, 60%, 20%)
+	--blue-2: hsl(214, 55%, 30%)
+	--blue-3: hsl(214, 45%, 35%)
+	--blue-4: hsl(214, 45%, 42%)
+	--blue-5: hsl(214, 45%, 49%)
+	--blue-6: hsl(214, 45%, 55%)
+	--blue-7: hsl(214, 45%, 67%)
+	--blue-8: hsl(214, 45%, 82%)
+	--blue-9: hsl(214, 60%, 93%)
+
+	--green-1: hsl(72, 100%, 12%)
+	--green-2: hsl(72, 100%, 16%)
+	--green-3: hsl(72, 100%, 20%)
+	--green-4: hsl(72, 100%, 23%)
+	--green-5: hsl(72, 100%, 27%)
+	--green-6: hsl(72, 90%, 32%)
+	--green-7: hsl(72, 70%, 70%)
+	--green-8: hsl(72, 70%, 84%)
+	--green-9: hsl(72, 70%, 94%)
+
+	--yellow-1: hsl(47, 100%, 11%)
+	--yellow-2: hsl(47, 100%, 11%)
+	--yellow-3: hsl(43, 100%, 30%)
+	--yellow-4: hsl(43, 100%, 40%)
+	--yellow-5: hsl(47, 100%, 46%)
+	--yellow-6: hsl(47, 90%, 60%)
+	--yellow-7: hsl(47, 90%, 80%)
+	--yellow-8: hsl(47, 90%, 90%)
+	--yellow-9: hsl(47, 80%, 96%)
+
+	--red-1: hsl(0, 67%, 15%)
+	--red-2: hsl(0, 67%, 23%)
+	--red-3: hsl(0, 67%, 30%)
+	--red-4: hsl(0, 67%, 39%)
+	--red-5: hsl(0, 53%, 50%)
+	--red-6: hsl(0, 67%, 70%)
+	--red-7: hsl(0, 67%, 80%)
+	--red-8: hsl(0, 67%, 90%)
+	--red-9: hsl(0, 67%, 95%)
+
+	--extra-1: #f5871f
+	--extra-2: #3e999f
+	--extra-3: #8959a8
+	--extra-4: #a3685a
+
+body[data-palette=base16]
+	--gray-1: #151515
+	--gray-2: #202020
+	--gray-3: #303030
+	--gray-4: #505050
+	--gray-5: #808080
+	--gray-6: #b0b0b0
+	--gray-7: #e0e0e0
+	--gray-8: #f5f5f5
+	--gray-9: #ffffff
+
+	--primary-1: hsl(312, 24%, 20%)
+	--primary-2: hsl(312, 24%, 30%)
+	--primary-3: hsl(312, 24%, 40%)
+	--primary-4: hsl(312, 24%, 49%)
+	--primary-5: hsl(312, 24%, 56%)
+	--primary-6: hsl(312, 24%, 67%)
+	--primary-7: hsl(312, 44%, 80%)
+	--primary-8: hsl(312, 44%, 90%)
+	--primary-9: hsl(312, 44%, 96%)
+
+	--blue-1: hsl(197, 50%, 18%)
+	--blue-2: hsl(197, 50%, 25%)
+	--blue-3: hsl(197, 50%, 35%)
+	--blue-4: hsl(197, 34%, 49%)
+	--blue-5: hsl(197, 34%, 56%)
+	--blue-6: hsl(197, 34%, 68%)
+	--blue-7: hsl(197, 34%, 80%)
+	--blue-8: hsl(197, 34%, 90%)
+	--blue-9: hsl(197, 34%, 95%)
+
+	--green-1: hsl(79, 32%, 15%)
+	--green-2: hsl(79, 32%, 21%)
+	--green-3: hsl(79, 32%, 28%)
+	--green-4: hsl(79, 32%, 41%)
+	--green-5: hsl(79, 32%, 51%)
+	--green-6: hsl(79, 32%, 65%)
+	--green-7: hsl(79, 32%, 80%)
+	--green-8: hsl(79, 32%, 90%)
+	--green-9: hsl(79, 32%, 95%)
+
+	--yellow-1: hsl(45, 60%, 10%)
+	--yellow-2: hsl(45, 60%, 18%)
+	--yellow-3: hsl(45, 90%, 25%)
+	--yellow-4: hsl(45, 100%, 32%)
+	--yellow-5: hsl(47, 100%, 40%)
+	--yellow-6: hsl(49, 100%, 50%)
+	--yellow-7: hsl(50, 100%, 75%)
+	--yellow-8: hsl(50, 100%, 90%)
+	--yellow-9: hsl(50, 70%, 95%)
+
+	--red-1: hsl(0, 45%, 27%)
+	--red-2: hsl(0, 45%, 35%)
+	--red-3: hsl(0, 45%, 46%)
+	--red-4: hsl(0, 48%, 50%)
+	--red-5: hsl(0, 50%, 56%)
+	--red-6: hsl(0, 50%, 60%)
+	--red-7: hsl(0, 50%, 80%)
+	--red-8: hsl(0, 50%, 90%)
+	--red-9: hsl(0, 50%, 96%)
+
+body[data-palette=solarized]
+	--gray-1: #002b36
+	--gray-2: #073642
+	--gray-3: #115662
+	--gray-4: #586e75
+	--gray-5: #839496
+	--gray-6: #93a1a1
+	--gray-7: #e0d8c3
+	--gray-8: #eee8d5
+	--gray-9: #fdf6e3
+
+	--primary-1: hsl(175, 80%, 13%)
+	--primary-2: hsl(175, 75%, 18%)
+	--primary-3: hsl(175, 70%, 25%)
+	--primary-4: hsl(175, 65%, 32%)
+	--primary-5: hsl(175, 59%, 40%)
+	--primary-6: hsl(175, 60%, 50%)
+	--primary-7: hsl(175, 65%, 60%)
+	--primary-8: hsl(175, 90%, 85%)
+	--primary-9: hsl(175, 90%, 93%)
+
+	--blue-1: hsl(205, 90%, 12%)
+	--blue-2: hsl(205, 85%, 20%)
+	--blue-3: hsl(205, 80%, 30%)
+	--blue-4: hsl(205, 75%, 40%)
+	--blue-5: hsl(205, 69%, 49%)
+	--blue-6: hsl(205, 75%, 60%)
+	--blue-7: hsl(205, 80%, 70%)
+	--blue-8: hsl(205, 85%, 82%)
+	--blue-9: hsl(205, 94%, 97%)
+
+	--green-1: hsl(68, 100%, 12%)
+	--green-2: hsl(68, 100%, 18%)
+	--green-3: hsl(68, 100%, 25%)
+	--green-4: hsl(68, 100%, 32%)
+	--green-5: hsl(68, 100%, 38%)
+	--green-6: hsl(68, 100%, 48%)
+	--green-7: hsl(68, 100%, 66%)
+	--green-8: hsl(68, 100%, 79%)
+	--green-9: hsl(68, 100%, 87%)
+
+	--yellow-1: hsl(45, 100%, 12%)
+	--yellow-2: hsl(45, 100%, 18%)
+	--yellow-3: hsl(45, 100%, 25%)
+	--yellow-4: hsl(45, 100%, 30%)
+	--yellow-5: hsl(45, 100%, 35%)
+	--yellow-6: hsl(45, 100%, 50%)
+	--yellow-7: hsl(45, 100%, 70%)
+	--yellow-8: hsl(45, 100%, 87%)
+	--yellow-9: hsl(45, 100%, 92%)
+
+	--red-1: hsl(1, 80%, 10%)
+	--red-2: hsl(1, 90%, 16%)
+	--red-3: hsl(1, 82%, 30%)
+	--red-4: hsl(1, 76%, 40%)
+	--red-5: hsl(1, 71%, 52%)
+	--red-6: hsl(1, 80%, 66%)
+	--red-7: hsl(1, 86%, 80%)
+	--red-8: hsl(1, 90%, 90%)
+	--red-9: hsl(1, 97%, 96%)
+
+	--nav-link-hover-bg: var(--gray-7)
+
+	&.dark
+		--nav-link-hover-bg: var(--gray-2)
+
+body[data-palette=mono]
+	--gray-1: #151515
+	--gray-2: #202020
+	--gray-3: #303030
+	--gray-4: #505050
+	--gray-5: #808080
+	--gray-6: #b0b0b0
+	--gray-7: #e0e0e0
+	--gray-8: #f5f5f5
+	--gray-9: #ffffff
+
+	--primary-1: var(--gray-1)
+	--primary-2: var(--gray-2)
+	--primary-3: var(--gray-3)
+	--primary-4: var(--gray-4)
+	--primary-5: var(--gray-5)
+	--primary-6: var(--gray-6)
+	--primary-7: var(--gray-7)
+	--primary-8: var(--gray-8)
+	--primary-9: var(--gray-9)
+
+	--blue-1: var(--gray-1)
+	--blue-2: var(--gray-2)
+	--blue-3: var(--gray-3)
+	--blue-4: var(--gray-4)
+	--blue-5: var(--gray-5)
+	--blue-6: var(--gray-6)
+	--blue-7: var(--gray-7)
+	--blue-8: var(--gray-8)
+	--blue-9: var(--gray-9)
+
+	--green-1: var(--gray-1)
+	--green-2: var(--gray-2)
+	--green-3: var(--gray-3)
+	--green-4: var(--gray-4)
+	--green-5: var(--gray-5)
+	--green-6: var(--gray-6)
+	--green-7: var(--gray-7)
+	--green-8: var(--gray-8)
+	--green-9: var(--gray-9)
+
+	--yellow-1: var(--gray-1)
+	--yellow-2: var(--gray-2)
+	--yellow-3: var(--gray-3)
+	--yellow-4: var(--gray-4)
+	--yellow-5: var(--gray-5)
+	--yellow-6: var(--gray-6)
+	--yellow-7: var(--gray-7)
+	--yellow-8: var(--gray-8)
+	--yellow-9: var(--gray-9)
+
+	--red-1: var(--gray-1)
+	--red-2: var(--gray-2)
+	--red-3: var(--gray-3)
+	--red-4: var(--gray-4)
+	--red-5: var(--gray-5)
+	--red-6: var(--gray-6)
+	--red-7: var(--gray-7)
+	--red-8: var(--gray-8)
+	--red-9: var(--gray-9)
+
+
+// Editor Theming
+// Order of these styles is important.
+.cm-s-default .CodeMirror-gutters
+	background: var(--gutter-bg)
+	border-right: 0px
+.cm-s-default .CodeMirror-guttermarker
+	color: var(--gutter-marker-fg)
+.cm-s-default .CodeMirror-guttermarker-subtle
+	color: var(--gutter-marker-subtle-fg)
+.cm-s-default .CodeMirror-linenumber
+	color: var(--gutter-fg)
+.cm-s-default .CodeMirror-cursor
+	border-left: 1px solid var(--cursor-color)
+
+.cm-s-default span.cm-comment
+	color: var(--cm-comment)
+.cm-s-default span.cm-atom
+	color: var(--cm-atom)
+.cm-s-default span.cm-number
+	color: var(--cm-number)
+
+.cm-s-default span.cm-attribute
+	color: var(--cm-attribute)
+.cm-s-default span.cm-keyword
+	color: var(--cm-keyword)
+.cm-s-default span.cm-string
+	color: var(--cm-string)
+.cm-s-default span.cm-string-2
+	color: var(--cm-string-2)
+.cm-s-default span.cm-property
+	color: var(--cm-property)
+
+.cm-s-default span.cm-variable
+	color: var(--cm-variable)
+.cm-s-default span.cm-variable-2
+	color: var(--cm-variable-2)
+.cm-s-default span.cm-def
+	color: var(--cm-def)
+.cm-s-default span.cm-bracket
+	color: var(--cm-bracket)
+.cm-s-default span.cm-tag
+	color: var(--cm-tag)
+.cm-s-default span.cm-link
+	color: var(--cm-link)
+	cursor: pointer
+.cm-s-default span.cm-error
+	background: var(--cm-error-bg)
+	color: var(--cm-error-fg)
+
+.cm-s-default .CodeMirror-activeline-background
+	background: var(--cursor-line-bg)
+.cm-s-default .CodeMirror-matchingbracket
+	color: var(--match-bracket-fg) !important
+	background-color: var(--match-bracket-bg) !important

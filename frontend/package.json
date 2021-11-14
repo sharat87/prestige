@@ -131,7 +131,9 @@
 			"no-multiple-empty-lines": "error",
 			"@typescript-eslint/no-for-in-array": "error",
 			"func-call-spacing": "off",
-			"@typescript-eslint/func-call-spacing": ["error"],
+			"@typescript-eslint/func-call-spacing": [
+				"error"
+			],
 			"@typescript-eslint/no-base-to-string": [
 				"error"
 			],
@@ -165,7 +167,7 @@
 	"devDependencies": {
 		"@babel/core": "^7.16.0",
 		"@babel/preset-typescript": "^7.16.0",
-		"@parcel/transformer-less": "2.0.1",
+		"@parcel/transformer-sass": "^2.0.1",
 		"@types/codemirror": "5.60.5",
 		"@types/jest": "^27.0.2",
 		"@types/lodash": "^4.14.176",
@@ -178,7 +180,6 @@
 		"codemirror": "^5.63.3",
 		"eslint": "^8.2.0",
 		"jest": "^27.3.1",
-		"less": "^4.1.2",
 		"lodash": "^4.17.21",
 		"mithril": "^2.0.4",
 		"parcel": "^2.0.0",
