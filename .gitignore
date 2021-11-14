@@ -26,8 +26,6 @@ e2e-tests/shots
 /dev.env
 /package.tar.gz
 
-.cache
-
 .DS_Store
 
 /.idea
