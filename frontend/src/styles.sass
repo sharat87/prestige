@@ -1,3 +1,13 @@
+@use "../node_modules/tachyons/css/tachyons"
+
+@use "../node_modules/codemirror/lib/codemirror.css"
+@use "../node_modules/codemirror/addon/dialog/dialog.css"
+@use "../node_modules/codemirror/addon/fold/foldgutter.css"
+@use "../node_modules/codemirror/addon/lint/lint.css"
+
+$spacing-small: .5rem
+$spacing-medium: 1rem
+
 *
 	scrollbar-color: var(--scrollbar-fg) var(--scrollbar-bg)
 	scrollbar-width: thin
@@ -34,10 +44,7 @@ button
 	opacity: .9
 	border: none
 	border-radius: .25rem
-	padding-top: var(--spacing-small)
-	padding-bottom: var(--spacing-small)
-	padding-left: var(--spacing-medium)
-	padding-right: var(--spacing-medium)
+	padding: $spacing-small $spacing-medium
 
 	&:hover
 		opacity: 1
@@ -61,7 +68,7 @@ svg.icon
 	margin: 3px
 
 th, td
-	padding: var(--spacing-small)
+	padding: $spacing-small
 	border: 1px solid var(--border-color)
 	vertical-align: top
 

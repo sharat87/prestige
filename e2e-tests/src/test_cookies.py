@@ -2,7 +2,6 @@ import textwrap
 
 
 def test_cookies_ui_reflects_responses(log, browser):
-	log.warning("haha")
 	browser.set_editor_content("GET " + browser.httpbun_base + "/cookies/set?name=sherlock\n")
 	browser.editor_run()
 

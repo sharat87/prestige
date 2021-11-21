@@ -28,6 +28,7 @@ window.addEventListener("load", main)
 
 function main() {
 	if (Env.rollbarToken != null) {
+		console.info("Enabling Rollbar with environment", Env.name)
 		Rollbar.init({
 			accessToken: Env.rollbarToken,
 			captureUncaught: true,
@@ -58,7 +59,9 @@ function main() {
 		stargazers_count: number
 	}
 
-	m.request<GitHubApiResponse>("https://api.github.com/repos/sharat87/prestige").then((response) => {
+	m.request<GitHubApiResponse>(
+		`${Env.EXT_URL_PREFIX}https://api.github.com/repos/sharat87/prestige`,
+	).then((response) => {
 		RepoStats.stars = response.stargazers_count
 	})
 
@@ -176,9 +179,9 @@ function WorkspaceView(): m.Component {
 					m(
 						NavLink,
 						{
+							class: "t-cookies-toggle-btn",
 							onclick: onCookiesToggle,
 							isActive: ModalManager.isShowing(VisiblePopup.Cookies),
-							class: "t-cookies-toggle-btn",
 						},
 						[
 							m(Icons.cookie),
@@ -207,6 +210,7 @@ function WorkspaceView(): m.Component {
 							: m(
 								NavLink,
 								{
+									class: "t-login-signup-btn",
 									onclick: onLoginFormToggle,
 									isActive: ModalManager.isShowing(VisiblePopup.LoginForm),
 								},

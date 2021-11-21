@@ -6,12 +6,15 @@ declare const process: {
 		PRESTIGE_BACKEND: string
 		PRESTIGE_ALLOWED_HOSTS: string
 		PRESTIGE_FRONTEND_ROLLBAR_TOKEN?: string
+		PRESTIGE_EXT_URL_PREFIX?: string
 	}
 }
 
 const PRESTIGE_BACKEND = (process.env.PRESTIGE_BACKEND || "/")?.replace(/\/*$/, "/")
 
 export const GIST_API_PREFIX = PRESTIGE_BACKEND + "gist/"
+
+export const EXT_URL_PREFIX = (process.env.PRESTIGE_EXT_URL_PREFIX || "").trim()
 
 export const rollbarToken: null | string = (() => {
 	const token = (process.env.PRESTIGE_FRONTEND_ROLLBAR_TOKEN || "").trim()

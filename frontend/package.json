@@ -4,13 +4,17 @@
 	"description": "Just an HTTP client, by Shrikant.",
 	"author": "Shrikant Sharat Kandula <shrikantsharat.k@gmail.com>",
 	"license": "Apache-2.0",
+	"private": true,
 	"bugs": {
 		"url": "https://github.com/sharat87/prestige/issues"
 	},
 	"homepage": "https://github.com/sharat87/prestige",
+	"_comment_browserslist": [
+		"Firefox 78 is default on Debian stable], at https://packages.debian.org/search?keywords=firefox-esr"
+	],
 	"browserslist": [
 		"last 2 Chrome versions",
-		"last 2 Firefox versions",
+		"Firefox >= 78",
 		"last 2 Edge versions",
 		"last 2 Safari versions"
 	],
@@ -102,7 +106,7 @@
 			"capitalized-comments": "error",
 			"eol-last": "error",
 			"no-trailing-spaces": "error",
-			"camelcase": "warn",
+			"camelcase": "error",
 			"brace-style": "off",
 			"@typescript-eslint/brace-style": [
 				"error",

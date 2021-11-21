@@ -18,6 +18,7 @@ frontend/coverage
 frontend/.parcel-cache
 __snapshots__
 
+e2e-tests/e2e-tests.db
 e2e-tests/drivers
 e2e-tests/shots
 

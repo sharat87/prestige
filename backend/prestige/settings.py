@@ -203,6 +203,8 @@ if not DEBUG:
 	SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = True
 
 
+EXT_URL_PREFIX = (os.getenv("PRESTIGE_EXT_URL_PREFIX", None) or "").strip()
+
 # Create on at <https://github.com/settings/developers>.
 # Callback URL is <http://localhost:3045/auth/github/callback>.
 GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID", None)

@@ -194,7 +194,7 @@ class ProfileView implements m.Component<{ user: User }> {
 	view(vnode: m.Vnode<{ user: User }>): m.Children {
 		const { user } = vnode.attrs
 		return [
-			m("p", [m("strong", "Email"), ": ", user.email]),
+			m("p", [m("strong", "Email"), ": ", m("span.t-user-email", user.email)]),
 			m("p", m(
 				Button,
 				{
@@ -218,6 +218,7 @@ const GitHubAuthButton: m.Component = {
 		return m(
 			Button,
 			{
+				class: "t-github-auth-btn",
 				onclick() {
 					AuthService.startOAuth()
 				},

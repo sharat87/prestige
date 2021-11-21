@@ -205,9 +205,10 @@ def github_auth_view(request):
 	request.session["github_auth_state_token"] = state_token
 
 	return redirect(
-		"https://github.com/login/oauth/authorize?client_id=" + settings.GITHUB_CLIENT_ID +
+		f"{settings.EXT_URL_PREFIX}https://github.com/login/oauth/authorize"
+		f"?client_id={settings.GITHUB_CLIENT_ID}"
 		"&scope=read:user user:email repo gist"
-		"&state=" + state_token
+		f"&state={state_token}"
 	)
 
 
@@ -241,7 +242,7 @@ def github_auth_callback_view(request):
 		return JsonResponse(status=HTTPStatus.UNAUTHORIZED, reason="Missing OAuth code", data={})
 
 	response = requests.post(
-		"https://github.com/login/oauth/access_token",
+		f"{settings.EXT_URL_PREFIX}https://github.com/login/oauth/access_token",
 		params={
 			"client_id": settings.GITHUB_CLIENT_ID,
 			"client_secret": settings.GITHUB_CLIENT_SECRET,
@@ -254,12 +255,12 @@ def github_auth_callback_view(request):
 	response.raise_for_status()
 
 	data = response.json()
-	# Sample: {"access_token":"gho_16C7e42F292c6912E7710c838347Ae178B4a", "scope":"repo,gist", "token_type":"bearer"}
+	# Sample: {"access_token":"gho_sample_token", "scope":"repo,gist", "token_type":"bearer"}
 	log.info("response from github access token url %r", data)
 	access_token = data["access_token"]
 
 	response = requests.post(
-		"https://api.github.com/graphql",
+		f"{settings.EXT_URL_PREFIX}https://api.github.com/graphql",
 		headers={
 			"Accept": "application/vnd.github.v3+json",
 			"Authorization": "Bearer " + access_token,
@@ -296,7 +297,7 @@ def github_auth_callback_view(request):
 
 	# The GraphQL API doesn't give any email information. So we have to do another REST query for that.
 	response = requests.get(
-		"https://api.github.com/user/emails",
+		f"{settings.EXT_URL_PREFIX}https://api.github.com/user/emails",
 		headers={
 			"Authorization": "token " + access_token,
 		},

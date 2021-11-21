@@ -260,7 +260,7 @@ function RichDataViewer(): m.Component<RichDataViewerAttrs> {
 
 	function toggleTab(title: string, tab: Tabs) {
 		return m(NavLink, {
-			class: "tab br2 br--top mh1",
+			class: `tab br2 br--top mh1 t-result-tab-${title.toLowerCase()}`,
 			isActive: visibleTab === tab,
 			onclick() {
 				visibleTab = tab
@@ -297,7 +297,7 @@ function RichDataViewer(): m.Component<RichDataViewerAttrs> {
 			m(".tab-bar", [
 				spec?.startsWith("image/") ? toggleTab("Image", Tabs.image) : toggleTab("Text", Tabs.text),
 				(spec === "text/html" || spec === "image/svg+xml") && toggleTab("iFrame", Tabs.iFrame),
-				spec === "image/svg+xml" && toggleTab("Text", Tabs.text - 500),
+				spec === "image/svg+xml" && toggleTab("Text", Tabs.text),
 			]),
 			// Panes.
 			visibleTab === Tabs.text && m(CodeBlock, { text, spec: spec ?? "", class: "mt0" }),
