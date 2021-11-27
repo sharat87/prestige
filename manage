@@ -5,7 +5,9 @@
 set -o errexit
 set -o nounset
 set -o pipefail
-# set -o xtrace
+if [[ -n "${CI:-}" ]]; then
+	set -o xtrace
+fi
 
 if [[ $1 == -h ]]; then
 	echo 'Please see the manage script source for available tasks.' >&2
@@ -103,7 +105,7 @@ build-frontend() (
 )
 
 lint-frontend() {
-	ensure-frontend-node_modules
+	ensure-node_modules frontend
 	(
 		cd frontend
 		npx tsc --noEmit --project .
@@ -112,23 +114,10 @@ lint-frontend() {
 }
 
 test-frontend() (
-	ensure-frontend-node_modules
+	ensure-node_modules frontend
 	cd frontend
 	npx jest
 )
-
-ensure-frontend-node_modules() {
-	if [[ -e frontend/node_modules/make_sentinel && frontend/package.json -ot frontend/node_modules/make_sentinel && frontend/yarn.lock -ot frontend/node_modules/make_sentinel ]]; then
-		return
-	fi
-	if ! type yarn; then npm install -g yarn; fi
-	if [[ frontend/package.json -nt frontend/yarn.lock ]]; then
-		cd frontend && yarn install
-	else
-		cd frontend && yarn install --frozen-lockfile
-	fi
-	touch frontend/node_modules/make_sentinel
-}
 
 update-browserslist() (
 	cd frontend
@@ -154,6 +143,7 @@ build-docs() {
 
 test-e2e() (
 	ensure-venv
+	ensure-node_modules e2e-tests
 	rm -rf e2e-tests/logs,trail
 	source venv/bin/activate
 	cd e2e-tests
@@ -173,6 +163,20 @@ ensure-venv() {
 	fi
 	(source venv/bin/activate && pip install -r requirements.txt && pip install -r requirements-dev.txt)
 	touch venv/make_sentinel
+}
+
+ensure-node_modules() {
+	at="$1"
+	if [[ -e $at/node_modules/make_sentinel && $at/package.json -ot $at/node_modules/make_sentinel && $at/yarn.lock -ot $at/node_modules/make_sentinel ]]; then
+		return
+	fi
+	if ! type yarn; then npm install -g yarn; fi
+	if [[ $at/package.json -nt $at/yarn.lock ]]; then
+		(cd "$at" && yarn install)
+	else
+		(cd "$at" && yarn install --frozen-lockfile)
+	fi
+	touch "$at/node_modules/make_sentinel"
 }
 
 test-all() {

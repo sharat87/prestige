@@ -29,13 +29,18 @@ jobs:
           cache-dependency-path: "frontend/yarn.lock"
 
       - name: "Lint and test backend"
-        run: "./manage lint-backend test-backend"
+        run: |
+          ./manage lint-backend
+          ./manage test-backend
 
       - name: "Lint and test frontend"
-        run: "./manage lint-frontend test-frontend"
+        run: |
+          ./manage lint-frontend
+          ./manage test-frontend
 
       - name: "UI Tests"
-        run: "./manage test-e2e"
+        run: |
+          ./manage test-e2e
 
       - name: "Upload test results"
         uses: "actions/upload-artifact@v2"
