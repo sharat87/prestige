@@ -3,6 +3,7 @@ supervisord.pid
 
 *.log
 venv
+node_modules
 
 backend/*.sqlite3
 backend/data
@@ -11,7 +12,6 @@ __pycache__
 .mypy_cache
 backend/.coverage
 
-frontend/node_modules
 frontend/dist
 frontend/dist-serve
 frontend/coverage
@@ -19,8 +19,7 @@ frontend/.parcel-cache
 __snapshots__
 
 e2e-tests/e2e-tests.db
-e2e-tests/drivers
-e2e-tests/shots
+e2e-tests/trail
 
 /docs/site
 

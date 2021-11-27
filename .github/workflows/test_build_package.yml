@@ -10,7 +10,7 @@ on:
       - "master"
 
 jobs:
-  backend_tests:
+  all:
     runs-on: "ubuntu-latest"
 
     steps:
@@ -20,46 +20,22 @@ jobs:
         uses: "actions/setup-python@v2"
         with:
           python-version: 3.9
+
+      - name: "Setup Node"
+        uses: "actions/setup-node@v2"
+        with:
+          node-version: 16
+          cache: "yarn"
+          cache-dependency-path: "frontend/yarn.lock"
 
       - name: "Lint and test backend"
-        run: "make lint-backend test-backend"
-
-  frontend_tests:
-    runs-on: "ubuntu-latest"
-
-    steps:
-      - uses: "actions/checkout@v2"
-
-      - name: "Setup Node"
-        uses: "actions/setup-node@v2"
-        with:
-          node-version: 16
-          cache: "yarn"
-          cache-dependency-path: "frontend/yarn.lock"
+        run: "./manage lint-backend test-backend"
 
       - name: "Lint and test frontend"
-        run: "make lint-frontend test-frontend"
+        run: "./manage lint-frontend test-frontend"
 
-  e2e_tests:
-    runs-on: "ubuntu-latest"
-
-    steps:
-      - uses: "actions/checkout@v2"
-
-      - name: "Setup Python"
-        uses: "actions/setup-python@v2"
-        with:
-          python-version: 3.9
-
-      - name: "Setup Node"
-        uses: "actions/setup-node@v2"
-        with:
-          node-version: 16
-          cache: "yarn"
-          cache-dependency-path: "frontend/yarn.lock"
-
-      - name: "Run tests"
-        run: "make test-e2e"
+      - name: "UI Tests"
+        run: "./manage test-e2e"
 
       - name: "Upload test results"
         uses: "actions/upload-artifact@v2"
@@ -70,32 +46,11 @@ jobs:
             e2e-tests/shots
             e2e-tests/logs
 
-  build:
-    needs:
-      - backend_tests
-      - frontend_tests
-      - e2e_tests
-
-    runs-on: "ubuntu-latest"
-
-    steps:
-      - uses: "actions/checkout@v2"
-
-      - name: "Setup Python"
-        uses: "actions/setup-python@v2"
-        with:
-          python-version: 3.9
-
-      - name: "Setup Node"
-        uses: "actions/setup-node@v2"
-        with:
-          node-version: 16
-
       - name: "Build and create archive"
         env:
           PRESTIGE_FRONTEND_ROLLBAR_TOKEN: ${{ secrets.PRESTIGE_FRONTEND_ROLLBAR_TOKEN }}
         run: |
-          make build-all
+          ./manage build-all
 
       - name: "Upload to S3"
         if: |
@@ -106,4 +61,4 @@ jobs:
           AWS_DEFAULT_REGION: us-east-2
           AWS_DEFAULT_OUTPUT: json
         run: |
-          make upload-package
+          ./manage upload-package

@@ -4,13 +4,9 @@ Starts required services for Prestige and then runs the UI tests.
 
 from pathlib import Path
 from typing import Any, Dict, List, Optional
-from urllib.request import urlretrieve
-from zipfile import ZipFile
 import atexit
 import logging
 import os
-import re
-import stat
 import subprocess
 import sys
 import threading
@@ -60,14 +56,12 @@ def kill_and_close_all():
 def main() -> Optional[int]:
 	logs_path.mkdir(parents=True, exist_ok=True)
 
-	chrome_driver_thread = spawn_thread(ensure_chrome_driver)
 	backend_thread = spawn_thread(prestige_backend)
 	frontend_thread = spawn_thread(prestige_frontend)
 	proxy_thread = spawn_thread(proxy)
 	httpbun_thread = spawn_thread(httpbun)
 	mocker_thread = spawn_thread(mocker)
 
-	chrome_driver_thread.join(20)
 	backend_thread.join(20)
 	frontend_thread.join(20)
 	proxy_thread.join(20)
@@ -75,7 +69,6 @@ def main() -> Optional[int]:
 	mocker_thread.join(20)
 
 	live_threads = [th for th in [
-		chrome_driver_thread,
 		backend_thread,
 		frontend_thread,
 		proxy_thread,
@@ -276,29 +269,11 @@ def verify_service_up(path: str, port: int, name: str = None, *, tries: int = 9)
 	log.debug("Readied %r.", name)
 
 
-def run_tests_selenium() -> int:
-	return spawn_process(
-		[
-			venv_bin / "pytest",
-			"-vv",
-			"src",
-			"--durations=0",
-			"--log-format=%(asctime)s %(levelname)s %(name)s:%(lineno)s %(message)s",
-			# To include date in log lines: "--log-date-format=%Y-%m-%d %H:%M:%S",
-		],
-		cwd=e2e_tests_path,
-		env={
-			"PATH": str(e2e_tests_path / "drivers") + ":" + os.environ.get("PATH", ""),
-			"PYTHONPATH": e2e_tests_path / "src",
-			"FRONTEND_URL": f"http://localhost:{proxy_port}",
-			"HTTPBUN_URL": f"http://localhost:{httpbun_port}",
-		},
-	).wait()
-
-
 def run_tests() -> int:
 	return spawn_process(
 		[
+			"node",
+			"--trace-warnings",
 			e2e_tests_path / "node_modules" / ".bin" / "jest",
 			"--detectOpenHandles",
 			"src",
@@ -309,52 +284,6 @@ def run_tests() -> int:
 			"HTTPBUN_URL": f"http://localhost:{httpbun_port}",
 		},
 	).wait()
-
-
-def ensure_chrome_driver():
-	if sys.platform == "darwin":
-		chrome_exe = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-		os_in_file = "mac64"
-	elif sys.platform == "linux":
-		chrome_exe = "google-chrome"
-		os_in_file = "linux64"
-	else:
-		raise ValueError("Unhandled platform %r." % sys.platform)
-
-	chrome_version = re.search(
-		r"\d+",
-		subprocess.check_output([chrome_exe, "--version"]).decode(),
-	).group()
-	log.debug("Chrome version: %r.", chrome_version)
-
-	driver_version = 0
-	if os.path.exists("drivers/chromedriver"):
-		driver_version = re.search(
-			r"\d+",
-			subprocess.check_output(["drivers/chromedriver", "--version"]).decode(),
-		).group()
-		log.debug("Driver version: %r.", driver_version)
-
-	if chrome_version == driver_version:
-		log.debug("Already have a matching chrome driver.")
-		return
-
-	response = requests.get("http://chromedriver.storage.googleapis.com/LATEST_RELEASE_" + chrome_version)
-	response.raise_for_status()
-	latest_version = response.text
-
-	urlretrieve(
-		f"https://chromedriver.storage.googleapis.com/{latest_version}/chromedriver_{os_in_file}.zip",
-		"chromedriver.zip",
-	)
-
-	with ZipFile("chromedriver.zip") as z:
-		os.makedirs("drivers", exist_ok=True)
-		z.extract(z.namelist()[0], "drivers")
-
-	os.remove("chromedriver.zip")
-	st = os.stat("drivers/chromedriver")
-	os.chmod("drivers/chromedriver", st.st_mode | stat.S_IEXEC)
 
 
 if __name__ == "__main__":

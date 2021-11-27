@@ -1,20 +1,20 @@
 test("GitHub OAuth approved signup", async () => {
 	await page.goto("http://localhost:3052")
-	await page.screenshot({ path: "./shot0.png" })
+	await page.shot()
 	await expect(page.textOf(".t-login-signup-btn")).resolves.toEqual(expect.stringContaining("LogIn/SignUp"))
 	await page.click(".t-login-signup-btn")
 
-	await page.screenshot({ path: "./shot1.png" })
+	await page.shot()
 	const popup = await page.clickGetPopup(".t-github-auth-btn")
 
-	await page.screenshot({ path: "./shot2.png" })
-	await popup.screenshot({ path: "./shot3.png" })
+	await page.shot()
+	await popup.shot()
 
 	await popup.click("input[type=submit][value=approve]")
 
 	/*
 	if (!popup.isClosed()) {
-		await popup.screenshot({ path: "./shot4.png" })
+		await popup.shot()
 		await expect(popup.$eval("h1", e => e.textContent)).resolves.toBe("Finished. This window should close.")
 		await popup.close()
 	}
@@ -22,7 +22,7 @@ test("GitHub OAuth approved signup", async () => {
 	//*/
 
 	await page.waitForSelector(".t-user-email")
-	await page.screenshot({ path: "./shot5.png" })
+	await page.shot()
 	await expect(page.textOf(".t-user-email")).resolves.toBe("dummy_user@localhost")
 
 	await expect(page.title()).resolves.toMatch("Prestige")
@@ -30,6 +30,6 @@ test("GitHub OAuth approved signup", async () => {
 
 test("GitHub OAuth rejected signup", async () => {
 	await page.goto("http://localhost:3052")
-	await page.screenshot({ path: "./shot7.png" })
+	await page.shot()
 	await expect(page.title()).resolves.toMatch("Prestige")
 })
