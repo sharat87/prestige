@@ -107,10 +107,10 @@ class NicePage {
 		return this.page.title()
 	}
 
-	shot(options) {
+	shot(title) {
 		const shotId = shotCounters[this.shotsPath] = (shotCounters[this.shotsPath] || 0) + 1
 		return this.page.screenshot({
-			path: this.shotsPath + "/" + pad(shotId) + ".png",
+			path: this.shotsPath + "/" + pad(shotId) + (title ? `-${title}` : "") + ".png",
 			fullPage: true,
 		})
 	}

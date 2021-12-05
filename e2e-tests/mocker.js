@@ -22,9 +22,12 @@ module.exports = async function requestHandler(req, res) {
 		writeJson(res, {ok: true})
 
 	} else if (url.pathname === "/inspect") {
-		writeJson(res, {
-			method: req.method,
+		res.writeHead(parseInt(url.searchParams.get("status") || 200, 10), {
+			"Content-Type": "application/json",
 		})
+		res.end(JSON.stringify({
+			method: req.method,
+		}))
 
 	} else if (url.pathname === "/cookies/set") {
 		const cookies = url.search.substr(1).split("&")
@@ -123,18 +126,36 @@ function handleGitHubOauthForm(req, url, res) {
 }
 
 function handleGitHubOauthSubmit(req, url, res) {
-	// Handle accress rejection.
-	res.writeHead(301, {
-		"Content-Type": "text/html",
-		"Location": `${process.env.APP_URL}/auth/github/callback?state=${url.searchParams.get("state")}&code=abcdef`,
-	})
-	res.end([
-		"<!doctype html>",
-		"<title>Fake GitHub OAuth Submit</title>",
-		"<h1>Redirecting back to the application</h1>",
-		`<pre>${inspect(url)}</pre>`,
-		`<pre>${inspect(req.headers)}</pre>`,
-	].join("\n"))
+	const action = url.searchParams.get("action")
+
+	if (action === "approve") {
+		res.writeHead(301, {
+			"Content-Type": "text/html",
+			"Location": `${process.env.APP_URL}/auth/github/callback?state=${url.searchParams.get("state")}&code=abcdef`,
+		})
+		res.end([
+			"<!doctype html>",
+			"<title>Fake GitHub OAuth Submit</title>",
+			"<h1>Redirecting back to the application</h1>",
+			`<pre>${inspect(url)}</pre>`,
+			`<pre>${inspect(req.headers)}</pre>`,
+		].join("\n"))
+
+	} else {
+		res.writeHead(301, {
+			"Content-Type": "text/html",
+			"Location": `${process.env.APP_URL}/auth/github/callback?state=${url.searchParams.get("state")}&error=access_denied`,
+		})
+		res.end([
+			"<!doctype html>",
+			"<title>Fake GitHub OAuth Submit</title>",
+			"<h1>Redirecting back to the application</h1>",
+			`<pre>${inspect(url)}</pre>`,
+			`<pre>${inspect(req.headers)}</pre>`,
+		].join("\n"))
+
+
+	}
 }
 
 function handleGitHubOauthAccessToken(req, url, res) {

@@ -12,3 +12,18 @@ test("Get 200", async () => {
 		"3}",
 	].join("\n"))
 })
+
+test("Get 400", async () => {
+	await page.goto(APP_URL)
+	await page.setEditorText("GET " + MOCKER_URL + "/inspect?status=400\n\n###\n\n")
+	await page.editorRun()
+	const statusEl = await page.waitForSelector(".t-response-status")
+	await page.shot()
+
+	await expect(statusEl.evaluate(el => el.innerText)).resolves.toBe("400 Bad Request")
+	await expect(page.$eval(".t-response-body pre", (el) => el.innerText)).resolves.toBe([
+		"1{",
+		'2  "method": "GET"',
+		"3}",
+	].join("\n"))
+})
