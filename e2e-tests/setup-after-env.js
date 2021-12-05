@@ -7,12 +7,17 @@ beforeEach(async () => {
 	})
 
 	global.page = await NicePage.fromPage(await (await browser.createIncognitoBrowserContext()).newPage(), null)
+
+	global.MOCKER_URL = `http://localhost:${process.env.MOCKER_PORT}`
+	global.APP_URL = process.env.APP_URL
 })
 
 afterEach(async () => {
 	await global.page.disconnect()
 	delete global.page
 })
+
+const shotCounters = {}
 
 class NicePage {
 	static async fromPage(page, parentNicePage) {
@@ -34,7 +39,6 @@ class NicePage {
 		const currentTest = expect.getState().currentTestName
 		this.trailPath = "trail/" + expect.getState().currentTestName.toLowerCase().replace(/[-\s:?*|/\\]+/g, "-")
 
-		this.nextShotId = 1
 		this.shotsPath = this.trailPath + "/shots"
 		await fs.mkdir(this.shotsPath, {
 			recursive: true,
@@ -69,13 +73,22 @@ class NicePage {
 	}
 
 	async disconnect() {
-		if (this.parentNicePage == null) {
+		if (this.parentNicePage != null) {
+			throw new Error("Cannot call disconnect on a child page.")
+		}
+
+		const browser = this.page.browser()
+
+		// Close the log file handles _after_ the browser is disconnected, otherwise there's attempts to write to
+		// log file _after_ the browser is disconnected which obviously fails.
+		browser.once("disconnected", async () => {
 			await Promise.all([
 				this.consoleLogFd.close(),
 				this.requestLogFd.close(),
 			])
-		}
-		this.page.browser().disconnect()
+		})
+
+		browser.disconnect()
 	}
 
 	goto(url) {
@@ -86,13 +99,18 @@ class NicePage {
 		return this.page.reload()
 	}
 
+	close() {
+		return this.page.close()
+	}
+
 	title() {
 		return this.page.title()
 	}
 
 	shot(options) {
+		const shotId = shotCounters[this.shotsPath] = (shotCounters[this.shotsPath] || 0) + 1
 		return this.page.screenshot({
-			path: this.shotsPath + "/" + pad(this.nextShotId++) + ".png",
+			path: this.shotsPath + "/" + pad(shotId) + ".png",
 			fullPage: true,
 		})
 	}

@@ -18,12 +18,9 @@ logging.basicConfig(level=logging.INFO, format="%(levelname)s\t%(name)s %(messag
 log = logging.getLogger(__name__)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.ERROR)
 
-# TODO: Find random available ports using
-# ... <https://selenium-python.readthedocs.io/api.html#selenium.webdriver.common.utils.free_port>?
 frontend_port: int = 3050
 backend_port: int = frontend_port + 1
-proxy_port: int = frontend_port + 2
-httpbun_port: int = frontend_port + 3
+docs_port: int = frontend_port + 2
 mocker_port: int = frontend_port + 4
 
 child_processes: List[subprocess.Popen] = []
@@ -58,22 +55,13 @@ def main() -> Optional[int]:
 
 	backend_thread = spawn_thread(prestige_backend)
 	frontend_thread = spawn_thread(prestige_frontend)
-	proxy_thread = spawn_thread(proxy)
-	httpbun_thread = spawn_thread(httpbun)
-	mocker_thread = spawn_thread(mocker)
 
 	backend_thread.join(20)
 	frontend_thread.join(20)
-	proxy_thread.join(20)
-	httpbun_thread.join(20)
-	mocker_thread.join(20)
 
 	live_threads = [th for th in [
 		backend_thread,
 		frontend_thread,
-		proxy_thread,
-		httpbun_thread,
-		mocker_thread,
 	] if th.is_alive()]
 
 	if live_threads:
@@ -116,7 +104,6 @@ def prestige_backend():
 	spawn_process(
 		[
 			venv_bin / "python",
-			# e2e_tests_path / "mocked_backend_server.py",
 			"manage.py",
 			"runserver",
 			"--noreload",
@@ -135,84 +122,24 @@ def prestige_frontend():
 	# 2. Frontend server process.
 	spawn_process(
 		[
-			"make",
-			"build-frontend",
-		],
-		env={
-			"PRESTIGE_EXT_URL_PREFIX": f"http://localhost:{mocker_port}/",
-		},
-		outfile="frontend.log",
-	).wait()
-
-	spawn_process(
-		[
-			venv_bin / "python",
-			"-m",
-			"http.server",
+			"node_modules/.bin/parcel",
+			"serve",
+			"src/index.html",
+			"--dist-dir",
+			"dist-e2e-serve",
+			"--port",
 			frontend_port,
 		],
-		cwd=str(frontend_path / "dist"),
+		cwd=frontend_path,
+		env={
+			"PRESTIGE_EXT_URL_PREFIX": f"http://localhost:{mocker_port}/",
+			"BACKEND_PORT": backend_port,
+		},
 		outfile="frontend.log",
-		outfile_append=True,
 	)
 	time.sleep(1)
 
 	verify_service_up("", frontend_port, "frontend")
-
-
-def proxy():
-	# 3. A reverse proxy to tie the frontend and backend togather on a single domain.
-	spawn_process(
-		[
-			venv_bin / "mitmdump",
-			"--mode",
-			f"reverse:http://localhost:{frontend_port}",
-			"--scripts",
-			"./mitm_routing.py",
-			"--listen-port",
-			proxy_port,
-		],
-		env={
-			"PROXY_PORT": proxy_port,
-			"FRONTEND_PORT": frontend_port,
-			"BACKEND_PORT": backend_port,
-		},
-		outfile="proxy.log",
-	)
-
-
-def httpbun():
-	# 4. A local httpbun server process.
-	# TODO: Switch to httpbun for e2e tests, intead of httpbin.
-
-	spawn_process(
-		[
-			venv_bin / "python",
-			"-m",
-			"httpbin.core",
-			"--port",
-			httpbun_port,
-		],
-		outfile="httpbun.log",
-	)
-
-	verify_service_up("get", httpbun_port, "httpbun")
-
-
-def mocker():
-	# 5. Mock server for external APIs.
-	spawn_process(
-		[
-			"node",
-			e2e_tests_path / "mocker.js",
-		],
-		env={
-			"PORT": mocker_port,
-		},
-		outfile="mocker.log",
-	)
-
-	verify_service_up("health", mocker_port, "mocker")
 
 
 def spawn_thread(fn) -> threading.Thread:
@@ -276,12 +203,15 @@ def run_tests() -> int:
 			"--trace-warnings",
 			e2e_tests_path / "node_modules" / ".bin" / "jest",
 			"--detectOpenHandles",
+			"--verbose",
 			"src",
 		],
 		cwd=e2e_tests_path,
 		env={
-			"FRONTEND_URL": f"http://localhost:{proxy_port}",
-			"HTTPBUN_URL": f"http://localhost:{httpbun_port}",
+			"APP_URL": f"http://localhost:{frontend_port}",
+			"DOCS_PORT": docs_port,
+			"MOCKER_PORT": mocker_port,
+			"MOCKER_LOGS": logs_path / "mocker.log",
 		},
 	).wait()
 

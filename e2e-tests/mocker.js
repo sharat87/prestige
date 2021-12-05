@@ -2,16 +2,13 @@
  * A fake GitHub API, mocking endpoints needed by Prestige, for testing Prestige.
  */
 
-const http = require("http")
+const { Console } = require("console")
+const fs = require("fs")
 const { inspect } = require("util")
-start()
 
-function start() {
-	const server = http.createServer(requestHandler)
-	server.listen(parseInt(process.env.PORT || 3046))
-}
+const console = process.env.MOCKER_LOGS ? new Console(fs.createWriteStream(process.env.MOCKER_LOGS)) : global.console
 
-async function requestHandler(req, res) {
+module.exports = async function requestHandler(req, res) {
 	const url = new URL(req.url, "http://" + req.headers.host)
 	console.log("url", url, url.searchParams)
 
@@ -22,11 +19,50 @@ async function requestHandler(req, res) {
 	})
 
 	if (url.pathname === "/health") {
-		res.writeHead(200, {
-			"Content-Type": "application/json",
+		writeJson(res, {ok: true})
+
+	} else if (url.pathname === "/inspect") {
+		writeJson(res, {
+			method: req.method,
 		})
-		res.end(JSON.stringify({ok: true}))
-		return
+
+	} else if (url.pathname === "/cookies/set") {
+		const cookies = url.search.substr(1).split("&")
+		for (let i = cookies.length; i--;) {
+			cookies[i] += "; Path=/"
+		}
+		res.writeHead(200, {
+			"Content-Type": "text/plain",
+			"Set-Cookie": cookies,
+		})
+		res.end("ok")
+
+	} else if (url.pathname === "/cookies/delete") {
+		const cookies = []
+		for (const key of url.searchParams.keys()) {
+			cookies.push(`${key}=; Path=/; Max-Age=0`)
+		}
+		res.writeHead(200, {
+			"Content-Type": "text/plain",
+			"Set-Cookie": cookies,
+		})
+		res.end("ok")
+
+	} else if (url.pathname === "/image/svg") {
+		res.writeHead(200, {
+			"Content-Type": "image/svg+xml",
+		})
+		res.end(`<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 100 100">
+
+  <title>SVG Logo</title>
+
+  <a xlink:href="http://www.w3.org/Graphics/SVG/" target="_parent"
+     xlink:title="W3C SVG Working Group home page">
+
+    <rect fill="#f09" x="5" y="5" width="90" height="90" rx="4" ry="4" />
+
+  </a>
+</svg>`)
 
 	} else if (url.pathname === "/https://github.com/login/oauth/authorize") {
 		// Ask user for OAuth consent.
@@ -59,6 +95,13 @@ async function requestHandler(req, res) {
 	}
 }
 
+function writeJson(res, body) {
+	res.writeHead(200, {
+		"Content-Type": "application/json",
+	})
+	res.end(JSON.stringify(body))
+}
+
 function handleGitHubOauthForm(req, url, res) {
 	res.writeHead(200, {
 		"Content-Type": "text/html",
@@ -83,7 +126,7 @@ function handleGitHubOauthSubmit(req, url, res) {
 	// Handle accress rejection.
 	res.writeHead(301, {
 		"Content-Type": "text/html",
-		"Location": `http://localhost:3052/auth/github/callback?state=${url.searchParams.get("state")}&code=abcdef`,
+		"Location": `${process.env.APP_URL}/auth/github/callback?state=${url.searchParams.get("state")}&code=abcdef`,
 	})
 	res.end([
 		"<!doctype html>",

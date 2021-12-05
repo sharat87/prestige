@@ -13,7 +13,7 @@ __pycache__
 backend/.coverage
 
 frontend/dist
-frontend/dist-serve
+frontend/dist-*
 frontend/coverage
 frontend/.parcel-cache
 __snapshots__

@@ -1,12 +1,3 @@
-mitmproxy  # Dev-time routing.
-supervisor
-
-# E2E tests.
-selenium
-types-selenium
-httpbin
-pytest
-
 mkdocs  # Building documentation.
 
 coverage

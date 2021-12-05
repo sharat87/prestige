@@ -204,6 +204,7 @@ if not DEBUG:
 
 
 EXT_URL_PREFIX = (os.getenv("PRESTIGE_EXT_URL_PREFIX", None) or "").strip()
+print("EXT_URL_PREFIX is", EXT_URL_PREFIX)
 
 # Create on at <https://github.com/settings/developers>.
 # Callback URL is <http://localhost:3045/auth/github/callback>.

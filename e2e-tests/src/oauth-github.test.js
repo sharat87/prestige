@@ -1,5 +1,5 @@
 test("GitHub OAuth approved signup", async () => {
-	await page.goto("http://localhost:3052")
+	await page.goto(APP_URL)
 	await page.shot()
 	await expect(page.textOf(".t-login-signup-btn")).resolves.toEqual(expect.stringContaining("LogIn/SignUp"))
 	await page.click(".t-login-signup-btn")
@@ -21,6 +21,7 @@ test("GitHub OAuth approved signup", async () => {
 	expect(popup.isClosed()).toBeTruthy()
 	//*/
 
+	await page.shot()
 	await page.waitForSelector(".t-user-email")
 	await page.shot()
 	await expect(page.textOf(".t-user-email")).resolves.toBe("dummy_user@localhost")
@@ -29,7 +30,7 @@ test("GitHub OAuth approved signup", async () => {
 })
 
 test("GitHub OAuth rejected signup", async () => {
-	await page.goto("http://localhost:3052")
+	await page.goto(APP_URL)
 	await page.shot()
 	await expect(page.title()).resolves.toMatch("Prestige")
 })

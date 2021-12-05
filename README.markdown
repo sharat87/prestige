@@ -43,7 +43,6 @@ weren't listed here, but still were just as helpful):
 1. [Python](https://www.python.org/) & [Django](https://www.djangoproject.com/) &mdash; power the backend logic.
 1. [Python](https://www.python.org/) & [Selenium](https://www.selenium.dev/) &mdash; power the end-to-end testing workflow.
 1. [MkDocs](https://www.mkdocs.org/) &mdash; powers the documentation site.
-1. [GNU Make]() & [Parcel](https://parceljs.org/) &mdash; power the building and bundling facilities.
 1. [Phosphor](https://phosphoricons.com/) &mdash; Original source for icons in the application.
 
 A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
@@ -52,14 +51,14 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 Please ensure you have Node >= v14 (with yarn) and Python >= v3.8 (with pip) before trying the following commands. I recommend using `asdf-vm` for this, and the project includes a `.tool-versions` file. So, if you have `asdf` already setup, you can just do `asdf install` in this repo and you'll have the correct versions of Node and Python.
 
-The project contains a `makefile` and a `supervisor.conf` file that make getting started with development quite easy. Here's a quick summary:
+The project contains a `manage` script and a `supervisord.conf` file that make getting started with development quite easy. Here's a quick summary:
 
-1. `make start` &mdash; Starts a supervisor daemon, with all servers needed for Prestige to be running.
+1. `./manage start` &mdash; Starts a supervisor daemon, with all servers needed for Prestige to be running.
 	All servers are started in dev mode, with auto-reload on, along with a small web UI from supervisor, to monitor the running processes and view their logs.
-	See output of `make start` for details.
-1. `make stop` &mdash; Stops and shuts down supervisor daemon, along with all the dev processes.
-1. `make test-*` &mdash; Test frontend/backend/e2e (depending on what's in place of `*`).
-1. `make build-*` &mdash; Build frontend/backend/docs (depending on what's in place of `*`).
+	See output of `./manage start` for details.
+1. `./manage stop` &mdash; Stops and shuts down supervisor daemon, along with all the dev processes.
+1. `./manage test-*` &mdash; Test frontend/backend/e2e (depending on what's in place of `*`).
+1. `./manage build-*` &mdash; Build frontend/backend/docs (depending on what's in place of `*`).
 
 ## Inspirations
 
