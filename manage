@@ -20,14 +20,13 @@ help() {
 # Backend targets
 ###
 
-build-backend() {
+build-backend() (
 	ensure-venv
-	(source venv/bin/activate \
-		&& cd backend \
-		&& PRESTIGE_ENV=manage DATABASE_URL='sqlite://:memory:' python manage.py collectstatic --clear --no-input \
-		&& python -m compileall -f .
-	)
-}
+	source venv/bin/activate
+	cd backend
+	PRESTIGE_ENV=manage DATABASE_URL='sqlite://:memory:' python manage.py collectstatic --clear --no-input
+	python -m compileall -f .
+)
 
 lint-backend() {
 	ensure-venv
@@ -129,6 +128,13 @@ serve-docs() {
 	cd docs
 	PYTHONPATH=. exec mkdocs serve --dev-addr "127.0.0.1:${PORT:-3042}"
 }
+
+build-docs() (
+	ensure-venv
+	source venv/bin/activate
+	cd docs
+	PYTHONPATH=. mkdocs
+)
 
 ###
 # End-to-end Testing
