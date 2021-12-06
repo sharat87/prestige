@@ -133,7 +133,7 @@ build-docs() (
 	ensure-venv
 	source venv/bin/activate
 	cd docs
-	PYTHONPATH=. mkdocs
+	PYTHONPATH=. mkdocs build
 )
 
 ###
