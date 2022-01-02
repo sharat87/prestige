@@ -1,3 +1,5 @@
+supervisor
+
 mkdocs  # Building documentation.
 
 coverage
