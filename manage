@@ -20,6 +20,13 @@ help() {
 # Backend targets
 ###
 
+serve-backend() (
+	ensure-venv
+	source venv/bin/activate
+	cd backend
+	PRESTIGE_ENV=development PYTHONUTF8=1 PYTHONUNBUFFERED=1 python manage.py runserver 127.0.0.1:3041
+)
+
 build-backend() (
 	ensure-venv
 	source venv/bin/activate
@@ -91,6 +98,11 @@ resetdb() {
 ###
 # Frontend targets
 ###
+
+serve-frontend() (
+	cd frontend
+	NODE_ENV=development npx parcel serve src/index.html --dist-dir dist-serve --port 3040
+)
 
 build-frontend() (
 	cd frontend
@@ -202,7 +214,7 @@ upgrade-deps() (
 
 start() (
 	ensure-venv
-	if [[ -e .supervisor.sock ]]; then
+	if [[ -e supervisord.pid ]]; then
 		echo 'Already running.'
 	else
 		if [[ -f dev.env ]]; then
@@ -218,7 +230,7 @@ start() (
 
 stop() (
 	ensure-venv
-	if [[ -e .supervisor.sock ]]; then
+	if [[ -e supervisord.pid ]]; then
 		kill "$(venv/bin/supervisorctl pid)"
 		echo 'Just stopped.'
 		sleep 2s

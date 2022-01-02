@@ -17,7 +17,7 @@ module.exports = function (app) {
 			"/storage",
 		],
 		{
-			"target": `http://localhost:${BACKEND_PORT}`,
+			target: `http://localhost:${BACKEND_PORT}`,
 		},
 	))
 
@@ -27,7 +27,10 @@ module.exports = function (app) {
 			"/livereload",
 		],
 		{
-			"target": `http://localhost:${DOCS_PORT}`,
+			target: `http://localhost:${DOCS_PORT}`,
+			// pathRewrite: {
+			// 	"^/docs": "",
+			// },
 		},
 	))
 

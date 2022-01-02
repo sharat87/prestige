@@ -228,6 +228,7 @@ function WorkspaceView(): m.Component {
 							"About",
 						],
 					),
+					Env.isDev() && m(NavLink, { href: "/admin/" }, ["Admin", m(Icons.externalLink)]),
 					m(NavLink, { href: "/docs/" }, [m(Icons.question), "Docs", m(Icons.externalLink)]),
 					m(
 						NavLink,
