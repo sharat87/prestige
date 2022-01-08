@@ -1,5 +1,6 @@
 supervisord.pid
 .supervisord.sock
+/logs
 
 *.log
 venv

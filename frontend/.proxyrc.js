@@ -1,7 +1,7 @@
 const { createProxyMiddleware } = require("http-proxy-middleware")
 
-BACKEND_PORT = parseInt(process.env.BACKEND_PORT || 3041, 10)
-DOCS_PORT = parseInt(process.env.DOCS_PORT || 3042, 10)
+const BACKEND_PORT = parseInt(process.env.BACKEND_PORT || 3041, 10)
+const DOCS_PORT = parseInt(process.env.DOCS_PORT || 3042, 10)
 
 module.exports = function (app) {
 
@@ -28,9 +28,6 @@ module.exports = function (app) {
 		],
 		{
 			target: `http://localhost:${DOCS_PORT}`,
-			// pathRewrite: {
-			// 	"^/docs": "",
-			// },
 		},
 	))
 

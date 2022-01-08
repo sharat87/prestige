@@ -1,6 +1,7 @@
 from http import HTTPStatus
 from http.client import HTTPSConnection
 from typing import List
+import logging
 
 from django.http import JsonResponse, FileResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -9,6 +10,8 @@ from django.template.loader import render_to_string
 import requests
 
 from auth_api.utils import login_required_json
+
+log = logging.getLogger(__name__)
 
 # Duplicated in Workspace.ts
 INITIAL_SHEET_CONTENT = '''# Welcome to Prestige! Your newest developer tool!
@@ -122,7 +125,7 @@ def list_gists_view(request, gh_identity):
 	)
 
 	if response.status_code != 200:
-		print("Error fetching gists", response.content())
+		log.info("Error fetching gists", response.content())
 		return JsonResponse(status=HTTPStatus.UNAUTHORIZED, data={
 			"error": {
 				"code": "gists-list-api-fail",
@@ -205,28 +208,61 @@ def create_gist_view(request, gh_identity):
 	title = title.strip()
 	description = description.strip()
 
+	content = request.parsed_body.get("content", "") or INITIAL_SHEET_CONTENT
+	if content is None:
+		content = INITIAL_SHEET_CONTENT
+	elif not isinstance(content, str):
+		return JsonResponse(status=HTTPStatus.BAD_REQUEST, data={
+			"error": {
+				"code": "invalid-content-in-create-gist",
+				"message": "Invalid content for creating a Gist.",
+			},
+		})
+
 	is_public = bool(request.parsed_body.get("isPublic", False))
 
 	readme_name = "_" + title + ".md"
 	files = {
-		readme_name: {"content": "# " + title},
-		"main.prestige": {"content": INITIAL_SHEET_CONTENT},
+		readme_name: {
+			"content": "# " + title,
+		},
+		"main.prestige": {
+			"content": content,
+		},
 	}
 
 	# Ref: <https://docs.github.com/en/rest/reference/gists#create-a-gist>.
+	payload = {
+		"description": description,
+		"public": is_public,
+		"files": files,
+	}
+	log.info("create gist with %r", payload)
 	creation_response = requests.post(
 		"https://api.github.com/gists",
 		headers={
 			"Accept": "application/vnd.github.v3+json",
 			"Authorization": "Bearer " + access_token,
 		},
-		json={
-			"description": description,
-			"public": False and is_public,
-			"files": files,
-		},
+		json=payload,
 	)
-	creation_response.raise_for_status()
+
+	if not creation_response.ok:
+		response_data = creation_response.json()
+		log.error(
+			"Error creating Gist: %r %r %r",
+			creation_response.status_code,
+			creation_response.reason,
+			response_data,
+		)
+		# TODO: Raise an alert to Rollbar here.
+		return JsonResponse(data={
+			"ok": False,
+			"error": {
+				"code": "gist-creation-failed",
+				"message": "Failed to create Gist. We are working to fix this.",
+			}
+		})
 
 	gist_id = creation_response.json()["id"]
 
@@ -247,7 +283,23 @@ def create_gist_view(request, gh_identity):
 			"files": files,
 		},
 	)
-	updation_response.raise_for_status()
+
+	if not updation_response.ok:
+		response_data = updation_response.json()
+		log.error(
+			"Error updating Gist, right after creating it: %r %r %r",
+			updation_response.status_code,
+			updation_response.reason,
+			response_data,
+		)
+		# TODO: Raise an alert to Rollbar here.
+		return JsonResponse(data={
+			"ok": False,
+			"error": {
+				"code": "gist-update-after-creation-failed",
+				"message": "Partially failed to create Gist. We are working to fix this.",
+			}
+		})
 
 	# The creation response includes a `git_push_url`, perhaps we can force push to clear the history of creating and
 	# updating in two steps above?

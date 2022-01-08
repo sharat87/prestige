@@ -226,3 +226,12 @@ ACCESS_TOKEN_ENCRYPTION_KEY = get_prod_env(
 	# Default to a dummy encryption key, when not in production.
 	"eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHg=",
 )
+
+
+if os.environ.get("PRESTIGE_BACKEND_ROLLBAR_TOKEN"):
+	ROLLBAR = {
+		"access_token": os.environ["PRESTIGE_BACKEND_ROLLBAR_TOKEN"],
+		"environment": "development" if DEBUG else "production",
+		"branch": "master",
+		"root": os.getcwd(),
+	}

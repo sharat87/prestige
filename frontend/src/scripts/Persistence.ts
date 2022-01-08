@@ -14,23 +14,23 @@ export type Source =
 	| GistSource
 
 interface BaseSource {
-	type: string;
-	title: string;
+	type: string
+	title: string
 }
 
 interface LocalSource extends BaseSource {
-	type: "browser";
+	type: "browser"
 	details: {
-		prefix: string;
-	};
+		prefix: string
+	}
 }
 
 interface CloudSource extends BaseSource {
-	type: "cloud";
+	type: "cloud"
 }
 
 interface GistSource extends BaseSource {
-	type: "gist";
+	type: "gist"
 }
 
 type SheetPath = string
@@ -280,7 +280,7 @@ interface GistFile {
 	rawUrl: string
 }
 
-class GistProvider extends Provider<GistSource> {
+export class GistProvider extends Provider<GistSource> {
 	private gists: Record<string, Gist>
 
 	constructor(key: string, source: GistSource) {
@@ -369,12 +369,12 @@ class GistProvider extends Provider<GistSource> {
 		})
 	}
 
-	async create(): Promise<void> {
+	async create(content = ""): Promise<void> {
 		let title = ""
 		let description = ""
 
 		ModalManager.show((control) => {
-			const onsubmit = (event: SubmitEvent) => {
+			const onGistFormSubmit = (event: SubmitEvent) => {
 				if (title === "") {
 					return
 				}
@@ -387,6 +387,7 @@ class GistProvider extends Provider<GistSource> {
 					body: {
 						title,
 						description,
+						content,
 						isPublic: event.submitter?.classList.contains("public") ?? false,
 					},
 				}).then(() => {
@@ -399,7 +400,7 @@ class GistProvider extends Provider<GistSource> {
 
 			return m(".pa2", [
 				m("h1", "Create a new Gist"),
-				m("form", { onsubmit }, [
+				m("form", { onsubmit: onGistFormSubmit }, [
 					m(".grid", [
 						m("label", { for: "gist-title" }, m("span", "Title*")),
 						m("input", {
@@ -455,15 +456,15 @@ class GistProvider extends Provider<GistSource> {
 		const gists = Object.values(this.gists)
 
 		return [
-			gists.length === 0 && m("p", [
+			gists.length === 0 && m("p.pa1", [
 				"No prestige gists found! Let's ",
-				m("a", { onclic: this.create, href: "#" }, "create one now"),
+				m("a", { onclick: () => this.create(), href: "#" }, "create one now"),
 				"!",
 			]),
 			gists.length > 0 && m(
 				"a.pv1.ph2.db",
 				{
-					onclick: this.create,
+					onclick: () => this.create(),
 					href: "#",
 				},
 				"+ Create new",
@@ -642,7 +643,7 @@ export async function openSheet(qualifiedName: string): Promise<Sheet> {
 	return await provider.load(path)
 }
 
-function getProvider(qualifiedName: string): Provider<Source> {
+export function getProvider(qualifiedName: string): Provider<Source> {
 	if (typeof currentProviders() === "undefined") {
 		throw new Error("Providers not initialized yet.")
 	}

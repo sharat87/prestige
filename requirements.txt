@@ -4,3 +4,4 @@ Requests
 psycopg2-binary
 gunicorn
 cryptography
+rollbar

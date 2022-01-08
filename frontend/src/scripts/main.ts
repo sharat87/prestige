@@ -10,7 +10,7 @@ import CookiesModal from "_/CookiesModal"
 import LoginFormModal from "_/LoginFormModal"
 import FileBucketModal from "_/FileBucketModal"
 import ColorPaletteModal from "_/ColorPaletteModal"
-import { NavLink } from "_/NavLink"
+import NavLink from "_/NavLink"
 import ResultPane from "_/ResultPane"
 import * as Env from "_/Env"
 import Toaster from "_/Toaster"
@@ -18,7 +18,8 @@ import ExternalLink from "_/ExternalLink"
 import ModalManager from "_/ModalManager"
 import Toolbar from "_/Toolbar"
 import PageEnd from "_/PageEnd"
-import { currentSheet, isManualSaveAvailable, SaveState } from "_/Persistence"
+import { currentSheet, isManualSaveAvailable, SaveState, getProvider } from "_/Persistence"
+import type { GistProvider } from "_/Persistence"
 import Rollbar from "rollbar"
 import * as pings from "_/pings"
 
@@ -158,7 +159,7 @@ function WorkspaceView(): m.Component {
 					RepoStats.stars > 0 && m(".pv1.ph2.db.flex.items-center.silver", [
 						m(
 							NavLink,
-							{ href: REPO_URL },
+							{ href: REPO_URL, title: "Star Prestige on GitHub" },
 							[m(Icons.github), "Star: ", RepoStats.stars, m(Icons.externalLink)],
 						),
 					]),
@@ -360,15 +361,23 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 					m("span.pa1", "📃 " + workspace.currentSheetQualifiedPath()),
 				]),
 				right: m(".flex", [
-					Env.isDev() && m(
-						NavLink,
-						{
-							onclick: () => {
-								alert("Work in progress")
+					Env.isDev() && (workspace.currentSheet != null && workspace.isCurrentSheetAGist()
+						? m(
+							NavLink,
+							{
+								href: "https://gist.github.com/" + workspace.currentSheet.path,
 							},
-						},
-						"Create a Gist",
-					),
+							["Open in Gist", m(Icons.externalLink)],
+						)
+						: m(
+							NavLink,
+							{
+								onclick: () => {
+									(getProvider("gist") as GistProvider).create(workspace.getContent())
+								},
+							},
+							"Create Gist",
+						)),
 				]),
 			}),
 			m(".body", {

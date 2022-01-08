@@ -20,12 +20,12 @@ help() {
 # Backend targets
 ###
 
-serve-backend() (
+serve-backend() {
 	ensure-venv
 	source venv/bin/activate
 	cd backend
-	PRESTIGE_ENV=development PYTHONUTF8=1 PYTHONUNBUFFERED=1 python manage.py runserver 127.0.0.1:3041
-)
+	PRESTIGE_ENV=development PYTHONUTF8=1 PYTHONUNBUFFERED=1 exec python manage.py runserver 127.0.0.1:3041
+}
 
 build-backend() (
 	ensure-venv
@@ -99,10 +99,10 @@ resetdb() {
 # Frontend targets
 ###
 
-serve-frontend() (
+serve-frontend() {
 	cd frontend
-	NODE_ENV=development npx parcel serve src/index.html --dist-dir dist-serve --port 3040
-)
+	NODE_ENV=development exec npx parcel serve src/index.html --dist-dir dist-serve --port 3040
+}
 
 build-frontend() (
 	cd frontend
@@ -222,6 +222,7 @@ start() (
 			source dev.env
 			set +a
 		fi
+		mkdir -pv logs
 		venv/bin/supervisord
 		echo 'Just started.'
 	fi

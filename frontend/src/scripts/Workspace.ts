@@ -678,6 +678,10 @@ export default class Workspace {
 		}
 	}
 
+	isCurrentSheetAGist(): boolean {
+		return this.currentSheetQualifiedPath()?.startsWith("gist/") ?? false
+	}
+
 }
 
 function isLocalUrl(url: string): boolean {

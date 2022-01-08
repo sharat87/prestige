@@ -12,7 +12,8 @@ toolset.
 
 [Discuss on Hacker News](https://news.ycombinator.com/item?id=27412445). Join us on [Discord](https://discord.gg/6tc9fMmYRW).
 
-![Prestige Screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot.png)
+![Prestige light mode screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot-light.png#gh-light-mode-only)
+![Prestige dark model screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot-dark.png#gh-dark-mode-only)
 
 **Why is Prestige labeled as Beta Software?**: Gaps in documentation, insufficient test coverage, and potential for
 backwards-incompatible changes to the syntax.
@@ -39,7 +40,7 @@ weren't listed here, but still were just as helpful):
 
 1. [TypeScript](https://www.typescriptlang.org/) & [Mithril](https://mithril.js.org/) &mdash; power the frontend UI and logic.
 1. [CodeMirror](https://codemirror.net/) &mdash; powers the code editor and syntax-highlighted code blocks.
-1. [Less](https://lesscss.org/) & [Tachyons](http://tachyons.io/) &mdash; power the styling and theming systems.
+1. [Sass](https://sass-lang.com/) & [Tachyons](http://tachyons.io/) &mdash; power the styling and theming systems.
 1. [Python](https://www.python.org/) & [Django](https://www.djangoproject.com/) &mdash; power the backend logic.
 1. [Python](https://www.python.org/) & [Selenium](https://www.selenium.dev/) &mdash; power the end-to-end testing workflow.
 1. [MkDocs](https://www.mkdocs.org/) &mdash; powers the documentation site.
