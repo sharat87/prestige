@@ -5,18 +5,16 @@
 
 > Under all the abstractions, it's just stardust interacting with text.
 
-This is a *powerful*, *text-based*, *in-browser*, HTTP client app that I wanted for myself.
+This is a *powerful*, *text-based*, *in-browser*, HTTP client app geared towards web developers and API testing professionals.
 
-Check out the [User Guide](https://prestigemad.com/docs) to learn how Prestige can be a powerful addition to your
-toolset.
+Check out the [User Guide](https://prestigemad.com/docs) to learn how Prestige can be a powerful addition to your toolset.
 
 [Discuss on Hacker News](https://news.ycombinator.com/item?id=27412445). Join us on [Discord](https://discord.gg/6tc9fMmYRW).
 
 ![Prestige light mode screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot-light.png#gh-light-mode-only)
 ![Prestige dark model screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot-dark.png#gh-dark-mode-only)
 
-**Why is Prestige labeled as Beta Software?**: Gaps in documentation, insufficient test coverage, and potential for
-backwards-incompatible changes to the syntax.
+Prestige is a work-in-progress. Although it's stable enough to be my main API testing and development tool, there are edge cases and missing features that still need work. If you find any issue or have a suggestion, please [create an issue](https://github.com/sharat87/prestige/issues/new).
 
 ## Features
 
@@ -31,10 +29,6 @@ backwards-incompatible changes to the syntax.
 
 ## Under the Hood
 
-While Prestige is currently beta, and it does break occasionally, I use Prestige all day, every day at my job, and its
-fairly stable in that. When I find something lacking/breaking, I tend to either immediately fix it (if it's a small
-thing) or defer it to a weekend.
-
 Prestige exists thanks to the work of the following open source projects (not exhaustive, thanks to all those who
 weren't listed here, but still were just as helpful):
 
@@ -42,7 +36,7 @@ weren't listed here, but still were just as helpful):
 1. [CodeMirror](https://codemirror.net/) &mdash; powers the code editor and syntax-highlighted code blocks.
 1. [Sass](https://sass-lang.com/) & [Tachyons](http://tachyons.io/) &mdash; power the styling and theming systems.
 1. [Python](https://www.python.org/) & [Django](https://www.djangoproject.com/) &mdash; power the backend logic.
-1. [Python](https://www.python.org/) & [Selenium](https://www.selenium.dev/) &mdash; power the end-to-end testing workflow.
+1. [Jest](https://jestjs.io/) & [Puppeteer](https://pptr.dev/) &mdash; power the testing workflows.
 1. [MkDocs](https://www.mkdocs.org/) &mdash; powers the documentation site.
 1. [Phosphor](https://phosphoricons.com/) &mdash; Original source for icons in the application.
 
@@ -50,13 +44,14 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 ## Developing
 
-Please ensure you have Node >= v14 (with yarn) and Python >= v3.8 (with pip) before trying the following commands. I recommend using `asdf-vm` for this, and the project includes a `.tool-versions` file. So, if you have `asdf` already setup, you can just do `asdf install` in this repo and you'll have the correct versions of Node and Python.
+Please ensure you have NodeJS (with yarn) and Python (with pip), of versions as specified in the [`.tool-versions`](https://github.com/sharat87/prestige/blob/master/.tool-versions) file, before trying the following commands. I recommend using `asdf-vm` for this, which integrates with the `.tool-versions` file. So, if you have `asdf` already setup, you can just do `asdf install` in this repo and you'll have the correct versions of NodeJS and Python.
 
 The project contains a `manage` script and a `supervisord.conf` file that make getting started with development quite easy. Here's a quick summary:
 
 1. `./manage start` &mdash; Starts a supervisor daemon, with all servers needed for Prestige to be running.
 	All servers are started in dev mode, with auto-reload on, along with a small web UI from supervisor, to monitor the running processes and view their logs.
 	See output of `./manage start` for details.
+	Logs are also available in the `logs` folder.
 1. `./manage stop` &mdash; Stops and shuts down supervisor daemon, along with all the dev processes.
 1. `./manage test-*` &mdash; Test frontend/backend/e2e (depending on what's in place of `*`).
 1. `./manage build-*` &mdash; Build frontend/backend/docs (depending on what's in place of `*`).
