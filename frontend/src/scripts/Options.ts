@@ -148,9 +148,10 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 						},
 					},
 					[
-						m("option", { value: "Source Code Pro" }, "Source Code Pro (Default)"),
-						m("option", { value: "Consolas" }, "Consolas"),
-						m("option", { value: "Monaco" }, "Monaco"),
+						m("option", { value: "'Source Code Pro'" }, "Source Code Pro (Default)"),
+						m("option", { value: "'Consolas'" }, "Consolas"),
+						m("option", { value: "'Monaco'" }, "Monaco"),
+						m("option", { value: "monospace" }, "Browser Default"),
 					],
 				),
 				m(".b", "Editor Font Size"),
