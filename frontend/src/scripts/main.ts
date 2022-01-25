@@ -151,91 +151,142 @@ function WorkspaceView(): m.Component {
 					m("h1.f3.mh2.mv0", "Prestige"),
 					m(".f6.i.ml3", [
 						"Just an HTTP client by ",
-						m("a", { href: "https://sharats.me", target: "_blank" }, "Shri"),
+						m(
+							"a",
+							{ href: "https://sharats.me", target: "_blank" },
+							"Shri"
+						),
 						".",
 					]),
 				]),
 				m(".flex.items-stretch", [
-					RepoStats.stars > 0 && m(".pv1.ph2.db.flex.items-center.silver", [
+					RepoStats.stars > 0 &&
+						m(".pv1.ph2.db.flex.items-center.silver", [
+							m(
+								NavLink,
+								{
+									href: REPO_URL,
+									title: "Star Prestige on GitHub",
+								},
+								[
+									m(Icons.github),
+									"Star: ",
+									RepoStats.stars,
+									m(Icons.externalLink),
+								]
+							),
+						]),
+					workspace.saveState === SaveState.unsaved &&
+						m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
+					workspace.saveState === SaveState.saving &&
+						m(
+							".i.pv1.ph2.db.flex.items-center.silver",
+							m.trust("Saving&hellip;")
+						),
+					Env.isDev() &&
+						m(
+							"code.flex.items-center.ph1",
+							{
+								style: {
+									lineHeight: 1.15,
+									color: "var(--red-3)",
+									background: "var(--red-9)",
+								},
+							},
+							["R", ++redrawCount]
+						),
+					Env.isDev() &&
 						m(
 							NavLink,
-							{ href: REPO_URL, title: "Star Prestige on GitHub" },
-							[m(Icons.github), "Star: ", RepoStats.stars, m(Icons.externalLink)],
+							{
+								onclick: onColorPaletteToggle,
+								isActive: ModalManager.isShowing(
+									VisiblePopup.ColorPalette
+								),
+							},
+							"Palette"
 						),
-					]),
-					workspace.saveState === SaveState.unsaved
-						&& m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
-					workspace.saveState === SaveState.saving
-						&& m(".i.pv1.ph2.db.flex.items-center.silver", m.trust("Saving&hellip;")),
-					Env.isDev() && m(
-						"code.flex.items-center.ph1",
-						{ style: { lineHeight: 1.15, color: "var(--red-3)", background: "var(--red-9)" } },
-						["R", ++redrawCount],
-					),
-					Env.isDev() && m(
-						NavLink,
-						{ onclick: onColorPaletteToggle, isActive: ModalManager.isShowing(VisiblePopup.ColorPalette) },
-						"Palette",
-					),
 					m(
 						NavLink,
 						{
 							class: "t-cookies-toggle-btn",
 							onclick: onCookiesToggle,
-							isActive: ModalManager.isShowing(VisiblePopup.Cookies),
+							isActive: ModalManager.isShowing(
+								VisiblePopup.Cookies
+							),
 						},
 						[
 							m(Icons.cookie),
-							`Cookies (${ workspace.cookieJar?.size ?? 0 })`,
-						],
+							`Cookies (${workspace.cookieJar?.size ?? 0})`,
+						]
 					),
 					m(
 						NavLink,
-						{ onclick: onFileBucketToggle, isActive: ModalManager.isShowing(VisiblePopup.FileBucketPopup) },
+						{
+							onclick: onFileBucketToggle,
+							isActive: ModalManager.isShowing(
+								VisiblePopup.FileBucketPopup
+							),
+						},
 						[
 							m(Icons.folderClosed),
 							`FileBucket (${workspace.fileBucket.size})`,
-						],
+						]
 					),
 					m(
 						NavLink,
-						{ onclick: onOptionsToggle, isActive: ModalManager.isShowing(VisiblePopup.Options) },
-						[
-							m(Icons.wrench),
-							"Options",
-						],
+						{
+							onclick: onOptionsToggle,
+							isActive: ModalManager.isShowing(
+								VisiblePopup.Options
+							),
+						},
+						[m(Icons.wrench), "Options"]
 					),
 					[
 						authState === AuthState.PENDING
 							? m.trust("&middot; &middot; &middot;")
 							: m(
-								NavLink,
-								{
-									class: "t-login-signup-btn",
-									onclick: onLoginFormToggle,
-									isActive: ModalManager.isShowing(VisiblePopup.LoginForm),
-								},
-								[
-									m(Icons.user),
-									authState === AuthState.LOGGED_IN ? "Profile" : "LogIn/SignUp",
-								],
-							),
+									NavLink,
+									{
+										class: "t-login-signup-btn",
+										onclick: onLoginFormToggle,
+										isActive: ModalManager.isShowing(
+											VisiblePopup.LoginForm
+										),
+									},
+									[
+										m(Icons.user),
+										authState === AuthState.LOGGED_IN
+											? "Profile"
+											: "LogIn/SignUp",
+									]
+							  ),
 					],
 					m(
 						NavLink,
-						{ onclick: onAboutPaneToggle, isActive: ModalManager.isShowing(VisiblePopup.AboutPane) },
-						[
-							m(Icons.info),
-							"About",
-						],
+						{
+							onclick: onAboutPaneToggle,
+							isActive: ModalManager.isShowing(
+								VisiblePopup.AboutPane
+							),
+						},
+						[m(Icons.info), "About"]
 					),
-					Env.isDev() && m(NavLink, { href: "/admin/" }, ["Admin", m(Icons.externalLink)]),
-					m(NavLink, { href: "/docs/" }, [m(Icons.question), "Docs", m(Icons.externalLink)]),
-					m(
-						NavLink,
-						{ href: REPO_URL + "/issues/new" },
-						["Report a problem", m(Icons.externalLink)],
-					),
+					Env.isDev() &&
+						m(NavLink, { href: "/admin/" }, [
+							"Admin",
+							m(Icons.externalLink),
+						]),
+					m(NavLink, { href: "/docs/" }, [
+						m(Icons.question),
+						"Docs",
+						m(Icons.externalLink),
+					]),
+					m(NavLink, { href: REPO_URL + "/issues/new" }, [
+						"Report a problem",
+						m(Icons.externalLink),
+					]),
 				]),
 			]),
 			m(Sidebar, { workspace }),
@@ -245,9 +296,12 @@ function WorkspaceView(): m.Component {
 			// ... to be next to each other in this order, so that a `+` selector works for layout change.
 			m(ResultPane, { workspace }),
 			m(EditorPane, { workspace }),
-			m("style", "body { --monospace-font: " + editorFontOption() === "default" ? "monospace" : `'${editorFontOption()}'` + "; --monospace-font-size: " +
-				editorFontSizeOption() + "px; }"),
-		])
+			m(
+				"style",
+				"body { --monospace-font: " + editorFontOption() === "default" ? "monospace" : `'${editorFontOption()}'` +
+					"; --monospace-font-size: " + editorFontSizeOption() + "px; }"
+			),
+		]);
 	}
 
 	function onAboutPaneToggle() {
