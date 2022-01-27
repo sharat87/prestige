@@ -245,9 +245,12 @@ function WorkspaceView(): m.Component {
 			// ... to be next to each other in this order, so that a `+` selector works for layout change.
 			m(ResultPane, { workspace }),
 			m(EditorPane, { workspace }),
-			m("style", "body { --monospace-font: '" + editorFontOption() + "'; --monospace-font-size: " +
-				editorFontSizeOption() + "px; }"),
-		])
+			m(
+				"style",
+				"body { --monospace-font: " + editorFontOption() === "default" ? "monospace" : `'${editorFontOption()}'` +
+					"; --monospace-font-size: " + editorFontSizeOption() + "px; }"
+			),
+		]);
 	}
 
 	function onAboutPaneToggle() {
