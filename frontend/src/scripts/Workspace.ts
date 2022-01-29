@@ -493,7 +493,7 @@ export default class Workspace {
 		this.session.pushLoading()
 		let request: null | RequestDetails = null
 
-		const context = new Context(this, this.cookieJar, this.fileBucket)
+		const context = new Context(this, this.cookieJar, this.fileBucket, {})
 		let result: null | AnyResult = null
 
 		try {

@@ -33,7 +33,13 @@ export default function Sidebar(): m.Component<Attrs> {
 				m(".content", { style: { width: `${currentWidth}px` } }, [
 					currentPane === "d" && m(DocumentBrowser),
 					currentPane === "o" && m(OptionsModal),
-					currentPane === "e" && m(EnvSecretsView, { model: vnode.attrs.workspace.secretsObject, model2: vnode.attrs.workspace.secrets }),
+					currentPane === "e" && m(
+						EnvSecretsView,
+						{
+							model: vnode.attrs.workspace.secretsObject,
+							model2: vnode.attrs.workspace.secrets,
+						},
+					),
 					m(PageEnd),
 				]),
 				isDev() && m(".grip", {
