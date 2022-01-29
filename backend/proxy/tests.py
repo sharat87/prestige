@@ -68,7 +68,6 @@ class HttpMethods(SimpleTestCase, JobMixin):
 		response = self.job({
 			"method": "GET",
 			"url": "http://httpbun.org/get?one=two",
-			"headers": {},
 			"cookies": {},
 		})
 
@@ -78,6 +77,31 @@ class HttpMethods(SimpleTestCase, JobMixin):
 		body = json.loads(data["response"]["body"])
 		self.assertEqual(body["args"], {
 			"one": "two",
+		})
+
+
+class MultipartFormDataRequests(SimpleTestCase, JobMixin):
+	def test_just_formdata(self):
+		response = self.job({
+			"method": "POST",
+			"url": "http://httpbun.org/post",
+			"headers": [
+				["content-type", "multipart/form-data"],
+			],
+			"body": json.dumps({
+				"field1": "string value 1",
+			}),
+			"bodyType": "multipart/form-data",
+		})
+
+		self.assertEqual(response.status_code, HTTPStatus.OK)
+
+		data = response.json()
+		body = json.loads(data["response"]["body"])
+		self.assertEqual(body["args"], {})
+		self.assertEqual(body["files"], {})
+		self.assertEqual(body["form"], {
+			"field1": "string value 1",
 		})
 
 

@@ -194,7 +194,7 @@ def response_to_dict(response: requests.Response):
 			"method": response.request.method,
 			"headers": list(response.request.headers.items()),
 			"body": request_body,
-		}
+		},
 	}
 
 
