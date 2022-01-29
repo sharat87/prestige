@@ -177,6 +177,12 @@ def cookie_jar_to_plain(cookie_jar: RequestsCookieJar) -> PlainCookieJarType:
 
 def response_to_dict(response: requests.Response):
 	body_in_response = get_body_in_response(response)
+
+	request_body = response.request.body
+	if isinstance(request_body, bytes):
+		# TODO: Figure out a better way to show the body _bytes_ here, instead of assuming UTF-8.
+		request_body = request_body.decode()
+
 	return {
 		"url": response.url,
 		"status": response.status_code,
@@ -187,8 +193,7 @@ def response_to_dict(response: requests.Response):
 			"url": response.request.url,
 			"method": response.request.method,
 			"headers": list(response.request.headers.items()),
-			# TODO: Figure out a better way to show the body _bytes_ here, instead of assuming UTF-8.
-			"body": None if response.request.body is None else response.request.body.decode(),
+			"body": request_body,
 		}
 	}
 
