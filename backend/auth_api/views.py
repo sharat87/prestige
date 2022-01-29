@@ -203,7 +203,6 @@ def github_auth_view(request):
 
 	state_token = secrets.token_urlsafe(64)
 	request.session["github_auth_state_token"] = state_token
-	log.error("Ext url prefix is %r", settings.EXT_URL_PREFIX)
 
 	return redirect(
 		f"{settings.EXT_URL_PREFIX}https://github.com/login/oauth/authorize"

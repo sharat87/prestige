@@ -188,7 +188,7 @@ def response_to_dict(response: requests.Response):
 			"method": response.request.method,
 			"headers": list(response.request.headers.items()),
 			# TODO: Figure out a better way to show the body _bytes_ here, instead of assuming UTF-8.
-			"body": response.request.body.decode(),
+			"body": None if response.request.body is None else response.request.body.decode(),
 		}
 	}
 
