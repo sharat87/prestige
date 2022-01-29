@@ -5,6 +5,8 @@ import type { User } from "_/AuthService"
 import { GIST_API_PREFIX, storageUrl } from "_/Env"
 import ModalManager from "_/ModalManager"
 import Button from "_/Button"
+import GitHubAuthButton from "_/GitHubAuthButton"
+import Toaster from "_/Toaster"
 
 const STORAGE_URL_BASE = storageUrl()
 
@@ -380,6 +382,7 @@ export class GistProvider extends Provider<GistSource> {
 				}
 				event.preventDefault()
 				control.close()
+				const toastId = Toaster.pushLoadingToast("Creating Gist...")
 				m.request({
 					method: "POST",
 					url: GIST_API_PREFIX,
@@ -392,6 +395,7 @@ export class GistProvider extends Provider<GistSource> {
 					},
 				}).then(() => {
 					console.log("Loading root listing after creating a gist.")
+					Toaster.remove(toastId)
 					this.loadRootListing()
 				}).catch((error) => {
 					console.error("Error creating Gist", error)
@@ -446,7 +450,11 @@ export class GistProvider extends Provider<GistSource> {
 		const currentUser = AuthService.currentUser()
 
 		if (currentUser == null) {
-			return "Please login with GitHub to view your Gists."
+			return m("p.pa1", [
+				"Please ",
+				m(GitHubAuthButton, "login with GitHub"),
+				" to view your Gists.",
+			])
 		}
 
 		if (!currentUser.isGitHubConnected) {

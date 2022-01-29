@@ -17,15 +17,22 @@ export default class Context {
 	private workspace: null | Workspace
 	private cookieJar: null | CookieJar
 	private fileBucket: null | FileBucket
+	secrets: Record<string, string>
 	getProxyUrl: null | ((request: RequestDetails) => null | string)
 
-	constructor(workspace: null | Workspace, cookieJar: null | CookieJar, fileBucket: null | FileBucket) {
+	constructor(
+		workspace: null | Workspace,
+		cookieJar: null | CookieJar,
+		fileBucket: null | FileBucket,
+		secrets: Record<string, string>,
+	) {
 		this.data = {}
 		this.handlers = new Map()
 
 		this.workspace = workspace
 		this.cookieJar = cookieJar
 		this.fileBucket = fileBucket
+		this.secrets = secrets
 
 		this.getProxyUrl = null
 	}

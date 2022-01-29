@@ -1,10 +1,9 @@
 import type { Vnode, VnodeDOM } from "mithril"
 import m from "mithril"
-import OptionsModal, { editorFontOption, editorFontSizeOption } from "_/Options"
+import { styleOverrides } from "_/Options"
 import Workspace from "_/Workspace"
 import AuthService from "_/AuthService"
 import { AuthState } from "_/AuthService"
-import DocumentBrowser from "_/DocumentBrowser"
 import * as Icons from "_/Icons"
 import CookiesModal from "_/CookiesModal"
 import LoginFormModal from "_/LoginFormModal"
@@ -12,12 +11,12 @@ import FileBucketModal from "_/FileBucketModal"
 import ColorPaletteModal from "_/ColorPaletteModal"
 import NavLink from "_/NavLink"
 import ResultPane from "_/ResultPane"
+import Sidebar from "_/Sidebar"
 import * as Env from "_/Env"
 import Toaster from "_/Toaster"
 import ExternalLink from "_/ExternalLink"
 import ModalManager from "_/ModalManager"
 import Toolbar from "_/Toolbar"
-import PageEnd from "_/PageEnd"
 import { currentSheet, isManualSaveAvailable, SaveState, getProvider } from "_/Persistence"
 import type { GistProvider } from "_/Persistence"
 import Rollbar from "rollbar"
@@ -42,7 +41,7 @@ function main() {
 
 	const root = document.createElement("main")
 	root.setAttribute("id", "app")
-	document.body.insertAdjacentElement("afterbegin", root)
+	document.body.appendChild(root)
 	document.getElementById("loadingBox")?.remove()
 
 	applyCookieStorageMigration()
@@ -79,6 +78,7 @@ const Layout: m.Component = {
 			vnode.children,
 			ModalManager.render(),
 			Toaster.render(),
+			m("style", styleOverrides()),
 		]
 	},
 }
@@ -94,7 +94,6 @@ function WorkspaceView(): m.Component {
 		FileBucketPopup,
 		LoginForm,
 		None,
-		Options,
 	}
 
 	let popup: VisiblePopup = VisiblePopup.None
@@ -160,7 +159,7 @@ function WorkspaceView(): m.Component {
 						m(
 							NavLink,
 							{ href: REPO_URL, title: "Star Prestige on GitHub" },
-							[m(Icons.github), "Star: ", RepoStats.stars, m(Icons.externalLink)],
+							[m(Icons.github), "Star: ", RepoStats.stars, m(Icons.arrowSquareOut)],
 						),
 					]),
 					workspace.saveState === SaveState.unsaved
@@ -197,17 +196,9 @@ function WorkspaceView(): m.Component {
 							`FileBucket (${workspace.fileBucket.size})`,
 						],
 					),
-					m(
-						NavLink,
-						{ onclick: onOptionsToggle, isActive: ModalManager.isShowing(VisiblePopup.Options) },
-						[
-							m(Icons.wrench),
-							"Options",
-						],
-					),
 					[
 						authState === AuthState.PENDING
-							? m.trust("&middot; &middot; &middot;")
+							? [m(Icons.user), m(Icons.spinner, { style: "bold" })]
 							: m(
 								NavLink,
 								{
@@ -229,12 +220,11 @@ function WorkspaceView(): m.Component {
 							"About",
 						],
 					),
-					Env.isDev() && m(NavLink, { href: "/admin/" }, ["Admin", m(Icons.externalLink)]),
-					m(NavLink, { href: "/docs/" }, [m(Icons.question), "Docs", m(Icons.externalLink)]),
+					m(NavLink, { href: "/docs/" }, [m(Icons.question), "Docs", m(Icons.arrowSquareOut)]),
 					m(
 						NavLink,
 						{ href: REPO_URL + "/issues/new" },
-						["Report a problem", m(Icons.externalLink)],
+						["Report a problem", m(Icons.arrowSquareOut)],
 					),
 				]),
 			]),
@@ -245,12 +235,7 @@ function WorkspaceView(): m.Component {
 			// ... to be next to each other in this order, so that a `+` selector works for layout change.
 			m(ResultPane, { workspace }),
 			m(EditorPane, { workspace }),
-			m(
-				"style",
-				"body { --monospace-font: " + editorFontOption() === "default" ? "monospace" : `'${editorFontOption()}'` +
-					"; --monospace-font-size: " + editorFontSizeOption() + "px; }"
-			),
-		]);
+		])
 	}
 
 	function onAboutPaneToggle() {
@@ -278,36 +263,8 @@ function WorkspaceView(): m.Component {
 		ModalManager.toggleDrawer(() => m(LoginFormModal), VisiblePopup.LoginForm)
 	}
 
-	function onOptionsToggle() {
-		ModalManager.toggleDrawer(() => m(OptionsModal), VisiblePopup.Options)
-	}
-
 	function onColorPaletteToggle() {
 		ModalManager.toggleDrawer(() => m(ColorPaletteModal), VisiblePopup.ColorPalette)
-	}
-}
-
-class Sidebar implements m.ClassComponent {
-	isOpen: boolean
-
-	constructor() {
-		this.isOpen = false
-	}
-
-	view() {
-		return m("aside.sidebar.flex", [
-			m(".tab-bar", [
-				m(NavLink, { isActive: this.isOpen, onclick: this.toggleOpen.bind(this) }, m(Icons.files)),
-			]),
-			this.isOpen && m(".content", [
-				m(DocumentBrowser),
-				m(PageEnd),
-			]),
-		])
-	}
-
-	toggleOpen() {
-		this.isOpen = !this.isOpen
 	}
 }
 
@@ -348,11 +305,12 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 							workspace.saveSheetManual()
 						},
 					},
-					"💾 Save document",
+					[m(Icons.floppyDisk, { style: "bold" }), "Save document"],
 				),
 				workspace.saveState === SaveState.unchanged && m("div", "No changes"),
-				workspace.saveState === SaveState.saving && m("div", m.trust("✍️ Saving&hellip;")),
-				workspace.saveState === SaveState.saved && m("div", "✓ Saved!"),
+				workspace.saveState === SaveState.saving &&
+					m("div", [m(Icons.spinner, { style: "bold" }), m.trust("Saving&hellip;")]),
+				workspace.saveState === SaveState.saved && m("div", [m(Icons.check, { style: "bold" }), "Saved!"]),
 			])
 
 		}
@@ -361,16 +319,16 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 			m(Toolbar, {
 				left: m(".flex", [
 					saveButtonSpace,
-					m("span.pa1", "📃 " + workspace.currentSheetQualifiedPath()),
+					m("span.pa1", [m(Icons.scroll, { style: "bold" }), workspace.currentSheetQualifiedPath()]),
 				]),
 				right: m(".flex", [
-					Env.isDev() && (workspace.currentSheet != null && workspace.isCurrentSheetAGist()
+					workspace.currentSheet != null && (workspace.isCurrentSheetAGist()
 						? m(
 							NavLink,
 							{
 								href: "https://gist.github.com/" + workspace.currentSheet.path,
 							},
-							["Open in Gist", m(Icons.externalLink)],
+							["Open in Gist", m(Icons.arrowSquareOut)],
 						)
 						: m(
 							NavLink,
@@ -380,7 +338,13 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 								},
 							},
 							"Create Gist",
-						)),
+						)
+					),
+					!workspace.isResultPaneVisible && workspace.session.result != null && m(
+						NavLink,
+						{ onclick: () => workspace.isResultPaneVisible = true },
+						"Show result pane",
+					),
 				]),
 			}),
 			m(".body", {
@@ -413,13 +377,9 @@ const AboutModal: m.Component = {
 					[
 						"Check out my blog at ",
 						m("a", { href: "https://sharats.me", target: "_blank" }, "sharats.me"),
-						". You can also find me on ",
+						" or my other projects at ",
 						m(ExternalLink, { href: "https://github.com/sharat87" }, "GitHub"),
-						" or ",
-						m(ExternalLink, { href: "https://twitter.com/sharat87" }, "Twitter"),
-						" or ",
-						m(ExternalLink, { href: "https://www.linkedin.com/in/sharat87" }, "LinkedIn"),
-						", althought I'm not quite active on those platforms.",
+						".",
 					],
 				),
 				m(

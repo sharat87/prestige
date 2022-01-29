@@ -11,6 +11,7 @@ backend/data
 backend/static
 __pycache__
 .mypy_cache
+.pytest_cache
 backend/.coverage
 
 frontend/dist

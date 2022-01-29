@@ -1,4 +1,4 @@
-# Prestige <sup>&beta;</sup>
+# Prestige
 
 **Just an HTTP client, by [@sharat87](https://sharats.me). Available at [prestigemad.com](https://prestigemad.com)
 ([Why that domain?](#why-the-domain)).**
@@ -22,10 +22,10 @@ Prestige is a work-in-progress. Although it's stable enough to be my main API te
 - Write plain, familiar Javascript for templating within your requests.
 - Shows all responses in a redirect chain, if request redirects.
 - Save your Prestige documents to Gist.
-- Export requests as cURL commands (more export formats coming soon).
+- Export requests as cURL commands. Please [open an issue](https://github.com/sharat87/prestige/issues/new) if you'd like to see more export formats.
 - Isolated cookie management.
-- Uploading files to APIs is simple as dropping the file and calling a function.
-- Light and dark modes.
+- Uploading files to APIs is as simple as drag-dropping the file and calling a function.
+- Light and dark modes, for multiple themes.
 
 ## Under the Hood
 
@@ -67,8 +67,7 @@ More: <https://github.com/marmelab/awesome-rest>.
 
 ## Some public APIs to play with
 
-1. [httpbun.com](https://httpbun.com) &mdash; Great for meta-testing and JSON/form-data related experiments. Another
-   project by [@sharat87](https://sharats.me).
+1. [httpbun.com](https://httpbun.com) &mdash; Great for meta-testing and JSON/form-data related experiments. Another project by [@sharat87](https://sharats.me).
 1. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
 1. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
 1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL, but requires a personal auth token.
@@ -78,11 +77,11 @@ More: <https://github.com/marmelab/awesome-rest>.
 ## Rough Roadmap
 
 - Close gaps in documentation, finish API Reference and link all mentions of API functions to this page.
-- A desktop app with NeutralinoJS.
+- A desktop app with NeutralinoJS or some other such technology.
 - A browser extension that, when installed, would make it so that we don't need the proxy anymore.
-- Dockerfiles for frontend and backend. Document a way to self-host with a single `docker-compose` command.
-- Ability to open/edit documents from GitHub (and Gist), Google Drive and Dropbox.
-- Rich editor features like auto-complete, JSON editing help, hotkeys to start new GET/POST/etc. request etc.
+- A Dockerfile for quickly running a self-hosted instance of Prestige with Docker.
+- Ability to open/edit documents from GitHub repos, Google Drive and Dropbox.
+- Rich editor features like auto-complete, JSON editing help, hotkeys to start new GET/POST/etc. request, snippets etc.
 
 ## Why the domain?
 

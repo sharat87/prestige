@@ -10,6 +10,8 @@ interface Attrs {
 	href?: string
 	title?: string
 	isActive?: boolean
+	tooltip?: string
+	tooltipDir?: "right"
 	onclick?: ((event: MouseEvent) => void)
 }
 
@@ -26,6 +28,9 @@ function view(vnode: m.VnodeDOM<Attrs>): m.Children {
 			title: vnode.attrs.title,
 			onclick: vnode.attrs.onclick,
 		},
-		vnode.children,
+		[
+			vnode.children,
+			vnode.attrs.tooltip != null && m("span.tip", { class: vnode.attrs.tooltipDir }, vnode.attrs.tooltip),
+		],
 	)
 }

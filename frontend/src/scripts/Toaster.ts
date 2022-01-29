@@ -2,9 +2,9 @@ import m from "mithril"
 
 export interface Toast {
 	id: number
-	type: "success" | "danger"
+	type: "success" | "danger" | "loading"
 	message: string
-	endTime: number
+	endTime?: number
 }
 
 export interface Message {
@@ -49,7 +49,19 @@ class Toaster {
 			}
 		}
 		this.toasts.push(t)
-		setTimeout(() => this.remove(id), t.endTime - Date.now())
+		if (t.endTime != null) {
+			setTimeout(() => this.remove(id), t.endTime - Date.now())
+		}
+	}
+
+	pushLoadingToast(message: string): number {
+		const id = nextId++
+		this.toasts.push({
+			id,
+			type: "loading",
+			message,
+		})
+		return id
 	}
 
 	remove(id: number): void {
@@ -72,6 +84,7 @@ class Toaster {
 					class: {
 						success: "bg-washed-green dark-green",
 						danger: "bg-washed-red dark-red",
+						loading: "bg-washed-green dark-green",
 					}[toast.type],
 					key: toast.id,
 					onbeforeremove({ dom }: m.VnodeDOM): Promise<Event> {
@@ -87,6 +100,7 @@ class Toaster {
 						class: {
 							success: "bg-light-green dark-green",
 							danger: "bg-light-red dark-red",
+							loading: "bg-washed-green dark-green",
 						}[toast.type],
 						"data-toast-id": toast.id,
 					}, m.trust("&times;")),

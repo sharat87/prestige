@@ -1,6 +1,5 @@
 import m from "mithril"
 import Stream from "mithril/stream"
-import ModalManager from "_/ModalManager"
 
 const PREFIX = "option:"
 
@@ -45,10 +44,16 @@ const editorFontSizeOption: Stream<string> = Stream()
 editorFontSizeOption.map(m.redraw)
 initOption(editorFontSizeOption, "editorFontSize", "14")
 
-export {
-	editorFontOption,
-	editorFontSizeOption,
-}
+export const styleOverrides: Stream<string> = Stream.lift((displayMode, editorFont, editorFontSize) => {
+	return [
+		":root {",
+		// Ref: <https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme>.
+		"color-scheme: " + (displayMode === "auto" ? "light dark" : displayMode) + ";",
+		"--monospace-font: " + (editorFont === "default" ? "monospace" : `'${editorFont}'`) + ";",
+		"--monospace-font-size: " + editorFontSize + "px;",
+		"}",
+	].join("\n")
+}, displayModeOption, editorFontOption, editorFontSizeOption)
 
 function load<T>(name: string): null | T {
 	const rawValue = localStorage.getItem(PREFIX + name)
@@ -83,13 +88,10 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 	return { view }
 
 	function view() {
-		return m(
-			ModalManager.DrawerLayout,
-			{
-				title: "Cookies",
-			},
-			m("form.grid", [
-				m(".b", "Dark Mode"),
+		return [
+			m("h2.pa2", "Options"),
+			m("p.pa1", [
+				m(".b.pb1", "Dark Mode"),
 				m(".flex", [
 					m("label.flex", { title: "Sync to system's dark mode setting." }, [
 						m("input", {
@@ -97,7 +99,7 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 							name: "displayMode",
 							value: "auto",
 							checked: displayModeOption() === "auto",
-							onchange,
+							onchange: () => displayModeOption("auto"),
 						}),
 						m(".ml1", "System"),
 					]),
@@ -107,7 +109,7 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 							name: "displayMode",
 							value: "light",
 							checked: displayModeOption() === "light",
-							onchange,
+							onchange: () => displayModeOption("light"),
 						}),
 						m(".ml1", "Light"),
 					]),
@@ -117,12 +119,14 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 							name: "displayMode",
 							value: "dark",
 							checked: displayModeOption() === "dark",
-							onchange,
+							onchange: () => displayModeOption("dark"),
 						}),
 						m(".ml1", "Dark"),
 					]),
 				]),
-				m(".b", "Color Scheme"),
+			]),
+			m("p.pa1", [
+				m(".b.pb1", "Color Scheme"),
 				m(
 					"select",
 					{
@@ -138,7 +142,9 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 						m("option", { value: "solarized" }, "Solarized"),
 					],
 				),
-				m(".b", "Editor Font"),
+			]),
+			m("p.pa1", [
+				m(".b.pb1", "Editor Font"),
 				m(
 					"select",
 					{
@@ -154,7 +160,9 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 						m("option", { value: "default" }, "Browser Default"),
 					],
 				),
-				m(".b", "Editor Font Size"),
+			]),
+			m("p.pa1", [
+				m(".b.pb1", "Editor Font Size"),
 				m(
 					"input",
 					{
@@ -166,10 +174,7 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 					},
 				),
 			]),
-		)
+		]
 	}
 
-	function onchange(event: Event) {
-		displayModeOption((event.target as HTMLInputElement).form?.displayMode.value)
-	}
 }

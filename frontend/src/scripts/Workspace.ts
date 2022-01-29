@@ -25,6 +25,7 @@ import Context from "_/Context"
 import { ping } from "_/pings"
 import ExportPane from "_/ExportPane"
 import ModalManager from "_/ModalManager"
+import SecretsPack from "_/secrets/model"
 
 // Duplicated in backend/gist/views.py
 const DEFAULT_EDITOR_CONTENT = `# Welcome to Prestige! Your newest developer tool!
@@ -96,6 +97,9 @@ export default class Workspace {
 	private _disableAutoSave: boolean
 	cookieJar: null | CookieJar
 	updateEditorDisplay: ReturnType<typeof throttle>
+	isResultPaneVisible: boolean
+	secretsObject: Stream<string>
+	secrets: SecretsPack
 
 	constructor() {
 		this.codeMirror = null
@@ -118,7 +122,6 @@ export default class Workspace {
 				})
 		}, this.currentSheetQualifiedPath, currentProviders)
 
-		this.runAgain = this.runAgain.bind(this)
 		this.doExecute = this.doExecute.bind(this)
 		this.onNewClicked = this.onNewClicked.bind(this)
 		this.onDuplicateClicked = this.onDuplicateClicked.bind(this)
@@ -127,6 +130,9 @@ export default class Workspace {
 		this.saveSheetAuto = throttle(this.saveSheetAuto.bind(this), 3000, { trailing: true })
 		this.updateEditorDisplay = throttle(this._updateEditorDisplay.bind(this), 3000, { trailing: true })
 		this.cookieJar = null
+		this.isResultPaneVisible = true
+		this.secretsObject = Stream("")
+		this.secrets = new SecretsPack()
 
 		currentSheet.map((value) => {
 			this.currentSheet = value instanceof Sheet ? value : null
@@ -385,10 +391,15 @@ export default class Workspace {
 	async onExportClicked(event: MouseEvent): Promise<void> {
 		ping("export", "Export request clicked")
 		const lineNum = parseInt((event.currentTarget as HTMLElement).dataset.lineNum || "0", 10)
-		const context = new Context(this, this.cookieJar, this.fileBucket)
+		const context = new Context(this, this.cookieJar, this.fileBucket, await this.parseSecrets())
 		const exportingRequest = await this.buildRequestAtLine(lineNum + 1, context)
 		ModalManager.show(() => m(ExportPane, { request: exportingRequest, cookieJar: this.cookieJar }))
 		m.redraw()
+	}
+
+	async parseSecrets() {
+		// Doing `eval` here instead of `JSON.parse` so that comments are forgiven.
+		return eval(this.secretsObject())
 	}
 
 	onPrettifyClicked(event: MouseEvent): void {
@@ -629,8 +640,19 @@ export default class Workspace {
 			return
 		}
 
-		this.codeMirror.setCursor(this.prevExecuteBookmark.find() as any)
+		this.findInEditor()
 		this.doExecute()
+	}
+
+	findInEditor(): void {
+		if (this.codeMirror == null || this.prevExecuteBookmark == null) {
+			return
+		}
+
+		setTimeout(() => this.codeMirror?.focus(), 100)
+		this.codeMirror.setCursor(this.prevExecuteBookmark.find() as CodeMirror.Position)
+		// TODO: If this line is already in view, don't scroll.
+		this.codeMirror.scrollIntoView(null, 40)
 	}
 
 	doFlashes(): void {

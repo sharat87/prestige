@@ -34,7 +34,7 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 	return m("div", { ondragover, ondragleave, ondrop }, m(
 		ModalManager.DrawerLayout,
 		{
-			title: "FileBucket",
+			title: "File Bucket",
 		},
 		[
 			rows.length === 0 ? m(EmptyBucket) : m(
@@ -103,7 +103,7 @@ const EmptyBucket = {
 			m(
 				"pre",
 				"POST https://httpbun.com/post\n\n" +
-					"= this.multipart({\n  myFile: await this.fileFromBucket('data.txt')\n})",
+					"= this.multipart({\n  myFile: await this.fileFromBucket(\"data.txt\")\n})",
 			),
 			m("p", [
 				"Where ",

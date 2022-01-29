@@ -1,0 +1,7 @@
+Django==3.2.5
+dj-database-url
+Requests
+psycopg2-binary
+gunicorn
+cryptography
+rollbar

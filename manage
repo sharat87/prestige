@@ -166,13 +166,19 @@ test-e2e() (
 ###
 
 ensure-venv() {
-	if [[ -f venv/make_sentinel && requirements.txt -ot venv/make_sentinel && requirements-dev.txt -ot venv/make_sentinel ]]; then
+	if [[ -f venv/make_sentinel && -f venv/bin/pip-compile && requirements.in -ot venv/make_sentinel && requirements.txt -ot venv/make_sentinel && requirements-dev.txt -ot venv/make_sentinel ]]; then
 		return
 	fi
 	if [[ ! -d venv ]]; then
 		python3 -m venv --prompt prestige venv
 	fi
-	(source venv/bin/activate && pip install -r requirements.txt && pip install -r requirements-dev.txt)
+	(
+		source venv/bin/activate
+		pip install pip-tools
+		pip-compile requirements.in
+		pip install -r requirements.txt
+		pip install -r requirements-dev.txt
+	)
 	touch venv/make_sentinel
 }
 
@@ -202,6 +208,12 @@ outdated() (
 	cd frontend
 	yarn outdated
 )
+
+deps() {
+	ensure-venv
+	ensure-node_modules frontend
+	ensure-node_modules e2e-tests
+}
 
 upgrade-deps() (
 	# TODO: Don't attempt stop/start frontend, if isn't already running.

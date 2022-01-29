@@ -17,7 +17,7 @@
 
 	{%- block styles %}
 		<link rel="preconnect" href="https://fonts.gstatic.com">
-		<link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&family=Source+Sans+Pro:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+		<link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
 		<link rel=stylesheet href="https://unpkg.com/tachyons@4.12.0/css/tachyons.min.css"/>
 		{%- for path in config['extra_css'] %}
 		<link rel=stylesheet href="{{ path|url }}">
@@ -59,19 +59,17 @@
 			</div>
 			{%- endif %}
 			<footer>
-				{%- block footer %}
 				{%- if config.copyright %}<span>{{ config.copyright }}</span>{%- endif %}
 				<span>Documentation built with <a href="https://www.mkdocs.org/" target="_blank" rel="noopener">MkDocs</a>, with a custom theme.</span>
-				{%- endblock %}
 			</footer>
 		</main>
 
 		<nav>
-			<a class="brand"a href="{{ nav.homepage.url|url }}">{{ config.site_name }}</a>
-			<a href="#" class="mv2">Prestige Home</a>
+			<a class=brand href="{{ nav.homepage.url|url }}">{{ config.site_name }}</a>
+			<a href="https://prestigemad.com" class=mv2>Prestige Home</a>
 			{%- block search_button %}
 			{%- if 'search' in config['plugins'] %}
-			<a href="#" id="searchBtn" class="mv2">Search</a>
+			<a href=# id=searchBtn class=mv2>Search</a>
 			{%- endif %}
 			{%- endblock %}
 			{%- block repo %}

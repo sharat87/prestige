@@ -3,6 +3,7 @@ import ModalManager from "_/ModalManager"
 import Button from "_/Button"
 import AuthService from "_/AuthService"
 import { AuthState, User } from "_/AuthService"
+import GitHubAuthButton from "_/GitHubAuthButton"
 
 interface InputAttrs {
 	id: string;
@@ -207,23 +208,8 @@ class ProfileView implements m.Component<{ user: User }> {
 			)),
 			m("h2", "Social Connections"),
 			user.isGitHubConnected
-				? m("p", "GitHub already connected")
+				? m("p", "GitHub already connected.")
 				: m(GitHubAuthButton, "Connect GitHub to work with Gists"),
 		]
 	}
-}
-
-const GitHubAuthButton: m.Component = {
-	view(vnode: m.Vnode) {
-		return m(
-			Button,
-			{
-				class: "t-github-auth-btn",
-				onclick() {
-					AuthService.startOAuth()
-				},
-			},
-			vnode.children ?? "GitHub",
-		)
-	},
 }

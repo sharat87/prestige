@@ -14,13 +14,13 @@ import type { Response } from "_/HttpSession"
 import ModalManager from "_/ModalManager"
 
 interface Attrs {
-	class?: string;
-	workspace: Workspace;
+	class?: string
+	workspace: Workspace
 }
 
 interface State {
-	requestMirror: CodeMirror.Editor;
-	responseMirror: CodeMirror.Editor;
+	requestMirror: CodeMirror.Editor
+	responseMirror: CodeMirror.Editor
 }
 
 export default function ResultPane(): m.Component<Attrs, State> {
@@ -28,6 +28,11 @@ export default function ResultPane(): m.Component<Attrs, State> {
 
 	function view(vnode: VnodeDOM<Attrs, State>) {
 		const workspace = vnode.attrs.workspace
+
+		if (!workspace.isResultPaneVisible) {
+			return null
+		}
+
 		const { result, isLoading } = workspace.session
 
 		if (isLoading) {
@@ -44,11 +49,11 @@ export default function ResultPane(): m.Component<Attrs, State> {
 
 		const toolbar = m(Toolbar, {
 			left: m(".flex", [
-				m(NavLink, { onclick: workspace.runAgain }, "Run Again"),
-				m(NavLink, { onclick: () => {
-					// TODO: Implement the "Find in Editor" button.
-					alert("Work in progress")
-				} }, "Find in Editor"),
+				m(NavLink, { onclick: () => workspace.runAgain() }, "Run Again"),
+				m(NavLink, { onclick: () => workspace.findInEditor() }, "Find in Editor"),
+			]),
+			right: m(".flex", [
+				m(NavLink, { onclick: () => workspace.isResultPaneVisible = false }, "Hide"),
 			]),
 		})
 
@@ -138,7 +143,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 							m("a", { href: "/docs/guides/proxy/", target: "_blank" }, "Learn More"),
 							".",
 						]
-						: "Direct CORS request, no proxy used. Only limited information available."),
+						: "Direct cross-origin request, no proxy used. Only limited information available."),
 				]),
 				renderResponse(response),
 				history ? history.map(r => renderResponse(r)).reverse() : null,

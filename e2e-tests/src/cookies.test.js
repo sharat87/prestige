@@ -28,33 +28,33 @@ test("Cookies UI reflect responses", async () => {
 	await expect(page.$(".t-cookies-empty")).resolves.not.toBeNull()
 }, 10000)
 
-test("Clear cookies button", async () => {
+test("Setting multiple cookies", async () => {
 	await page.goto(APP_URL)
-	await page.setEditorText("GET " + MOCKER_URL + "/cookies/set?name=mycroft\n")
+	await page.setEditorText("GET " + MOCKER_URL + "/cookies/set?name=mycroft&brother=sherlock\n")
 	await page.editorRun()
 	await page.shot()
 
 	await page.click(".t-cookies-toggle-btn")
 	await page.shot()
-	await page.shot()
 
 	await expect(page.$eval(".t-cookies-table tbody", (el) => el.innerText)).resolves.toBe([
-		"1",
-		"localhost.local",
-		"/",
-		"name",
-		"mycroft",
-		"n/a",
-		"Del",
-	].join("\t"))
-
-	await page.click(".t-cookies-clear-all-btn")
-	await page.shot()
-	await expect(page.$(".t-cookies-empty")).resolves.not.toBeNull()
-
-	await page.reload()
-	await page.waitForSelector(".t-cookies-toggle-btn")
-	await page.click(".t-cookies-toggle-btn")
-	await page.shot()
-	await expect(page.$(".t-cookies-empty")).resolves.not.toBeNull()
+		[
+			"1",
+			"localhost.local",
+			"/",
+			"brother",
+			"sherlock",
+			"n/a",
+			"Del",
+		].join("\t"),
+		[
+			"2",
+			"localhost.local",
+			"/",
+			"name",
+			"mycroft",
+			"n/a",
+			"Del",
+		].join("\t"),
+	].join("\n"))
 })

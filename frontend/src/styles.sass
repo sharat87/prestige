@@ -63,9 +63,13 @@ p.info
 svg.icon
 	display: inline-block
 	vertical-align: middle
-	width: 2ch
-	height: 2ch
 	margin: 3px
+	stroke-linecap: round
+	stroke-linejoin: round
+
+	.spin
+		animation: spin 2s linear infinite
+		transform-origin: center
 
 th, td
 	padding: $spacing-small
@@ -105,10 +109,31 @@ main
 	cursor: pointer
 	display: flex
 	align-items: center
+	position: relative
 
 	&.active
 		background-color: var(--active-tab-bg)
 		color: var(--active-tab-fg)
+
+	.tip
+		display: none
+		position: absolute
+		z-index: 9
+		font-size: 1rem
+		background-color: var(--nav-link-hover-bg)
+		color: var(--nav-link-hover-fg)
+		padding: 6px
+		border-radius: 3px
+		box-shadow: 0 0 12px #0009
+		white-space: pre
+
+		&.right
+			left: calc(100% + 6px)
+			top: 50%
+			transform: translateY(-50%)
+
+	&:not(.active):hover .tip
+		display: block
 
 :root
 	--monospace-font: "Source Code Pro"
@@ -300,6 +325,7 @@ pre
 
 .sidebar
 	border-right: 1px solid var(--border-color)
+	position: relative
 
 	.tab-bar
 		background-color: var(--page-bg2)
@@ -309,9 +335,21 @@ pre
 			font-size: 2em
 
 	.content
-		width: 240px
-		max-width: 20vw
+		min-width: 90px
+		max-width: 60vw
 		overflow: hidden auto
+
+	.grip
+		position: absolute
+		border: 1px solid var(--border-color)
+		border-radius: .6ch
+		right: -.6ch
+		top: 100px
+		width: 1.2ch
+		height: 5ch
+		z-index: 9
+		background-color: var(--page-bg)
+		cursor: ew-resize
 
 .CodeMirror-selected, ::selection
 	background: var(--selection-bg) !important
@@ -353,6 +391,7 @@ pre
 	max-width: 50vw
 	left: 50%
 	transform: translateX(-50%)
+	min-height: 40vh
 	max-height: 90vh
 	top: 5vh
 	z-index: 110
@@ -543,6 +582,11 @@ details.fold
 		opacity: 0
 		transform: translateY(-3em) scale(2.5)
 
+@keyframes spin
+	from
+		transform: rotate(0)
+	to
+		transform: rotate(360deg)
 
 // Theming
 

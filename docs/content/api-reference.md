@@ -16,7 +16,7 @@ A `Context` object contains the following:
 
         Authorization: ${this.basicAuth("scott", "tiger")}
 
-    This will set the Authorization header to do basic auth with username `"scott"` and `"tiger"`.
+    This will set the Authorization header to do basic auth with username `"scott"` and password `"tiger"`.
 
 `.multipart(object)`
 :   Constructs a multipart request body when building a request. This is intended for use in the body section, in the following fashion:
@@ -28,10 +28,21 @@ A `Context` object contains the following:
             file2: "file 2 content here"
         })
 
-    This request will make a POST call to `https://httpbun.com/post`, with `Content-Type` as `multipart/form-data`, with the two files `file1` and `file2`. You can use files from the File Bucket with the `.fileFromBucket()` method.
+    This request will make a POST call to `https://httpbun.com/post`, with `Content-Type` as `multipart/form-data`, with the two fields `file1` and `file2`. You can use files from the File Bucket with the `.fileFromBucket()` method.
+
+`.fileFromBucket(fileName: string): Promise<MultiPartFormValue>`
+:   This function can be used to load a file from the file bucket. It returns a Promise that resolves to `MultiPartFormValue` object, so it's ideally suited to be used in the `.multipart` method. For example, if you've dropped a file called `info.txt` in your File Bucket, then it can be uploaded to an API like this:
+
+        POST https://httpbun.com/post
+
+        = this.multipart({
+            file: await this.fileFromBucket("info.txt"),
+        })
 
 `.storeItem(key: string, data: any): void`
 :   Takes a key-value pair and stores it in the browser's `localStorage`. While it is possible to use the `localStorage` object directly form inside Javascript blocks, its not recommended, and may indeed not be allowed at all in the future.
+
+    Note that any data stored with this method are common across all documents. If you do `this.storeItem("ocean", "Pacific")` in one Prestige document, it'll be available for any other Prestige document you open, in the form of `this.loadItem("ocean")`.
 
 `.loadItem(key: string): any`
 :   Takes a key, and returns the value, if any, that was previously stored by calling the `.storeItem` method. While it is possible to use the `localStorage` object directly form inside Javascript blocks, its not recommended, and may indeed not be allowed at all in the future.

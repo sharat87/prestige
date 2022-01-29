@@ -72,13 +72,31 @@ def proxy(request):
 		update_cookie_jar(session.cookies, cookies)
 
 	if body_type == "multipart/form-data":
+		body_dict = json.loads(body)
+		if not isinstance(body_dict, dict):
+			return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid body type", data={
+				"error": {
+					"code": "invalid-body-type-for-multipart",
+					"message": "Body should be a JSON serialized object for multipart requests.",
+				},
+			})
+
 		# The content-type will be set with an appropriate boundary value by the `request` method below.
 		del headers["content-type"]
-		data = None
-		files = json.loads(body) if body else {}
-		for key, value in files.items():
+
+		data = {}
+		files = {}
+
+		for key, value in body_dict.items():
 			if isinstance(value, dict):
 				files[key] = value["name"], base64.b64decode(value["body"]), value["type"]
+			elif isinstance(value, bool):
+				data[key] = "true" if value else "false"
+			elif value is None:
+				data[key] = "null"
+			else:
+				data[key] = value
+
 	else:
 		data = None if body is None else body.encode("utf-8")
 		files = None
@@ -110,11 +128,8 @@ def proxy(request):
 
 	return JsonResponse(status=HTTPStatus.OK, data={
 		"id": job.get("id"),
-		"response": response_to_dict(response, None if response.history else body),
-		"history": [
-			response_to_dict(r, None if i > 0 else body)
-			for i, r in enumerate(response.history)
-		],
+		"response": response_to_dict(response),
+		"history": list(map(response_to_dict, response.history)),
 		"cookies": cookie_jar_to_plain(session.cookies),
 	})
 
@@ -160,7 +175,7 @@ def cookie_jar_to_plain(cookie_jar: RequestsCookieJar) -> PlainCookieJarType:
 	return plain
 
 
-def response_to_dict(response: requests.Response, body=None):
+def response_to_dict(response: requests.Response):
 	body_in_response = get_body_in_response(response)
 	return {
 		"url": response.url,
@@ -169,9 +184,11 @@ def response_to_dict(response: requests.Response, body=None):
 		"headers": list(response.headers.items()),
 		"body": body_in_response,
 		"request": {
+			"url": response.request.url,
 			"method": response.request.method,
 			"headers": list(response.request.headers.items()),
-			"body": body,
+			# TODO: Figure out a better way to show the body _bytes_ here, instead of assuming UTF-8.
+			"body": response.request.body.decode(),
 		}
 	}
 

@@ -3,6 +3,8 @@ description: >
   Run Javascript functions at key points when executing requests in Prestige HTTP Client.
 ---
 
+# Event Handling
+
 ## Handling for any request
 
 In a Javascript block, the `this.on` context method can be used to add event handlers. For example:

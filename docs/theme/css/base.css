@@ -59,7 +59,6 @@ nav > :first-child, aside > :first-child {
 
 main {
 	margin: 1rem auto;
-	width: 60%;
 	max-width: 45rem;
 	background-color: #FFF;
 	padding: .5rem 2rem;
@@ -162,7 +161,7 @@ hr {
 }
 
 code, kbd {
-	font-family: "Source Code Pro", monospace;
+	font-family: monospace;
 	font-size: .9rem;
 }
 
@@ -223,11 +222,19 @@ th, td {
 
 dt {
 	font-weight: bold;
-	margin-top: 1em;
+	margin-top: 1.3em;
 }
 
 dt + dt {
 	margin-top: 0;
+}
+
+dt code {
+	font-size: 1rem;
+}
+
+dd > :first-child {
+	margin-top: .3em;
 }
 
 footer {
@@ -241,12 +248,10 @@ footer {
 }
 
 .headerlink {
-	font-family: FontAwesome;
 	display: none;
 	padding-left: .5em;
 	color: inherit;
 	transform: scale(.7);
-	font-size: 90%;
 	text-decoration: none;
 }
 
