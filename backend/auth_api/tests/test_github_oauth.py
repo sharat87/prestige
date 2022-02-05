@@ -20,5 +20,5 @@ class GitHubOauthTests(TestCase):
 
 		params = parse_qs(location.query)
 		self.assertEqual(params["client_id"], ["gh-cid"])
-		self.assertEqual(set(" ".join(params["scope"]).split()), {"read:user", "user:email", "repo", "gist"})
+		self.assertEqual(set(" ".join(params["scope"]).split()), {"read:user", "user:email", "gist"})
 		self.assertEqual(len(params["state"]), 1)

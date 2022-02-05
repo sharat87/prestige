@@ -47,6 +47,7 @@ class MessedUpInput(SimpleTestCase, JobMixin):
 		self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 		self.assertEqual(response.json(), {
 			"error": {
+				"code": "missing-url",
 				"message": "Missing endpoint URL to proxy to.",
 			},
 		})
@@ -58,6 +59,7 @@ class MessedUpInput(SimpleTestCase, JobMixin):
 		self.assertEqual(response.status_code, HTTPStatus.BAD_REQUEST)
 		self.assertEqual(response.json(), {
 			"error": {
+				"code": "url-not-string",
 				"message": "URL should be a string.",
 			},
 		})
