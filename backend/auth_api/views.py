@@ -207,7 +207,7 @@ def github_auth_view(request):
 	return redirect(
 		f"{settings.EXT_URL_PREFIX}https://github.com/login/oauth/authorize"
 		f"?client_id={settings.GITHUB_CLIENT_ID}"
-		"&scope=read:user user:email repo gist"
+		"&scope=read:user user:email gist"
 		f"&state={state_token}"
 	)
 
