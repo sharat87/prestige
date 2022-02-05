@@ -3,6 +3,7 @@ import logging
 from http import HTTPStatus
 import json
 from typing import Dict, Union, Any, Optional
+import socket
 
 import requests
 from django.conf import settings
@@ -38,6 +39,7 @@ def proxy(request):
 	if not url:
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Missing URL in payload", data={
 			"error": {
+				"code": "missing-url",
 				"message": "Missing endpoint URL to proxy to.",
 			},
 		})
@@ -45,6 +47,7 @@ def proxy(request):
 	if not isinstance(url, str):
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Incorrect data type of URL", data={
 			"error": {
+				"code": "url-not-string",
 				"message": "URL should be a string.",
 			},
 		})
@@ -52,12 +55,13 @@ def proxy(request):
 	if not is_url_allowed(url):
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Endpoint not allowed", data={
 			"error": {
+				"code": "url-not-allowed",
 				"message": "This URL is not allowed on this proxy.",
 			},
 		})
 
 	# Logging part of URLs here to help prevent abuse.
-	log.info("ProxyingTo %r %r", method, url and url.split("?")[0])
+	log.info("ProxyingTo %r %r", method, url and url.split("?", 1)[0])
 
 	headers: Dict[str, str] = {name: value for name, value in job["headers"]} if job.get("headers") else {}
 	body: Optional[str] = job.get("body")
@@ -109,12 +113,13 @@ def proxy(request):
 			data=data,
 			files=files,
 			timeout=timeout,
-			verify=False,
+			verify=False,  # TODO: This shouldn't be always `False`. The client should be able to set it to `False`.
 		)
 
 	except requests.exceptions.ConnectionError:
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Proxied endpoint unreachable", data={
 			"error": {
+				"code": "error-connecting-to-host",
 				"message": "Error connecting to host at {}.".format(url),
 			},
 		})
@@ -122,6 +127,7 @@ def proxy(request):
 	except requests.exceptions.MissingSchema:
 		return JsonResponse(status=HTTPStatus.BAD_REQUEST, reason="Invalid URL in body", data={
 			"error": {
+				"code": "missing-schema-in-url",
 				"message": "Invalid URL: '{0}'. Perhaps you meant 'http://{0}'".format(url),
 			},
 		})
@@ -233,6 +239,16 @@ def is_url_allowed(url: str):
 		return False
 
 	host_port = parts[2]
-	host = (host_port.split(":")[0] if ":" in host_port else host_port).lower()
+	if ":" in host_port:
+		host, port_str = host_port.split(":", 1)
+		port = int(port_str)
+	else:
+		host = host_port
+		port = 443 if url.startswith("https://") else 80
 
-	return host not in settings.PROXY_DISALLOW_HOSTS
+	host = host.lower()
+
+	return not (
+		host in settings.PROXY_DISALLOW_HOSTS or
+		socket.getaddrinfo(host, port)[0][4][0] in settings.PROXY_DISALLOW_HOSTS
+	)

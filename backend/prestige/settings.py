@@ -187,10 +187,14 @@ if DEBUG:
 else:
 	PROXY_DISALLOW_HOSTS = {
 		s.strip()
-		for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "localhost, 127.0.0.1").split(",")
+		for s in os.getenv("PRESTIGE_PROXY_DISALLOW_HOSTS", "").split(",")
 		if not s.isspace()
 	}
-	PROXY_DISALLOW_HOSTS.update(ALLOWED_HOSTS)
+	PROXY_DISALLOW_HOSTS.update(
+		ALLOWED_HOSTS,
+		# These will *always* be rejected.
+		{"localhost", "127.0.0.1", "169.254.169.254", "metadata.google.internal"},
+	)
 
 
 if not DEBUG:
