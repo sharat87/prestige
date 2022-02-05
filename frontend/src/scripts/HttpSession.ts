@@ -220,7 +220,8 @@ export default class HttpSession {
 		if (data.response != null && data.response.headers != null) {
 			data.response.headers = new Headers(data.response.headers)
 		}
-		for (const res of data.history) {
+
+		for (const res of (data.history ?? [])) {
 			if (res.headers != null) {
 				res.headers = new Headers(res.headers)
 			}
