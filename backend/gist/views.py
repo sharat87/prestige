@@ -124,8 +124,20 @@ def list_gists_view(request, gh_identity):
 		},
 	)
 
+	response_data = response.json()
+
 	if response.status_code != 200:
-		log.info("Error fetching gists", response.content())
+		log.info("Error fetching gists", response.content)
+
+		if response_data["message"] == "Bad credentials":
+			# Access has been revoked from GitHub's settings and this token is now invalid.
+			return JsonResponse(status=HTTPStatus.UNAUTHORIZED, data={
+				"error": {
+					"code": "gist-access-revoked",
+					"message": "Access to Gist appears to have been revoked. Please re-authorize.",
+				},
+			})
+
 		return JsonResponse(status=HTTPStatus.UNAUTHORIZED, data={
 			"error": {
 				"code": "gists-list-api-fail",
@@ -133,7 +145,6 @@ def list_gists_view(request, gh_identity):
 			},
 		})
 
-	response_data = response.json()
 	if "data" not in response_data:
 		return JsonResponse(status=HTTPStatus.INTERNAL_SERVER_ERROR, data={
 			"error": {

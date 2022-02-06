@@ -207,7 +207,7 @@ class ProfileView implements m.Component<{ user: User }> {
 				"Log out",
 			)),
 			m("h2", "Social Connections"),
-			user.isGitHubConnected
+			AuthService.isGistAvailable()
 				? m("p", "GitHub already connected.")
 				: m(GitHubAuthButton, "Connect GitHub to work with Gists"),
 		]

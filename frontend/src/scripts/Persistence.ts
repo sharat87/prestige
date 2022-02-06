@@ -297,7 +297,7 @@ export class GistProvider extends Provider<GistSource> {
 			throw new Error("User not logged in, cannot browse documents on Gist.")
 		}
 
-		if (!currentUser.isGitHubConnected) {
+		if (!AuthService.isGistAvailable()) {
 			throw new Error("GitHub not connected for logged in user, cannot browse documents on Gist.")
 		}
 
@@ -311,11 +311,31 @@ export class GistProvider extends Provider<GistSource> {
 			return
 		}
 
-		const response = await m.request<{ gists: Gist[] }>({
-			method: "GET",
-			url: GIST_API_PREFIX,
-			withCredentials: true,
-		})
+		let response: {
+			gists: Gist[]
+		}
+
+		try {
+			response = await m.request<typeof response>({
+				method: "GET",
+				url: GIST_API_PREFIX,
+				withCredentials: true,
+			})
+
+		} catch(error: unknown) {
+			const { code } = (error as any).response.error
+			if (code === "gist-access-revoked") {
+				AuthService.isGistAvailable(false)
+				Toaster.push(
+					"danger",
+					"Access to Gist appears to have been revoked. Please re-authorize from the Profile menu.",
+				)
+				return
+			}
+
+			throw error
+
+		}
 
 		this.entries = []
 		for (const gist of response.gists) {
@@ -457,7 +477,7 @@ export class GistProvider extends Provider<GistSource> {
 			])
 		}
 
-		if (!currentUser.isGitHubConnected) {
+		if (!AuthService.isGistAvailable()) {
 			return "Please connect to GitHub to view your Gists."
 		}
 
@@ -574,6 +594,7 @@ export const currentSheetName: Stream<null | string> = Stream(null)
 export const currentSheet: Stream<null | "loading" | Sheet> = Stream(null)
 
 availableSources.map(async function(sources: Source[]): Promise<void> {
+	console.log("available sources", sources)
 	// Refresh available providers.
 	const providers: Provider<Source>[] = []
 
@@ -591,6 +612,7 @@ availableSources.map(async function(sources: Source[]): Promise<void> {
 		providers.push(provider)
 	}
 
+	console.log("providers", providers)
 	await Promise.all(providers.map(provider => provider.loadRootListing()))
 
 	currentProviders(providers)

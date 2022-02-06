@@ -34,8 +34,9 @@ declare const grecaptcha: {
 
 class AuthServiceImpl {
 	authState: AuthState
-	currentUser: Stream<null | User>
+	currentUser: Stream<null | User>  // Deprecated
 	email: Stream<string>
+	isGistAvailable: Stream<boolean>
 	oAuthWindow: null | Window
 
 	constructor() {
@@ -43,6 +44,7 @@ class AuthServiceImpl {
 		// TODO: Use a non-null sentinel value for indicating anonymous user.
 		this.currentUser = Stream(null)
 		this.email = Stream("")
+		this.isGistAvailable = Stream(false)
 		this.oAuthWindow = null
 
 		this.currentUser.map(async (user): Promise<void> => {
@@ -60,14 +62,17 @@ class AuthServiceImpl {
 			.then(response => {
 				if (response.user == null) {
 					this.authState = AuthState.ANONYMOUS
+					this.isGistAvailable(false)
 					this.currentUser(null)
 				} else {
 					this.authState = AuthState.LOGGED_IN
+					this.isGistAvailable(response.user?.isGitHubConnected ?? false)
 					this.currentUser(response.user)
 				}
 			})
 			.catch(() => {
 				this.authState = AuthState.ANONYMOUS
+				this.isGistAvailable(false)
 				this.currentUser(null)
 			})
 			.finally(m.redraw)
@@ -123,6 +128,7 @@ class AuthServiceImpl {
 		})
 			.then((response) => {
 				this.authState = AuthState.LOGGED_IN
+				this.isGistAvailable(response.user?.isGitHubConnected ?? false)
 				this.currentUser(response.user)
 			})
 			.catch(error => {
@@ -142,6 +148,7 @@ class AuthServiceImpl {
 		})
 			.then(() => {
 				this.authState = AuthState.ANONYMOUS
+				this.isGistAvailable(false)
 				this.currentUser(null)
 			})
 			.catch(() => {
