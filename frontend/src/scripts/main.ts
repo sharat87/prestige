@@ -148,11 +148,7 @@ function WorkspaceView(): m.Component {
 			m("header", [
 				m(".flex.items-end", [
 					m("h1.f3.mh2.mv0", "Prestige"),
-					m(".f6.i.ml3", [
-						"Just an HTTP client by ",
-						m("a", { href: "https://sharats.me", target: "_blank" }, "Shri"),
-						".",
-					]),
+					m(".f6.i.ml3", "An HTTP client."),
 				]),
 				m(".flex.items-stretch", [
 					RepoStats.stars > 0 && m(".pv1.ph2.db.flex.items-center.silver", [

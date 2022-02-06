@@ -31,6 +31,7 @@ function view(vnode: m.VnodeDOM<Attrs, State>): m.Children {
 	console.log(exporter.toCurl({ includeCookies, useLongFlags }).toComponentChildren())
 
 	return m(".ma2", { style: { width: "50vw" } }, [
+		m("h2.ma2", "Export Request"),
 		m("p", [
 			m("label.mh2", [
 				m("input", {
