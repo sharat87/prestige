@@ -49,7 +49,16 @@ export default function ResultPane(): m.Component<Attrs, State> {
 
 		const toolbar = m(Toolbar, {
 			left: m(".flex", [
-				m(NavLink, { onclick: () => workspace.runAgain() }, "Run Again"),
+				m(
+					NavLink,
+					{
+						disabled: !workspace.isRunAgainAvailable(),
+						onclick: () => {
+							workspace.runAgain()
+						},
+					},
+					"Run Again",
+				),
 				m(NavLink, { onclick: () => workspace.findInEditor() }, "Find in Editor"),
 			]),
 			right: m(".flex", [

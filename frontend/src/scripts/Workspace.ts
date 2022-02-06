@@ -655,6 +655,10 @@ export default class Workspace {
 		this.codeMirror.scrollIntoView(null, 40)
 	}
 
+	isRunAgainAvailable(): boolean {
+		return this.prevExecuteBookmark?.find() != null
+	}
+
 	doFlashes(): void {
 		if (this.codeMirror == null) {
 			return

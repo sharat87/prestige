@@ -594,7 +594,6 @@ export const currentSheetName: Stream<null | string> = Stream(null)
 export const currentSheet: Stream<null | "loading" | Sheet> = Stream(null)
 
 availableSources.map(async function(sources: Source[]): Promise<void> {
-	console.log("available sources", sources)
 	// Refresh available providers.
 	const providers: Provider<Source>[] = []
 
@@ -612,7 +611,6 @@ availableSources.map(async function(sources: Source[]): Promise<void> {
 		providers.push(provider)
 	}
 
-	console.log("providers", providers)
 	await Promise.all(providers.map(provider => provider.loadRootListing()))
 
 	currentProviders(providers)
