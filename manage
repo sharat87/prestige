@@ -227,6 +227,12 @@ upgrade-deps() (
 start() (
 	ensure-venv
 	if [[ -e supervisord.pid ]]; then
+		if ! curl -sS localhost:3044 >&/dev/null; then
+			echo "Looks like an unclean exit was done. Cleaning up and trying to start again."
+			rm supervisord.pid
+			start
+			return
+		fi
 		echo 'Already running.'
 	else
 		if [[ -f dev.env ]]; then

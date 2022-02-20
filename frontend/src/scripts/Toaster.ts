@@ -7,11 +7,6 @@ export interface Toast {
 	endTime?: number
 }
 
-export interface Message {
-	type: "error" | "success",
-	body: string,
-}
-
 let nextId = 1
 
 class Toaster {
@@ -20,10 +15,6 @@ class Toaster {
 	constructor() {
 		this.toasts = []
 		this.onCloseBtnClicked = this.onCloseBtnClicked.bind(this)
-	}
-
-	map<T>(fn: ((toast: Toast) => T)): T[] {
-		return this.toasts.map(fn)
 	}
 
 	push(type: Toast["type"], message: Toast["message"]): void
@@ -78,7 +69,7 @@ class Toaster {
 			{
 				onclick: this.onCloseBtnClicked,
 			},
-			this.map(toast => m(
+			this.toasts.map(toast => m(
 				".f5.pa3.mb2.br2.shadow-2",
 				{
 					class: {
@@ -106,7 +97,8 @@ class Toaster {
 					}, m.trust("&times;")),
 					m("div", toast.message),
 				],
-			)))
+			)),
+		)
 	}
 
 	onCloseBtnClicked(event: Event) {

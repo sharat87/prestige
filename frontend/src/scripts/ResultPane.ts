@@ -1,7 +1,7 @@
 import m, { VnodeDOM } from "mithril"
 import Workspace from "_/Workspace"
 import CodeMirror from "codemirror"
-import { LoadingLabel } from "_/LoadingLabel"
+import LoadingLabel from "_/LoadingLabel"
 import Toolbar from "_/Toolbar"
 import Table from "_/Table"
 import PageEnd from "_/PageEnd"
@@ -125,9 +125,11 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			toolbar,
 			m(".body", [
 				m("ul.messages", [
-					history.length > 0 && m("li",
-						`Redirected ${ history.length === 1 ? "once" : history.length + "times" }.` +
-						" Scroll down for more details."),
+					history.length > 0 && m(
+						"li",
+						`Redirected ${ history.length > 1 ? `${history.length} times` : "once" }.` +
+							" Scroll down for more details.",
+					),
 					result.timeTaken != null && m("li", [
 						"Finished in ",
 						m("b", m(IntervalDisplay, { ms: result.timeTaken })),
@@ -137,9 +139,9 @@ export default function ResultPane(): m.Component<Attrs, State> {
 						[
 							"Cookies: ",
 							m.trust([
-								cookieChanges.added ? (cookieChanges.added + " new") : null,
-								cookieChanges.modified ? (cookieChanges.modified + " modified") : null,
-								cookieChanges.removed ? (cookieChanges.removed + " removed") : null,
+								cookieChanges.added ? `${cookieChanges.added} new` : null,
+								cookieChanges.modified ? `${cookieChanges.modified} modified` : null,
+								cookieChanges.removed ? `${cookieChanges.removed} removed` : null,
 							].filter(v => v != null).join(", ")),
 							".",
 						],
@@ -176,13 +178,13 @@ export default function ResultPane(): m.Component<Attrs, State> {
 		})[response.status.toString()[0]] ?? ""
 
 		const htmlBaseUrl = response.url ? new URL(response.url).origin : null
+		const statusTitleCase = response?.statusText.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase())
 
 		return response && m(".response", [
 			m(
 				".t-response-status.status.f2.pa2",
 				{ class: skin },
-				response.status + " " +
-					response.statusText.toLowerCase().replace(/\b[a-z]/g, (c) => c.toUpperCase()),
+				`${response.status} ${statusTitleCase}`,
 			),
 			m("pre.pa2.pb3.overflow-x-auto.overflow-y-hidden", response.request.method + " " + response.url),
 			response.request.method === "GET"

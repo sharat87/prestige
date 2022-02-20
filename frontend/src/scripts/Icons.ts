@@ -144,5 +144,5 @@ export const floppyDisk = iconComponent`
 `
 
 export const spinner = iconComponent`
-<path d="M168,40.7a96,96,0,1,1-80,0" fill="none" stroke="currentColor" class="spin"></path>
+<path d="M128,32A96,96,0,1,0,224,128" fill="none" stroke="currentColor" class="spin"></path>
 `

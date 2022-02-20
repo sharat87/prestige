@@ -4,6 +4,7 @@ import Button from "_/Button"
 import AuthService from "_/AuthService"
 import { AuthState, User } from "_/AuthService"
 import GitHubAuthButton from "_/GitHubAuthButton"
+import * as Icons from "_/Icons"
 
 interface InputAttrs {
 	id: string;
@@ -149,7 +150,7 @@ class LoginFormView implements m.ClassComponent<never> {
 				),
 				m(
 					GitHubAuthButton,
-					"Login with GitHub",
+					[m(Icons.github), "Login with GitHub"],
 				),
 			]),
 			this.isLogin
@@ -208,8 +209,8 @@ class ProfileView implements m.Component<{ user: User }> {
 			)),
 			m("h2", "Social Connections"),
 			AuthService.isGistAvailable()
-				? m("p", "GitHub already connected.")
-				: m(GitHubAuthButton, "Connect GitHub to work with Gists"),
+				? m("p", [m(Icons.github), "GitHub already connected."])
+				: m(GitHubAuthButton, [m(Icons.github), "Connect GitHub to work with Gists"]),
 		]
 	}
 }

@@ -25,6 +25,8 @@ import * as pings from "_/pings"
 const REPO_URL = "https://github.com/sharat87/prestige"
 
 window.addEventListener("load", main)
+window.addEventListener("error", onWindowError)
+window.addEventListener("unhandledrejection", onUnhandledRejection)
 
 function main() {
 	if (Env.rollbarToken != null) {
@@ -66,6 +68,27 @@ function main() {
 	})
 
 	pings.load()
+}
+
+function onWindowError(event: ErrorEvent) {
+	// Ref: <https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event>.
+	if (event instanceof UIEvent) {
+		// Error was generated from a UI element.
+		Toaster.push("danger", `UI: ${event.type}: ${event.message}`)
+	} else {
+		// Non-UI error.
+		Toaster.push("danger", `${event.type}: ${event.message}`)
+	}
+	// Manual redraw since this event handler is not managed by Mithril.
+	m.redraw()
+}
+
+function onUnhandledRejection(event: { promise: Promise<unknown>, reason: unknown }) {
+	// Don't do any error specific special handling here. That should be done at the source of the error.
+	// Ref: <https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event>.
+	Toaster.push("danger", `${event.reason} (UR)`)
+	// Manual redraw since this event handler is not managed by Mithril.
+	m.redraw()
 }
 
 const RepoStats = {
