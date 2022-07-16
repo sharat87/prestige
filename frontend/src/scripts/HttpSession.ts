@@ -1,5 +1,6 @@
 import m from "mithril"
-import type CookieJar, { StoreType } from "_/CookieJar"
+import type CookieJar from "_/CookieJar"
+import type { StoreType } from "_/CookieJar"
 import type { RequestDetails } from "_/Parser"
 
 interface ResultBase {
