@@ -110,7 +110,7 @@ function renderTokens(fullText: string, mode: CodeMirror.Mode<unknown>): m.Child
 			}
 
 			if (prevTokenText === "{" || prevTokenText === "[") {
-				const commentEl = m("span.i.cm-comment.no-select", "n/a")
+				const commentEl = m("span.i.cm-comment.no-select", "")
 				rows.push(commentEl)
 				nestingStack.push({
 					commentEl,
