@@ -1,6 +1,5 @@
 import m from "mithril"
-import type CookieJar from "_/CookieJar"
-import type { StoreType } from "_/CookieJar"
+import type CookieJar, { StoreType } from "_/CookieJar"
 import type { RequestDetails } from "_/Parser"
 
 interface ResultBase {
@@ -10,7 +9,7 @@ interface ResultBase {
 interface SuccessResult extends ResultBase {
 	ok: true
 	response: Response
-	history: Response[]
+	history: null | Response[]
 	proxy: null | string
 	cookies: null | StoreType
 	cookieChanges?: {

@@ -125,7 +125,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			toolbar,
 			m(".body", [
 				m("ul.messages", [
-					history.length > 0 && m(
+					history != null && history.length > 0 && m(
 						"li",
 						`Redirected ${ history.length > 1 ? `${history.length} times` : "once" }.` +
 							" Scroll down for more details.",
@@ -184,7 +184,7 @@ export default function ResultPane(): m.Component<Attrs, State> {
 			m(
 				".t-response-status.status.f2.pa2",
 				{ class: skin },
-				`${response.status} ${statusTitleCase}`,
+				statusTitleCase,
 			),
 			m("pre.pa2.pb3.overflow-x-auto.overflow-y-hidden", response.request.method + " " + response.url),
 			response.request.method === "GET"

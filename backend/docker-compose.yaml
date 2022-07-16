@@ -1,0 +1,23 @@
+version: "3.7"
+
+name: prestige
+
+services:
+  mongo:
+    image: mongo:5.0.9
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: user
+      MONGO_INITDB_ROOT_PASSWORD: pass
+    ports:
+      - "27017:27017"
+
+  httpbun:
+    image: ghcr.io/sharat87/httpbun
+    ports:
+      - "3043:80"
+
+  maildev:
+    image: maildev/maildev
+    ports:
+      - "3044:1025"  # SMTP Port
+      - "3045:1080"  # HTTP Port for the web UI

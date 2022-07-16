@@ -1,8 +1,7 @@
 import m from "mithril"
 import Stream from "mithril/stream"
-import { authUrl } from "_/Env"
+import { authUrl, getRecaptchaSiteKey } from "_/Env"
 import Toaster from "_/Toaster"
-import { getRecaptchaSiteKey } from "_/Env"
 
 export const enum AuthState {
 	PENDING,
@@ -84,25 +83,28 @@ class AuthServiceImpl {
 
 	async signup(email: string, password: string): Promise<void> {
 		const recaptchaSiteKey = await getRecaptchaSiteKey()
-		if (typeof grecaptcha === "undefined") {
-			await new Promise((resolve, reject) => {
-				const s = document.createElement("script")
-				s.src = "https://www.google.com/recaptcha/enterprise.js?render=" + recaptchaSiteKey
-				s.onload = resolve
-				s.onerror = reject
-				document.body.appendChild(s)
-			})
-		}
+		let token: null | string = null
 
-		await new Promise(resolve => grecaptcha.enterprise.ready(resolve))
+		if (recaptchaSiteKey !== "") {
+			if (typeof grecaptcha === "undefined") {
+				await new Promise((resolve, reject) => {
+					const s = document.createElement("script")
+					s.src = "https://www.google.com/recaptcha/enterprise.js?render=" + recaptchaSiteKey
+					s.onload = resolve
+					s.onerror = reject
+					document.body.appendChild(s)
+				})
+			}
 
-		let token = ""
-		try {
-			token = await grecaptcha.enterprise.execute(recaptchaSiteKey, { action: "SIGNUP" })
-		} catch (error) {
-			console.error("Error getting reCAPTCHA token", error)
-			alert("Unable to do reCAPTCHA, signup failed.")
-			return
+			await new Promise(resolve => grecaptcha.enterprise.ready(resolve))
+
+			try {
+				token = await grecaptcha.enterprise.execute(recaptchaSiteKey, { action: "SIGNUP" })
+			} catch (error) {
+				console.error("Error getting reCAPTCHA token", error)
+				alert("Unable to do reCAPTCHA, signup failed.")
+				return
+			}
 		}
 
 		return this.authAction("signup", email, password, token)
@@ -125,6 +127,9 @@ class AuthServiceImpl {
 				password,
 				recaptchaToken,
 			},
+			headers: {
+				"Content-Type": "application/json",
+			},
 		})
 			.then((response) => {
 				this.authState = AuthState.LOGGED_IN
@@ -145,6 +150,9 @@ class AuthServiceImpl {
 			method: "POST",
 			url: AUTH_URL_BASE + "logout",
 			withCredentials: true,
+			headers: {
+				"Content-Type": "application/json",
+			},
 		})
 			.then(() => {
 				this.authState = AuthState.ANONYMOUS
@@ -216,6 +224,25 @@ class AuthServiceImpl {
 		this.oAuthWindow?.focus()
 	}
 
+	forgotPasswordRequest(email: string): Promise<void> {
+		return m.request<void>({
+			method: "POST",
+			url: AUTH_URL_BASE + "forgot-password/request",
+			withCredentials: true,
+			body: {
+				email,
+			},
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+			.then(() => {
+				Toaster.push("success", "Password reset email sent.")
+			})
+			.catch(() => {
+				Toaster.push("danger", "Password reset failed.")
+			})
+	}
 }
 
 function isAuthMessage(object: unknown): object is AuthMessage {

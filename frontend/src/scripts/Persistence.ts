@@ -1,7 +1,7 @@
 import m from "mithril"
 import Stream from "mithril/stream"
-import AuthService from "_/AuthService"
 import type { User } from "_/AuthService"
+import AuthService from "_/AuthService"
 import { GIST_API_PREFIX, storageUrl } from "_/Env"
 import ModalManager from "_/ModalManager"
 import Button from "_/Button"
@@ -158,7 +158,7 @@ class BrowserProvider extends Provider<LocalSource> {
 								m.route.Link,
 								{
 									href,
-									class: window.location.hash.substr(2) === href ? "active" : "",
+									class: window.location.hash.substring(2) === href ? "active" : "",
 								},
 								entry.name,
 							),
@@ -279,7 +279,6 @@ interface Gist {
 
 interface GistFile {
 	name: string
-	rawUrl: string
 }
 
 export class GistProvider extends Provider<GistSource> {
@@ -340,8 +339,7 @@ export class GistProvider extends Provider<GistSource> {
 		this.entries = []
 		for (const gist of response.gists) {
 			if (gist.readme != null && gist.files?.length > 0) {
-				const path = `${ gist.owner }/${ gist.name }`
-				gist.path = path
+				gist.path = `${ gist.owner }/${ gist.name }`
 				this.gists[gist.name] = gist
 			}
 		}
@@ -380,6 +378,9 @@ export class GistProvider extends Provider<GistSource> {
 			method: "PATCH",
 			url: GIST_API_PREFIX + "update/" + gistName,
 			withCredentials: true,
+			headers: {
+				"Content-Type": "application/json",
+			},
 			body: {
 				readmeName: gist.readme.name,
 				files: {
@@ -407,6 +408,9 @@ export class GistProvider extends Provider<GistSource> {
 					method: "POST",
 					url: GIST_API_PREFIX,
 					withCredentials: true,
+					headers: {
+						"Content-Type": "application/json",
+					},
 					body: {
 						title,
 						description,
@@ -507,7 +511,7 @@ export class GistProvider extends Provider<GistSource> {
 								m.route.Link,
 								{
 									href: gistHref,
-									class: window.location.hash.substr(2) === gistHref ? "active" : "",
+									class: window.location.hash.substring(2) === gistHref ? "active" : "",
 								},
 								gist.readme.name.replace(/^_|(\.md$)/g, ""),
 							)),
@@ -517,7 +521,7 @@ export class GistProvider extends Provider<GistSource> {
 								m.route.Link,
 								{
 									href: gistHref,
-									class: window.location.hash.substr(2) === gistHref ? "active" : "",
+									class: window.location.hash.substring(2) === gistHref ? "active" : "",
 								},
 								gist.readme.name.replace(/^_|(\.md$)/g, ""),
 							),
@@ -528,7 +532,7 @@ export class GistProvider extends Provider<GistSource> {
 										m.route.Link,
 										{
 											href: fileHref,
-											class: window.location.hash.substr(2) === fileHref ? "active" : "",
+											class: window.location.hash.substring(2) === fileHref ? "active" : "",
 										},
 										file.name,
 									))
@@ -584,7 +588,7 @@ function createProviderForSource(key: string, source: Source): Provider<Source> 
 		return new GistProvider(key, source)
 	}
 
-	throw new Error(`Unrecognized persistence source type: '${ source != null && (source as BaseSource).type }'.`)
+	throw new Error(`Unrecognized persistence source type: '${ (source as BaseSource).type }'.`)
 }
 
 // TODO: Data in `currentProviders` and `providerRegistry` is the same, in different shapes. Remove one.

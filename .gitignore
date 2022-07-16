@@ -13,6 +13,7 @@ __pycache__
 .mypy_cache
 .pytest_cache
 backend/.coverage
+/backend/assets/static
 
 frontend/dist
 frontend/dist-*
@@ -25,7 +26,7 @@ e2e-tests/trail
 
 /docs/site
 
-/dev.env
+env-*.sh
 /package.tar.gz
 
 .DS_Store

@@ -1,0 +1,52 @@
+# Welcome to Prestige! Your newest developer tool!
+# Just enter the HTTP requests you want to make and hit Ctrl+Enter (or Cmd+Enter) to execute.
+# Like this one right here:
+
+GET https://httpbun.com/get?name=haha
+
+###
+
+# Lines starting with a single '#' like this are comments.
+# Learn more about the syntax at ${window.location.origin}/docs/guides/syntax/.
+# Let's make a POST request!
+
+POST https://httpbun.com/post
+Content-Type: application/x-www-form-urlencoded
+
+username=sherlock&password=elementary
+
+###
+
+# Custom headers, easy as popcorn.
+# Learn more at ${window.location.origin}/docs/guides/syntax/#header-section.
+
+GET https://httpbun.com/headers
+X-Custom1: custom header value one
+X-Custom2: custom header value two
+
+### javascript
+
+// This is a Javascript block, so comments start with '//'.
+// The following will be available for templating in requests *after* this Javascript block.
+// Learn more at ${window.location.origin}/docs/guides/javascript-blocks/.
+this.data.postUrl = "post"
+
+###
+
+# Let's use templates to make the same POST request as before!
+# Learn more at: ${window.location.origin}/docs/guides/templating/.
+POST https://httpbun.com/${postUrl}
+Content-Type: application/x-www-form-urlencoded
+
+username=sherlock&password=elementary
+
+###
+
+# We can define a Javascript function to be called when this request finishes execution.
+POST https://httpbun.com/post
+
+one=1&two=2
+
+@onFinish(response) {
+	alert("Request finished!")
+}

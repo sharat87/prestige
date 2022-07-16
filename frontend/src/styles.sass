@@ -21,7 +21,7 @@ body
 	font-size: 14px
 	--header-height: 30px
 
-body, sans-serif
+body, .sans-serif
 	font-family: "Source Sans Pro", sans-serif
 
 .no-select
@@ -139,7 +139,7 @@ main
 	&:not(.active):hover .tip
 		display: block
 
-:root
+\:root
 	--monospace-font: "Source Code Pro"
 	--monospace-font-size: 16px
 
@@ -399,7 +399,7 @@ pre
 	top: 5vh
 	z-index: 110
 	overflow: hidden
-	box-shadow: 0px 9px 72px #0009
+	box-shadow: 0 9px 72px #0009
 	display: flex
 	flex-direction: column
 
@@ -434,12 +434,9 @@ label
 
 form.grid, form > .grid
 	display: grid
-	grid: auto / minmax(120px, auto) minmax(300px, auto)
+	grid: auto / minmax(90px, auto) minmax(300px, auto)
 	align-items: center
 	margin: 0 auto
-
-	label
-		text-align: right
 
 	> *
 		margin: 6px
@@ -1079,7 +1076,7 @@ body[data-palette=mono]
 // Order of these styles is important.
 .cm-s-default .CodeMirror-gutters
 	background: var(--gutter-bg)
-	border-right: 0px
+	border-right: 0
 .cm-s-default .CodeMirror-guttermarker
 	color: var(--gutter-marker-fg)
 .cm-s-default .CodeMirror-guttermarker-subtle

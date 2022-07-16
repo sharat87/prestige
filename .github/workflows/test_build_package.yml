@@ -14,15 +14,20 @@ jobs:
     runs-on: "ubuntu-latest"
 
     steps:
-      - uses: "actions/checkout@v2"
+      - uses: "actions/checkout@v3"
 
       - name: "Setup Python"
         uses: "actions/setup-python@v2"
         with:
           python-version: 3.9
 
+      - name: "Setup Go"
+        uses: "actions/setup-go@v3"
+        with:
+          python-version: 3.9
+
       - name: "Setup Node"
-        uses: "actions/setup-node@v2"
+        uses: "actions/setup-node@v3"
         with:
           node-version: 16
           cache: "yarn"
@@ -30,17 +35,17 @@ jobs:
 
       - name: "Lint and test backend"
         run: |
-          ./manage lint-backend
-          ./manage test-backend
+          ./manage.sh lint-backend
+          ./manage.sh test-backend
 
       - name: "Lint and test frontend"
         run: |
-          ./manage lint-frontend
-          ./manage test-frontend
+          ./manage.sh lint-frontend
+          ./manage.sh test-frontend
 
-      - name: "UI Tests"
-        run: |
-          ./manage test-e2e
+#      - name: "UI Tests"
+#        run: |
+#          ./manage.sh test-e2e
 
       - name: "Upload test results"
         uses: "actions/upload-artifact@v2"
@@ -55,7 +60,7 @@ jobs:
         env:
           PRESTIGE_FRONTEND_ROLLBAR_TOKEN: ${{ secrets.PRESTIGE_FRONTEND_ROLLBAR_TOKEN }}
         run: |
-          ./manage build-all
+          ./manage.sh build-all
 
       - name: "Upload to S3"
         if: |
@@ -66,4 +71,4 @@ jobs:
           AWS_DEFAULT_REGION: us-east-2
           AWS_DEFAULT_OUTPUT: json
         run: |
-          ./manage upload-package
+          ./manage.sh upload-package
