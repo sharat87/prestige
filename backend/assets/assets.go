@@ -12,7 +12,7 @@ import (
 )
 
 // The static folder contains frontend build artifacts.
-//go:embed static embeds
+//go:embed *
 var assets embed.FS
 
 var embeddedTemplates = loadTemplates()

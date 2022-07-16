@@ -6,9 +6,6 @@ supervisord.pid
 venv
 node_modules
 
-backend/*.sqlite3
-backend/data
-backend/static
 __pycache__
 .mypy_cache
 .pytest_cache
