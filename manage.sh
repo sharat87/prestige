@@ -40,15 +40,15 @@ lint-backend() {
 test-backend() {
 	pushd backend
 
-	docker-compose pull
-	docker-compose up -d
+	docker compose pull
+	docker compose up -d
 
 	# The `%%` here will be replaced by a different db name for each test.
 	export PRESTIGE_DATABASE_URI="mongodb://user:pass@localhost/%%?authSource=admin"
 
 	n=4
 	while [[ $n -gt 0 ]]; do
-		if docker-compose exec mongo mongosh "${PRESTIGE_DATABASE_URI//%%/}" --quiet --eval "$(cat apitests/mongodb-test-data.js)"; then
+		if docker compose exec mongo mongosh "${PRESTIGE_DATABASE_URI//%%/}" --quiet --eval "$(cat apitests/mongodb-test-data.js)"; then
 			break
 		fi
 		sleep 3
