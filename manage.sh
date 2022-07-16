@@ -81,14 +81,23 @@ serve-frontend() {
 	if [[ package.json -nt yarn.lock ]]; then
 		yarn install
 	fi
+	fix-star-zoom
 	NODE_ENV=development exec npx parcel serve src/index.html --dist-dir dist-serve --port 3040
 }
 
 build-frontend() (
 	cd frontend
+	fix-star-zoom
 	NODE_ENV="production" PRESTIGE_BACKEND=${PRESTIGE_BACKEND:-} \
 		npx parcel build src/index.html --dist-dir dist --no-autoinstall --no-source-maps --no-cache
 )
+
+fix-star-zoom() {
+	if grep -F -m1 -q "*zoom:" node_modules/tachyons/css/tachyons.css; then
+		out="$(sed "s/\*zoom:/zoom:/" node_modules/tachyons/css/tachyons.css)"
+		echo "$out" > node_modules/tachyons/css/tachyons.css
+	fi
+}
 
 lint-frontend() {
 	ensure-node_modules frontend
