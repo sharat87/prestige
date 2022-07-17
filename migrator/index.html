@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang=en>
+<head>
+	<title>Prestige</title>
+</head>
+<body>
+<noscript>This page needs Javascript to run.</noscript>
+<script>
+	if (localStorage.length === 0) {
+		location.href = "https://prestige.dev"
+	}
+
+	document.body.insertAdjacentHTML("beforeend", `
+<p>Hello! We are moving to a new domain, <a href="https://prestige.dev">prestige.dev</a>.</p>
+<p>To export your data on prestigemad.com, click the below link to download data, and then import on
+\t<a href="https://prestige.dev">prestige.dev</a>, by going to Options pane from the left sidebar.</p>
+`)
+
+	const data = {};
+	for (const [key, value] of localStorage) {
+		data[key] = value;
+	}
+
+	const a = document.createElement('a');
+	a.innerText = "Download Data"
+	a.setAttribute("download", "prestigemad-data.json")
+	a.setAttribute("href", "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(data)))
+	document.body.append(a)
+</script>
+</body>

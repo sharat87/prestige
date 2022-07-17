@@ -48,15 +48,13 @@ A big thank you to all folks who put in their time and sweat for these projects 
 
 Please ensure you have NodeJS (with yarn) and Go, of versions as specified in the [`.tool-versions`](https://github.com/sharat87/prestige/blob/master/.tool-versions) file, before trying the following commands. I recommend using `asdf-vm` for this, which integrates with the `.tool-versions` file. So, if you have `asdf` already setup, you can just do `asdf install` in this repo, and you'll have the correct versions of NodeJS and Go.
 
-The project contains a `manage.sh` script and a `supervisord.conf` file that make getting started with development quite easy. Here's a quick summary:
+The project contains a `manage.sh` script that makes development a little easier.
 
-1. `./manage.sh start` &mdash; Starts a supervisor daemon, with all servers needed for Prestige to be running.
-	All servers are started in dev mode, with auto-reload on, along with a small web UI from supervisor, to monitor the running processes and view their logs.
-	See output of `./manage start` for details.
-	Logs are also available in the `logs` folder.
-1. `./manage.sh stop` &mdash; Stops and shuts down supervisor daemon, along with all the dev processes.
-1. `./manage.sh test-*` &mdash; Test frontend/backend/e2e (depending on what's in place of `*`).
-1. `./manage.sh build-*` &mdash; Build frontend/backend/docs (depending on what's in place of `*`).
+1. `./manage.sh serve-backend` &mdash; Start backend server. This _doesn't_ auto-reload when code changes.
+2. `./manage.sh serve-frontend` &mdash; Start frontend Parcel server. This supports full auto-reload.
+3. `./manage.sh serve-docs` &mdash; Start docs server. This supports auto-reload only for content pages.
+4. `./manage.sh test-*` &mdash; Test frontend/backend/e2e (depending on what's in place of `*`).
+5. `./manage.sh build-*` &mdash; Build frontend/backend/docs (depending on what's in place of `*`).
 
 ## Inspirations
 

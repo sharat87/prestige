@@ -82,7 +82,7 @@ serve-frontend() {
 		yarn install
 	fi
 	fix-star-zoom
-	NODE_ENV=development exec npx parcel serve src/index.html --dist-dir dist-serve --port 3040
+	NODE_ENV=development exec npx parcel serve src/index.html --dist-dir dist-serve --port "${PORT-3040}"
 }
 
 build-frontend() (

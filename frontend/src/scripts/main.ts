@@ -28,6 +28,11 @@ window.addEventListener("error", onWindowError)
 window.addEventListener("unhandledrejection", onUnhandledRejection)
 
 function main() {
+	if (location.host === "prestigemad.com" && localStorage.length === 0) {
+		location.href = "https://prestige.dev"
+		return
+	}
+
 	if (Env.rollbarToken != null) {
 		console.info("Enabling Rollbar with environment", Env.name)
 		Rollbar.init({
@@ -94,6 +99,14 @@ const RepoStats = {
 	stars: 0,
 }
 
+function exportLocalStorage() {
+	const data: Record<string, string> = {}
+	for (const [key, value] of Object.entries(localStorage)) {
+		data[key] = value
+	}
+	return data
+}
+
 const Layout: m.Component = {
 	view(vnode: m.VnodeDOM): m.Children {
 		return [
@@ -101,6 +114,18 @@ const Layout: m.Component = {
 			ModalManager.render(),
 			Toaster.render(),
 			m("style", styleOverrides()),
+			location.host === "prestigemad.com" && m("div.old-domain-notice", [
+				m("h2", "Hey!"),
+				m("p", [
+					"We are moving to a new domain (prestige.dev). Please use the following link to download your local data from this domain, and import it on ",
+					m("a", { href: "https://prestige.dev" }, "prestige.dev"),
+					".",
+				]),
+				m("a", {
+					href: "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(exportLocalStorage())),
+					download: "prestigemad-data.json",
+				}, "Download export data")
+			]),
 		]
 	},
 }

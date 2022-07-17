@@ -174,6 +174,36 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 					},
 				),
 			]),
+			m("p.pa1", [
+				m(".b.pb1", "Import from prestigemad.com"),
+				m("p.mt0", "If you've been a user on our old domain, prestigemad.com, and have exported your data there, you can import using the form below:"),
+				m(
+					"input",
+					{
+						type: "file",
+						accept: ".json",
+					},
+				),
+				m("button", {
+					onclick(event: MouseEvent) {
+						const fileInput = (event.target as HTMLButtonElement).previousElementSibling as HTMLInputElement
+						const file = fileInput.files?.[0]
+						if (file == null) {
+							return
+						}
+						const reader = new FileReader()
+						reader.addEventListener("load", (event) => {
+							const content = (event.target as FileReader).result as string
+							const data = JSON.parse(content)
+							for (const [key, value] of Object.entries(data)) {
+								localStorage.setItem(key, value as string)
+							}
+							location.reload()
+						})
+						reader.readAsText(file)
+					},
+				}, "Import!"),
+			]),
 		]
 	}
 
