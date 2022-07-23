@@ -1,7 +1,6 @@
 # Prestige
 
-**A text-based HTTP client, by [@sharat87](https://sharats.me). Available at [prestigemad.com](https://prestigemad.com)
-([Why that domain?](#why-the-domain)).**
+**A text-based HTTP client, by [@sharat87](https://sharats.me). Available at [prestige.dev](https://prestige.dev).**
 
 > Under all the abstractions, it's just stardust interacting with text.
 
@@ -82,21 +81,6 @@ More: <https://github.com/marmelab/awesome-rest>.
 - A Dockerfile for quickly running a self-hosted instance of Prestige with Docker.
 - Ability to open/edit documents from GitHub repos, Google Drive and Dropbox.
 - Rich editor features like auto-complete, JSON editing help, hotkeys to start new GET/POST/etc. request, snippets etc.
-
-## Why the domain?
-
-Well, because finding a decent and reasonable domain name today is precisely mad. Arriving at this domain went something
-like this:
-
-> **SO**: Whatcha doin? \
-> **Me**: Going mad looking for a domain name for my project. \
-> **SO**: Okay. \
-> **Me**: I'm just going to pick a mad domain instead. \
-> **SO**: Sure. \
-> **Me**: I'll just stick mad into the domain name! \
-> **SO**: What's for dinner?
-
-Turns out that domain name was indeed available; and so we have [prestigemad.com](https://prestigemad.com).
 
 ## Contributing
 

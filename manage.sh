@@ -188,7 +188,7 @@ ensure-node_modules() {
 test-all() {
 	lint-frontend
 	test-frontend
-	# lint-backend
+	 lint-backend
 	test-backend
 	test-e2e
 }
