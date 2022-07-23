@@ -41,7 +41,7 @@ func New() *Mux {
 
 	m.Route(`/env`, HandleEnv)
 
-	m.Route(`/proxy/?`, proxy.HandleProxy)
+	m.Route(`/proxy`, proxy.HandleProxy)
 
 	m.Route(`/auth/signup`, auth.HandleRegister) // Deprecated.
 	m.Route(`/auth/register`, auth.HandleRegister)

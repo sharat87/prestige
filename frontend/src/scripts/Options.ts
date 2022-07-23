@@ -192,13 +192,13 @@ export default function OptionsModal(): m.Component<{ doClose: () => void}> {
 							return
 						}
 						const reader = new FileReader()
-						reader.addEventListener("load", (event) => {
-							const content = (event.target as FileReader).result as string
+						reader.addEventListener("load", (event1) => {
+							const content = (event1.target as FileReader).result as string
 							const data = JSON.parse(content)
 							for (const [key, value] of Object.entries(data)) {
 								localStorage.setItem(key, value as string)
 							}
-							location.reload()
+							window.location.reload()
 						})
 						reader.readAsText(file)
 					},

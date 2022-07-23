@@ -66,17 +66,7 @@
 					"allowIndentationTabs": true
 				}
 			],
-			"max-len": [
-				"error",
-				{
-					"code": 120,
-					"tabWidth": 4,
-					"ignoreComments": false,
-					"ignoreTrailingComments": false,
-					"ignoreStrings": false,
-					"ignoreTemplateLiterals": false
-				}
-			],
+			"max-len": "off",
 			"linebreak-style": [
 				"error",
 				"unix"

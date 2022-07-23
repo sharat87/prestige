@@ -28,8 +28,8 @@ window.addEventListener("error", onWindowError)
 window.addEventListener("unhandledrejection", onUnhandledRejection)
 
 function main() {
-	if (location.host === "prestigemad.com" && localStorage.length === 0) {
-		location.href = "https://prestige.dev"
+	if (window.location.host === "prestigemad.com" && localStorage.length === 0) {
+		window.location.href = "https://prestige.dev"
 		return
 	}
 
@@ -114,7 +114,7 @@ const Layout: m.Component = {
 			ModalManager.render(),
 			Toaster.render(),
 			m("style", styleOverrides()),
-			location.host === "prestigemad.com" && m("div.old-domain-notice", [
+			window.location.host === "prestigemad.com" && m("div.old-domain-notice", [
 				m("h2", "Hey!"),
 				m("p", [
 					"We are moving to a new domain (prestige.dev). Please use the following link to download your local data from this domain, and import it on ",
@@ -124,7 +124,7 @@ const Layout: m.Component = {
 				m("a", {
 					href: "data:text/plain;charset=utf-8," + encodeURIComponent(JSON.stringify(exportLocalStorage())),
 					download: "prestigemad-data.json",
-				}, "Download export data")
+				}, "Download export data"),
 			]),
 		]
 	},
@@ -334,7 +334,7 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 		workspace.doFlashes()
 		workspace.codeMirror?.refresh()
 
-		let saveButtonSpace: m.Children = null
+		let saveButtonSpace: m.Children
 
 		if (!isManualSaveAvailable()) {
 			saveButtonSpace = m("em.pa1", "Autosaved")
@@ -377,7 +377,9 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 							NavLink,
 							{
 								onclick: () => {
-									(getProvider("gist") as GistProvider).create(workspace.getContent())
+									(getProvider("gist") as GistProvider)
+										.create(workspace.getContent())
+										.catch(console.error)
 								},
 							},
 							"Create Gist",

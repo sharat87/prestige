@@ -61,6 +61,18 @@ type (
 )
 
 func HandleProxy(_ context.Context, ex *exchange.Exchange) {
+	if ex.Request.Method == http.MethodGet {
+		http.Redirect(ex.ResponseWriter, &ex.Request, "./docs/guides/proxy/", http.StatusMovedPermanently)
+		return
+	} else if ex.Request.Method != http.MethodPost {
+		ex.RespondError(
+			http.StatusBadRequest,
+			"invalid-method-for-proxy",
+			"Invalid method for proxy",
+		)
+		return
+	}
+
 	job := Job{}
 	err := ex.DecodeBody(&job)
 	if err != nil {
