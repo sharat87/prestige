@@ -92,7 +92,7 @@ export default class Workspace {
 	isResultPaneVisible: boolean
 	secretsObject: Stream<string>
 	secrets: SecretsPack
-	private defaultProxy: null | string
+	defaultProxy: null | string
 	private _content: string
 	private prevExecuteBookmark: null | CodeMirror.TextMarker
 	private flashQueue: { start: number, end: number }[]
