@@ -1,6 +1,7 @@
 ---
 description: >
-  In order to execute requests blocked by CORS, Prestige runs them through a small proxy server, which can be disabled or made to point to a different endpoint.
+In order to execute requests blocked by CORS, Prestige runs them through a small proxy server, which can be disabled or
+made to point to a different endpoint.
 ---
 
 # Proxy
@@ -8,10 +9,10 @@ description: >
 Prestige uses a small proxy server to execute the actual HTTP requests. The reason for this is to avoid CORS
 restrictions by the browser. Briefly, what that means is that browsers don't let a web app running on `abc.com` to
 execute HTTP requests to `xyz.com`, as a security measure. But in Prestige, even though it's opened from
-`prestigemad.com`, we'd want to execute requests on other domains. Without that capability, Prestige would be a lot less
+`prestige.dev`, we'd want to execute requests on other domains. Without that capability, Prestige would be a lot less
 useful, honestly.
 
-So, to resolve this, Prestige has a small proxy server running on the `prestigemad.com` server which executes the
+So, to resolve this, Prestige has a small proxy server running on the `prestige.dev` server which executes the
 requests on your behalf.
 
 <svg width="600" height="250" version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -31,7 +32,7 @@ requests on your behalf.
 
 A consequence of using a proxy hosted elsewhere is that if you are hitting requests on `localhost`, they won't work. The
 reason is resources on `localhost` are obviously hosted on your local machine, which are not accessible to the outside
-internet (at least not as `localhost`). So, the proxy server up on `prestigemad.com` has no idea what to do with it.
+internet (at least not as `localhost`). So, the proxy server up on `prestige.dev` has no idea what to do with it.
 
 However, you might've noticed that requests to `localhost` *do partially* work in Prestige. It's not magic though.
 Prestige intelligently *doesn't use a proxy* when making requests to `localhost`.

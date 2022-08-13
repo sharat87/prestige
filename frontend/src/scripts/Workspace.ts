@@ -1,8 +1,9 @@
-import HttpSession from "_/HttpSession"
 import type { AnyResult } from "_/HttpSession"
+import HttpSession from "_/HttpSession"
 import m from "mithril"
 import CodeMirror from "_/codemirror"
-import { BlockType, parse } from "_/Parser"
+import type { RequestDetails } from "_/Parser"
+import { BlockType, extractRequest, parse } from "_/Parser"
 import CookieJar from "_/CookieJar"
 import { proxyUrl } from "_/Env"
 import {
@@ -12,15 +13,13 @@ import {
 	Provider,
 	saveSheetAuto,
 	saveSheetManual,
+	SaveState,
 	Sheet,
 	Source,
-	SaveState,
 } from "_/Persistence"
 import Stream from "mithril/stream"
 import throttle from "lodash/throttle"
 import FileBucket from "_/FileBucket"
-import type { RequestDetails } from "_/Parser"
-import { extractRequest } from "_/Parser"
 import Context from "_/Context"
 import { ping } from "_/pings"
 import ExportPane from "_/ExportPane"
@@ -37,7 +36,7 @@ GET https://httpbun.com/get?name=haha
 ###
 
 # Lines starting with a single '#' like this are comments.
-# Learn more about the syntax at ${window.location.origin}/docs/guides/syntax/.
+# Learn more about the syntax at ${ window.location.origin }/docs/guides/syntax/.
 # Let's make a POST request!
 
 POST https://httpbun.com/post
@@ -48,7 +47,7 @@ username=sherlock&password=elementary
 ###
 
 # Custom headers, easy as popcorn.
-# Learn more at ${window.location.origin}/docs/guides/syntax/#header-section.
+# Learn more at ${ window.location.origin }/docs/guides/syntax/#header-section.
 
 GET https://httpbun.com/headers
 X-Custom1: custom header value one
@@ -58,13 +57,13 @@ X-Custom2: custom header value two
 
 // This is a Javascript block, so comments start with '//'.
 // The following will be available for templating in requests *after* this Javascript block.
-// Learn more at ${window.location.origin}/docs/guides/javascript-blocks/.
+// Learn more at ${ window.location.origin }/docs/guides/javascript-blocks/.
 this.data.postUrl = "post"
 
 ###
 
 # Let's use templates to make the same POST request as before!
-# Learn more at: ${window.location.origin}/docs/guides/templating/.
+# Learn more at: ${ window.location.origin }/docs/guides/templating/.
 POST https://httpbun.com/dollar{postUrl}
 Content-Type: application/x-www-form-urlencoded
 
@@ -84,22 +83,21 @@ one=1&two=2
 
 export default class Workspace {
 	codeMirror: null | CodeMirror.Editor
-	private _content: string
-	private _lines: null | string[]
-	private prevExecuteBookmark: null | CodeMirror.TextMarker
 	session: HttpSession
-	defaultProxy: null | string
 	fileBucket: FileBucket
-	private flashQueue: { start: number, end: number }[]
-	private widgetMarks: CodeMirror.TextMarker[]
 	currentSheet: null | Sheet
 	currentSheetQualifiedPath: Stream<string>
-	private _disableAutoSave: boolean
 	cookieJar: null | CookieJar
 	updateEditorDisplay: ReturnType<typeof throttle>
 	isResultPaneVisible: boolean
 	secretsObject: Stream<string>
 	secrets: SecretsPack
+	private defaultProxy: null | string
+	private _content: string
+	private prevExecuteBookmark: null | CodeMirror.TextMarker
+	private flashQueue: { start: number, end: number }[]
+	private widgetMarks: CodeMirror.TextMarker[]
+	private _disableAutoSave: boolean
 
 	constructor() {
 		this.codeMirror = null
@@ -150,6 +148,20 @@ export default class Workspace {
 
 			m.redraw()
 		})
+	}
+
+	private _lines: null | string[]
+
+	get lines(): string[] {
+		if (this._lines == null) {
+			this._lines = this.getContent().split("\n")
+		}
+
+		return this._lines
+	}
+
+	get saveState(): SaveState {
+		return this.currentSheet?.saveState ?? SaveState.unchanged
 	}
 
 	async loadSheet(sheetPath: string): Promise<void> {
@@ -231,10 +243,6 @@ export default class Workspace {
 		saveSheetManual(this.currentSheetQualifiedPath(), this.currentSheet).finally(m.redraw)
 	}
 
-	get saveState(): SaveState {
-		return this.currentSheet?.saveState ?? SaveState.unchanged
-	}
-
 	getContent(): string {
 		return this.codeMirror ? this.codeMirror.getValue() : this._content
 	}
@@ -250,14 +258,6 @@ export default class Workspace {
 		}
 		(this.saveSheetAuto as any).flush()
 		this.updateEditorDisplay.flush()
-	}
-
-	get lines(): string[] {
-		if (this._lines == null) {
-			this._lines = this.getContent().split("\n")
-		}
-
-		return this._lines
 	}
 
 	/**
@@ -506,7 +506,7 @@ export default class Workspace {
 
 			await context.emit("finish", result)
 
-			if (result != null && result.ok && result.cookies) {
+			if (result != null && result.ok) {
 				result.cookieChanges = this.cookieJar?.overwrite(result.cookies)
 			}
 

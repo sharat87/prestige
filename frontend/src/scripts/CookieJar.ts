@@ -21,6 +21,20 @@ export default class CookieJar {
 		this.recomputeSize()
 	}
 
+	static loadOrCreate(sheetPath: string): CookieJar {
+		const serializedCookies = localStorage.getItem("cookies:" + sheetPath)
+		if (serializedCookies != null && serializedCookies !== "") {
+			try {
+				return new CookieJar(JSON.parse(serializedCookies), sheetPath)
+			} catch (error) {
+				console.error("Unable to load cookies for path", sheetPath, error)
+				return new CookieJar({}, sheetPath)
+			}
+		} else {
+			return new CookieJar({}, sheetPath)
+		}
+	}
+
 	clear(): void {
 		this.store = {}
 		this.size = 0
@@ -38,47 +52,7 @@ export default class CookieJar {
 		}
 	}
 
-	static loadOrCreate(sheetPath: string): CookieJar {
-		const serializedCookies = localStorage.getItem("cookies:" + sheetPath)
-		if (serializedCookies != null && serializedCookies !== "") {
-			try {
-				return new CookieJar(JSON.parse(serializedCookies), sheetPath)
-			} catch (error) {
-				console.error("Unable to load cookies for path", sheetPath, error)
-				return new CookieJar({}, sheetPath)
-			}
-		} else {
-			return new CookieJar({}, sheetPath)
-		}
-	}
-
-	private recomputeSize(): void {
-		let count = 0
-
-		for (const byPath of Object.values(this.store)) {
-			for (const byName of Object.values(byPath)) {
-				count += Object.keys(byName).length
-			}
-		}
-
-		this.size = count
-	}
-
-	private flat(jar: StoreType = this.store): Map<string, Morsel> {
-		const map: Map<string, Morsel> = new Map()
-
-		for (const [domain, byPath] of Object.entries(jar)) {
-			for (const [path, byName] of Object.entries(byPath)) {
-				for (const [name, morsel] of Object.entries(byName)) {
-					map.set(`${domain}\t${path}\t${name}`, morsel)
-				}
-			}
-		}
-
-		return map
-	}
-
-	overwrite(newCookies: StoreType): { added: number, modified: number, removed: number, any: boolean } {
+	overwrite(newCookies: null | StoreType): { added: number, modified: number, removed: number, any: boolean } {
 		let modified = 0
 		let removed = 0
 
@@ -166,6 +140,36 @@ export default class CookieJar {
 
 		this.recomputeSize()
 		this.save()
+	}
+
+	private recomputeSize(): void {
+		let count = 0
+
+		for (const byPath of Object.values(this.store)) {
+			for (const byName of Object.values(byPath)) {
+				count += Object.keys(byName).length
+			}
+		}
+
+		this.size = count
+	}
+
+	private flat(jar: null | StoreType = this.store): Map<string, Morsel> {
+		const map: Map<string, Morsel> = new Map()
+
+		if (jar == null) {
+			return map
+		}
+
+		for (const [domain, byPath] of Object.entries(jar)) {
+			for (const [path, byName] of Object.entries(byPath)) {
+				for (const [name, morsel] of Object.entries(byName)) {
+					map.set(`${ domain }\t${ path }\t${ name }`, morsel)
+				}
+			}
+		}
+
+		return map
 	}
 
 }

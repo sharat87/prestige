@@ -22,11 +22,11 @@ function view(vnode: VnodeDOM<Attrs>): m.Children {
 			for (const [name, morsel] of Object.entries(byName)) {
 				rows.push(m("tr", [
 					m("td", ++i),
-					m("td", domain),
-					m("td", path),
-					m("td", name),
-					m("td", morsel.value),
-					m("td", m(TimeView, { time: morsel.expires })),
+					m("td.t-domain", domain),
+					m("td.t-path", path),
+					m("td.t-name", name),
+					m("td.t-value", morsel.value),
+					m("td.t-expires", m(TimeView, { time: morsel.expires })),
 					m("td", [
 						m(
 							Button,

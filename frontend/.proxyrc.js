@@ -5,6 +5,8 @@ const backendTarget = bindAddress.startsWith("unix/")
 	? { socketPath: bindAddress.substring("unix/".length) }
 	: `http://${bindAddress}`
 
+console.log("backendTarget", backendTarget)
+
 const DOCS_PORT = parseInt(process.env.DOCS_PORT || 3042, 10)
 
 module.exports = function (app) {

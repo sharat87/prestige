@@ -4,16 +4,19 @@
 
 > Under all the abstractions, it's just stardust interacting with text.
 
-This is a *powerful*, *text-based*, *in-browser*, HTTP client app geared towards web developers and API testing professionals.
+This is a *powerful*, *text-based*, *in-browser*, HTTP client app geared towards web developers and API testing
+professionals.
 
-Check out the [User Guide](https://prestigemad.com/docs) to learn how Prestige can be a powerful addition to your toolset.
+Check out the [User Guide](https://prestige.dev/docs) to learn how Prestige can be a powerful addition to your toolset.
 
-[Discussion on Hacker News](https://news.ycombinator.com/item?id=27412445). Join us on [Discord](https://discord.gg/6tc9fMmYRW).
+[Discussion on Hacker News](https://news.ycombinator.com/item?id=27412445). Join us
+on [Discord](https://discord.gg/6tc9fMmYRW).
 
 ![Prestige light mode screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot-light.png#gh-light-mode-only)
 ![Prestige dark model screenshot](https://github.com/sharat87/prestige/raw/master/docs/content/img/screenshot-dark.png#gh-dark-mode-only)
 
-If you face any problems or have a suggestion, please [reach out on Discord](https://discord.gg/6tc9fMmYRW), or [create an issue](https://github.com/sharat87/prestige/issues/new).
+If you face any problems or have a suggestion, please [reach out on Discord](https://discord.gg/6tc9fMmYRW),
+or [create an issue](https://github.com/sharat87/prestige/issues/new).
 
 ## Features
 
@@ -21,7 +24,8 @@ If you face any problems or have a suggestion, please [reach out on Discord](htt
 - Write plain, familiar Javascript for templating within your requests.
 - Shows all responses in a redirect chain, if request redirects.
 - Save your Prestige documents to Gist.
-- Export requests as cURL commands. Please [open an issue](https://github.com/sharat87/prestige/issues/new) if you'd like to see more export formats.
+- Export requests as cURL commands. Please [open an issue](https://github.com/sharat87/prestige/issues/new) if you'd
+  like to see more export formats.
 - Isolated cookie management.
 - Uploading files to APIs is as simple as drag-dropping the file and calling a function.
 - Light and dark modes, for multiple themes.
@@ -31,7 +35,8 @@ If you face any problems or have a suggestion, please [reach out on Discord](htt
 Prestige exists thanks to the work of the following open source projects (not exhaustive, thanks to all those who
 weren't listed here, but still were just as helpful):
 
-1. [TypeScript](https://www.typescriptlang.org/) & [Mithril](https://mithril.js.org/) &mdash; power the frontend UI and logic.
+1. [TypeScript](https://www.typescriptlang.org/) & [Mithril](https://mithril.js.org/) &mdash; power the frontend UI and
+   logic.
 1. [CodeMirror](https://codemirror.net/) &mdash; powers the code editor and syntax-highlighted code blocks.
 1. [Sass](https://sass-lang.com/) & [Tachyons](http://tachyons.io/) &mdash; power the styling and theming systems.
 1. [Go](https://go.dev) &mdash; power the backend logic.
@@ -39,13 +44,18 @@ weren't listed here, but still were just as helpful):
 1. [MkDocs](https://www.mkdocs.org/) &mdash; powers the documentation site.
 1. [Phosphor](https://phosphoricons.com/) &mdash; Original source for icons in the application.
 
-The backend was once powered by Python and Django, but was later rewritten in Go. Thanks to the teams behind Python and Django as well!
+The backend was once powered by Python and Django, but was later rewritten in Go. Thanks to the teams behind Python and
+Django as well!
 
 A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
 
 ## Developing
 
-Please ensure you have NodeJS (with yarn) and Go, of versions as specified in the [`.tool-versions`](https://github.com/sharat87/prestige/blob/master/.tool-versions) file, before trying the following commands. I recommend using `asdf-vm` for this, which integrates with the `.tool-versions` file. So, if you have `asdf` already setup, you can just do `asdf install` in this repo, and you'll have the correct versions of NodeJS and Go.
+Please ensure you have NodeJS (with yarn) and Go, of versions as specified in
+the [`.tool-versions`](https://github.com/sharat87/prestige/blob/master/.tool-versions) file, before trying the
+following commands. I recommend using `asdf-vm` for this, which integrates with the `.tool-versions` file. So, if you
+have `asdf` already setup, you can just do `asdf install` in this repo, and you'll have the correct versions of NodeJS
+and Go.
 
 The project contains a `manage.sh` script that makes development a little easier.
 
@@ -59,14 +69,16 @@ The project contains a `manage.sh` script that makes development a little easier
 
 - HTTP Client for Sublime Text: [Requester](https://github.com/kylebebak/Requester).
 - HTTP Client for VS Code: [vscode-restclient](https://github.com/Huachao/vscode-restclient).
-- REST Client for IntelliJ based IDEs: [JetBrains HTTP Client](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html).
+- REST Client for IntelliJ based
+  IDEs: [JetBrains HTTP Client](https://www.jetbrains.com/help/idea/http-client-in-product-code-editor.html).
 - My own Vim extension towards a very similar concept: [roast.vim](https://github.com/sharat87/roast.vim).
 
 More: <https://github.com/marmelab/awesome-rest>.
 
 ## Some public APIs to play with
 
-1. [httpbun.com](https://httpbun.com) &mdash; Great for meta-testing and JSON/form-data related experiments. Another project by [@sharat87](https://sharats.me).
+1. [httpbun.com](https://httpbun.com) &mdash; Great for meta-testing and JSON/form-data related experiments. Another
+   project by [@sharat87](https://sharats.me).
 1. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
 1. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
 1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL, but requires a personal auth token.

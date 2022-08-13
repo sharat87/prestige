@@ -170,7 +170,11 @@ func (mux Mux) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	}
 
 	if match == nil {
-		assets.HandleStatic(ctx, ex)
+		if ex.Request.Method == http.MethodGet {
+			assets.HandleStatic(ctx, ex)
+		} else {
+			ex.RespondError(http.StatusNotFound, "not-found", "Not found.")
+		}
 		return
 	}
 

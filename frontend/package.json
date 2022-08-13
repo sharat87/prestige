@@ -173,6 +173,7 @@
 		"babel-preset-env": "^1.7.0",
 		"codemirror": "^5.65.1",
 		"eslint": "^8.19.0",
+		"http-proxy-middleware": "^2.0.6",
 		"jest": "^27.5.1",
 		"lodash": "^4.17.21",
 		"mithril": "^2.2.2",

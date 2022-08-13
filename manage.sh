@@ -150,6 +150,29 @@ test-e2e() (
 	time python3 run.py
 )
 
+test-ui() {
+	build-all
+	cd ui-tests
+	if [[ package.json -nt yarn.lock ]]; then
+		yarn install
+	fi
+	cp -v ../prestige .
+
+	docker compose -f ../backend/docker-compose.yaml pull
+	docker compose -f ../backend/docker-compose.yaml up -d
+
+	n=4
+	while [[ $n -gt 0 ]]; do
+		if docker compose -f ../backend/docker-compose.yaml exec mongo mongosh "mongodb://user:pass@localhost/ui-tests?authSource=admin" --quiet --eval "$(cat ../backend/apitests/mongodb-test-data.js)"; then
+			break
+		fi
+		sleep 3
+		n=$((n-1))
+	done
+
+	DEBUG=pw:webserver yarn playwright test
+}
+
 ###
 # Miscellaneous / Project-wide targets
 ###
@@ -260,11 +283,11 @@ build-all() (
 	build-docs
 	mv docs/site backend/assets/static/docs
 	build-backend
-	tar -caf package.tar.gz prestige
-	du -sh prestige package.tar.gz || true
 )
 
 upload-package() (
+	tar -caf package.tar.gz prestige
+	du -sh prestige package.tar.gz || true
 	aws s3 cp package.tar.gz s3://ssk-artifacts/prestige-package.tar.gz
 )
 

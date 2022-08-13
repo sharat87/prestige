@@ -27,6 +27,7 @@ export const name: string = (() => {
 })()
 
 let recaptchaSiteKey: null | string = null
+
 export async function getRecaptchaSiteKey(): Promise<string> {
 	if (recaptchaSiteKey == null) {
 		const response = await m.request<{ recaptchaSiteKey: string }>({
@@ -43,7 +44,8 @@ export function isDev(): boolean {
 }
 
 export function proxyUrl(): string {
-	return PRESTIGE_BACKEND + "proxy/"
+	console.log("proxyUrl", PRESTIGE_BACKEND)
+	return PRESTIGE_BACKEND + "proxy"
 }
 
 export function authUrl(): string {

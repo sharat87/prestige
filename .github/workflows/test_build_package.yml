@@ -11,6 +11,7 @@ on:
 
 jobs:
   all:
+    timeout-minutes: 15
     runs-on: "ubuntu-latest"
 
     steps:
