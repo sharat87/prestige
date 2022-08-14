@@ -52,7 +52,7 @@ test-backend() {
 			break
 		fi
 		sleep 3
-		n=$((n-1))
+		n=$((n - 1))
 	done
 
 	go clean -testcache || true
@@ -95,7 +95,7 @@ build-frontend() (
 fix-star-zoom() {
 	if grep -F -m1 -q "*zoom:" node_modules/tachyons/css/tachyons.css; then
 		out="$(sed "s/\*zoom:/zoom:/" node_modules/tachyons/css/tachyons.css)"
-		echo "$out" > node_modules/tachyons/css/tachyons.css
+		echo "$out" >node_modules/tachyons/css/tachyons.css
 	fi
 }
 
@@ -138,24 +138,23 @@ build-docs() (
 )
 
 ###
-# End-to-end Testing
+# UI Tests
 ###
-
-test-e2e() (
-	ensure-venv
-	ensure-node_modules e2e-tests
-	rm -rf e2e-tests/{logs,trail}
-	source venv/bin/activate
-	cd e2e-tests
-	time python3 run.py
-)
 
 test-ui() {
 	build-all
 	cd ui-tests
 	if [[ package.json -nt yarn.lock ]]; then
-		yarn install
+		if [[ -n $CI ]]; then
+			echo 'Yarn lock file is older than package.json, failing CI.' >&2
+			exit 1
+		else
+			yarn install
+		fi
 	fi
+
+	yarn playwright install-deps
+
 	cp -v ../prestige .
 
 	docker compose -f ../backend/docker-compose.yaml pull
@@ -167,7 +166,7 @@ test-ui() {
 			break
 		fi
 		sleep 3
-		n=$((n-1))
+		n=$((n - 1))
 	done
 
 	DEBUG=pw:webserver yarn playwright test
@@ -211,9 +210,8 @@ ensure-node_modules() {
 test-all() {
 	lint-frontend
 	test-frontend
-	 lint-backend
+	lint-backend
 	test-backend
-	test-e2e
 }
 
 outdated() (
@@ -225,7 +223,6 @@ outdated() (
 deps() {
 	ensure-venv
 	ensure-node_modules frontend
-	ensure-node_modules e2e-tests
 }
 
 upgrade-deps() (

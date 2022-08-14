@@ -15,7 +15,6 @@ backend/.coverage
 frontend/dist
 frontend/dist-*
 frontend/coverage
-frontend/.parcel-cache
 __snapshots__
 
 
@@ -25,12 +24,14 @@ e2e-tests/trail
 /ui-tests/prestige
 /ui-tests/test-results/
 /ui-tests/playwright-report/
-/ui-tests/playwright/.cache/
 
 /docs/site
 
 env-*.sh
 /package.tar.gz
+
+*.log
+.*cache
 
 .DS_Store
 

@@ -1,0 +1,11 @@
+{
+  "name": "ui-tests",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.24.0",
+    "@types/node": "^18.0.6"
+  },
+  "scripts": {}
+}

@@ -44,18 +44,16 @@ jobs:
           ./manage.sh lint-frontend
           ./manage.sh test-frontend
 
-#      - name: "UI Tests"
-#        run: |
-#          ./manage.sh test-e2e
+      - name: "UI Tests"
+        run: |
+          ./manage.sh test-ui
 
       - name: "Upload test results"
         uses: "actions/upload-artifact@v2"
-        if: failure()
+        if: always()
         with:
-          name: "e2e-results-${{ github.sha }}"
-          path: |
-            e2e-tests/shots
-            e2e-tests/logs
+          name: "ui-results-${{ github.sha }}"
+          path: ui-tests/playwright-report/
 
       - name: "Build and create archive"
         env:
