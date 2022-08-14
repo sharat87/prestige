@@ -151,9 +151,11 @@ test-ui() {
 		else
 			yarn install
 		fi
+	elif [[ -n $CI ]]; then
+		yarn install --frozen-lockfile
 	fi
 
-	yarn playwright install-deps
+	yarn playwright install --with-deps
 
 	cp -v ../prestige .
 
