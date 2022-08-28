@@ -9,7 +9,6 @@ import (
 )
 
 type Config struct {
-	BindProtocol            string
 	BindTarget              string
 	AllowedHosts            map[string]any // A set of hostnames.
 	EncryptionKey           [32]byte
@@ -18,10 +17,9 @@ type Config struct {
 }
 
 func MustLoad() Config {
-	protocol, target := loadBindProtocolAndTarget()
+	target := loadBindTarget()
 	hosts, prefixes := loadProxyDisallowedHosts()
 	return Config{
-		BindProtocol:            protocol,
 		BindTarget:              target,
 		AllowedHosts:            loadAllowedHosts(),
 		EncryptionKey:           *(*[32]byte)(loadEncryptionKey()),
@@ -30,16 +28,11 @@ func MustLoad() Config {
 	}
 }
 
-func loadBindProtocolAndTarget() (protocol string, target string) {
-	bindTarget := os.Getenv("PRESTIGE_BIND")
-	if bindTarget == "" {
-		bindTarget = ":3041"
-	}
-
-	if strings.HasPrefix(bindTarget, "unix/") {
-		return "unix", strings.TrimPrefix(bindTarget, "unix/")
+func loadBindTarget() string {
+	if port, ok := os.LookupEnv("PORT"); ok {
+		return ":" + port
 	} else {
-		return "tcp", bindTarget
+		return ":3041"
 	}
 }
 

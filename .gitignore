@@ -1,36 +1,25 @@
-supervisord.pid
-.supervisord.sock
-/logs
-
 *.log
-venv
+
 node_modules
 
-__pycache__
-.mypy_cache
-.pytest_cache
-backend/.coverage
 /backend/assets/static
 
-frontend/dist
-frontend/dist-*
-frontend/coverage
-__snapshots__
-
-
-e2e-tests/e2e-tests.db
-e2e-tests/trail
+/frontend/dist
+/frontend/dist-*
+/frontend/coverage
 
 /ui-tests/prestige
 /ui-tests/test-results/
 /ui-tests/playwright-report/
 
-/docs/site
+/docs/public
+/docs/hugo
+.hugo_build.lock
 
 env-*.sh
 /package.tar.gz
+/prestige
 
-*.log
 .*cache
 
 .DS_Store

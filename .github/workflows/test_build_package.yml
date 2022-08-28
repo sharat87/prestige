@@ -17,11 +17,6 @@ jobs:
     steps:
       - uses: "actions/checkout@v3"
 
-      - name: "Setup Python"
-        uses: "actions/setup-python@v2"
-        with:
-          python-version: 3.9
-
       - name: "Setup Go"
         uses: "actions/setup-go@v3"
         with:
@@ -55,19 +50,11 @@ jobs:
           name: "ui-results-${{ github.sha }}"
           path: ui-tests/playwright-report/
 
-      - name: "Build and create archive"
-        env:
-          PRESTIGE_FRONTEND_ROLLBAR_TOKEN: ${{ secrets.PRESTIGE_FRONTEND_ROLLBAR_TOKEN }}
-        run: |
-          ./manage.sh build-all
-
-      - name: "Upload to S3"
+      - name: Push Docker image to GHCR
         if: |
           success() && github.event_name == 'push' && github.ref == 'refs/heads/master'
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: us-east-2
-          AWS_DEFAULT_OUTPUT: json
         run: |
-          ./manage.sh upload-package
+          ./manage.sh build-for-docker
+          docker build -t ghcr.io/${{ github.actor }}/prestige:latest .
+          docker login ghcr.io --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }}
+          docker push --all-tags ghcr.io/${{ github.actor }}/prestige

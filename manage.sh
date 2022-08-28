@@ -3,7 +3,7 @@
 set -o errexit
 set -o nounset
 set -o pipefail
-if [[ -n "${CI:-}" ]]; then
+if [[ -n "${CI-}" ]]; then
 	set -o xtrace
 fi
 
@@ -88,8 +88,7 @@ serve-frontend() {
 build-frontend() (
 	cd frontend
 	fix-star-zoom
-	NODE_ENV="production" PRESTIGE_BACKEND=${PRESTIGE_BACKEND:-} \
-		npx parcel build src/index.html --dist-dir dist --no-autoinstall --no-source-maps --no-cache
+	NODE_ENV=production npx parcel build src/index.html --dist-dir dist --no-autoinstall --no-cache
 )
 
 fix-star-zoom() {
@@ -114,28 +113,34 @@ test-frontend() (
 	npx jest
 )
 
-update-browserslist() (
-	cd frontend
-	npx browserslist@latest --update-db
-)
-
 ###
 # Documentation
 ###
 
 serve-docs() {
-	ensure-venv
-	source venv/bin/activate
+	ensure-hugo
 	cd docs
-	PYTHONPATH=. exec mkdocs serve --dev-addr "127.0.0.1:${PORT:-3042}"
+	./hugo server --port 3042
 }
 
 build-docs() (
-	ensure-venv
-	source venv/bin/activate
+	ensure-hugo
 	cd docs
-	PYTHONPATH=. mkdocs build
+	./hugo
 )
+
+ensure-hugo() {
+	if [[ ! -e docs/hugo ]]; then
+		if [[ $(uname) == Darwin ]]; then
+			url="https://github.com/gohugoio/hugo/releases/download/v0.101.0/hugo_extended_0.101.0_macOS-64bit.tar.gz"
+		else
+			url="https://github.com/gohugoio/hugo/releases/download/v0.101.0/hugo_extended_0.101.0_Linux-64bit.tar.gz"
+		fi
+		pushd docs
+		curl -sL "$url" | tar -xz
+		popd
+	fi
+}
 
 ###
 # UI Tests
@@ -145,13 +150,13 @@ test-ui() {
 	build-all
 	cd ui-tests
 	if [[ package.json -nt yarn.lock ]]; then
-		if [[ -n $CI ]]; then
+		if [[ -n ${CI-} ]]; then
 			echo 'Yarn lock file is older than package.json, failing CI.' >&2
 			exit 1
 		else
 			yarn install
 		fi
-	elif [[ -n $CI ]]; then
+	elif [[ -n ${CI-} ]]; then
 		yarn install --frozen-lockfile
 	fi
 
@@ -178,21 +183,18 @@ test-ui() {
 # Miscellaneous / Project-wide targets
 ###
 
-ensure-venv() {
-	if [[ -f venv/make_sentinel && -f venv/bin/pip-compile && requirements.in -ot venv/make_sentinel && requirements.txt -ot venv/make_sentinel && requirements-dev.txt -ot venv/make_sentinel ]]; then
-		return
-	fi
-	if [[ ! -d venv ]]; then
-		python3 -m venv --prompt prestige venv
-	fi
-	(
-		source venv/bin/activate
-		pip install pip-tools
-		pip-compile requirements.in
-		pip install -r requirements.txt
-		pip install -r requirements-dev.txt
-	)
-	touch venv/make_sentinel
+build-all() (
+	build-frontend
+	rm -rf backend/assets/static
+	mv frontend/dist backend/assets/static
+	build-docs
+	mv docs/public backend/assets/static/docs
+	build-backend
+)
+
+build-for-docker() {
+	export CGO_ENABLED=0 GOOS=linux GOARCH=amd64
+	build-all
 }
 
 ensure-node_modules() {
@@ -223,71 +225,14 @@ outdated() (
 )
 
 deps() {
-	ensure-venv
 	ensure-node_modules frontend
 }
 
 upgrade-deps() (
-	# TODO: Don't attempt stop/start frontend, if isn't already running.
-	cd frontend
-	../venv/bin/supervisorctl stop prestige:frontend
-	yarn upgrade --latest
-	../venv/bin/supervisorctl start prestige:frontend
-	# TODO: Upgrade dependencies for backend as well.
-)
-
-start() (
-	ensure-venv
-	if [[ -e supervisord.pid ]]; then
-		if ! curl -sS localhost:3044 >&/dev/null; then
-			echo "Looks like an unclean exit was done. Cleaning up and trying to start again."
-			rm supervisord.pid
-			start
-			return
-		fi
-		echo 'Already running.'
-	else
-		if [[ -f dev.env ]]; then
-			set -a
-			source dev.env
-			set +a
-		fi
-		mkdir -pv logs
-		venv/bin/supervisord
-		echo 'Just started.'
-	fi
-	echo -e 'App available at <http://localhost:3040>.\nProcess monitor at <http://localhost:3044>.'
-)
-
-stop() (
-	ensure-venv
-	if [[ -e supervisord.pid ]]; then
-		kill "$(venv/bin/supervisorctl pid)"
-		echo 'Just stopped.'
-		sleep 2s
-	else
-		echo 'Already stopped.'
-	fi
-)
-
-restart() {
-	stop
-	start
-}
-
-build-all() (
-	build-frontend
-	rm -rf backend/assets/static
-	mv frontend/dist backend/assets/static
-	build-docs
-	mv docs/site backend/assets/static/docs
-	build-backend
-)
-
-upload-package() (
-	tar -caf package.tar.gz prestige
-	du -sh prestige package.tar.gz || true
-	aws s3 cp package.tar.gz s3://ssk-artifacts/prestige-package.tar.gz
+	(cd frontend && npx browserslist@latest --update-db)
+	(cd backend && go get -u && go mod tidy)
+	(cd frontend && yarn upgrade --latest)
+	(cd ui-tests && yarn upgrade --latest)
 )
 
 cd "$(dirname "$0")"

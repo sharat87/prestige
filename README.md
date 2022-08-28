@@ -1,6 +1,6 @@
 # Prestige
 
-**A text-based HTTP client, by [@sharat87](https://sharats.me). Available at [prestige.dev](https://prestige.dev).**
+**A text-based HTTP client, by [Shri](https://sharats.me). Available at [prestige.dev](https://prestige.dev).**
 
 > Under all the abstractions, it's just stardust interacting with text.
 
@@ -30,25 +30,6 @@ or [create an issue](https://github.com/sharat87/prestige/issues/new).
 - Uploading files to APIs is as simple as drag-dropping the file and calling a function.
 - Light and dark modes, for multiple themes.
 
-## Under the Hood
-
-Prestige exists thanks to the work of the following open source projects (not exhaustive, thanks to all those who
-weren't listed here, but still were just as helpful):
-
-1. [TypeScript](https://www.typescriptlang.org/) & [Mithril](https://mithril.js.org/) &mdash; power the frontend UI and
-   logic.
-1. [CodeMirror](https://codemirror.net/) &mdash; powers the code editor and syntax-highlighted code blocks.
-1. [Sass](https://sass-lang.com/) & [Tachyons](http://tachyons.io/) &mdash; power the styling and theming systems.
-1. [Go](https://go.dev) &mdash; power the backend logic.
-1. [Jest](https://jestjs.io/) & [Puppeteer](https://pptr.dev/) &mdash; power the testing workflows.
-1. [MkDocs](https://www.mkdocs.org/) &mdash; powers the documentation site.
-1. [Phosphor](https://phosphoricons.com/) &mdash; Original source for icons in the application.
-
-The backend was once powered by Python and Django, but was later rewritten in Go. Thanks to the teams behind Python and
-Django as well!
-
-A big thank you to all folks who put in their time and sweat for these projects to exist as open source!
-
 ## Developing
 
 Please ensure you have NodeJS (with yarn) and Go, of versions as specified in
@@ -59,11 +40,13 @@ and Go.
 
 The project contains a `manage.sh` script that makes development a little easier.
 
-1. `./manage.sh serve-backend` &mdash; Start backend server. This _doesn't_ auto-reload when code changes.
-2. `./manage.sh serve-frontend` &mdash; Start frontend Parcel server. This supports full auto-reload.
+1. `./manage.sh serve-frontend` &mdash; Start frontend Parcel server. This supports full auto-reload.
+2. `./manage.sh serve-backend` &mdash; Start backend server. This _doesn't_ auto-reload when code changes.
 3. `./manage.sh serve-docs` &mdash; Start docs server. This supports auto-reload only for content pages.
-4. `./manage.sh test-*` &mdash; Test frontend/backend/e2e (depending on what's in place of `*`).
+4. `./manage.sh test-*` &mdash; Test frontend/backend/ui (depending on what's in place of `*`).
 5. `./manage.sh build-*` &mdash; Build frontend/backend/docs (depending on what's in place of `*`).
+
+Run the serve commands in parallel, then open <http://localhost:3040>.
 
 ## Inspirations
 
@@ -79,11 +62,11 @@ More: <https://github.com/marmelab/awesome-rest>.
 
 1. [httpbun.com](https://httpbun.com) &mdash; Great for meta-testing and JSON/form-data related experiments. Another
    project by [@sharat87](https://sharats.me).
-1. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
-1. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
-1. GitHub GraphQL API &mdash; Great for experimenting with GraphQL, but requires a personal auth token.
-1. [A Curated List of 100 Cool and Fun Public APIs to Inspire Your Next Project](https://medium.com/better-programming/a-curated-list-of-100-cool-and-fun-public-apis-to-inspire-your-next-project-7600ce3e9b3)
-1. [Postman's collection](https://www.postman.com/cs-demo/workspace/public-rest-apis/collection/8854915-454a2dc7-dcbe-41cf-9bfa-da544fcd93a2)
+2. [A collective list of free APIs for use in software and web development](https://github.com/public-apis/public-apis).
+3. Yahoo Finance stock prices API &mdash; Great for large text responses and CSV data.
+4. GitHub GraphQL API &mdash; Great for experimenting with GraphQL, but requires a personal auth token.
+5. [A Curated List of 100 Cool and Fun Public APIs to Inspire Your Next Project](https://medium.com/better-programming/a-curated-list-of-100-cool-and-fun-public-apis-to-inspire-your-next-project-7600ce3e9b3)
+6. [Postman's collection](https://www.postman.com/cs-demo/workspace/public-rest-apis/collection/8854915-454a2dc7-dcbe-41cf-9bfa-da544fcd93a2)
 
 ## Rough Roadmap
 

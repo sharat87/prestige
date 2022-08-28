@@ -3,14 +3,13 @@ import m from "mithril"
 declare const process: {
 	env: {
 		NODE_ENV?: string
-		PRESTIGE_BACKEND: string
 		PRESTIGE_ALLOWED_HOSTS: string
 		PRESTIGE_FRONTEND_ROLLBAR_TOKEN?: string
 		PRESTIGE_EXT_URL_PREFIX?: string
 	}
 }
 
-const PRESTIGE_BACKEND = (process.env.PRESTIGE_BACKEND || "/")?.replace(/\/*$/, "/")
+const PRESTIGE_BACKEND = "/"
 
 export const GIST_API_PREFIX = PRESTIGE_BACKEND + "gist/"
 
