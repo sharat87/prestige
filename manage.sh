@@ -136,8 +136,6 @@ ensure-hugo() {
 		else
 			url="https://github.com/gohugoio/hugo/releases/download/v0.101.0/hugo_extended_0.101.0_Linux-64bit.tar.gz"
 		fi
-		pwd
-		ls
 		pushd docs
 		curl -sL "$url" | tar -xz
 		popd

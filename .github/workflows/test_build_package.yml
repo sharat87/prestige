@@ -39,9 +39,9 @@ jobs:
           ./manage.sh lint-frontend
           ./manage.sh test-frontend
 
-      #- name: "UI Tests"
-      #  run: |
-      #    ./manage.sh test-ui
+      - name: "UI Tests"
+        run: |
+          ./manage.sh test-ui
 
       - name: "Upload test results"
         uses: "actions/upload-artifact@v2"

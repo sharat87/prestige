@@ -1,0 +1,14 @@
+title: Prestige Docs
+
+baseURL: https://prestige.dev/docs/
+languageCode: en-us
+
+theme: hugo-book
+
+params:
+  BookTheme: auto
+  BookRepo: https://github.com/sharat87/prestige
+
+markup:
+  highlight:
+    noClasses: false
