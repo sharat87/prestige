@@ -119,6 +119,13 @@ func (mux Mux) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	ctx, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancelFunc()
 
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("panic: %v", r)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+	}()
+
 	if req.RequestURI == "*" {
 		if req.ProtoAtLeast(1, 1) {
 			w.Header().Set("Connection", "close")
