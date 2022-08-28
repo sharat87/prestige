@@ -71,7 +71,7 @@ func New(ctx context.Context, dbUri string) DBClient {
 
 	database := client.Database(dbName)
 
-	expireAfterSeconds := int32(0)
+	/*expireAfterSeconds := int32(0)
 	mustCreateIndex(
 		ctx,
 		database.Collection("sessions"),
@@ -84,6 +84,7 @@ func New(ctx context.Context, dbUri string) DBClient {
 
 	mustCreateUniqueIndex(ctx, database.Collection("sessions"), "sid_unique", "sid")
 	mustCreateUniqueIndex(ctx, database.Collection("users"), "email_unique", "email")
+	*/
 
 	return &Impl{
 		NativeDatabase: database,
