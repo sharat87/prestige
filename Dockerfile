@@ -1,4 +1,4 @@
-FROM scratch
+FROM ubuntu
 
 ADD prestige /prestige
 
