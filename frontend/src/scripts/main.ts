@@ -28,7 +28,7 @@ window.addEventListener("error", onWindowError)
 window.addEventListener("unhandledrejection", onUnhandledRejection)
 
 function main() {
-	if (window.location.host === "prestigemad.com" && localStorage.length === 0) {
+	if (window.location.host === "prestigemad.com" && Object.keys(localStorage).find(k => k.startsWith("instance:")) == null) {
 		window.location.href = "https://prestige.dev"
 		return
 	}
@@ -66,7 +66,7 @@ function main() {
 	}
 
 	m.request<GitHubApiResponse>(
-		`${Env.EXT_URL_PREFIX}https://api.github.com/repos/sharat87/prestige`,
+		`${ Env.EXT_URL_PREFIX }https://api.github.com/repos/sharat87/prestige`,
 	).then((response) => {
 		RepoStats.stars = response.stargazers_count
 	})
@@ -78,10 +78,10 @@ function onWindowError(event: ErrorEvent) {
 	// Ref: <https://developer.mozilla.org/en-US/docs/Web/API/Window/error_event>.
 	if (event instanceof UIEvent) {
 		// Error was generated from a UI element.
-		Toaster.push("danger", `UI: ${event.type}: ${event.message}`)
+		Toaster.push("danger", `UI: ${ event.type }: ${ event.message }`)
 	} else {
 		// Non-UI error.
-		Toaster.push("danger", `${event.type}: ${event.message}`)
+		Toaster.push("danger", `${ event.type }: ${ event.message }`)
 	}
 	// Manual redraw since this event handler is not managed by Mithril.
 	m.redraw()
@@ -90,7 +90,7 @@ function onWindowError(event: ErrorEvent) {
 function onUnhandledRejection(event: { promise: Promise<unknown>, reason: unknown }) {
 	// Don't do any error specific special handling here. That should be done at the source of the error.
 	// Ref: <https://developer.mozilla.org/en-US/docs/Web/API/Window/unhandledrejection_event>.
-	Toaster.push("danger", `${event.reason} (UR)`)
+	Toaster.push("danger", `${ event.reason } (UR)`)
 	// Manual redraw since this event handler is not managed by Mithril.
 	m.redraw()
 }
@@ -206,9 +206,9 @@ function WorkspaceView(): m.Component {
 						),
 					]),
 					workspace.saveState === SaveState.unsaved
-						&& m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
+					&& m(".i.pv1.ph2.db.flex.items-center.silver", "Unsaved"),
 					workspace.saveState === SaveState.saving
-						&& m(".i.pv1.ph2.db.flex.items-center.silver", m.trust("Saving&hellip;")),
+					&& m(".i.pv1.ph2.db.flex.items-center.silver", m.trust("Saving&hellip;")),
 					Env.isDev() && m(
 						"code.flex.items-center.ph1",
 						{ style: { lineHeight: 1.15, color: "var(--red-3)", background: "var(--red-9)" } },
@@ -236,7 +236,7 @@ function WorkspaceView(): m.Component {
 						{ onclick: onFileBucketToggle, isActive: ModalManager.isShowing(VisiblePopup.FileBucketPopup) },
 						[
 							m(Icons.folderClosed),
-							`FileBucket (${workspace.fileBucket.size})`,
+							`FileBucket (${ workspace.fileBucket.size })`,
 						],
 					),
 					[
@@ -352,7 +352,7 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 				),
 				workspace.saveState === SaveState.unchanged && m("div", "No changes"),
 				workspace.saveState === SaveState.saving &&
-					m("div", [m(Icons.spinner, { style: "bold" }), m.trust("Saving&hellip;")]),
+				m("div", [m(Icons.spinner, { style: "bold" }), m.trust("Saving&hellip;")]),
 				workspace.saveState === SaveState.saved && m("div", [m(Icons.check, { style: "bold" }), "Saved!"]),
 			])
 
@@ -366,24 +366,24 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 				]),
 				right: m(".flex", [
 					workspace.currentSheet != null && (workspace.isCurrentSheetAGist()
-						? m(
-							NavLink,
-							{
-								href: "https://gist.github.com/" + workspace.currentSheet.path,
-							},
-							["Open in Gist", m(Icons.arrowSquareOut)],
-						)
-						: m(
-							NavLink,
-							{
-								onclick: () => {
-									(getProvider("gist") as GistProvider)
-										.create(workspace.getContent())
-										.catch(console.error)
+							? m(
+								NavLink,
+								{
+									href: "https://gist.github.com/" + workspace.currentSheet.path,
 								},
-							},
-							"Create Gist",
-						)
+								["Open in Gist", m(Icons.arrowSquareOut)],
+							)
+							: m(
+								NavLink,
+								{
+									onclick: () => {
+										(getProvider("gist") as GistProvider)
+											.create(workspace.getContent())
+											.catch(console.error)
+									},
+								},
+								"Create Gist",
+							)
 					),
 					!workspace.isResultPaneVisible && workspace.session.result != null && m(
 						NavLink,
@@ -415,7 +415,7 @@ const AboutModal: m.Component = {
 				m(
 					"p",
 					"My name is Shrikant. I built Prestige because I needed an app like this when working" +
-						" with APIs and playing with external APIs.",
+					" with APIs and playing with external APIs.",
 				),
 				m(
 					"p",
@@ -437,7 +437,7 @@ const AboutModal: m.Component = {
 							"starring the project on GitHub",
 						),
 						". It'll help improve the project's visibility and works as indication that this " +
-							"project is indeed a useful tool. Thank you! 🙏",
+						"project is indeed a useful tool. Thank you! 🙏",
 					],
 				),
 				m(
