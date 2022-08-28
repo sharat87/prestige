@@ -29,10 +29,10 @@ jobs:
           cache: "yarn"
           cache-dependency-path: "frontend/yarn.lock"
 
-      #- name: "Lint and test backend"
-      #  run: |
-      #    ./manage.sh lint-backend
-      #    ./manage.sh test-backend
+      - name: "Lint and test backend"
+        run: |
+          ./manage.sh lint-backend
+          ./manage.sh test-backend
 
       - name: "Lint and test frontend"
         run: |
