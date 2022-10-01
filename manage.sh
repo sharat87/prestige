@@ -89,7 +89,7 @@ build-frontend() (
 	cd frontend
 	fix-star-zoom
 	NODE_ENV=production npx parcel build src/index.html --dist-dir dist --no-autoinstall --no-cache
-	cp -v src/assets/icon-32.png dist/favicon.png
+	cp -v src/assets/logo-32.png dist/favicon.png
 )
 
 fix-star-zoom() {
