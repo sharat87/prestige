@@ -15,7 +15,7 @@ useful, honestly.
 So, to resolve this, Prestige has a small proxy server running on the `prestige.dev` server which executes the
 requests on your behalf.
 
-<svg width="600" height="250" version="1.1" xmlns="http://www.w3.org/2000/svg">
+<svg width="600" height="250" xmlns="http://www.w3.org/2000/svg">
   <rect x="10" y="10" rx="3" ry="3" width="150" height="30" stroke="black" fill="transparent" stroke-width="2"/>
   <text x="22" y="30">Prestige in browser</text>
   <line x1="85" x2="85" y1="40" y2="100" stroke="black" stroke-width="2"/>
@@ -67,12 +67,12 @@ this.getProxyUrl = (request) => {
 Notice here that we are returning the string `"@super"` which tells Proxy to use the default behavior, essentially like
 calling the original `getProxyUrl` method. Here's how the return value of this function is interpreted by Prestige:
 
-| Returns | Implication |
-| ------- | ----------- |
-| `null` | Don't use a proxy. Execute the request directly. This will fail if the server denies CORS. |
-| `"@super"` | Behave as if `this.getProxyUrl` hasn't been customized at all. That is, don't use proxy for `localhost` URLs, use proxy otherwise. |
-| `"@default"` | Use the default Prestige proxy for executing this request. |
-| Any other string | Treated as the proxy URL to use. |
+| Returns          | Implication                                                                                                                        |
+|------------------|------------------------------------------------------------------------------------------------------------------------------------|
+| `null`           | Don't use a proxy. Execute the request directly. This will fail if the server denies CORS.                                         |
+| `"@super"`       | Behave as if `this.getProxyUrl` hasn't been customized at all. That is, don't use proxy for `localhost` URLs, use proxy otherwise. |
+| `"@default"`     | Use the default Prestige proxy for executing this request.                                                                         |
+| Any other string | Treated as the proxy URL to use.                                                                                                   |
 
 ## Conclusion
 

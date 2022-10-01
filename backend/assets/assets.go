@@ -28,7 +28,7 @@ func loadTemplates() *template.Template {
 func RenderToString(name string, data any) string {
 	var rendered strings.Builder
 
-	if err := embeddedTemplates.ExecuteTemplate(&rendered, "embeds/"+name, data); err != nil {
+	if err := embeddedTemplates.ExecuteTemplate(&rendered, name, data); err != nil {
 		log.Fatalf("Error executing %q template %v.", name, err)
 	}
 

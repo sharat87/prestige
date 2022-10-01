@@ -9,6 +9,8 @@ declare const process: {
 	}
 }
 
+const NODE_ENV = process.env.NODE_ENV || "production"
+
 const PRESTIGE_BACKEND = "/"
 
 export const GIST_API_PREFIX = PRESTIGE_BACKEND + "gist/"
@@ -21,8 +23,7 @@ export const rollbarToken: null | string = (() => {
 })()
 
 export const name: string = (() => {
-	const value = (process.env.NODE_ENV || "").trim()
-	return value != null && value !== "" ? value : "production"
+	return NODE_ENV != null && NODE_ENV !== "" ? NODE_ENV : "production"
 })()
 
 let recaptchaSiteKey: null | string = null

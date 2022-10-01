@@ -1,3 +1,5 @@
+import { isDev } from "./Env"
+
 declare const goatcounter: {
 	count: (event: Record<string, unknown>) => void
 }
@@ -9,8 +11,11 @@ export function ping(name: string, title: string): void {
 }
 
 export function load(): void {
-	const s = document.createElement("script")
-	s.dataset.goatcounter = "https://prestigemad.goatcounter.com/count"
-	s.src = "//gc.zgo.at/count.js"
-	document.body.appendChild(s)
+	if (!isDev()) {
+		// noinspection JSUnresolvedLibraryURL
+		document.body.insertAdjacentHTML(
+			"beforeend",
+			`<script async data-website-id="7378a035-9235-43ef-98bd-bf5886295b91" defer src="//u.sharats.me/main.js"></script>`,
+		)
+	}
 }
