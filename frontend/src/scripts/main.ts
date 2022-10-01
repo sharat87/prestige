@@ -365,7 +365,8 @@ function EditorPane(): m.Component<{ class?: string, workspace: Workspace }> {
 					m("span.pa1", [m(Icons.scroll, { style: "bold" }), workspace.currentSheetQualifiedPath()]),
 				]),
 				right: m(".flex", [
-					workspace.currentSheet != null && (workspace.isCurrentSheetAGist()
+					workspace.currentSheet != null && (
+						workspace.isCurrentSheetAGist()
 							? m(
 								NavLink,
 								{

@@ -15,7 +15,7 @@ export function load(): void {
 		// noinspection JSUnresolvedLibraryURL
 		document.body.insertAdjacentHTML(
 			"beforeend",
-			`<script async data-website-id="7378a035-9235-43ef-98bd-bf5886295b91" defer src="//u.sharats.me/main.js"></script>`,
+			"<script async data-website-id=\"7378a035-9235-43ef-98bd-bf5886295b91\" defer src=\"//u.sharats.me/main.js\"></script>",
 		)
 	}
 }

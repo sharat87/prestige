@@ -93,7 +93,13 @@
 				"error",
 				"always-multiline"
 			],
-			"capitalized-comments": "error",
+			"capitalized-comments": [
+				"error",
+				"always",
+				{
+					"ignorePattern": "noinspection"
+				}
+			],
 			"eol-last": "error",
 			"no-trailing-spaces": "error",
 			"camelcase": "error",
