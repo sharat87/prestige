@@ -19,7 +19,6 @@ import Toolbar from "_/Toolbar"
 import type { GistProvider } from "_/Persistence"
 import { currentSheet, getProvider, isManualSaveAvailable, SaveState } from "_/Persistence"
 import Rollbar from "rollbar"
-import * as pings from "_/pings"
 
 const REPO_URL = "https://github.com/sharat87/prestige"
 
@@ -70,8 +69,6 @@ function main() {
 	).then((response) => {
 		RepoStats.stars = response.stargazers_count
 	})
-
-	pings.load()
 }
 
 function onWindowError(event: ErrorEvent) {
